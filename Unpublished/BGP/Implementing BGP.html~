@@ -35,17 +35,17 @@
 <p>
 BGP is an open standard path vector routing application based on RFC 4271. 
 As of 2023, BGP is  the only external gateway protocol in active use. 
-The design consideration for BGP was for routing between large inter-organization 
-networks like the Internet. BGP's primary purpose is to interconnect autonomous 
-systems and allow the sharing of prefixes among them. Internet Service Providers 
+BGP's primary purpose is to interconnect autonomous 
+systems and allow the sharing of prefixes among them; Internet Service Providers 
 (ISPs) use BGP to share prefixes.
 Other BGP use cases include: prefix exchange in large data centers (RFC 7938) 
 and scaling of DMVPN where locally significant autonomous system numbers are used.
 </p>
 <p>
-BGP forms point-to-point peerings resulting in unicast peer relationships. 
-The adjacencies between BGP peers are known as BGP sessions or peering. 
-BGP does not use hello packets to discover neighbors. 
+BGP forms point-to-point peerings resulting in unicast peer relationships between 
+BGP routers. 
+The adjacencies between BGP peers is known as BGP sessions or peering. 
+BGP does not use hello packets to discover neighbors and due to this,  
 BGP routers can not discover each other dynamically. Neighbor relationships need to be configured manually.
 BGP is able to form neighbor relationships across many hops; what is commonly referred to as 
 a multihop relationship. This is possible because BGP uses TCP as the transport 
@@ -62,12 +62,13 @@ on TCP reliability mechanisms for transmission of messages.
 <li>ensuring packets are reliably transmitted</li>
 </ol>
 TCP allows for multi-hop BGP sessions. This directly implies that BGP requires the 
-implementation of an IGP first in the network.
+implementation of an interior gateway protocol (IGP) such as OSPF and IS-IS 
+first in the network.
 </p>
 
 <p>
 BGP provides high scalability and flexibility that does not compare to interior 
-gateway protocols such as OSPF and IS-IS. 
+gateway protocols. 
 BGP can support millions of prefixes. As of this writing, the Internet routing 
 table size is approximately 940,000+ (Jan 2023) prefixes and counting.
 </p>
@@ -84,8 +85,8 @@ exist in the RIB without the need for redistribution.
 <h2>Why use BGP</h2>
 <p>
  <ol>
-   <li>Support of a large number of prefixes.</li>
-   <li>Policy application i.e. easy to influence ingress and egress traffic</li>
+   <li>Support for a large number of prefixes.</li>
+   <li>Policy application i.e. easy to influence ingress and egress traffic.</li>
  </ol>
 </p>
 
@@ -94,7 +95,7 @@ The following are selected use cases under which the use of BGP can be considere
 <ul>
   <li>Scaling the enterprise: to interconnect different implementations of discrete 
   IGPs.</li>
-  <li>Scaling DMVPN: hubs in DMVPN can be configered as route reflectors.</li>
+  <li>Scaling DMVPN: hubs in DMVPN can be configured as route reflectors.</li>
   <li>Scaling data centers</li>
 </ul>
 </p>
@@ -110,6 +111,9 @@ an autonomous system could use BGP as the only routing protocol.
 </p>
 <p>
 Autonomous systems are uniquely identified by an autonomous system number (ASN).
+Every autonomous system is provided with an autonomous system number (ASN) that 
+is ultimately issued by the <a href="https://www.iana.org/assignments/as-numbers/as-numbers.xhtml">
+Internet Assigned Numbers Authority (iana.org)</a>.
 Originally, the ASNs issued were 2 bytes(16 bits) in the range 0 - 65535. The 
 publically issued ASNs were in the range 1 - 64495. The 2 byte ASNs were depleted 
 rapidly resulting in the 4 byte ASNs being adopted based on the recommendation 
@@ -118,16 +122,28 @@ of <a href="https://tools/ietf.org/html/rfc4893">RFC 4893</a>. The ASN range wit
 32-bit (4 byte) autonomous system numbers have been available since 1/1/2007. 
 All ASNs issued today are 32-bit.
 </p>
-<p>
-Every autonomous system is provided with an autonomous system number (ASN) that is ultimately issued by the 
-<a href="https://www.iana.org/assignments/as-numbers/as-numbers.xhtml">Internet Assigned Numbers Authority 
-(iana.org)</a>. 
+<p> 
 Two blocks of private ASNs are available for any organisation to use as long as 
-they are never exchanged publically on the Internet i.e. 64512 - 65534 in the 16-bit range and ASN 4200000000 - 4294967294
-in the 32-bit range. Service providers sometimes assign a private ASN to an organisation which is then stripped as 
-the network prefix is advertised outside of the service provider's autonomous system.
-IANA is responsible for assigning all public ASNs to ensure that they are globally unique. In BGP, ASNs act as a 
-loop prevention mechanism. IANA requires the following information when requesting for a public ASN:
+they are never exchanged publically on the Internet i.e. 64512 - 65534 in the 
+16-bit range and ASN 4200000000 - 4294967294 in the 32-bit range. Service providers 
+sometimes assign a private ASN to an organization which is then stripped as 
+the network prefix is advertised outside of the service provider's autonomous 
+system. 
+Private ASNs are issued to organizations that have a single connection to 
+an ISP. Private ASNs should be used if an autonomous system is only required to 
+communicate using BGP with a single service provider as the routing policy 
+between the provider and the autonomous system will not be visible on the public 
+Internet.
+A private ASN received from a LIR cannot be retained if the organization migrates 
+to another service provider. A public ASN is required only when an autonomous 
+system is exchanging routing information with other autonomous systems on the 
+public Internet i.e. all routes originating from an autonomous system are visible
+on the Internet.
+</p>
+<p>
+IANA is responsible for assigning all public ASNs to ensure that they are globally 
+unique. In BGP, ASNs act as a loop prevention mechanism and can be used for traffic 
+engineering. IANA requires the following information when requesting for a public ASN:
 <ol>
   <li>Proof of a publically-allocated network range i.e. addresses are owned by 
   the enterprise.</li>
@@ -142,8 +158,13 @@ which are usually ISPs.
 </p>
 
 <h2>Special-Purpose ASNs</h2>
-<table id="table-special-purpose-as-numbers" class="sortable" width="100%">
-      <thead>
+<p>
+The following table displays ASNs are reserved for special purposes and are not 
+to be used on Internet facing BGP configurations:
+</p>
+<table id="table-special-purpose-as-numbers" class="sortable" width="100%" 
+cellspacing="0">
+      <thead style="background-color:D3D3D3;">
         <tr>
           <th  style="border-top: 1px  solid;">AS Number</th>
           <th  style="border-top: 1px  solid;">Reason for Reservation</th>
@@ -198,27 +219,23 @@ which are usually ISPs.
         </tr>
       </tbody>
     </table>
-<p>
-All ASNs not listed above are issued by IANA. Private ASNs are issued to organizations that have a single connection to 
-an ISP. Private ASNs should be used if an autonomous system is only required to communicate using BGP with a single service 
-provider as the routing policy between the provider and the autonomous system will not be visible on the public Internet.
-A private ASN received from a LIR cannot be retained if the organization migrates to another service provider.
-A public ASN is required only when an autonomous system is exchanging routing information with other autonomous 
-systems on the public Internet i.e. all routes originating from an autonomous system are visible on the Internet.
-</p>
+
 <h2>Types of Autonomous Systems</h2>
 <p>
 There are three different kinds of Autonomous Systems:
 <ul>
-   <li><b>Stub AS:</b> connects to only one other AS, though it may have its own private connections not visible to the    
-   rest of the Internet. A corporate network connected to an ISP may be considered to have the same ASN as the ISP 
-   it is connected to. An example is a lower-tier ISP that gets its service from another ISP. Other specific examples 
-   include private interconnections in the financial and transportation sectors.</li>
-   <li><b>Multi-homed AS:</b> connects to two or more ASes. This allows the AS to maintain its Internet connection should one
-   AS connection fail. A multi-homed autonomous system does not allow traffic from one AS to pass through to another AS.</li>                                                                                            </li>
-   <li><b>Transit AS:</b> acts as a link between two or more other ASes, allowing for data to pass through it, 
-   even data from unassociated networks. ISPs offer transit services carrying traffic from one AS to another AS.
-   The complete path may involve multiple transit AS.                                                                          </li>
+   <li><b>Stub AS:</b> connects to only one other AS, though it may have its own
+   private connections not visible to the rest of the Internet. A corporate 
+   network connected to an ISP may be considered to have the same ASN as the ISP 
+   it is connected to. An example is a lower-tier ISP that gets its service from
+   another ISP.</li>
+   <li><b>Multi-homed AS:</b> connects to two or more ASes. This allows the AS 
+   to maintain its Internet connection should one AS connection fail. 
+   A multi-homed autonomous system does not allow traffic from one AS to pass 
+   through it to another AS. Many enterprise ASs fall in this category.</li>                                                                                            </li>
+   <li><b>Transit AS:</b> interconnects two or more ASs, allowing for traffic to 
+   transit through it. ISPs fall in this category. The complete path for traffic 
+   may involve multiple transit AS.</li>
 </ul>
 </p>
 <h2>Representation of 32-bit Autonomous System Numbers (ASNs)</h2>
@@ -239,13 +256,7 @@ There are three ways of representing 32-bit autonomous system numbers:
   0 - 65535 is written in asplain as 65535 and any autonomous system number above
   that range is written in asdot+. To enable asdot notation, enter the command: 
   <code style="font-size:120%"><b>bgp asnotation dot</b></code> under BGP router 
-  configuration mode.
-  <p> 
-4 byte ASNs support is negotiated during capability exchange. The old BGP speakers 
-are sent ASdot numbers encoded as ASN "23456". The real AS-Path is encoded with 
-the optional transitive attributes AS4_AGGREGATOR and AS4_PATH 
-</p>
-  </li>
+  configuration mode.</li>
 </ol>
 </p>
 
@@ -311,82 +322,58 @@ The following Wireshark packet capture shows the details of the BGP header.
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
 <code style="font-size:120%">
 Border Gateway Protocol - UPDATE Message                      <br />
-<div style="background-color:#a4a0ec; border-style:dotted;border-width:1px;border-color:#E3E3E3">
 &nbsp;&nbsp;&nbsp;&nbsp;Marker: ffffffffffffffffffffffffffffffff                  <br />
 &nbsp;&nbsp;&nbsp;&nbsp;Length: 67                                                <br />
 &nbsp;&nbsp;&nbsp;&nbsp;Type: UPDATE Message (2)                                  <br />
-</div>
-&nbsp;&nbsp;&nbsp;&nbsp;Withdrawn Routes Length: 0                                <br />
-&nbsp;&nbsp;&nbsp;&nbsp;Total Path Attribute Length: 28                           <br />
-&nbsp;&nbsp;&nbsp;&nbsp;Path attributes                                           <br />
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Path Attribute - ORIGIN: IGP                          <br />
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Flags: 0x40, Transitive, Well-known, Complete     <br />
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0... .... = Optional: Not set                 <br />
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.1.. .... = Transitive: Set                   <br />
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;..0. .... = Partial: Not set                  <br />
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...0 .... = Extended-Length: Not set          <br />
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.... 0000 = Unused: 0x0                       <br />
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Type Code: ORIGIN (1)                             <br />
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Length: 1                                         <br />
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Origin: IGP (0)                                   <br />
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Path Attribute - AS_PATH: 65537 65536 65000           <br />
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Flags: 0x40, Transitive, Well-known, Complete     <br />
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0... .... = Optional: Not set                 <br />
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.1.. .... = Transitive: Set                   <br />
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;..0. .... = Partial: Not set                  <br />
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...0 .... = Extended-Length: Not set          <br />
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.... 0000 = Unused: 0x0                       <br />
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Type Code: AS_PATH (2)                            <br />
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Length: 14                                        <br />
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;AS Path segment: 65537 65536 65000                <br />
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Segment type: AS_SEQUENCE (2)                 <br />
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Segment length (number of ASN): 3             <br />
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;AS4: 65537                                    <br />
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;AS4: 65536                                    <br />
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;AS4: 65000                                    <br />
-.....                                                         <br />
+                                                         <br />
 </code></div>
 
 <h2>BGP Message Types</h2>
 <p>
 BGP uses five message types for communication: OPEN, UPDATE, ROUTE-REFRESH, 
-NOTIFICATION, KEEPALIVE. A BGP packet can contain one or more of these BGP 
+NOTIFICATION, and KEEPALIVE. A BGP message can contain one or more of these BGP 
 message types depending on the amount of information to be transmitted.
 </p>
 <h3>OPEN</h3>
 <p>
 The BGP open message is used to establish a BGP adjacency and advertise local 
 ASN, timer values, BGP identifier, BGP capabilities such as: 
-multi-protocol support, route refresh capability, support for 4-octet autonomous system numbers. 
+multi-protocol support, route refresh capability, support for 4-octet ASNs.
+4 byte ASNs support is negotiated during capability exchange. The old BGP speakers 
+are sent ASdot numbers encoded as ASN "23456". The real AS-Path is encoded with 
+the optional transitive attributes AS4_AGGREGATOR and AS4_PATH.
 BGP OPEN messages have a value of 1 (one) in the type field of the message header.
-After entering the BGP <code style="font-size:120%"><b>neighbor</b></code> command to define a neighbor, 
+After configuring the BGP <code style="font-size:120%"><b>neighbor</b></code> 
+command to define a neighbor, 
  BGP sends an OPEN message to try to establish a peering relationship with that 
 neighbor. The OPEN message contains the 
 following fields: version, My AS, holdtime, BGP identifier fields. The BGP OPEN 
 packet body contains fields that advertise the local BGP capabilities.
+
 <div>
 <table cellspacing="0" cellpadding="3%">
 <tr>
-<td width="30%" style="border-bottom:solid;  border-top: solid; border-width:1px;"><b>Version: </b></td> 
-<td style="border-bottom:solid; border-top: solid; border-width:1px;">contains 
+<td width="20%" style="border-bottom:solid;  border-top: solid; border-width:1px;"><b>Version: </b></td> 
+<td style="border-bottom:solid; border-top: solid; border-width:1px;">Contains 
 the BGP version (usually version 4).</td>
 </tr>
 <tr>
 <td style="border-bottom:solid; border-width:1px;"><b>My AS</b></td>
-<td style="border-bottom:solid; border-width:1px;">the autonomous system number 
+<td style="border-bottom:solid; border-width:1px;">The autonomous system number 
 of the local device. This is important for determining whether the BGP 
 peering session will be iBGP or eBGP.</td>
 </tr>
 <tr>
 <td style="border-bottom:solid; border-width:1px;"><b>Hold time:</b></td>
 <td style="border-bottom:solid; border-width:1px;">
-contains sender's hold time, the recepient compares this hold timer value with its configured hold timer and uses 
-the smaller hold timer value for the peering. The minimum hold timer value needs 
-to be either zero or at least three seconds. 
+Contains sender's hold time, the recipient compares this hold timer value with 
+its configured (or default) hold timer and uses the smaller hold timer value for
+the peering. The minimum hold timer value needs to be either zero or at least 
+three seconds. 
 Monitoring of the hold timer values can be disabled by configuring a holdtimer value of zero. This also disables
 the transmission of keepalive messages.
 For Cisco devices, the default hold time is 180 seconds. When the hold time expires, 
-the BGP session is torn down and prefixes originated by the failed peer are 
+the BGP session is torn down and prefixes originated by the unreachable peer are 
 purged from the BGP table. An update with a route withdrawal is sent to other 
 BGP peers for the affected prefixes.
 </td>
@@ -394,7 +381,8 @@ BGP peers for the affected prefixes.
 <tr>
 <td style="border-bottom:solid; border-width:1px;"><b>BGP Identifier:</b></td>
 <td style="border-bottom:solid; border-width:1px;">
-The BGP Identifier is 32-bit and is the BGP router ID. It is critical for uniquely identifying a device in the BGP peering.
+The BGP Identifier is 32-bit and is in the form of an IPv4 address. It is the 
+BGP router ID. It is critical for uniquely identifying a device in the BGP peering.
 The BGP identifier must have a non-zero value for routers to become peers.
 </td>
 </tr>
@@ -407,7 +395,7 @@ BGP device's capabilties which provide added flexibility with the protocol.</td>
 </div>
 </p>
 <p>
-The following output is a wireshark packet capture of a BGP OPEN message.
+The following output is a Wireshark packet capture of a BGP OPEN message.
 </p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
 <code style="font-size:120%">
@@ -458,6 +446,7 @@ Border Gateway Protocol - OPEN Message                                   <br />
 </code>
 </div>
 
+
 <h3>UPDATE</h3>
 <p>
 When BGP devices become peers, they start exchanging their best Network Layer 
@@ -470,13 +459,13 @@ Information (prefix) and associated path attributes when advertising prefixes.
 Withdrawn prefixes only include the prefix and prefix length of prefixes 
 previously advertised but now being withdrawn. An UPDATE can act as a keepalive 
 to reduce unnecessary traffic. UPDATE messages are sent until the complete BGP 
-table has been exchanged.
+table has been fully exchanged.
 </p>
 <p>
 The fields of a BGP UPDATE message include the following:
 </p>
 <div>
-<table>
+<table cellspacing="0">
 <!--
 <thead>
 <tr>
@@ -585,9 +574,11 @@ Total Path Attribute Length: 0                                                  
 </div>
 <h3>NOTIFICATION</h3>
 <p>
-BGP NOTIFICATION messages are sent when an error is detected with the BGP session such as hold timer expiring, 
-neighbor capabilities changing or a BGP session reset being requested. This causes the BGP session to close.
+BGP NOTIFICATION messages are sent when an error is detected with the BGP session 
+such as hold timer expiring, neighbor capabilities changing or a BGP session 
+hard reset being requested. This causes the BGP session to close.
 NOTIFICATION messages have a value of 3 in the type field of the BGP message header.
+The presence of a NOTIFICATION message in a network is a sign of a problem in BGP.
 They contain the following fields:
 </p>
 <div>
@@ -646,24 +637,26 @@ Border Gateway Protocol - KEEPALIVE Message                        <br />
 ROUTE-REFRESH messages are used to exchange changes in NLRI without having to reset
 peerings. Route-refresh message types were not included in the original BGP RFC.
 However, they are now supported by major network equipment vendors.
-ROUTE-REFRESH messages are contain the value of 5 in the BGP header. 
-ROUTE-REFRESH is usually set when BGP operational parameters have been 
-changed and these new changes are to be implemented on prefixes in the Loc-RIB 
-table. ROUTE-REFRESH message are sent after a soft-reset command has been issued. 
-A hard reset does not trigger the transmission of ROUTE-REFRESH messages.
-A ROUTE REFRESH BGP packet contains the following fields:
+ROUTE-REFRESH messages have a message type value of 5 in the BGP header. 
+ROUTE-REFRESH is usually set when BGP session and/or policy parameters have been 
+changed and these new changes are to be implemented on the session and prefixes 
+prefixes exchanged. ROUTE-REFRESH message are sent after a soft-reset command 
+has been issued. A hard reset does not trigger the transmission of ROUTE-REFRESH 
+messages. A ROUTE REFRESH BGP packet contains the following fields:
 </p>
 <div>
 <table width="100%" cellpadding="0" cellspacing="0">
+<!--
   <thead>
     <tr>
       <td style="border-bottom: 1px solid; border-top: 1px solid; "><b>Field</b></td>
       <td style="border-bottom: 1px solid; border-top: 1px solid; "><b>Description</b></td>
     </tr>
   </thead>
+-->
   <tbody>
     <tr>
-    <td style="border-bottom: 1px solid; font-weight: bold;">Address family identifier (AFI):</td>
+    <td width="30%" style="border-bottom: 1px solid; font-weight: bold;">Address family identifier (AFI):</td>
     <td style="border-bottom: 1px solid;">Identifies the address-family whose prefixes are to be affected by the route-refresh.</td>
     </tr>
     <tr>
@@ -2102,7 +2095,7 @@ For an iBGP peer that is a member of a peer-group:
 <code style="font-size:120%">
 R3#<b>show bgp ipv4 unicast neighbor 6.6.6.6</b>                <br>
 BGP neighbor is 6.6.6.6,&nbsp;&nbsp;remote AS 65000, internal link        <br>
-&nbsp;<span style="background-color: gray;">Member of peer-group AS65000 for session parameters </span>           <br>
+&nbsp;<span style="background-color: D3D3D3;">Member of peer-group AS65000 for session parameters </span>           <br>
 &nbsp;&nbsp;BGP version 4, remote router ID 10.6.15.1                     <br>
 &nbsp;&nbsp;BGP state = Established, up for 02:32:18                      <br>
 &nbsp;&nbsp;Last read 00:00:30, last write 00:00:00, hold time is 180, keepalive interval is 60 seconds<br>
