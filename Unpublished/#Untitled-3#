@@ -1,0 +1,440 @@
+<p></p><p align="center" style="line-height: 100%; margin-bottom: 0.08in; margin-top: 0.17in; page-break-after: avoid;"></p>
+<p style="line-height: 100%; margin-bottom: 0in;">EIGRP is classified
+as an advanced distance vector protocol that is characterised by the
+following features;</p>
+<ul><li><p style="line-height: 100%; margin-bottom: 0in;">sends partial
+	updates to EIGRP neighbors (peers)</p>
+	</li><li><p style="line-height: 100%; margin-bottom: 0in;">support for
+	Variable Length Subnet Masks (VLSM) i.e. supports subnetting and
+	configuration of summarization</p>
+	</li><li><p style="line-height: 100%; margin-bottom: 0in;">Data-link
+	Protocol support: EIGRP supports various data-link protocols such as
+	Ethernet, serial links etc.</p>
+	</li><li><p style="line-height: 100%; margin-bottom: 0in;">Fast
+	convergence: EIGRP supports sub-second convergence with some
+	documentation indicating that backup routes can be installed in
+	200milliseconds after the failure of a primary route.</p>
+	</li><li><p style="line-height: 100%; margin-bottom: 0in;">32/64 bit
+	metric: classic EIGRP configuration supports 32-bit metric  (which
+	is compatible with IGRP) and named-mode configuration supports 64
+	bit metric.</p>
+	</li><li><p style="line-height: 100%; margin-bottom: 0in;">Support for
+	IPv4 and IPv6 network protocols.</p>
+</li></ul>
+<p style="line-height: 100%; margin-bottom: 0in;">EIGRP routes by
+rumour classifying it as a distance-vector protocol. It only
+advertises to its peers the routes that it is using rather than
+advertising all available paths in its topology table.</p>
+<p style="line-height: 100%; margin-bottom: 0in;">The successor route
+is the best route for a given destination in the topology table.</p>
+<p style="line-height: 100%; margin-bottom: 0in;">Feasible successor:
+next best route in the topology table.</p>
+<p style="line-height: 100%; margin-bottom: 0in;">Fast convergence is
+enabled by query scoping, feasible successor implementation, route
+summarization. 
+</p>
+<p style="line-height: 100%; margin-bottom: 0in;">EIGRP has triggered
+and bounded (partial) updates. Updates are sent only if the route
+metric changes or paths to a destination change. Updates are bounded
+only to peers that need the changes resulting in less bandwidth
+consumption. Update scope is limited using unicasts or multicasts.
+The IPv4 multicast address used by EIGRP is 224.0.0.10 and the IPv6
+equivalent is FF02::A. These multicasts are sent on the local link to
+directly connected peers.</p>
+<p style="line-height: 100%; margin-bottom: 0in;"><br />
+
+</p>
+<p style="line-height: 100%; margin-bottom: 0in;">EIGRP features
+64-bit wide metrics which support interfaces with bandwidth of up to
+4.2 Terabits per second.</p>
+<p style="line-height: 100%; margin-bottom: 0in;">EIGRP supports
+routing through up to thirty two (32) equal cost multi-paths (ECMP).
+The default is four. Through the variance command, EIGRP supports
+unequal cost multi-paths (UCMP). An EIGRP network is implemented as a
+flat architecture.</p>
+<p style="line-height: 100%; margin-bottom: 0in;">EIGRP provides
+seamless support across various data-link protocols such as HDLC,
+Ethernet etc.</p>
+
+<h2 class="western">Reliable Transport Protocol (RTP)</h2>
+<p style="line-height: 100%; margin-bottom: 0in;"> EIGRP runs on IP
+using protocol number 88. 
+</p>
+<p style="line-height: 100%; margin-bottom: 0in;">RTP is used for
+sequencing and acknowledgement rather than being a separate protocol.
+</p>
+<p style="line-height: 100%; margin-bottom: 0in;">Only selected
+packets are sent reliably requiring acknowledgement upon receipt. 
+</p>
+<p style="line-height: 100%; margin-bottom: 0in;">Five packet types;
+Hello, Update, Query, Reply, Acknowledgement, Others include SIA
+Query and SIA Reply.</p>
+<p style="line-height: 100%; margin-bottom: 0in;">RTP is used to
+ensure guaranteed, ordered packet delivery. 
+</p>
+<p style="line-height: 100%; margin-bottom: 0in;">Multicast messages
+have a TTL of 1.</p>
+<p style="line-height: 100%; margin-bottom: 0in;"><br />
+
+</p>
+<h2 class="western">Explore EIGRP Operation</h2>
+<p style="line-height: 100%; margin-bottom: 0in;">Operation of EIGRP
+is based on information stored in three tables i.e. neighbor table,
+topology table  and routing table (RIB).</p>
+<p style="line-height: 100%; margin-bottom: 0in;"><br />
+
+</p>
+<p style="line-height: 100%; margin-bottom: 0in;">If network
+statements are conflicting, the more specific statements take
+precedence. To enable EIGRP on all interfaces, define a network and
+wildcard mask of 0.0.0.0 255.255.255.255. 
+</p>
+<p style="line-height: 100%; margin-bottom: 0in;"><br />
+
+</p>
+<h3 class="western">Neighbor Table</h3>
+<p style="line-height: 100%; margin-bottom: 0in;">Entries in this
+table are routing information sources i.e. EIGRP peers.</p>
+<p style="line-height: 100%; margin-bottom: 0in;">Restrictions for
+forming an adjacency include the following;</p>
+<ul><li><p style="line-height: 100%; margin-bottom: 0in;">Common subnet</p>
+	</li><li><p style="line-height: 100%; margin-bottom: 0in;">Same Autonomous
+	System number</p>
+	</li><li><p style="line-height: 100%; margin-bottom: 0in;">Similar
+	K-values</p>
+	</li><li><p style="line-height: 100%; margin-bottom: 0in;">Same
+	authentication type and password (if authentication is implemented).</p>
+</li></ul>
+<p style="line-height: 100%; margin-bottom: 0in;">The following
+variables do not have to match for neighborship formation;</p>
+<ul><li><p style="line-height: 100%; margin-bottom: 0in;">Hello interval
+	and hold time values</p>
+	</li><li><p style="line-height: 100%; margin-bottom: 0in;">IP MTU values</p>
+</li></ul>
+<h3 class="western">Router ID</h3>
+<p style="line-height: 100%; margin-bottom: 0in;">Each router is
+uniquely identified by the router ID during communication with
+neighbors. It is also used for validating the origin of external
+routes. If an external route is received with a local router ID, it
+is discarded. The router ID cannot be 0.0.0.0 or 255.255.255.255</p>
+<p style="line-height: 100%; margin-bottom: 0in;">Manual router ID
+configuration takes highest priority. 
+</p>
+<p style="line-height: 100%; margin-bottom: 0in;">#eigrp router-id
+1.1.1.1</p>
+<p style="line-height: 100%; margin-bottom: 0in;">Router selects the
+highest IP address on any configured loopback interface. If no
+loopback, router ID will be the highest IP address of any active
+interface.</p>
+<p style="line-height: 100%; margin-bottom: 0in;">Router ID should be
+32 bits and should follow the dotted decimal format. The router ID is
+not as significant in EIGRP as it is in OSPF.</p>
+<h2 class="western">EIGRP Classic and Named Modes</h2>
+<p style="line-height: 100%; margin-bottom: 0in;">Classic mode
+drawbacks;</p>
+<ul><li><p style="line-height: 100%; margin-bottom: 0in;">32-bit metric;
+	less effective for higher bandwidth support</p>
+	</li><li><p style="line-height: 100%; margin-bottom: 0in;">Scattered
+	configuration</p>
+</li></ul>
+<p style="line-height: 100%; margin-bottom: 0in;">Named mode benefits;</p>
+<ul><li><p style="line-height: 100%; margin-bottom: 0in;">All EIGRP
+	configuration is done in one place</p>
+	</li><li><p style="line-height: 100%; margin-bottom: 0in;">Backwards
+	compatible with classic mode</p>
+	</li><li><p style="line-height: 100%; margin-bottom: 0in;">Unifies
+	configuration of EIGRP for IPv4 and IPv6.</p>
+	</li><li><p style="line-height: 100%; margin-bottom: 0in;">Accurate
+	support for higher speed links using 64-bit wide metric.</p>
+	</li><li><p style="line-height: 100%; margin-bottom: 0in;">Picosecond
+	latency calculation.</p>
+</li></ul>
+<p style="line-height: 100%; margin-bottom: 0in;">Classic mode to
+named mode conversion can be done using EIGRP upgrade-cli command
+which upgrades configuration without restarting the EIGRP process. 
+(no flaps).</p>
+<p style="line-height: 100%; margin-bottom: 0in;"><br />
+
+</p>
+<h3 class="western">EIGRP Named-mode Configuration</h3>
+<p style="line-height: 100%; margin-bottom: 0in;">Routers from the
+same routing domain (AS) will exchange routes and those routes will
+be marked as EIGRP internal routes. EIGRP named mode can be
+configured using the following command;</p>
+<p style="line-height: 100%; margin-bottom: 0in;">#router eigrp
+EIGRP_NAMED. This does not yet start EIGRP. It can be confirmed by
+entering the command #show ip protocols</p>
+<p style="line-height: 100%; margin-bottom: 0in;">EIGPRP is then
+started as a routing protocol when an address-family is configured;</p>
+<p style="line-height: 100%; margin-bottom: 0in;">#address-family ipv4
+unicast autonomous-system <i>asn_number</i></p>
+<p style="font-style: normal; line-height: 100%; margin-bottom: 0in;">EIGRP
+named mode uses wide metrics i.e. actuves K6 K-value.</p>
+<p style="font-style: normal; line-height: 100%; margin-bottom: 0in;">EIGRP
+named mode has a metric rib scale which allows scaling the metric
+down to the value that is necessary to communicate with a classic
+router.</p>
+<p style="font-style: normal; line-height: 100%; margin-bottom: 0in;">Automatic
+summarization is disabled.</p>
+<h3 class="western">EIGRP for IPv6</h3>
+<p style="line-height: 100%; margin-bottom: 0in;">In IPv6, ensure that
+routing is enabled; #ipv6 unicast-routing</p>
+<p style="line-height: 100%; margin-bottom: 0in;">EIGRP for IPv6
+supports shutting down the EIGRP process using the EIGRP mode command
+#shutdown. During configuration of EIGRP for IPv6, ensure that #no
+shutdown command is entered.</p>
+<p style="line-height: 100%; margin-bottom: 0in;">EIGRP for IPv6 can
+be enabled using the command #ipv6 router eigrp 20. Some IOS have
+EIGRP shutdown by default. 
+</p>
+<p style="line-height: 100%; margin-bottom: 0in;">In EIGRP for IPv6
+configuration, network statements are not used. The protocol is
+enabled explicitly on the interface.</p>
+<p style="line-height: 100%; margin-bottom: 0in;">An interface must
+have a link-local address before EIGRP for IPv6 can be activated on
+the interface.</p>
+<p style="line-height: 100%; margin-bottom: 0in;"><br />
+
+</p>
+<h2 class="western">Verification</h2>
+<p style="line-height: 100%; margin-bottom: 0in;">#show ip eigrp
+neighbors &lt;detail&gt; displays;</p>
+<ul><li><p style="line-height: 100%; margin-bottom: 0in;">Neighbors IP
+	address-family 
+	</p>
+	</li><li><p style="line-height: 100%; margin-bottom: 0in;">Exit interface
+	to neighbor</p>
+	</li><li><p style="line-height: 100%; margin-bottom: 0in;">Hold timer</p>
+	</li><li><p style="line-height: 100%; margin-bottom: 0in;">Duration of the
+	neighborship</p>
+	</li><li><p style="line-height: 100%; margin-bottom: 0in;">SRTT</p>
+	</li><li><p style="line-height: 100%; margin-bottom: 0in;">RTO</p>
+	</li><li><p style="line-height: 100%; margin-bottom: 0in;">Sequence
+	Number: Indicates how many times the database has changed.
+	Increments when sending updates, queries and replies. High sequence
+	number indicate 
+	</p>
+	</li><li><p style="line-height: 100%; margin-bottom: 0in;">Q Count:should
+	be zero. Number of packets queued for a peer. Greater than zero
+	indicates network congestion.</p>
+</li></ul>
+<p style="line-height: 100%; margin-bottom: 0in;">&lt;detail&gt;</p>
+<ul><li><p style="line-height: 100%; margin-bottom: 0in;">shows EIGRP
+	version of neighbor</p>
+	</li><li><p style="line-height: 100%; margin-bottom: 0in;">Number of
+	prefixes learnt from a peer.</p>
+	</li><li><p style="line-height: 100%; margin-bottom: 0in;">H (host index):
+	show the order in which peering sessions were formed.</p>
+	</li><li><p style="line-height: 100%; margin-bottom: 0in;">SRTT: shows the
+	amount of time, in milliseconds, required for the router to send an
+	EIGRP packet to its neighbor and receive an acknowledgement for that
+	packet. 
+	</p>
+	</li><li><p style="line-height: 100%; margin-bottom: 0in;">RTO
+	(Retransmission Timeout): Shows the amount of time that the router
+	waits before sending a packet from the retransmission queue.</p>
+	</li><li><p style="line-height: 100%; margin-bottom: 0in;">Retrans: shows
+	the number of times that a packet has been retransmitted.</p>
+</li></ul>
+<p style="line-height: 100%; margin-bottom: 0in;"><br />
+
+</p>
+<p style="line-height: 100%; margin-bottom: 0in;">#show ip eigrp
+interfaces &lt;detail&gt;</p>
+<p style="line-height: 100%; margin-bottom: 0in;">Passive interfaces
+do not appear in this list. This command displays interfaces that are
+actively sending EIGRP packets.</p>
+<p style="line-height: 100%; margin-bottom: 0in;">Shows configured
+timers; default hello interval is 5 seconds and hold time 15 seconds.</p>
+<p style="line-height: 100%; margin-bottom: 0in;">Split horizon status</p>
+<p style="line-height: 100%; margin-bottom: 0in;">(Un)reliable
+multicasts</p>
+<p style="line-height: 100%; margin-bottom: 0in;">(Un) reliable
+unicasts.</p>
+<p style="line-height: 100%; margin-bottom: 0in;">EIGRP starts
+initially by sending multicasts but pivots to sending unicasts.</p>
+<p style="line-height: 100%; margin-bottom: 0in;">NBMA interfaces have
+timers; Hello interval is  60 seconds and hold-time 180 seconds.</p>
+<p style="line-height: 100%; margin-bottom: 0in;">#show ip protocols;
+shows all routing protocols. For EIGRP, the command displays;</p>
+<ul><li><p style="line-height: 100%; margin-bottom: 0in;">K-values</p>
+	</li><li><p style="line-height: 100%; margin-bottom: 0in;">Router ID</p>
+	</li><li><p style="line-height: 100%; margin-bottom: 0in;">Administrative
+	Distance values</p>
+	</li><li><p style="line-height: 100%; margin-bottom: 0in;">Max path, hop
+	count, metric variance values.</p>
+</li></ul>
+<p style="line-height: 100%; margin-bottom: 0in;"><u><b>Passive
+Interfaces</b></u></p>
+<p style="line-height: 100%; margin-bottom: 0in;">Disables sending of
+EIGRP Hello packets on an interface.</p>
+<p style="line-height: 100%; margin-bottom: 0in;">To make all
+interfaces passive in EIGRP named mode;</p>
+<p style="line-height: 100%; margin-bottom: 0in;">RTR(config-router-af)#af-interface
+default</p>
+<p style="line-height: 100%; margin-bottom: 0in;">#passive-interface</p>
+<p style="line-height: 100%; margin-bottom: 0in;"><br />
+
+</p>
+<p style="line-height: 100%; margin-bottom: 0in;">To disable passive
+interface status on an inteface</p>
+<p style="line-height: 100%; margin-bottom: 0in;">RTR(config-router)#no
+passive-interface ethernet1/0</p>
+<p style="line-height: 100%; margin-bottom: 0in;">#show ipv6
+protocols;</p>
+<p style="line-height: 100%; margin-bottom: 0in;"><br />
+
+</p>
+<p style="line-height: 100%; margin-bottom: 0in;">shows interfaces
+ipv6 is enabled on instead of networks being advertised.</p>
+<p style="line-height: 100%; margin-bottom: 0in;">Default max ECMP is
+16. Max is 32. To modify max paths for ECMP in;</p>
+<p style="line-height: 100%; margin-bottom: 0in;">classic mode:
+#maximum-paths 16</p>
+<p style="line-height: 100%; margin-bottom: 0in;">named mode:
+#topology base</p>
+<p style="line-height: 100%; margin-bottom: 0in;">                    
+  #maximum-paths 32</p>
+<h3 class="western">Configuring Timers</h3>
+<p style="line-height: 100%; margin-bottom: 0in;">In classic mode;
+timers are configured under the interface;</p>
+<p style="line-height: 100%; margin-bottom: 0in;">#ip hello-interval
+eigrp 10 1 
+</p>
+<p style="line-height: 100%; margin-bottom: 0in;">#ip hold-time eigrp
+10 5</p>
+<p style="line-height: 100%; margin-bottom: 0in;">If holdtime is not
+specified, by default, it is set to three times the hello time.</p>
+<p style="line-height: 100%; margin-bottom: 0in;">To configure
+sub-second hello interfaces, configure Bi-directional Forwarding
+(BFD).</p>
+<p style="line-height: 100%; margin-bottom: 0in;">In named mode:</p>
+<p style="line-height: 100%; margin-bottom: 0in;">##af-interface
+ethernet 0/0</p>
+<p style="line-height: 100%; margin-bottom: 0in;">#hello-interval 1</p>
+<p style="line-height: 100%; margin-bottom: 0in;">#hold-time 5</p>
+<p style="line-height: 100%; margin-bottom: 0in;">hold-timer values
+are included in hello packets.</p>
+<p style="line-height: 100%; margin-bottom: 0in;">Hello and hold timer
+values do not have to march. However, if they are skewed enough (hold
+time being less than hello values for a peer), it can affect the
+neighborship.</p>
+<p style="line-height: 100%; margin-bottom: 0in;">The hello interval
+can be determined by establishing the interval within which hello
+packets are received.</p>
+<p style="line-height: 100%; margin-bottom: 0in;">In EIGRP named mode,
+show commands display in microseconds. However, metric calculation is
+in picoseconds.</p>
+<h2 class="western">Exchange of Routing Knowledge in EIGRP</h2>
+<h3 class="western">Neighbor Table</h3>
+<p style="line-height: 100%; margin-bottom: 0in;">List of directly
+connected EIGRP neighbor routers and the local interface to reach it.</p>
+<p style="line-height: 100%; margin-bottom: 0in;"><br />
+
+</p>
+<h3 class="western">Topology Table</h3>
+<p style="line-height: 100%; margin-bottom: 0in;">List of all routes
+learned from each EIGRP or through redistribution and identifies
+sucessor routes and feasible successor routes.</p>
+<p style="line-height: 100%; margin-bottom: 0in;">Can be viewed using
+the command 
+</p>
+<p style="line-height: 100%; margin-bottom: 0in;">#show ip eigrp
+topology</p>
+<p style="line-height: 100%; margin-bottom: 0in;">All routes received
+from updates are stored in the topology table.</p>
+<p style="line-height: 100%; margin-bottom: 0in;">#show ip eigrp
+topology only shows sucessor and feasible successor routes. To view
+all routes in the topology table; issue the command #show ip eigrp
+topology all-links.</p>
+<p style="line-height: 100%; margin-bottom: 0in;">This command will
+also display non-successor routes; routes that do not satisfy the
+feasibility condition.</p>
+<h4 class="western">Feasibility condition</h4>
+<p style="line-height: 100%; margin-bottom: 0in;">Reported distance of
+the successor must be less than the feasible distance of feasible
+successor. Feasibility condition is critical to maintain a loop-free
+topology.</p>
+<h3 class="western">EIGRP Metrics and Metric Calculation</h3>
+<p>Metric weights or K-values determine which components are used to
+calculate the metric. Bandwidth and delay are used to calculate the
+metric by default. The K-values are, by default, K1 =1, K2 = 0, K3 =
+1. K4 = 0, K5 = 0.</p>
+<p>The MTU value is included in the update but not used in metric
+calculation. During metric calculation, the lowest bandwidth is used
+for metric calculation. The delay value is the cumulative delay
+across the entire path. Hop count is exhanged as well. Cisco does not
+recommend chaning the K-values. It also discourages including
+reliability and load in metric calculation.</p>
+<p><u><b>EIGRP NAMED MODE</b></u></p>
+<p><span style="text-decoration: none;"><span style="font-weight: normal;">uses
+64-bit </span></span><span style="text-decoration: none;"><span style="font-weight: normal;">wide
+metric . EIGRP named mode uses through out and latency by default .
+Latency values are calculated in picoseconds for high-speed links.
+</span></span><span style="text-decoration: none;"><span style="font-weight: normal;">RIB-scaling
+is supported. </span></span>
+</p>
+<p style="font-weight: normal; text-decoration: none;">To view values
+used for metric calculation of a route;</p>
+<p style="font-weight: normal; text-decoration: none;">#show ip eigrp
+topology 10.1.20.0 255.255.255.252.</p>
+<p><span style="text-decoration: none;"><span style="font-weight: normal;">If,
+in the output of the above command, the feasible distance </span></span><span style="text-decoration: none;"><span style="font-weight: normal;">and
+reported distance are the same, then the network is a connected
+network. </span></span>
+</p>
+<p><br />
+<br />
+
+</p>
+<p style="line-height: 100%; margin-bottom: 0in;">Bandwidth (BW) = 10
+<sup>7</sup> / minimum bandwidth in kbps</p>
+<p style="line-height: 100%; margin-bottom: 0in;">Delay =  (cumulative
+delay) / 10  (microsecond usec)</p>
+<p style="line-height: 100%; margin-bottom: 0in;">Metric = (bandwidth
++ delay ) * 256</p><p style="line-height: 100%; margin-bottom: 0in;">
+
+</p>
+<h3 class="western">Routing Table</h3>
+<p style="line-height: 100%; margin-bottom: 0in;">Successor routes
+from EIGRP topology table and othe routing processes are compared,
+using the administrative distance (AD) and the lowest AD is installed
+in the routing table 
+</p>
+<p style="line-height: 100%; margin-bottom: 0in;"><br />
+
+</p>
+<p style="line-height: 100%; margin-bottom: 0in;">To view EIGRP packet
+exchange;</p>
+<p style="line-height: 100%; margin-bottom: 0in;">#debug eigrp packets
+&lt;terse&gt; . Use the keyword terse if Hello packets are to be
+excluded.</p>
+<p style="line-height: 100%; margin-bottom: 0in;">The process of
+sending and receiving Hello packets is undirectional; the router
+sends the Hello packets unreliably using multicasts and expects no
+acknowledgement from the other side. Hello packets are sent
+periodically to check neighbor availability.</p>
+<p style="line-height: 100%; margin-bottom: 0in;"><br />
+
+</p>
+<p style="line-height: 100%; margin-bottom: 0in;">EIGRP uses dual to
+calculate the best paths to a destination.</p>
+<p style="line-height: 100%; margin-bottom: 0in;">RD (reported
+distance): composite metric value from the perspective of the
+neighboring router.</p>
+<p style="line-height: 100%; margin-bottom: 0in;">Feasible Distance
+(FD): metric value of the successor route.</p>
+<p style="line-height: 100%; margin-bottom: 0in;">Feasible Successor:
+alternative route that satisfies the feasibility condition. 
+</p>
+<p style="line-height: 100%; margin-bottom: 0in;">The route with the
+smallest metric is the successor and the next-hop router is the
+successor. Four successors can be added to the RIB by default.</p>
+<p style="line-height: 100%; margin-bottom: 0in;">Feasibility
+condition: the RD of an alternate backup route is always smaller than
+the FD of the best path. Routes that satisfy the feasibility
+condition are feasible successor routes and the next-hop routers are
+feasible successors.</p>
+<p style="line-height: 100%; margin-bottom: 0in;"><br />
+
+</p>

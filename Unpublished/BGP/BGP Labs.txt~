@@ -1,0 +1,8 @@
+BGP Labs
+------------
+-PATH SELECTION
+-Modify the weight on R5 so that all routers from R6 are assigned the weight of 666 and only 172.16.0.0/16 prefix from 
+R4 is assigned a weight of 888.
+-Local Preference: Modify the local preference so that only the 172.16.0.0/16 prefix via R2 has a local preference value 
+of 333. Modify the local preference on R6 so that all routes via R3 have a local preference value of 150.
+-View all path attributes of different paths of a prefix and identify the reason that one was selected over another.

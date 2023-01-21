@@ -1,0 +1,120 @@
+<h1>Route Manipulation and Control </h1>
+<h1>Route Tags</h1>
+<p>
+To create a route tag list, use the global configuration mode command: 
+<code><b>route-tag list <i>list_name</i></b></code>
+</p>
+<div>
+  <code>
+    route-tag list TO_CAT2  seq 10 permit 0.0.0.2 0.0.0.0<br>
+  </code>
+</div>
+<p>
+A route-tag can be referenced inside of a route map using the keyword <code><b>match</b></code>.
+</p>
+<div>
+  <code>
+    route-map ADV_TO_R4 permit 10<br>
+	  match tag list TO_CAT2
+  </code>
+</div>
+<p>
+To filter advertisements:
+</p>
+<div>
+  <code>
+    router eigrp 10
+	distribute-list route-map ADV_TO_R4 out eth0/0 
+  </code>
+</div>
+
+<p>
+<b>Note:</b> that distribute-lists have an impact on high-availability and fail-over.
+</p>
+<h3>Distribute List</h3>
+<p>
+Allow the filtering of network prefixes on a neighbor-by-neighbor basis using standard or extended 
+access control lists.
+</p>
+<h3>Prefix List</h3>
+<p>
+Allow the filtering of network prefixes on a neighbor-by-neighbor basis using a prefix list.
+</p>
+<h3>Filter-List</h3>
+<p>
+Used in OSPF and BGP. In OSPF filter lists can be used to filter prefixes between OSPF areas.
+</p>
+<h3>Preventing Loops with Tags</h3>
+<p>
+
+</p>
+<h1>Split Horizon</h1>
+<p>
+Split horizon is a method of preventing routing loops in distance-vector 
+routing protocols such as RIP and EIGRP by prohibiting a router from 
+advertising a route back onto the interface from which it was learned.
+Split horizon follows the principle that; Never advertise a route out 
+of the interface through which you learned it.
+</p>
+<p>
+Split horizon prevents the advertisement of reverse routes. EIGRP and BGP enable split horizon by default.
+DMVPN is one of the technologies that will require the disabling of split horizon on the hub.
+</p>
+<p>
+To disable split-horizon on an interface, use the interface configuration 
+command: <code><b>no ip split-horizon {eigrp <ASN>}</b></code>
+</p>
+<p>
+TODO:
+<ol>
+  <li>View split horizon status of an interface.</li>
+  <li>Disable split horizon on interface</li>
+  <li>Disable split horizon for EIGRP. Note: EIGRP resyncs after split horizon change.</li>
+</ol>
+</p>
+<h1>Route Poisoning</h1>
+<p>
+Advertises a prefix with an infinity metric; in RIP, this is metric of 16., OSPF sets the LSA age to 3600
+
+</p>
+
+<h1>Maximum Hops</h1>
+<p>
+The maximum hops in EIGRP can be modified using the EIGRP router configuration 
+command: <code><b>metric maximum-hops <i>number</i></b></code> where 
+<code><i>number</i></code> is the maximum number of hops beyond which a route 
+will be considered unreachable.
+The modification of the maximum-hops results in a new adjacency being created 
+with existing neighbors.
+</p>
+<p>
+<b>Note:</b> Modification of the maximum-hops results in the deletion of 
+all EIGRP sourced routes in the RIB.
+</p>
+<p>
+The maximum-hops can be configured using the command: 
+<code><b>show ip protocols</b></code>
+</p>
+<p>
+ In EIGRP named mode, the maximum-hops can be configured under the topology base 
+ address-family configuration mode.
+</p>
+
+<h1>Filtering</h1>
+<h2>EIGRP</h2>
+<p>
+Configuration of a distribution-list results in a resynchronization. Modification 
+of the referenced access lists also results in a resynchronization.
+</p>
+<p>
+Access-lists additionally affect the high-availability when interfaces do down.
+</p>
+<h1>Offset Lists</h1>
+<p>
+When configuring offset-lists, configuring an non-existent ACL or configuring 
+zero (0) results in all network prefixes being included in their offset-lists
+metric modification.
+</p>
+<p>
+Offset-lists provide some form of route poisoning.
+</p>

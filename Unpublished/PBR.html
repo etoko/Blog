@@ -1,0 +1,575 @@
+<h1>Path Control using Policy Based Routing (PBR)</h1>
+<p>
+By default, routers make forwarding decisions based on the destination IP address 
+of the packet. This is known as destination-based routing where the 
+routing table is checked to determine next-hop IP address and the exit interface 
+through which packets are forwarded towards the destination. 
+In majority of network designs, destination-based routing meets designed network
+traffic flow. However, in some cases, some network traffic may require special 
+treatment for instance traffic to remote corporate resources may be preferred to be routed 
+through a specific ISP over another.
+</p
+<p>
+Policy-Based Routing(PBR) provides the capability to override the default 
+destination-based routing behaviour of routing devices. 
+PBR is implemented using a route-map to identify which unicast packets are to be 
+policy-routed and how to route the traffic. A unicast packet arriving on a 
+PBR-configured interface will be subject to PBR except when its destination IP 
+address is the same as the IP address of the router's interface. Because PBR uses 
+a route map, it provides solutions in cases where legal, contractual, or political 
+constraints dictate that traffic is routed through specific paths.<br>
+<b>Note:</b> PBR is only applicable to unicast packets; it is not applicable to 
+multicast packets.
+</p>
+
+<p>
+PBR makes forwarding decisions independent of the routing table. These forwarding 
+decisions may be based upon any one or combination of the following:
+<ul>
+ <li>IP address i.e. destination IP address, source IP address or combination of 
+ the two.</li>
+ <li>Protocol type i.e. IP protocols such as ICMP, TCP, UDP or TCP and UDP 
+ applications such as HTTP, FTP, SSH etc.</li>
+ <li>Packet size: a range can be configured and packets whose sizes fall within 
+ this range can be policy routed.</li>
+ <li>Incoming interface</li>
+ <li>Manual assignment of different network paths to the same destination, based 
+     on tolerance for latency, link speed etc.</li>
+</ul>
+</p>
+
+<p>
+Some of the drawbacks of conditional routing include the following:
+<ul>
+<li>Administrative burden in scalability</li>
+<li>Lack of network intelligence</li>
+<li>Troubleshooting complexity</li>
+</ul>
+</p>
+
+<h2>PBR Fast Switching</h2>
+<p>
+In earlier IOS versions, PBR was implemented at the control-plane rather than the
+data-plane. This made it highly CPU-intensive PBR was not able to utilize CEF and RSVP.
+It was therefore process-switched. In later IOS versions, PBR is fast-switched 
+and is operationally compatible with CEF, distributed CEF. 
+With process-switching, many platforms supported switching rates of 1000 to 10,000
+packets per second. This may not be fast enough for some applications. Fast-switched 
+policy routing supports all route-map <code><b>match</b></code> commands and most 
+ <code><b>set</b></code> commands except for the following:
+<ul>
+  <li><code><b>set ip default</b></code></li>
+  <li><code><b>set interface</b></code></li>
+</ul>
+Fast-switched PBR is enabled by default. However, if disabled, to configure 
+fast-switched policy routing, use the interface configuration command 
+<code><b>ip route-cache policy</b></code>
+</p>
+
+<h2>PBR Application Scenarios</h2>
+<p>
+Possible applications of PBR include:
+<ul>
+  <li>Routing based on interactive rather than batch traffic.</li>
+  <li>Routing of selected traffic based on dedicated links.</li>
+  <li>Protocol-sensitive routing.</li>
+  <li>Source-sensitive routing.</li>
+</ul>
+</p>
+
+<h2>Policy Routing Variations</h2>
+<p>
+PBR can be configured to modify the next-hop for two types of traffic:
+<ol>
+  <li><b>Incoming Traffic:</b>
+    PBR is configured on the ingress interface of the traffic using the interface
+    mode command: <code><b> ip policy route-map <i>route-map-name</i></b></code>
+    Application of PBR on an interface does not affect locally generated traffic.
+  </li>
+    
+  <li><b>Locally-originated traffic</b>: 
+   Locally-generated traffic includes consists of mainly routing protocol packets. 
+   Additionally, it may include pings, traceroutes from the local router.
+   For locally-generated traffic, PBR is configured
+      in global configuration mode using the command:
+      <code><b>ip local policy route-map <i>route-map-name</i></b></code>.
+      Some IOS versions do not have control plane checks.
+   </li>
+</ol>
+</p>
+
+<h1>Configuration of Policy-Based Routing (PBR)</h1>
+<p>
+PBR is configured through a series of steps:
+
+<h2>Step 1: Define Traffic an Access Control List or Prefix-List.</h2>
+<ul>
+  <li><b>Standard Access Control List:</b> To match against only the packet source IP 
+  address.</li>
+  <li><b>Extended Access Control List:</b> To match against any IP protocols such 
+  as TCP, UDP, ICMP, source IP address, destination IP address or both, 
+  TCP or UDP applications by port numbers or name.
+</li>
+</ul>
+</p>
+<p>
+When configuring an ACL or prefix-list to identify traffic to be policy routed:
+<ul>
+  <li>A <code><b>permit</b></code> statement in the access control list or 
+  prefix-list means to policy route the identified traffic.</li>
+  <li>A <code><b>deny</b></code> statement means to use destination-based 
+  forwarding where the routing table is consulted for the next-hop to the 
+  destination network. It does not mean that the traffic is to be blocked.</li>
+</ul>
+In the following configuration, ICMP traffic and UDP traffic from host 192.168.1.2 
+to host 172.31.0.1 has been identified for policy routing using an extended ACL. 
+</p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+<code>                                                                   
+R1(config)#<b>ip access-list extended ACL_172.31.0.0/24</b>                    <br>
+R1(config-ext-nacl)#<b>10 permit icmp host 192.168.1.2 host 172.31.0.1 </b>    <br>
+R1(config-ext-nacl)#<b>20 permit udp host 192.168.1.2 host 172.31.0.1  </b>    <br>
+R1(config-ext-nacl)#<b>do show access-lists                            </b>    <br>
+Extended IP access list ACL_172.31.0.0/24                               <br>
+&nbsp;&nbsp;&nbsp;&nbsp;10 permit icmp host 192.168.1.2 host 172.31.0.1                     <br>
+&nbsp;&nbsp;&nbsp;&nbsp;20 permit udp host 192.168.1.2 host 172.31.0.1                      <br>
+R1(config-ext-nacl)#
+
+</code></div>
+
+
+
+
+<h2>Step 2: Configure a Route-map</h2> 
+ <h3>Identification of Traffic</h3>
+ <p>
+ Traffic is identified in a route map using the <code><b>match</b></code> 
+ statement and referencing the ACL or prefix-list configured in Step 1.
+Depending on the hardware platform or IOS version, many characteristics of 
+the traffic can be matched.
+</p>
+<h4>Match condition considerations</h4>
+<p>
+What you can match on usually will depend on specifically how you are 
+  classifying the traffic; packets can be matched by:
+  <ul>
+    <li><b>IP address:</b> 
+    an ACL or prefix list can be used to match traffic by IP address.
+    <ul>
+      <li>To match traffic using an ACL, use the command: <code><b>match 
+  ip address <i>acl_name or number</i> </b></code>. Match all or match any based 
+  on how the match statements are written in the clause. <code><b> match ip address 
+  10, 20 - 30, MY_ACL,</b></code> match any.
+  
+  <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+<code>
+R1(config)#<b>route-map RM_PBR_172.31.0.1 permit 10</b><br>
+R1(config-route-map)#<b>match ip address ACL_172.31.0.0/24</b><br>
+</code></div>
+  
+  </li>
+  <li>To match traffic using a prefix-list, use the command:
+  <code><b>match ip prefix-list <i>prefix-list-name</i> </b></code>.
+  </li>
+  </ul>
+  </li>
+    <li>Packet length(in bytes)</li>
+    <li>Source routing protocol</li>
+    <li>Route-tag</li>
+    <li>Route metric</li>
+   </ul> 
+    
+</p>
+<p>
+Matching against a prefix-list is commonly in BGP.	
+</p>
+
+ <h3>Defining an Action to Take on Identified Traffic</h3>
+<p>
+ After the matching, the action to be taken to the matched traffic is configured 
+using the route-map <code><b>set</b></code> command.
+The conditions that can be modified by the <code><b>set</b></code> command is 
+highly dependent on the platform and the IOS version; for PBR the action is 
+usually the <code><b>next-hop</b></code> keyword:
+<ul>
+  <li><code><b>set next-hop <i>ip_address</i></b></code>: the next hop is 
+  unconditionally used; the configured next-hop will be used to forward traffic 
+  and the routing table will not be consulted.
+  <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+<code>
+R1(config-route-map)#<b>set ip next-hop 10.0.13.2</b>
+</code></div>
+  </li>
+  <li><code><b>set default next-hop <i>ip_address</i></b></code>: IP routing 
+  table is first consulted for the next hop before the configured next hop is 
+  considered. If the specific destination network does not exist in the routing 
+  table, then the PBR defined next hop is considered. The matching of routes in 
+  the RIB holds true except the default route. The routing table default route 
+  is not considered.
+  This can be considered as some sort of default route for matched traffic. The 
+  next hop has to be directly connected to the local router. The recursive 
+  keyword enables configuration of a next-hop that is not directly connected.
+  </li>
+  <li><code><b>set interface <i>exit-interface</i></b></code>: The egress interface 
+  for the matched packets is defined. PBR does not verify if the configured 
+  egress interface is up or down. When configuring the exit interface, a warning 
+  message is issued recommending that a P2P interface be configured such as a
+  serial interface. It is recommended that the egress interface be a serial 
+  interface. If an interface in a broadcast environment such as FastEthernet or 
+  GigabitEthernet is used, an ARP request is sent for each and every packet. If 
+  the configured egress interface is down, the router will route traffic using the RIB.</li>
+  <li><code><b>set default interface <i>exit-interface</i></b></code>: The RIB 
+  is consulted first to determine the egress-interface. If RIB does not have the 
+  destination network, then the configured egress interface is used. 
+  </li>
+  <li><code><b>set next hop verify-availability <i>ip-address</i> track 
+  <i>track-number</i></b></code>. Set the next hop if the IP SLA track is up.
+  </li>
+</ul>
+</p>
+<p>
+In addition to modification of the routing path of packets, PBR supports the 
+following modifications to the header of IP packets;
+<ul>
+  <li><b>IP Precedence:</b> Modification of precedence attribute of IP packets 
+  using the route-map command <code><b>set ip precedence</b></code>. The IP 
+  header precedence setting determines how packets are treated by routers during 
+  times of high traffic. When packets containing these headers arrive at another 
+  router, the packets are ordered for transmission according to the precedence 
+  set if queuing feature is enabled. Precedence bits are not honoured if queueing 
+  is not enabled; in which case packet queueing will be based on FIFO. 
+  The precedence value can be changed by using a name or number. Possible values 
+  include: 
+  <ul>
+    <li>0 (routine)         </li>
+    <li>1 (priority)        </li>
+    <li>2(immediate)        </li>
+    <li>3(flash)            </li>
+    <li>4 (flash-override)  </li>
+    <li>5(critical)         </li>
+    <li>6(internet)         </li>
+    <li>7(network)          </li>
+  </ul>
+  </li>
+  <li><b>DF bit:</b> The IP header DF bit can be modified using the command 
+  <code><b>set ip df <i>df</i></b></code>.</li>
+  <li><b>VRF:</b> The VRF of a packet can be configured using the command 
+  <code><b>set vrf <i>vrf</i></b></code>.</li>
+ </ul>
+</p>
+<p>
+When PBR is configured, the PBR configured next hop takes precedence over the FIB table. 
+</p>
+
+</li>
+</li>
+</ul>
+<h2>Step 3: Apply PBR</h2>
+<ul>
+<li>
+<p>
+<b>Inbound Traffic:</b>
+The route-map is applied with the interface configuration command: 
+<code><b>ip policy route-map <i>route-map-name</i></b></code>
+</p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+<code>
+R1(config)#<b>interface f4/1</b><br>
+R1(config-if)#<b>ip policy route-map RM_PBR_172.31.0.1</b>
+</code></div>
+</li>
+<li>
+<p>
+<b>Locally-generated Traffic:</b> PBR for locally-generated traffic is 
+applied using the global configuration command: <code><b>ip local policy route-map  
+<i>route-map-name</i></b></code>.
+</p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+<code>
+R1(config)#<b>ip access-list extended ACL_172.31.0.0/24</b>                    <br>
+R1(config-ext-nacl)#<b>30 permit udp host 192.168.1.1 host 172.31.0.1</b><br>
+R1(config-ext-nacl)#<b>exit</b><br>
+R1(config)#<b>ip local policy route-map RM_PBR_172.31.0.1</b>
+</code></div>
+</li>
+</ul>
+ 
+</p>
+</li>
+</ul>
+<h1>Reliable and Dynamic Path Control using PBR</h1>
+<p>
+To monitor network performance and change specific traffic paths that are based 
+on the health of the network, you can use Cisco IP Service Level Agreement (IP SLA)
+in combination with PBR.
+</p>
+<h2>IP SLA</h2>
+<p>
+Create the probe using the command 
+</p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+<code>
+<b>#ip sla 1                                         <br>
+#icmp-echo ipaddress source-ip ipaddress             <br>
+#frequency 10                                        <br>
+#show ip sla summary                                 <br>
+#ip sla schedule 1 life forever start-time now       <br>
+#show ip sla summary                                 <br>
+#show ip sla configuration                           <br>
+#show ip sla statistics                              <br>
+</b>
+</code></div>
+<p>
+IP SLA probes need to be enabled as they are disabled by default.
+</p>
+<h3>Create a Tracking Object</h3>
+<p>
+Tracking objects are used  to monitor probes.
+<code>
+#track 1 ip sla 1 reach
+#delay down 10 up 3
+#show track 
+</code>
+</p>
+<p>
+To apply the track in a route-map set command:
+<code>
+#set ip next-hop verify-availability 10.1.13.2 13.1.14.2 1 track 1 
+</code>
+</p>
+<h3>Verification</h3>
+<p>
+show track. In the output, look out for section tracked by:
+</p>
+
+<h1>Verification of PBR</h1>
+<p>
+PBR can be verified by the following list of commands:
+</p>
+<h2><code>ping <i>remote-ip-address</i></code></h2>
+      <p>
+        Tests PBR by generating traffic. Pings are usually sent using ICMP packets
+        and these are matched in an extended ACL.
+      </p>
+      <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+        <code>
+         user3@box:~$<b> ping 172.31.0.1</b>                    <br>
+PING 172.31.0.1 (172.31.0.1): 56 data bytes                     <br>
+64 bytes from 172.31.0.1: seq=0 ttl=253 time=59.776 ms          <br>
+64 bytes from 172.31.0.1: seq=1 ttl=253 time=41.286 ms          <br>
+64 bytes from 172.31.0.1: seq=2 ttl=253 time=37.056 ms          <br>
+64 bytes from 172.31.0.1: seq=3 ttl=253 time=27.850 ms          <br>
+64 bytes from 172.31.0.1: seq=4 ttl=253 time=44.989 ms          <br>
+64 bytes from 172.31.0.1: seq=5 ttl=253 time=54.390 ms          <br>
+64 bytes from 172.31.0.1: seq=6 ttl=253 time=38.526 ms          <br>
+64 bytes from 172.31.0.1: seq=7 ttl=253 time=35.621 ms          <br>
+64 bytes from 172.31.0.1: seq=8 ttl=253 time=46.208 ms          <br>
+64 bytes from 172.31.0.1: seq=9 ttl=253 time=37.415 ms          <br>
+64 bytes from 172.31.0.1: seq=10 ttl=253 time=50.793 ms         <br>
+64 bytes from 172.31.0.1: seq=11 ttl=253 time=46.631 ms         <br>
+64 bytes from 172.31.0.1: seq=12 ttl=253 time=46.996 ms         <br>
+64 bytes from 172.31.0.1: seq=13 ttl=253 time=39.410 ms         <br>
+64 bytes from 172.31.0.1: seq=14 ttl=253 time=39.599 ms         <br>
+64 bytes from 172.31.0.1: seq=15 ttl=253 time=41.211 ms         <br>
+64 bytes from 172.31.0.1: seq=16 ttl=253 time=46.288 ms         <br>
+64 bytes from 172.31.0.1: seq=17 ttl=253 time=52.170 ms         <br>
+64 bytes from 172.31.0.1: seq=18 ttl=253 time=50.405 ms         <br>
+64 bytes from 172.31.0.1: seq=19 ttl=253 time=58.710 ms         <br>
+64 bytes from 172.31.0.1: seq=20 ttl=253 time=31.387 ms         <br>
+64 bytes from 172.31.0.1: seq=21 ttl=253 time=55.167 ms         <br>
+^C                                                              <br>
+--- 172.31.0.1 ping statistics ---                              <br>
+22 packets transmitted, 22 packets received, 0% packet loss     <br>
+round-trip min/avg/max = 27.850/44.631/59.776 ms                <br>
+user3@box:~$
+        </code>
+      </div>
+<h2><code>traceroute <i>remote-ip-address</i></code></h2>
+    <p>
+        Linux and IOS use UDP packets for traceroutes so these have to be configured 
+        in the extended ACL.
+     </p>
+     <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+        <code>
+        user3@box:~$ <b>traceroute 172.31.0.1</b>                  <br>
+traceroute to 172.31.0.1 (172.31.0.1), 30 hops max, 38 byte packets<br>
+ 1&nbsp;&nbsp;192.168.1.1 (192.168.1.1)&nbsp;&nbsp;20.034 ms&nbsp;&nbsp;10.405 ms&nbsp;&nbsp;7.962 ms      <br>
+ 2&nbsp;&nbsp;10.0.13.2 (10.0.13.2)&nbsp;&nbsp;37.697 ms&nbsp;&nbsp;37.986 ms&nbsp;&nbsp;50.232 ms         <br>
+ 3&nbsp;&nbsp;10.0.34.2 (10.0.34.2)&nbsp;&nbsp;47.604 ms&nbsp;&nbsp;48.801 ms&nbsp;&nbsp;52.973 ms         <br>
+user3@box:~$
+      </code></div>
+    <h2><code>show route-map</code></h2>
+      <p>
+      Displays the number of policy matches in terms of number of packets and 
+      number of bytes.
+     </p>
+     <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+       <code>
+         R1#<b>show route-map</b>                <br>
+route-map RM_PBR_172.31.0.1, permit, sequence 10 <br>
+&nbsp;&nbsp;Match clauses:                                 <br>
+&nbsp;&nbsp;&nbsp;&nbsp;ip address (access-lists): ACL_172.31.0.0/24 <br>
+&nbsp;&nbsp;Set clauses:                                   <br>
+&nbsp;&nbsp;&nbsp;&nbsp;ip next-hop 10.0.13.2                        <br>
+&nbsp;&nbsp;Policy routing matches: 70 packets, 5046 bytes <br>
+R1#
+       </code></div>
+    <h2><code>show ip policy</code></h2>
+    <p>
+     To view which route-map is applied to which interface.
+    </p>
+      <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+<code>
+R1#<b>show ip policy</b><br> 
+Interface&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Route map         <br>
+local&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;RM_PBR_172.31.0.1 <br>
+Fa4/1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;RM_PBR_172.31.0.1 <br>
+R1#
+</code></div>
+<p>
+The interface name "local" indicates that the route-map applies to PBR for locally-
+generated traffic. Any other interface name listed implies that PBR is configured 
+for incoming traffic
+</p>
+    <h2><code>debug ip policy</code></h2>
+      <p>
+        After enabling debugging using debug ip policy, a traceroute command is
+        run on the local router and a downstream device to the host 172.31.0.1.
+        </p>
+      <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+<code>  
+        R1#<b>debug ip policy </b>                                                                                     <br>
+Policy routing debugging is on                                                                                        <br>
+R1#                                                                                                                   <br>
+R1#<b>traceroute 172.31.0.1</b>                                                                                              <br>
+Type escape sequence to abort.                                                                                        <br>
+Tracing the route to 172.31.0.1                                                                                       <br>
+VRF info: (vrf in name/id, vrf out name/id)                                                                           <br>
+&nbsp;&nbsp;1 10.0.12.2 24 msec 16 msec 4 msec                                                                                  <br>
+&nbsp;&nbsp;2 10.0.24.2 12 msec 12 msec 48 msec                                                                                 <br>
+R1#                                                                                                                   <br>
+*Mar  5 02:51:08.579: IP: s=10.0.12.1 (local), d=172.31.0.1, len 28, policy rejected -- normal forwarding             <br>
+*Mar  5 02:51:08.607: IP: s=10.0.12.1 (local), d=172.31.0.1, len 28, policy rejected -- normal forwarding             <br>
+*Mar  5 02:51:08.627: IP: s=10.0.12.1 (local), d=172.31.0.1, len 28, policy rejected -- normal forwarding             <br>
+*Mar  5 02:51:08.635: IP: s=10.0.12.1 (local), d=172.31.0.1, len 28, policy rejected -- normal forwarding             <br>
+*Mar  5 02:51:08.655: IP: s=10.0.12.1 (local), d=172.31.0.1, len 28, policy rejected -- normal forwarding             <br>
+*Mar  5 02:51:08.671: IP: s=10.0.12.1 (local), d=172.31.0.1, len 28, policy rejected -- normal forwarding             <br>
+R1#                                                                                                                   <br>
+*Mar  5 02:51:30.747: IP: s=192.168.1.2 (FastEthernet4/1), d=172.31.0.1, len 38, policy match                         <br>
+*Mar  5 02:51:30.751: IP: route map RM_PBR_172.31.0.1, item 10, permit                                                <br>
+*Mar  5 02:51:30.751: IP: s=192.168.1.2 (FastEthernet4/1), d=172.31.0.1 (POS5/0), len 38, policy routed               <br>
+*Mar  5 02:51:30.755: IP: FastEthernet4/1 to POS5/0 10.0.13.2                                                         <br>
+*Mar  5 02:51:30.759: IP: s=192.168.1.1 (local), d=192.168.1.2, len 56, policy rejected -- normal forwarding          <br>
+*Mar  5 02:51:30.775: IP: s=192.168.1.2 (FastEthernet4/1), d=172.31.0.1, len 38, policy match                         <br>
+*Mar  5 02:51:30.779: IP: route map RM_PBR_172.31.0.1, item 10, permit                                                <br>
+*Mar  5 02:51:30.779: IP: s=192.168.1.2 (FastEthernet4/1), d=172.31.0.1 (POS5/0), len 38, policy routed               <br>
+*Mar  5 02:51:30.783: IP: FastEthernet4/1 to POS5/0 10.0.13.2                                                         <br>
+*Mar  5 02:51:30.787: IP: s=192.168.1.1 (local), d=192.168.1.2, len 56, policy rejected -- normal forwarding          <br>
+*Mar  5 02:51:30.807: IP: s=192.168.1.2 (FastEthernet4/1), d=172.31.0.1, len 38, policy match                         <br>
+*Mar  5 02:5                                                                                                          <br>
+R1#1:30.807: IP: route map RM_PBR_172.31.0.1, item 10, permit                                                         <br>
+*Mar  5 02:51:30.807: IP: s=192.168.1.2 (FastEthernet4/1), d=172.31.0.1 (POS5/0), len 38, policy routed               <br>
+*Mar  5 02:51:30.807: IP: FastEthernet4/1 to POS5/0 10.0.13.2                                                         <br>
+*Mar  5 02:51:30.807: IP: s=192.168.1.1 (local), d=192.168.1.2, len 56, policy rejected -- normal forwarding          <br>
+*Mar  5 02:51:30.819: IP: s=192.168.1.2 (FastEthernet4/1), d=172.31.0.1, len 38, FIB policy match                     <br>
+*Mar  5 02:51:30.819: IP: s=192.168.1.2 (FastEthernet4/1), d=172.31.0.1, len 38, PBR Counted                          <br>
+*Mar  5 02:51:30.823: IP: s=192.168.1.2 (FastEthernet4/1), d=172.31.0.1, g=10.0.13.2, len 38, FIB policy routed       <br>
+*Mar  5 02:51:30.863: IP: s=192.168.1.2 (FastEthernet4/1), d=172.31.0.1, len 38, FIB policy match                     <br>
+*Mar  5 02:51:30.863: IP: s=192.168.1.2 (FastEthernet4/1), d=172.31.0.1, len 38, PBR Counted                          <br>
+*Mar  5 02:51:30.863: IP: s=192.168.1.2 (FastEthernet4/1), d=172.31.0.1, g=10.0.13.2, len 38, FIB policy routed       <br>
+*Mar  5 02:51:30.899: IP: s=192.168.1.2 (FastEthe                                                                     <br>
+R1#rnet4/1), d=172.31.0.1, len 38, FIB policy match                                                                   <br>
+*Mar  5 02:51:30.899: IP: s=192.168.1.2 (FastEthernet4/1), d=172.31.0.1, len 38, PBR Counted                          <br>
+*Mar  5 02:51:30.903: IP: s=192.168.1.2 (FastEthernet4/1), d=172.31.0.1, g=10.0.13.2, len 38, FIB policy routed       <br>
+*Mar  5 02:51:30.959: IP: s=192.168.1.2 (FastEthernet4/1), d=172.31.0.1, len 38, FIB policy match                     <br>
+*Mar  5 02:51:30.959: IP: s=192.168.1.2 (FastEthernet4/1), d=172.31.0.1, len 38, PBR Counted                          <br>
+*Mar  5 02:51:30.959: IP: s=192.168.1.2 (FastEthernet4/1), d=172.31.0.1, g=10.0.13.2, len 38, FIB policy routed       <br>
+*Mar  5 02:51:31.007: IP: s=192.168.1.2 (FastEthernet4/1), d=172.31.0.1, len 38, FIB policy match                     <br>
+*Mar  5 02:51:31.011: IP: s=192.168.1.2 (FastEthernet4/1), d=172.31.0.1, len 38, PBR Counted                          <br>
+*Mar  5 02:51:31.011: IP: s=192.168.1.2 (FastEthernet4/1), d=172.31.0.1, g=10.0.13.2, len 38, FIB policy routed       <br>
+*Mar  5 02:51:31.063: IP: s=192.168.1.2 (FastEthernet4/1), d=172.31.0.1, len 38, FIB policy match                     <br>
+*Mar  5 02:51:31.063: IP: s=192                                                                                       <br>
+R1#.168.1.2 (FastEthernet4/1), d=172.31.0.1, len 38, PBR Counted                                                      <br>
+*Mar  5 02:51:31.067: IP: s=192.168.1.2 (FastEthernet4/1), d=172.31.0.1, g=10.0.13.2, len 38, FIB policy routed       <br>
+</code></div>
+    <h2> <code>show cef interface <i>interface-name</i></code></h2>
+   
+      <p>
+        CEF interface settings for PBR.
+        </p>
+        <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+<code>
+        R1#<b>show cef interface fa4/1</b>                   <br>
+FastEthernet4/1 is up (if_number 9)                          <br>
+&nbsp;&nbsp;Corresponding hwidb fast_if_number 9                       <br>
+&nbsp;&nbsp;Corresponding hwidb firstsw->if_number 9                   <br>
+&nbsp;&nbsp;Internet address is 192.168.1.1/24                         <br>
+&nbsp;&nbsp;ICMP redirects are always sent                             <br>
+&nbsp;&nbsp;Per packet load-sharing is disabled                        <br>
+&nbsp;&nbsp;IP unicast RPF check is disabled                           <br>
+&nbsp;&nbsp;Input features: Policy Routing                             <br>
+&nbsp;&nbsp;IP policy routing is enabled                               <br>
+&nbsp;&nbsp;IP policy route map is RM_PBR_172.31.0.1                   <br>
+&nbsp;&nbsp;BGP based policy accounting on input is disabled           <br>
+&nbsp;&nbsp;BGP based policy accounting on output is disabled          <br>
+&nbsp;&nbsp;Hardware idb is FastEthernet4/1                            <br>
+&nbsp;&nbsp;Fast switching type 1, interface type 18                   <br>
+&nbsp;&nbsp;IP CEF switching enabled                                   <br>
+&nbsp;&nbsp;IP CEF switching turbo vector                              <br>
+&nbsp;&nbsp;IP CEF turbo switching turbo vector                        <br>
+&nbsp;&nbsp;IP prefix lookup IPv4 mtrie 8-8-8-8 optimized              <br>
+&nbsp;&nbsp;Input fast flags 0x2, Output fast flags 0x0                <br>
+&nbsp;&nbsp;ifindex 9(9)                                               <br>
+&nbsp;&nbsp;Slot  Slot unit 1 VC -1                                    <br>
+&nbsp;&nbsp;IP MTU 1500                                                <br>
+R1#                                                          <br>
+</code></div>
+    <h2>
+      <code>show ip interface <i>interface-name</i></code></h2>
+      <p>
+        Displays route-map configured for PBR.
+        </p>
+        <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+<code>
+        R1#<b>show ip interface fa4/1</b>                           <br>         
+FastEthernet4/1 is up, line protocol is up                          <br>
+&nbsp;&nbsp;Internet address is 192.168.1.1/24                                <br>
+&nbsp;&nbsp;Broadcast address is 255.255.255.255                              <br>
+&nbsp;&nbsp;Address determined by setup command                               <br>
+&nbsp;&nbsp;MTU is 1500 bytes                                                 <br>
+&nbsp;&nbsp;Helper address is not set                                         <br>
+&nbsp;&nbsp;Directed broadcast forwarding is disabled                         <br>
+&nbsp;&nbsp;Multicast reserved groups joined: 224.0.0.5 224.0.0.6             <br>
+&nbsp;&nbsp;Outgoing access list is not set                                   <br>
+&nbsp;&nbsp;Inbound  access list is not set                                   <br>
+&nbsp;&nbsp;Proxy ARP is enabled                                              <br>
+&nbsp;&nbsp;Local Proxy ARP is disabled                                       <br>
+&nbsp;&nbsp;Security level is default                                         <br>
+&nbsp;&nbsp;Split horizon is enabled                                          <br>
+&nbsp;&nbsp;ICMP redirects are always sent                                    <br>
+&nbsp;&nbsp;ICMP unreachables are always sent                                 <br>
+&nbsp;&nbsp;ICMP mask replies are never sent                                  <br>
+&nbsp;&nbsp;IP fast switching is enabled                                      <br>
+&nbsp;&nbsp;IP fast switching on the same interface is disabled               <br>
+&nbsp;&nbsp;IP Flow switching is disabled                                     <br>
+&nbsp;&nbsp;IP CEF switching is enabled                                       <br>
+&nbsp;&nbsp;IP CEF switching turbo vector                                     <br>
+&nbsp;&nbsp;IP CEF turbo switching turbo vector                               <br>
+&nbsp;&nbsp;IP multicast fast switching is enabled                            <br>
+&nbsp;&nbsp;IP multicast distributed fast switching is disabled               <br>
+&nbsp;&nbsp;IP route-cache flags are Fast, CEF                                <br>
+&nbsp;&nbsp;Router Discovery is disabled                                      <br>
+&nbsp;&nbsp;IP output packet accounting is disabled                           <br>
+&nbsp;&nbsp;IP access violation accounting is disabled                        <br>
+&nbsp;&nbsp;TCP/IP header compression is disabled                             <br>
+&nbsp;&nbsp;RTP/IP header compression is disabled                             <br>
+&nbsp;&nbsp;Policy routing is enabled, using route map RM_PBR_172.31.0.1      <br>
+&nbsp;&nbsp;Network address translation is disabled                           <br>
+&nbsp;&nbsp;BGP Policy Mapping is disabled                                    <br>
+&nbsp;&nbsp;Input features: Policy Routing, MCI Check                         <br>
+&nbsp;&nbsp;IPv4 WCCP Redirect outbound is disabled                           <br>
+&nbsp;&nbsp;IPv4 WCCP Redirect inbound is disabled                            <br>
+&nbsp;&nbsp;IPv4 WCCP Redirect exclude is disabled                            <br>
+R1# 
+</code></div>
+

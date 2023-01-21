@@ -1,0 +1,37 @@
+<h1>MPLS</h1>
+<p>
+Is a service provider technology but is also used by enterprises. It is also 
+used to replace dedicated serial lines to interconnect separate offices.
+</p>
+<p>
+MPLS is globally enabled. MPLS is supported on almost all Cisco routers.
+By default, MPLS traffic follows the same path as regular IP traffic would.
+By default, all IGP routes will have a label assigned.
+</p>
+<p>
+MPLS consists of: 
+<ul>
+<li><b>MPLS data plane:</b> how MPLS traffic is forwarded in, out and throughout the MPLS 
+network</li>
+<li><b>Control plane:</b> deals with how the labels are assigned and exchanged in the MPLS 
+network.</li>
+</ul>
+</p>
+
+<h2>MPLS Data Plane</h2>
+<h3>Terms used in MPLS</h3>
+<p>
+Assumption is that the MPLS control-plane is fully functional.
+<ul>
+  <li><b>Label Switching Routers (LSRs):</b> all participating routers in MPLS 
+  network.</li>
+  <li><b>Edge LSR:</b> The LSRs at the edge of the network where traffic enters 
+  and exits the MPLS network are referred to as edge routers.</li> 
+<li><b>Ingress Edge LSR:</b> The edge LSR where IP packets enter the MPLS network.</li>
+</ul>
+</p>
+<p>
+When an incoming IP packet enters the ingress LSR, a lookup is done in the 
+Label Forwarding Information Base(LFIB). The LFIB contains  
+
+</p>

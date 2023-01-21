@@ -1,0 +1,292 @@
+<h1>Understanding and Configuration of VRF-Lite in Cisco IOS</h1>
+<p>
+ Virtual Routing and Forwarding Instances (VRFs) are used to segregate traffic 
+ at Layer 3. They are similar in concept to 
+ VLANs that are used to segregate traffic at Layer 2. VRFs create virtual routers 
+ with separate instances of the routing table (RIB) and forwarding table (FIB) 
+ independent from the global routing table. VRFs segment traffic in the data-plane and the 
+ control-plane based on the logical or physical interface that you assign to the VRF. 
+ The concept of VRFs is similar to that of virtual machines (VMs). It is important 
+ to note that the concept of VRF is locally significant to the device on which 
+ it is configured. VRFs improve network functionality because network paths can 
+ be segmented without requiring multiple physical routers. 
+ VRF-Lite is a feature of VRF that provides VRF without MPLS configuration.
+</p>
+<p>
+ If VRFs are configured on more than one router to ensure end to end connectivity, 
+ the links interconnecting the routers will need to be configured as a trunk 
+ (for layer 2 switches) or sub-interfaces (for routers) if a single link is to 
+ be shared with traffic from other separate VRFs or the default routing table. 
+ VRFs leverage trunk links with 802.1Q encapsulation to maintain connectivity with
+ same VRFs on remote devices.
+</p>
+
+<p>
+By default, all routers have single running VRF instance referred to as the 
+global VRF instamce. All interfaces, the global routing table, the forwarding table 
+are assigned to this global VRF instance. 
+One or more VRF instances can be configured on a single router that are separate 
+from the global routing VRF instance. The configured VRF instances can then be 
+identified by their configured VRF names. Interfaces or sub-interfaces are then 
+assigned to the configured VRFs. IP addresses configured on these VRF instances 
+can overlap if the interfaces are assigned to different VRFs. These IP addreses 
+are not included in the global routing table. If routing protocols are configured 
+for each VRF isntance, then separate SFP (OSPF) or DUAL (EIGRP) calculation 
+instances take place for each VRF instance.
+</p>
+<p>
+VRFs generically segment traffic at Layer 3. However, it is possible to leak 
+traffic between VRFs if such connectivity is required. This can be done through:
+<ul>
+  <li>Through importing or exporting routes between the multiple routing tables.</li>
+  <li>Static routing.</li>
+  <li>Physical cable to leak traffic.</li>
+</ul>
+</p>
+<p>
+Minimum configuration of VRF is called VRF Lite; VRFs without any MPLS configuration.
+The main reason for VRF Lite is separation of the control-plane.
+</p>
+<p>
+The number of VRFs on a single device should be limited to a small number as each 
+VRF instance consumes local resources.
+</ul>
+</p>
+<h1>Business Use Cases of VRF</h1>
+<p>
+  <ul>
+    <li>ISPs use VRFs to keep IP routing tables of customers logically separate 
+    to create separate VPNs for each customer when layer 3 end-to-end connectivity 
+    is provided; thus the technology is also referred to as VPN routing and forwarding.
+    </li>
+    <li>Network segmentation for different applications, departments</li>
+    <li>Security concerns</li>
+    <li>Corporate mergers</li>
+    <li>Data Centre access</li>
+  </ul>
+</p>
+
+<h1>VRF-Aware Routing</h1>
+<p>
+To support dynamic routing in VRFs, the routing protocols in use should be VRF 
+aware. Static routes support VRF. VRF-aware dynamic routing protocols include: 
+ RIP, EIGRP, OSPF, IS-IS, MP-BGP. Policy routing is also VRF-aware.
+</p>
+<h1>Configuration</h1>
+<h2>Step 1: Specify Locally Significant VRF Name</h2>
+<p>
+VRFs can be configured in one of two ways:
+<ul>
+  <li>
+    <p>
+    <code><b>ip vrf <i>vrf-name</i></b></code>: This global configuration command 
+    supports only IPv4 VRFs.
+    </p>
+  
+  <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+    <code>
+      R2(config)#<b>ip vrf RESEARCH</b><br>
+      R2(config)#<b>ip vrf FINANCE</b><br>
+      R2(config-vrf)#<b>description Finance VRF</b><br>
+    </code></div>
+  </li>
+  <li>
+  <p>
+  <code><b>vrf definition <i>name</i></b></code>: This global configuration 
+  command supports IPv4 and IPv6 VRFs. It is generally recommended to configure 
+  VRFs using this format. The address family should be additionally configured 
+  using the VRF mode command <code><b>address-family ipv4</b></code>. The 
+  address family needs to be explicitly configured after defining the VRF name.
+  </p>
+  <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+    <code>
+      R3(config)#<b>vrf definition RESEARCH</b><br>
+      R3(config-vrf)#<b>description Research and Development Department VRF</b><br>
+      R3(config-vrf)#<b>address-family ipv4</b><br>
+      R3(config-vrf-af)#<b>exit</b><br>
+      R3(config-vrf)#<b>exit</b><br>
+      R3(config)#<b>vrf definition FINANCE</b><br>
+      R3(config-vrf)#<b>description Finance Department VRF</b><br>
+      R3(config-vrf)#<b>address-family ipv4</b><br>
+    </code>
+  </div>
+  </li>
+</ul>
+</p>
+<p>
+   Cisco IOS has additional commands that enable VRFs created using the command 
+   <code><b>ip vrf <i>vrf-name</i></b></code> to support IPv6.
+    To enable support for IPv6 VRFs, in global configuration mode issue the command  
+    <code><b>vrf upgrade-cli multi-af-mode common-policies &lt;vrf <i>vrf-name</i>&gt; </b></code>.
+    By default all VRFs will be configured to support IPv4 and IPv6. If the optional 
+    VRF name is configured, only the specified VRF will support IPv4 and IPv6.
+    The keyword <code><b>common-policies</b></code> copies the pre-configured 
+    parameters such as route-target, route distinguisher to be applied to IPv6 
+    as previously configured under IPv4.
+    Any IPv6 addresses configured on the interfaces assigned to any VRF will be 
+    removed. When you view the running configuration file, the syntax will be 
+    changed to <code><b>vrf definition <i>vrf-name</i></b></code> which is the 
+    new format.
+  </p>
+<p>
+The VRF description can be added to provide helpful information on the purpose of
+the VRF. It can be added using the VRF mode command 
+<code><b>description <i>description</i></b></code>.
+</p>
+<p>
+<b>CAUTION:</b> 
+<ul>
+  <li>If deleting a VRF using the command <code><b>no ip vrf <i>vrf-name</i></b></code>
+the IPv4  addresses configured on the interfaces assigned to that VRF will be removed.
+</li>
+<li>VRF names are case sensitive. It is recommended to use all upper case letters 
+for VRF names.</li>
+</ul>
+</p>
+<p>
+In VRF-lite, there is no need to specify the import and export route target (RT).
+and route distinguisher (RD).
+</p>
+
+<h2>Step 2: Apply VRF to the Interface</h2>
+<p>
+Interfaces, physical or logical, can belong to only one VRF at a time.
+Interfaces assigned to the VRF  belong to that VRF's routing table isntance. 
+Interfaces not in a VRF are in the global or default VRF. 
+Interfaces are assigned to VRFs depending on the way the VRF was created using 
+one of the following interface mode commands:
+<ul>
+  <li><code><b>ip vrf forwarding <i>vrf-name</i></b></code>: This command is used 
+  when the interface was created using the global configuration command 
+  <code><b>ip vrf <i>name</i></b></code>.
+    <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+    <code>
+      R1(config)#<b>interface gigabitethernet1/0</b><br>
+      R1(config-if)#<b>ip vrf forwarding FINANCE</b><br>
+    </code>
+    </div>
+  </li> 
+  <li><code><b>vrf forwarding <i>vrf-name</i></b></code>: This command is used 
+  when the interface was created using the global configuration command 
+  <code><b>vrf definition <i>vrf-name</i></b></code>.
+  <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+    <code>
+      R3(config)#<b>interface gigabitethernet3/0</b><br>
+      R3(config-if)#<b>vrf forwarding FINANCE</b><br>
+    </code>
+    </div>
+</ul>
+<b>Caution:</b> If an IP address was configured on the interface, it gets removed. 
+Always view the interface configuration for IP address before assigning any 
+interface to a VRF.
+</p>
+
+<h2>Step 3: Associate Routes with the VRF</h2>
+
+<h3>Configure a Static Route</h3>
+<p>
+To configure a static route for a VRF, run the global configuration command: 
+
+<code><b>ip route vrf <i>vrf-name network mask next-hop</i></b></code>
+</p>
+   <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+    <code>
+      R1(config)#<b>ip route vrf FINANCE 172.17.1.0 255.255.255.0 10.20.13.2</b>
+   </code></div>
+
+<h3>Associate a Routing Process with each VRF</h3>
+<h4>EIGRP</h4>
+<h5>EIGRP Named Mode</h5>
+<p>
+<code>
+<b>router eigrp EIGRP_NAMED</b><br>
+<b>address-family ipv4 vrf <i>vrf-name</i> autonomous-system <i>id</i></b>
+</code>
+</p>
+<h4>OSPF</h4> 
+<p>
+<code><b>router ospf <i>process-id</i> vrf <i>vrf-name</i></b></code> 
+</p>
+<h4>BGP</h4>
+<p>
+BGP configuration requires the configuration of a route target. 
+</p>
+<h5>Specify "Route Distinguisher"</h5>
+<p>
+Configuration is done using the command <code><b>rd <i>ASN:nn</i></b></code> or 
+<code><b>rd <i>IP-address:nn</i></b></code>
+Used extensively in MP-BGP. The RD is used to keep the routes unique; how we 
+distinguish one route in one VRF from a route in another VRF particularly when 
+the IP addresses are overlapping in prefix and prefix-length. In some versions 
+of IOS, the RD needs to be configured. In the newer versions, you can skip over 
+this step.
+</p>
+<p>
+If two VRF instances A and B have overlapping IP addresses, such as 10.0.0.0/24.
+and VRF X has a configured RD of 1:1 and B 2:2, the addresses will be differentiated 
+such as X's addresses will be 1:1:10.0.0.0/24 and Y 2:2:10.0.0./24. In the case 
+of MP-BGP, these count as two separate routes. 
+</p>
+
+<h1>Verification</h1>
+<p>
+All testing or verification commands have to include the specific VRF whose 
+features you would like to view.
+</p>
+<h2><code>show ip route vrf <i>vrf-name</i></code></h2>
+<p>
+To view the IP routing table of a specific VRF.
+</p>
+<h2><code>ping vrf <i>vrf-name</i></code></h2>
+<p>
+Check reachability of remote networks.
+</p>
+ 
+<h2><code>show run vrf</code></h2>
+<p>
+To view VRF configurations.
+</p>
+<h2><code>show ip vrf</code></h2>
+<p>
+To view configured VRFs.
+</p>
+<h2>show ip route vrf * </h2>
+<p>
+To view the IP routing table for all VRFs at once.
+</p>
+<h2><code>show ip vrf interfaces <i>vrf-name</i></code></h2>
+<p>
+Display interfaces in specified VRF.
+</p>
+<h2><code>show ip protocols vrf <i>vrf-name</i></code></h2>
+<p>
+
+</p>
+<h2>EIGRP</h2>
+<h3><code>show ip eigrp vrf <i>vrf-name</i> topology</code></h3>
+<p>
+
+</p>
+<h3><code>show ip eigrp vrf <i>vrf-name</i> neighbors</code></h3>
+<p>
+
+</p>
+<h3><code>show ip eigrp vrf <i>vrf-name</i> interfaces</code></h3>
+<p>
+
+</p>
+<h3><code>show eigrp address-family ipv4 vrf <i>vrf-name</i> interfaces</code></h3>
+<h2>BGP</h2>
+<h3><code>show bgp vpnv4 unicast vrf <i>vrf-name</i> summary</code></h3>
+<p>
+
+</p>
+<h3><code>show bgp vpnv4 unicast all summary</code></h3>
+<p>
+
+</p>
+<h2>OSPF</h2>
+<p>
+OSPF commands do not require the inclusion of the VRF keyword and VRF name within
+the command.
+</p>

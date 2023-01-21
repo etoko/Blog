@@ -1,0 +1,72 @@
+<h2>OSPF Authentication</h2>
+OSPF supports adjacency authentication to protect the control-plane from routing 
+injection attacks. Every OSPF packet header includes authentication information 
+i.e. hello, LSU, LSR. 
+
+Three types of authentication are supported:
+<ul>
+ <li>Type 0 null</li>
+ <li>Type 1 - Simple password</li>
+ <li>Type 2 - Cryptographic MD5 or SHA)
+</ul>
+ <p>
+ Authentication can be enabled on:
+<ul>
+ <li>the OSPF process <code>#area 0 authentication </code></li>
+ <li>link level: <code> ip ospf authentication</code></li>
+ </ul>
+ 
+ <p>
+ The link level configuration overrides the process level authentication configuration.
+ The password is always configured on the link;
+ <code>
+ #ip ospf authentication-key password
+ #ip ospf message-digest-key 1 md5 password
+ </code>
+ Key IDs must match.
+ </p>
+ 
+ <p>
+Setting area authentication for area zero will require all virtual links to configure that type of authentication. A virtual-link is a member of area zero.
+</p>
+<h3>Verification of Authentication</h3>
+<code>
+#show ip ospf
+#show ip ospf interface
+#show key chain
+</code>
+<p>
+With SHA/MD5 authentication, the packet is not encrypted. A digest of the key ID and password is embedded 
+in the packet header.
+</p>
+
+<h2>Virtual-link Authentication</h2>
+<p>
+A virtual-link is an area 0 interface. It inherits area 0 authentication configurations.
+The virtual-link is the interface, the key configuration goes at the interface. 
+Type can be configured globally or at the interface.
+</p>
+
+<p>
+The virtual-link runs as a demand circuit. Always clear the virtual-link after 
+configuring authentication.
+</p>
+<code>
+#area 0 virtual-link 4.4.4.4 authentication message-digest
+</code>
+<p>
+OSPF supports the following SHA algorithms: HMAC-SHA-1, HMAC-SHA-256, HMAC-SHA-384, 
+HMAC-SHA-512. OSPF supports the use of key chains.
+</p>
+<code>
+#ip ospf authentication key-chain OSPF_KEY_CHAIN
+</code>
+<p>
+To define a key chain:
+</p>
+<code>
+#key chain OSPF_KEY_CHAIN <br>
+  #key 1<br>
+  #key-string PASSWORD<br>
+  #cryptographic-algorithm HMAC-SHA-384<br>
+</code>

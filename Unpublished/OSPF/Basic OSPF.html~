@@ -1,0 +1,1966 @@
+<h1>OSPF Configuration</h1>
+<p>
+OSPF is an open-standards link-state IP routing protocol. It is, therefore, open for any vendor in the network hardware 
+equipment market to include OSPF capability in their equipment.
+
+OSPF uses IP protocol number 89 and is its own transport protocol. 
+The current versions of OSPF are OSPFv2 that supports IPv4 and OSPFv3 that supports 
+IPv4 and IPv6. The two versions of OSPF are not compatible. Routers running OSPFv3 cannot form an 
+IPv4 adjacency with routers running OSPFv2.
+To configure OSPF issue the global config mode command <code>router ospf <i>process_id</i></code> where 
+process_id is a value between 1 - 65535:
+</p>
+
+<div style="background-color:#f4f0ec; border-style:dotted;border-width:1px;border-color:#DCDCDC">
+  <code>
+  R1#<b>enable</b> <br />
+  R1#<b>configure terminal </b> <br />
+  Enter configuration commands, one per line.  End with CNTL/Z. <br />
+  R1(config)#<b>router ospf 1 </b> <br />
+  R1(config-router)# <br />
+  </code>
+</div>
+<p>
+The process ID in OSPF does not have to match on any of the routers in the OSPF domain.
+</p>
+<h2>Advertising Networks</h2>
+<p>
+For OSPF to advertise connected networks, it has to be enabled on the interfaces where the networks to be advertised have been configured.
+The area that the network will be resident in has to be added to the configuration. A network can only reside in one area.
+This can be done in two ways:
+</p>
+<ol>
+<li><b>Network statement:</b> using the OSPF router mode command 
+<code><b>network</b> <i>network_address wild-card</i> <b>area</b> <i>area_id</i></code>.
+A wild card mask is an inverse of the subnet mask. It allows one to be as general or as specific as possible.
+
+<div style="background-color:#f4f0ec; border-style:dotted;border-width:1px;border-color:#DCDCDC">
+  <code>
+  R1#<b>enable</b> <br />
+  R1#<b>configure terminal </b> <br />
+  Enter configuration commands, one per line.  End with CNTL/Z. <br />
+  R1(config)#<b>router ospf 1 </b> <br />
+  R1(config-router)#<b>network 10.10.0.0 0.0.255.255 area 0</b> <br />
+  R1(config-router)# <br />  
+  </code>
+</div>
+It is possible to add all interfaces using a single <code>network</code> command. The following snippet adds all 
+interfaces with a configured IP address to area 0.
+<div style="background-color:#f4f0ec; border-style:dotted;border-width:1px;border-color:#DCDCDC">
+  <code>
+  R1(config)#<b>router ospf 1 </b> <br />
+  R1(config-router)#<b>network 0.0.0.0 0.0.0.0 area 0</b> <br />
+  R1(config-router)# <br />  
+  </code>
+</div>
+
+</li>
+<li> <b>Interface command:</b> OSPF is enabled directly on the interface whose network is to be advertised. 
+OSPF interface statement enables OSPF on the primary and secondary IP addresses. 
+Secondary advertisement can be disabled by addition of the <code> secondaries none </code>
+keyword. If the interface IP address is 
+subsequently changed, the new IP address will still be automatically advertised without any further configuration.
+
+<div style="background-color:#f4f0ec; border-style:dotted;border-width:1px;border-color:#DCDCDC">
+  <code>
+  R1#<b>enable</b> <br />
+  R1#<b>configure terminal </b> <br />
+  Enter configuration commands, one per line.  End with CNTL/Z. <br />
+  R1(config)#<b> interface g1/0 </b> <br />
+  R1(config-if)#<b> ip ospf 1 area 0 </b> <br />
+  </code>
+</div>
+</li>
+</ol>
+
+<p>
+To view the OSPF configuration including interfaces on which OSPF has been activated on including how OSPF was activated 
+on the networks:
+</p>
+<div style="background-color:#f4f0ec; border-style:dotted;border-width:1px;border-color:#DCDCDC">
+  <code>
+ R1#<b>show ip protocols</b> <br />
+*** IP Routing is NSF aware *** <br />
+ <br />
+Routing Protocol is "ospf 1" <br />
+&nbsp;&nbsp;  Outgoing update filter list for all interfaces is not set <br />
+&nbsp;&nbsp;  Incoming update filter list for all interfaces is not set <br />
+&nbsp;&nbsp;  Router ID 1.1.1.1 <br />
+&nbsp;&nbsp;  It is an area border and autonomous system boundary router <br />
+&nbsp; Redistributing External Routes from, <br />
+&nbsp;&nbsp;  Number of areas in this router is 2. 1 normal 0 stub 1 nssa <br />
+&nbsp;&nbsp;  Maximum path: 4 <br />
+&nbsp;  Routing for Networks: <br />
+&nbsp;&nbsp;    10.0.12.1 0.0.0.0 area 0 <br />
+&nbsp;  Routing on Interfaces Configured Explicitly (Area 0): <br />
+&nbsp;&nbsp;    FastEthernet3/0 <br />
+&nbsp;  Routing on Interfaces Configured Explicitly (Area 10): <br />
+&nbsp;&nbsp;    GigabitEthernet1/0 <br />
+&nbsp;  Routing Information Sources: <br />
+&nbsp;&nbsp;    Gateway         Distance      Last Update <br />
+&nbsp;&nbsp;    6.6.6.6              110      00:32:45 <br />
+&nbsp;&nbsp;    2.2.2.2              110      00:32:45 <br />
+&nbsp;  Distance: (default is 110) <br />
+
+R1#
+  </code>
+</div>
+
+<h2>How OSPF works</h2>
+For a router to effectively learn and exchange routes, the OSPF process transitions through 
+various stages to present accurate routing information to the global/VRF routing information base (RIB)
+These include:
+<ul>
+  <li><b>Step 1 - Neighbor and Topology discovery: </b>this involves the discovery of neighbors and all their learned routes</li>
+  <li><b>Step 2 - Best Path Selection: </b> each router creates a local database of learned routes, known as the 
+  Link-State Database (LSDB). Using the information from the LSDB, 
+OSPF generates a shortest path first tree (SPT) in which the local 
+  router is at the root of the tree. The shortest path to each node in the tree 
+  is determined and then presented to the global RIB for installation.</li>
+  <li><b>Step 3 - Neighbor and Topology Maintenance:</b> each router continually monitors the state 
+  of its neighbors and their links to ensure that its information on the network is up-to-date.</li>
+</ul>
+<h3>OSPF Packets</h3>
+<p>
+A router running OSPF builds and maintains two data structures or databases from which it develops an 
+accurate picture of the network, known as the shortest path first tree (SPT):
+<ol>
+<li><b>Neighbor Table:</b> table contains directly connected neighbors that share network information.</b>
+To view the neighbor table, issue the <code>show ip ospf neighbor</code> command:
+<div style="background-color:#f4f0ec; border-style:dotted;border-width:1px;border-color:#DCDCDC">
+  <code>
+ R1#<b>show ip ospf neighbor</b><br />
+<br />
+Neighbor ID&nbsp;&nbsp;     Pri&nbsp;&nbsp;   State&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;           Dead Time&nbsp;   Address&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;         Interface<br />
+2.2.2.2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;           1&nbsp;&nbsp;   FULL/DR  &nbsp;&nbsp;&nbsp;       00:00:27&nbsp;&nbsp;    10.0.12.2 &nbsp;&nbsp;      GigabitEthernet0/0<br />
+3.3.3.3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;           0&nbsp;&nbsp;   FULL/  - &nbsp;&nbsp;&nbsp;       00:00:27&nbsp;&nbsp;    10.10.13.2&nbsp;&nbsp;      GigabitEthernet1/0<br />
+R1#<br />
+  </code>
+</div>
+</li>
+<li><b>Link-State Database (LSDB): </b> database maintained by OSPF that contains 
+the details of all the networks in the local area and summary information about networks in other areas and external networks.
+To view a summary of the LSDB, use the command <code>show ip ospf database</code>:
+<div style="background-color:#f4f0ec; border-style:dotted;border-width:1px;border-color:#DCDCDC">
+  <code>
+R1#<b>show ip ospf database</b><br />
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;            OSPF Router with ID (1.1.1.1) (Process ID 1)<br />
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                Router Link States (Area 0)<br />
+<br />
+Link ID&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;         ADV Router&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;      Age&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;         Seq#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;       Checksum Link count<br />
+1.1.1.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;         1.1.1.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;         477  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;       0x8000000A 0x00C502 2<br />
+2.2.2.2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;         2.2.2.2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;         247  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;       0x8000000A 0x0066CD 3<br />
+6.6.6.6&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;         6.6.6.6&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;         3514 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;       0x80000004 0x00F749 4<br />
+8.8.8.8&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;         8.8.8.8&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;         3    &nbsp;&nbsp; (DNA) 0x80000002 0x00BDFD 1<br />
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                Net Link States (Area 0)<br />
+<br />
+Link ID  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;       ADV Router&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;      Age &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;        Seq#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;       Checksum<br />
+10.0.12.2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;       2.2.2.2   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;      725 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;        0x80000005 0x00A468<br />
+10.0.26.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;       2.2.2.2   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;      247 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;        0x80000005 0x000FDC<br />
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                Summary Net Link States (Area 0)<br />
+<br />
+Link ID   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;      ADV Router&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;      Age&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;         Seq#       Checksum<br />
+10.7.7.0  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;      6.6.6.6   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;      874&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;         0x80000003 0x00E621<br />
+10.7.7.0  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;      8.8.8.8   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;      13&nbsp;&nbsp;    (DNA) 0x80000001 0x0054B6<br />
+10.10.13.0&nbsp;&nbsp;&nbsp;&nbsp;      1.1.1.1   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;      477 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;        0x8000000A 0x00C64A<br />
+10.10.31.1&nbsp;&nbsp;&nbsp;&nbsp;      1.1.1.1   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;      1130&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;        0x80000001 0x0024DE<br />
+10.10.34.0&nbsp;&nbsp;&nbsp;&nbsp;      1.1.1.1   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;      1130&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;        0x80000001 0x00FA09<br />
+<br />                                                                                
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                Router Link States (Area 10)<br />
+<br />
+Link ID&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;         ADV Router&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;      Age  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;       Seq#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;       Checksum Link count<br />
+1.1.1.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;         1.1.1.1   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;      1134 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;       0x80000005 0x0015AC 2<br />
+3.3.3.3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;         3.3.3.3   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;      1135 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;       0x80000002 0x00A193 4<br />
+<br /> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;       Summary Net Link States (Area 10)<br />
+<br />
+Link ID    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;     ADV Router&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;      Age &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;        Seq# &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;      Checksum<br />
+10.0.12.0  &nbsp;&nbsp;&nbsp;&nbsp;     1.1.1.1   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;      720 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;        0x80000003 0x00FD1F<br />
+10.0.16.0  &nbsp;&nbsp;&nbsp;&nbsp;     1.1.1.1   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;      477 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;        0x80000005 0x00CD49<br />
+10.0.26.0  &nbsp;&nbsp;&nbsp;&nbsp;     1.1.1.1   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;      229 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;        0x80000007 0x00BF41<br />
+10.0.210.1 &nbsp;&nbsp;&nbsp;     1.1.1.1   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;      229 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;        0x80000007 0x007DCF<br />
+10.7.7.0   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;     1.1.1.1   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;      229 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;        0x80000007 0x00897D<br />
+192.168.6.0&nbsp;&nbsp;&nbsp;     1.1.1.1   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;      229 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;        0x80000007 0x00E3C4<br />
+R1#<br />
+  </code>
+</div>
+
+</b></li>
+</ol>
+OSPF uses five types of packets to ensure that the information in the neigbor table and the 
+LSDB is accurate and regularly updated:
+<ul>
+  <li><b>Hello (OSPF packet type 1):</b> is sent to announce the router's presence on a link/segment and its neighborship adjacency prerequisite conditions. The hello packet has the following fields: OSPF version, message type (type 1), OSPF source route ID, area ID, authentication type and data, active neighbors, DR and BDR(for segments where they're required), hello interval, network subnet mask.</li>
+  <li><b>Database Descriptor Packet (DBD/DDP):</b>used to share summaries of the LSDB.</li>
+  <li><b>Link-State Request (LSR):</b> used to request for additional information on specific networks from neighbors.
+  The LSR is usually sent when the router receives a DBD packet from a neighbor and it does not have the prefix advertised in the DBD in its LSDB</li>
+  <li><b>Link-State Update (LSU) (OSPF packet type 4):</b> contains details on one or more networks and is 
+  usually sent in response to an LSR. This packet type is the envelop into which OSPF's Link-State Advertisements are enclosed into.</li>
+  <li><b>Link-State Acknowledgement (LSAck OSPF packet type 5):</b> is sent in response to an LSR and LSU. It includes the 
+  sequence number of the LSU/LSR that it is acknowledging.</li>
+</ul>
+
+</p>
+OSPF packets containing prefix information are generically referred to as Link-State Advertisements (LSAs). 
+LSAs contain link-state prefixes and their associated metric and are sent to neighboring routers. LSAs are stored in a local link-state database as they have been received. 
+All routers in the same area have identical LSDBs for that area. The SPT differs for each router as each sees itself at the root of the SPT.
+</p>
+
+<p>
+OSPF routers exchange prefix information through unicast or multicast or both depending on the OSPF network type. 
+The OSPF multicast addresses used are:
+<ul>
+ <li><b>AllSPFRouters</b> <code>224.0.0.5</code> with MAC address <code>01:00:5E:00:00:05</code></li>
+ <li><b>AllDRouters</b> <code>224.0.0.6</code> with MAC address <code>01:00:5E:00:00:06</code></li>
+</ul>
+<p>
+All OSPF-enabled routers process packets arriving at the multicast address 224.0.0.5. Only the DR and BDR process packets arriving at the 
+multicast address 224.0.0.6
+</p>
+
+<h2>OSPF Neighbor Adjacency</h2>
+The process of creating a neighborship with another OSPF enabled router is known as a neighborship. Neighboring OSPF-enabled routers need to become adjacent in order to share their known routers. The adjacency stage depends on the OSPF network type of the neighbors. 
+For a routers to become adjacent to each other, some preconditions exist that if 
+met, a neighborship is formed:
+<ul>
+  <li>The router ID values (RIDs) are used to uniquely identify an OSPF-enabled router 
+  in the OSPF domain. The RIDs of the two routers must be unique.
+  The RID can be viewed using most OSPF show commands.
+  <div style="background-color:#f4f0ec; border-style:dotted;border-width:1px;border-color:#DCDCDC">
+  <code>
+
+  R1#<b>show ip ospf</b> <br />
+ Routing Process "ospf 1" with ID <span style="background-color:#DCDCDC">1.1.1.1 </span><br />
+ Start time: 00:00:32.764, Time elapsed: 00:29:01.924 <br />
+ Supports only single TOS(TOS0) routes <br />
+ Supports opaque LSA <br />
+ Supports Link-local Signaling (LLS) <br />
+ Supports area transit capability <br />
+ Supports NSSA (compatible with RFC 3101) <br />
+ Event-log enabled, Maximum number of events: 1000, Mode: cyclic <br />
+ It is an area border and autonomous system boundary router <br />
+ Redistributing External Routes from, <br />
+ Router is not originating router-LSAs with maximum metric <br />
+ Initial SPF schedule delay 5000 msecs <br />
+ .....
+  
+  </code>
+  </code>
+  .</li>
+  <li>Interfaces must be OSPF active (in an Up state). The interface through-which the 
+  adjacency is to be formed must have OSPF enabled on it and must not be in an OSPF passive state.</li>
+  <li>Interfaces must share a common subnet on primary IP address. By default, OSPF advertises the secondary IP address of an interface if it is enabled 
+  in the OSPF router mode or interface mode.</li>
+  <li>Interface MTU must match. Default MTU is 1500.</li>
+  <li>Area ID for the segment must match.</li>
+  <li>Need for a DR for the segment must match. The broadcast and non-broadcast network types require a DR while the point-to-point and point-to-multipoint network types do not require a DR.</li>
+  <li>Hello and Dead intervals must match </li>
+  <li>Authentication type and credentials must match </li>
+  <li>Area type flags must match i.e. whether normal, stubby or Not-So-Stubby Area(NSSA).</li>
+</ul>
+<p>
+Mismatched MTUs can be ignored using the command:
+</p>
+ <div style="background-color:#f4f0ec; border-style:dotted;border-width:1px;border-color:#DCDCDC">
+  <code>
+   R1(config)#<b> interface g0/0 </b> <br />
+  R1(config-if)#<b>ip ospf mtu-ignore</b>
+</code>
+</div>
+<p>
+However, ignoring MTU checks is not recommeded in production networks.
+</p>
+
+OSPF neighbor adjacencies transition through a maximum of eight states (depending on the network type):
+<ol>
+  <li><b>Down:</b> in this state, no hello packets have been received from a neighbor. Additionally, the OSPF-enabled interface of the local router may be shutdown. </li>
+  <li><b>Attempt:</b> unicast hello packet has been sent to neighbor but no hello packet has been received back. This state applies to an OSPF neighborship that is manually configured using the OSPF process command <code>neighbor 10.2.3.4 </code> in NBMA environments.</li>
+  <li><b>Init:</b> Received a hello from the neighbor. However, the neighbor router has not yet acknowledged the local router as a neighbor by including its RID in its hello packet header's 'Active Neighbor' field.</li>
+  <li><b>2-Way:</b> Hello received from neighbor and neighbor has acknowledged the local router as a neighbor by including the local router RID in its 'Active Neighbor' field of the hello packet header. In broadcast and non-broadcast networks, DROther routers complete their adjacency formation with each other at the 2-Way stage. Election of the DR/BDR roles 
+  is also started. The router with the higher RID is master during DR election. More on this in the next section.</li>
+  <li><b>ExStart:</b> The master/slave relationship is formed with the master being the router with the higher RID. The master controls aspects of the adjacency formation by choosing the starting sequence number for the database descriptor packets (DDP or DBD) that are used for actual exchange. Master and DR roles have no relationship. The master/slave role applies only to the local network connection between the two neighbors and does not influence the DR/BDR/DROther roles.</li>
+  <li><b>Exchange:</b> DDP or DBD packets are sent in unicast. A summary of the LSDB is exchanged through DBD packets. DBD sequence number is used for reliable acknowledgment / re-transmission.</li>
+  <li><b>Loading:</b> LSRs are sent asking for more information about particular LSAs that the local router does not have. Unicast LSUs are sent for missing links.</li>
+  <li><b>Full:</b> LSDBs of the routers are fully synchronized.</li>
+</ol>
+<p>
+To view the OSPF adjacency stages in real-time, run the privileged-exec command
+<code> debug ospf adj</code>:
+
+</p>
+
+ <div style="background-color:#f4f0ec; border-style:dotted;border-width:1px;border-color:#DCDCDC">
+  <code>
+  R1#<b>debug ip ospf adj</b><br />
+OSPF adjacency debugging is on<br />
+R1#<br />
+   *Aug 11 20:39:07.311: OSPF-1 ADJ   Gi0/0: Send with youngest Key 0<br />
+*Aug 11 20:39:07.375: OSPF-1 ADJ   Gi0/0: 2 Way Communication to 2.2.2.2, state <span style="background-color:#DCDCDC">2WAY</span><br />
+*Aug 11 20:39:07.375: OSPF-1 ADJ   Gi0/0: Neighbor change event<br />
+*Aug 11 20:39:07.375: OSPF-1 ADJ   Gi0/0: <span style="background-color:#DCDCDC">DR/BDR election</span><br />
+*Aug 11 20:39:07.379: OSPF-1 ADJ   Gi0/0: Elect BDR 2.2.2.2<br />
+*Aug 11 20:39:07.379: OSPF-1 ADJ   Gi0/0: Elect DR 1.1.1.1<br />
+*Aug 11 20:39:07.379: OSPF-1 ADJ   Gi0/0: DR: 1.1.1.1 (Id)   BDR: 2.2.2.2 (Id)<br />
+*Aug 11 20:39:07.383: OSPF-1 ADJ   Gi0/0: Nbr 2.2.2.2: Prepare dbase exchange<br />
+*Aug 11 20:39:07.387: OSPF-1 ADJ   Gi0/0: Send DBD to 2.2.2.2 seq 0x24C9 opt 0x52 flag 0x7 len 32<br />
+*Aug 11 20:39:07.387: OSPF-1 ADJ   Gi0/0: Send with youngest Key 0<br />
+*Aug 11 20:39:07.391: OSPF-1 ADJ   Gi0/0: Neighbor change event<br />
+*Aug 11 20:39:07.391: OSPF-1 ADJ   Gi0/0: DR/BDR election<br />
+*Aug 11 20:39:07.391: OSPF-1 ADJ   Gi0/0: <span style="background-color:#DCDCDC">Elect BDR 2.2.2.2</span><br />
+*Aug 11 20:39:07.395: OSPF-1 ADJ   Gi0/0: <span style="background-color:#DCDCDC">Elect DR 1.1.1.1</span><br />
+*Aug 11 20:39:07.395: OSPF-<br />
+R1#1 ADJ   Gi0/0: DR: 1.1.1.1 (Id)   BDR: 2.2.2.2 (Id)<br />
+*Aug 11 20:39:07.399: OSPF-1 ADJ   Gi0/0: Neighbor change event<br />
+*Aug 11 20:39:07.399: OSPF-1 ADJ   Gi0/0: DR/BDR election<br />
+*Aug 11 20:39:07.403: OSPF-1 ADJ   Gi0/0: Elect BDR 2.2.2.2<br />
+*Aug 11 20:39:07.403: OSPF-1 ADJ   Gi0/0: Elect DR 1.1.1.1<br />
+*Aug 11 20:39:07.403: OSPF-1 ADJ   Gi0/0: DR: 1.1.1.1 (Id)   BDR: 2.2.2.2 (Id)<br />
+*Aug 11 20:39:07.411: OSPF-1 ADJ   Gi0/0: Rcv DBD from 2.2.2.2 seq 0x22D5 opt 0x52 flag 0x7 len 32  mtu 1500 state <span style="background-color:#DCDCDC">EXSTART</span><br />
+*Aug 11 20:39:07.411: OSPF-1 ADJ   Gi0/0: NBR Negotiation Done. We are the SLAVE<br />
+*Aug 11 20:39:07.415: OSPF-1 ADJ   Gi0/0: Nbr 2.2.2.2: Summary list built, size 2<br />
+*Aug 11 20:39:07.415: OSPF-1 ADJ   Gi0/0: Send DBD to 2.2.2.2 seq 0x22D5 opt 0x52 flag 0x2 len 72<br />
+*Aug 11 20:39:07.419: OSPF-1 ADJ   Gi0/0: Send with youngest Key 0<br />
+*Aug 11 20:39:07.531: OSPF-1 ADJ   Gi0/0: Rcv DBD from 2.2.2.2 seq 0x22D6 opt 0x52 flag 0x1 len 52  mtu 1500 state <span style="background-color:#DCDCDC">EXCHANGE</span><br />
+*Aug 11 20:39:07.531: OSPF-1 ADJ   Gi0/0: Exchange Done with 2.2.2.2<br />
+*Aug 11 20:39:07.535: OSPF-1 ADJ   Gi0/0: Send with youngest Key 0<br />
+*Aug 11 20:39:07.535: OSPF-1 ADJ   Gi0/0: Send LS REQ to 2.2.2.2 length 36 LS<br />
+R1#A count 1<br />
+*Aug 11 20:39:07.539: OSPF-1 ADJ   Gi0/0: Send DBD to 2.2.2.2 seq 0x22D6 opt 0x52 flag 0x0 len 32<br />
+*Aug 11 20:39:07.539: OSPF-1 ADJ   Gi0/0: Send with youngest Key 0<br />
+*Aug 11 20:39:07.643: OSPF-1 ADJ   Gi0/0: Rcv LS UPD from 2.2.2.2 length 88 LSA count 1<br />
+*Aug 11 20:39:07.647: OSPF-1 ADJ   Gi0/0: Synchronized with 2.2.2.2, state <span style="background-color:#DCDCDC">FULL</span><br />
+*Aug 11 20:39:07.647: %OSPF-5-ADJCHG: Process 1, Nbr 2.2.2.2 on GigabitEthernet0/0 from LOADING to FULL, Loading Done<br />
+*Aug 11 20:39:07.651: OSPF-1 ADJ   Gi0/0: Rcv LS REQ from 2.2.2.2 length 48 LSA count 2<br />
+</code>
+</div>
+
+<h2>OSPF Areas</h2>
+<p>
+An area defines a flooding domain. All devices in the area agree on the topology with features such as authentication type, 
+area type i.e. normal, stubby, not-so-stubby area (NSSA). 
+Changes inside the area require LSA flooding and full SPF.
+All routers in an area execute OSPF when the network changes for example when links fail, when failed links are restored,
+new routes added, existing routes withdrawn.
+</p>
+<p>
+Inter-area routing is similar to distance vector because routers in another area do not have a detailed view of the local area. So they rely on the type 3 network summary LSAs. Changes such as the addition of a 
+new network, link flapping/failure outside the area don't always require 
+ LSA flooding or SPF limiting the impact on router resources.
+</p>
+
+OSPF networks are built on a two-level hierarchical topology:
+<ol>
+  <li><b>Backbone Area (Area 0):</b> Used to summarize topology information 
+  between other areas. Traffic from one area to another must transit area 0. Area 0 
+  must be contiguous.</li>
+  <li> <b>Non-backbone Area: </b> Must use connections through area 0 to reach other areas.
+  All non-backbone areas must connect to the backbone area directly or through a virtual-link.
+  </li>
+</ol>
+<p>
+In networks that are single area, any area number can be used and prefix exchange 
+will take place. In multi-area OSPF networks, area zero (0) must be configured with 
+inter-area traffic transiting area 0.
+</p>
+
+<p>
+To determine the OSPF areas that a router is participating in:
+
+<div style="background-color:#f4f0ec; border-style:dotted;border-width:1px;border-color:#DCDCDC">
+<code>
+R1(config-if)#<b>do show ip ospf interface brief </b><br />
+Interface&nbsp;&nbsp;    PID&nbsp;&nbsp;&nbsp;&nbsp;   <span style="background-color:#DCDCDC;">Area</span>&nbsp;&nbsp;&nbsp;&nbsp;            IP Address/Mask&nbsp;&nbsp;&nbsp;&nbsp;    Cost&nbsp;&nbsp;&nbsp;&nbsp;  State&nbsp;&nbsp;&nbsp;&nbsp; Nbrs F/C<br />
+Gi0/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;        1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;     0 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;              10.0.12.1/30 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;      1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;     DR &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   1/1<br />
+Fa3/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;        1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;     0 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;              10.0.16.1/30 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;      1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;     P2P&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   0/0<br />
+Gi1/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;        1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;     10&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;              10.10.13.1/30&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;      1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;     P2P&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   0/0<br />
+R1(config-if)#<b>do show ip ospf</b><br />
+ Routing Process "ospf 1" with ID 1.1.1.1<br />
+ Start time: 00:00:32.764, Time elapsed: 01:57:36.228<br />
+ Supports only single TOS(TOS0) routes<br />
+ Supports opaque LSA<br />
+ Supports Link-local Signaling (LLS)<br />
+ Supports area transit capability<br />
+ Supports NSSA (compatible with RFC 3101)<br />
+ Event-log enabled, Maximum number of events: 1000, Mode: cyclic<br />
+ It is an area border and autonomous system boundary router<br />
+ Redistributing External Routes from,<br />
+ Router is not originating router-LSAs with maximum metric<br />
+ Initial SPF schedule delay 5000 msecs<br />
+ Minimum hold time between two consecutive SPFs 10000 msecs<br />
+ Maximum wait time between two consecutive SPFs 10000 msecs<br />
+ Incremental-SPF disabled<br />
+ Minimum LSA interval 5 secs<br />
+ Minimum LSA arrival 1000 msecs<br />
+ LSA group pacing timer 240 secs<br />
+ Interface flood pacing timer 33 msecs<br />
+ Retransmission pacing timer 66 msecs<br />
+ Number of external LSA 0. Checksum Sum 0x000000<br />
+ Number of opaque AS LSA 0. Checksum Sum 0x000000<br />
+ Number of DCbitless external and opaque AS LSA 0<br />
+ Number of DoNotAge external and opaque AS LSA 0<br />
+ <span style="background-color:#DCDCDC;">Number of areas in this router is 2. 1 normal 0 stub 1 nssa</span><br />
+ Number of areas transit capable is 0<br />
+ External flood list length 0<br />
+ IETF NSF helper support enabled<br />
+ Cisco NSF helper support enabled<br />
+ Reference bandwidth unit is 100 mbps<br />
+&nbsp;&nbsp;&nbsp;    Area BACKBONE(0)<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;        Number of interfaces in this area is 2<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;        Area has message digest authentication<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;        SPF algorithm last executed 00:58:20.520 ago<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;        SPF algorithm executed 3 times<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;        Area ranges are<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;        Number of LSA 4. Checksum Sum 0x03233A<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;        Number of opaque link LSA 0. Checksum Sum 0x000000<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;        Number of DCbitless LSA 0<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;        Number of indication LSA 0<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;        Number of DoNotAge LSA 0<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;        Flood list length 0<br />
+&nbsp;&nbsp;&nbsp;    Area 10<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;        Number of interfaces in this area is 1<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;        It is a NSSA area<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;        Perform type-7/type-5 LSA translation<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;        Area has no authentication<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;        SPF algorithm last executed 01:57:24.284 ago<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;        SPF algorithm executed 2 times<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;        Area ranges are<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;        Number of LSA 5. Checksum Sum 0x035534<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;        Number of opaque link LSA 0. Checksum Sum 0x000000<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;        Number of DCbitless LSA 0<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;        Number of indication LSA 0<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;        Number of DoNotAge LSA 0<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;        Flood list length 0<br />
+<br />
+R1(config-if)#<br />
+</code>
+</div>
+</p>
+<p>
+If the output of the command <code>show ip ospf </code> shows that the router is 
+participating in more than one area, then the router is an ABR.
+</p>
+
+<h3>OSPF Router Types </h3>
+<ul>
+  <li><b>Backbone Router: </b>these are routers that have at least one interface in 
+  area 0 (backbone). </li>
+  <li><b>Internal Routers: </b> all links of the router are in one non-backbone 
+  area.</li>
+  <li><b>Area Border Router (ABR): </b>router has links in both area 0 and non-backbone area. The ABR summarizes information between area 0 and non-backbone area.</li>
+  <li><b>Autonomous System Boundary Router (ASBR): </b>has at least one link in the OSPF domain and another link in a non-OSPF domain for example IS-IS, EIGRP, 
+  BGP, RIP domain. The ASBR redistributes routes to and/or from other routing 
+  domains and OSPF. </li>
+</ul>
+<p>
+The router type can be verified by using the following commands:
+</p>
+<div style="background-color:#f4f0ec; border-style:dotted;border-width:1px;border-color:#DCDCDC">
+<code>
+R1#<b>show ip protocols</b><br />
+*** IP Routing is NSF aware ***<br />
+<br />
+Routing Protocol is "ospf 1"<br />
+&nbsp;&nbsp;  Outgoing update filter list for all interfaces is not set<br />
+&nbsp;&nbsp;  Incoming update filter list for all interfaces is not set<br />
+&nbsp;&nbsp;  Router ID 1.1.1.1<br />
+&nbsp;&nbsp;  <span style="background-color:#DCDCDC;">It is an area border and autonomous system boundary router</span><br />
+&nbsp; Redistributing External Routes from,<br />
+&nbsp;&nbsp;  Number of areas in this router is 2. 1 normal 0 stub 1 nssa<br />
+&nbsp;&nbsp;  Maximum path: 4<br />
+&nbsp;&nbsp;  Routing for Networks:<br />
+&nbsp;&nbsp;&nbsp;&nbsp;    10.0.12.1 0.0.0.0 area 0<br />
+  ...<br />
+</code>
+</div>
+<p>
+Other commands such <code><b>#show ip ospf </b></code> can display the router's type.
+</p>
+<h2>OSPF Media Dependencies and Network Types</h2>
+Different network types are defined to deal with different media characteristics.
+Network types control:
+<ul>
+<li>How hello packets and updates are sent.</li>
+<li>Who forms an adjacency</li>
+<li>How the next-hop is calculated.</li>
+</ul>
+The OSPF network type does not need to match to form an adjacency but it does 
+need to be compatible such as a common need for a DR/BDR for the segment. Other 
+attributes have to match such as timer values. OSPF network types include the following:
+<ul>
+<li><b>Broadcast networks:</b> default network type on multi-access broadcast media such as ethernet.
+This network type requires the election of a designated router (DR) and back-up designated router (BDR).
+Hellos and updates from DROthers are sent as multicast to 224.0.0.6 
+(AllDRouters) and with destination MAC address. 01:00:5E:00:00:06. The DR and BDR process packets 
+sent to this address. The DR acknowledges the packet with an LSAAck and sends a multicast update to all other routers AllSPFRouters with 
+a destination address of 224.0.0.5 and MAC address 01:00:5E:00:00:05. The hello interval is 10 seconds, dead interval 40 seconds, wait time 40 seconds.
+<p>
+The hello interval and dead intervals can be modified to values different from the default values. 
+In gigabit-ethernet networks, hello intervals of 10 seconds are rather long. They can be reduced to shorter durations of 
+say 5 seconds:
+</p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#DCDCDC">
+  <code>
+R1(config)#<b>interface fa3/0</b> <br />  
+R1(config-if)#<b>ip ospf hello-interval 5 </b> </code>
+</div>
+<p>
+The dead interval is automatically modified to four times the value of the hello-interval.
+</p>
+
+<p>
+OSPF Hello values can be sent using sub-second values using the interface command<code>ip ospf dead-interval minimal hello-multiplier <i>multiplier</i></code>. The <code><i>multiplier</i></code> is the number of hello packets sent per second;
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#DCDCDC">
+  <code>
+R1(config)#<b>interface fa3/0</b> <br />  
+R1(config-if)#<b>ip ospf dead-interval minimal hello-multiplier 4 </b><br />
+R1(config-if)#<b>end</b><br />
+R1#<b>show ip ospf interface fa3/0</b><br />
+FastEthernet3/0 is up, line protocol is up<br />
+  Internet Address 10.0.16.1/30, Area 0, Attached via Interface Enable<br />
+  Process ID 1, Router ID 1.1.1.1, Network Type <span style="background-color:#DCDCDC";>BROADCAST </span>, Cost: 1<br />
+  . . . . <br />
+  Enabled by interface config, including secondary ip addresses<br />
+  Transmit Delay is 1 sec, State DR, Priority 1<br />
+  Designated Router (ID) 1.1.1.1, Interface address 10.0.16.1<br />
+  No backup designated router on this network<br />
+  Timer intervals configured, <span style="background-color:#DCDCDC;">Hello 250 msec, Dead 1, Wait 1, Retransmit 5</span><br />
+    oob-resync timeout 40<br />
+    Hello due in 58 msec<br />
+  Supports Link-local Signaling (LLS)<br />
+  Cisco NSF helper support enabled<br />
+  IETF NSF helper support enabled<br />
+  ..... <br />
+R1#<br />
+</code>
+</div>
+</p>
+<p>
+Where 4 implies four hello packets are to be sent per second.
+BFD is a more optimum option to OSPF sub-second OSPF hello intervals. BFD is more light-weight.
+</p>
+
+<li><b>Nonbroadcast: </b>Default on NBMA networks such as frame-relay, DMVPN topologies. Hello packets are sent in unicast. Neighbors are manually defined using the router OSPF command <code><b>neighbor</b> <i>neighbor_ip_address</i></code>.  DR and BDR election is required for this network type. The hello 
+interval is 30 seconds, dead-interval 120 seconds, wait timer 120 seconds.
+
+<li><b>Point-to-point: </b>default on point-to-point media such as HDLC, PPP, GRE.
+Sends hellos as multicast to address 224.0.0.5. Supports only two neighbors on 
+the link. The hello interval is 10 seconds, dead interval 40 seconds. A DR and BDR 
+election is not required for this network.
+
+<li><b>Point-to-multipoint: </b>This network type can be treated as a collection of point-to-point links.
+Hello packets are sent to multicast address 224.0.0.5. Special next-hop processing takes place with the next 
+hop being set to the neighbor's IP address that sent the LSU. Point-to-multipoint 
+network type is usually the best design option for partial mesh NBMA networks. In point-to-multipoint networks, the interface's IP address is advertised as /32 host route. Point-to-multipoint is not a default for any medium type. 
+The hello interval is 30 seconds, dead-interval 120 seconds. DR and BDR election does not happen in this network type.
+ 
+ <li><b> Point-to-multipoint Non-Broadcast: </b>same as point-to-multipoint but sends hellos 
+ as unicast. Neighbors are manually defined using the router OSPF command <code><b>neighbor</b> <i>neighbor_ip_address</i></code>.
+ Allows for per-VC OSPF cost over NBMA. Special next-hop processing.</li>
+ <li><b>Loopback: </b> Special case for loopback and looped-back interfaces. 
+ Advertises link with /32 subnet mask as a host route.
+ </li>
+</ul>
+
+<p>
+The use/non-use of LSA type 2 determines whether OSPF network types can be compatible or not. 
+Network types that use  type 2 LSAs include: broadcast and non-broadcast. Others 
+do not.
+</p>
+
+<p>
+The OSPF network type of an interface can be changed from its default using the interface mode command: <code><b>ip ospf  network</b> <i>network_type</i></code> <code>network_type</code> can be either of: broadcast, non-broadcast, point-to-point, point-to-multipoint.
+<br />
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#DCDCDC">
+<code>
+R1(config)#<b>interface fa3/0</b><br />
+R1(config-if)#<b>ip ospf network point-to-point</b><br />
+R1(config-if)#<b>do show ip ospf interface fa3/0</b><br />
+FastEthernet3/0 is up, line protocol is up<br />
+  Internet Address 10.0.16.1/30, Area 0, Attached via Interface Enable<br />
+  Process ID 1, Router ID 1.1.1.1, Network Type<span style="background-color:#DCDCDC;"> POINT_TO_POINT</span>, Cost: 1<br />
+  ...<br />
+  Enabled by interface config, including secondary ip addresses<br />
+  Transmit Delay is 1 sec, State POINT_TO_POINT<br />
+  Timer intervals configured, Hello 250 msec, Dead 1, Wait 1, Retransmit 5<br />
+    oob-resync timeout 40<br />
+    Hello due in 73 msec<br />
+</code>
+</div>
+</p>
+<p>
+
+Broadcast networks with only two OSPF peers can be configured to point-to-point network type.
+This makes the adjacency complete faster eliminating the unnecessary DR/BDR election and OSPF type 2 LSA advertisements.
+</p>
+
+<h2>Designated Router and Backup Designated Router</h2>
+If multiple routers in multi-access networks are to form adjacencies, the total number of 
+adjacencies established is determined by the formula:
+
+<code>
+Total = n * (n - 1)/2.
+</code>
+All these routers will be sending hello and update packets to each and every one of them.
+In order to reduce the number of adjacencies (and OSPF packets) on a segment in a multi-access network, 
+OSPF elects one router to be a designated router and another to act as a backup designated router 
+to replace the designated router in case of its failure.
+
+<h3>DR/BDR Election</h3>
+<p>
+A router initialising OSPF on an interface waits the duration of the wait timer 
+listening for the presence of other OSPFrouters announcing their DR status before 
+declaring its DR status (if more favourable). In broadcast networks, the wait timer is 40 seconds, non 
+broadcast networks, 120 seconds.
+
+DR election is based on interface priority and router ID (RID). Usually, the first 
+router to initialize OSPF on an interface within a given number of seconds on a segment 
+becomes the DR regardless of its interface priority or RID.
+
+OSPF deems a router more preferrable for DR if:
+<ol>
+ <li> The interface of the router has the highest priority for that segment. The priority is any value between 1 - 255.
+ The default priority is one (1). </li>
+ <li> The router has the highest OSPF RID in that segment. The RID of a router is determined by:
+    <ol type=i>
+	<li>if configured, the highest IP address configured on any "up" loopback interfaces.</li>
+	<li>the highest physical interface IP address</li>
+	<li> manual configuration of the RID using the OSPF process command: 
+      <code>
+	    #router-id 1.1.1.1
+	  </code>
+	</li>
+	</ol>
+ </li>
+</ol>
+<p>
+Unlike BGP, the OSPF RID is not a routable address. It is possible to have a 
+valid RID such as 255.255.255.255
+</p>
+
+<p>
+The interface priority is a value from 1 to 255 inclusive. To change the router interface priority to 200:
+</p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#DCDCDC">
+<code>
+  R1(config)#<b>interface g0/0</b> <br />
+R1(config-if)#<b>ip ospf priority ? </b><br />
+  <0-255>  Priority <br />
+R1(config-if)#<b>ip ospf priority 200 </b><br />
+R1(config-if)#<b>do show ip ospf interface g0/0</b> <br />
+GigabitEthernet0/0 is up, line protocol is up <br />
+  &nbsp;&nbsp;Internet Address 10.0.12.1/30, Area 0, Attached via Network Statement <br />
+  &nbsp;&nbsp;Process ID 1, Router ID 1.1.1.1, Network Type BROADCAST, Cost: 1 <br />
+  &nbsp;&nbsp; .... <br />
+  &nbsp;&nbsp;Transmit Delay is 1 sec, State BDR, <span style="background-color:#DCDCDC;">Priority 200</span><br />
+</code>
+</div>
+<p>
+A value of zero makes the router ineligible for DR/BDR election.
+</p>
+<p>
+The DR and BDR roles can not be preempted by a router with higher interface priority or RID values.
+The election of a DR/BDR can be forced by clearing the OSPF process. This can be done using the following command: 
+</p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#DCDCDC">
+<code>
+R1# <br />
+R1#<b>clear ip ospf process</b> <br />
+Reset ALL OSPF processes? [no]: <b>yes</b> <br />
+R1# <br />
+*Aug 11 22:03:11.495: %OSPF-5-ADJCHG: Process 1, Nbr 2.2.2.2 on GigabitEthernet0/0 from FULL to DOWN, Neighbor Down: Interface down or detached <br />
+*Aug 11 22:03:11.767: %OSPF-5-ADJCHG: Process 1, Nbr 2.2.2.2 on GigabitEthernet0/0 from LOADING to FULL, Loading Done <br />
+</code>
+</div>
+
+
+<h3>DR Operation</h3>
+<p>
+A Designated Router forms a FULL adjacency with all routers on the link. 
+The other routers (DROthers) form 2-WAY adjacencies with each other.
+
+The DR listens for LSUs on the multicast address 224.0.0.6. A router (DROther) with an update sends it to the multicast address 224.0.0.6.
+After receiving an LSU. The DR sends a unicast LSAck to that router to acknowledge receiving the update.
+The DR then floods the LSU(s) to the segment using 224.0.0.5.
+The DR does not modify the next-hop value of this LSU. The BDR is used for redundancy. It does 
+not flood any updates but receives all updates sent to the DR.
+</p>
+
+<p>
+The DR forms full adjacencies with all other routers. The BDR forms full adjacencies 
+with all other routers as well. The DR/BDR roles can not be preempted by routers with 
+better periorities / RIDs.
+</p>
+
+
+<h2>Link State Advertisements (LSAs)</h2>
+LSAs are used by OSPF routers to form and maintain neighbor relationships and to share prefix information. 
+LSAs contain a sequence number as a form of version control to overcome problems that might be caused during
+ LSA propagation. 
+ 
+ All LSAs are stored in the link-state database (LSDB) can can be viewed by running the command:
+ <code>show ip ospf database</code>
+</p>
+
+<p>
+The originating router resends an LSA after every 1800 seconds (30 minutes).
+LSAs with age 3600 seconds (1hr) are deemed invalid and purged from the LSDB.
+OSPF uses this as a method of route withdrawal.
+</p>
+
+<h3>OSPFv2 LSA Types</h3>
+OSPF LSAs type 1,3,5 and 7 advertise prefixes while LSA types 2 and 4 advertise router IDs. 
+Which LSA types are sent or present on a segment depends on the router's type, OSPF network 
+type and area type.
+
+<ol>
+  <li> <b>Type 1 Router LSA: </b> advertises a router's OSPF enabled networks within an area. </li>
+  <li> <b>Type 2 Network LSA: </b> advertises a multi-access network segment attached to a DR.</li>
+  <li> <b>Type 3 Summary: </b> advertises network prefixes that originated from a different area.</li>
+  <li> <b>Type 4 ASBR-Summary: </b> advertises a summary LSA for a specific ASBR.</li>
+  <li> <b>Type 5 External: </b> advertises external redistributed routes.</li>
+  <li> <b>Type 7 NSSA External: </b> advertises redistributed routes in Not-So-Stubby Areas (NSSA).</li>
+</ol>
+
+<p>
+LSA types 1,2 are intra-area LSAs while LSA 3, 4 are inter-area LSAs. LSA Type 5, 
+7 advertise external routes.
+</p>
+
+<h3>Type 1 Router LSA</h3>
+<p>
+A type 1 LSA contains lists of all OSPF-enabled interfaces on a router and their associated cost.
+
+Type 1 LSAs can be viewed by running the command: <code>show ip ospf database router</code>
+</p>
+
+
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#DCDCDC">
+<code>
+  R1#<b>show ip ospf database router</b>                              <br />                                                        
+&nbsp;                                                               <br />                                                      
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;            OSPF Router with ID (1.1.1.1) (Process ID 1)       <br />                                                      
+&nbsp;                                                               <br />                                                      
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                Router Link States (Area 0)                    <br />                                                      
+&nbsp;                                                               <br />                                                      
+&nbsp;  LS age: 73                                                   <br />                                                      
+&nbsp;  Options: (No TOS-capability, DC)                             <br />                                                      
+&nbsp;  LS Type: Router Links                                        <br />                                                      
+&nbsp;  Link State ID: 1.1.1.1                                       <br />                                                      
+&nbsp;  Advertising Router: 1.1.1.1                                  <br />                                                      
+&nbsp;  LS Seq Number: 80000001                                      <br />                                                      
+&nbsp;  Checksum: 0x8F5C                                             <br />                                                      
+&nbsp;  Length: 48                                                   <br />                                                      
+&nbsp;  Area Border Router                                           <br />                                                      
+&nbsp;  AS Boundary Router                                           <br />                                                      
+&nbsp;  Number of Links: 2                                           <br />                                                      
+&nbsp;                                                               <br />                                                      
+&nbsp;&nbsp;&nbsp;    Link connected to: a Transit Network                          <br />                                                      
+&nbsp;&nbsp;&nbsp;&nbsp;     (Link ID) Designated Router address: 10.0.12.1                <br />                                                      
+&nbsp;&nbsp;&nbsp;&nbsp;      (Link Data) Router Interface address: 10.0.12.1                 <br />                                                      
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;            Number of MTID metrics: 0                                <br />                                                      
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;       TOS 0 Metrics: 1                                        <br />                                                      
+&nbsp;                                                               <br />                                                      
+&nbsp;&nbsp;&nbsp;    Link connected to: a Stub Network                          <br />                                                      
+&nbsp;&nbsp;&nbsp;&nbsp;     (Link ID) Network/subnet number: 10.0.16.0                <br />                                                      
+&nbsp;&nbsp;&nbsp;&nbsp;     (Link Data) Network Mask: 255.255.255.252                 <br />                                                      
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;            Number of MTID metrics: 0                                <br />                                                      
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;       TOS 0 Metrics: 1                                        <br />                                                      
+  <br />                                                                                                                   
+  <br />                                                                                                                   
+  <br />
+&nbsp;   Adv Router is not-reachable in topology Base with MTID 0        <br />
+&nbsp;  LS age: 2                                                        <br />
+&nbsp;  Options: (No TOS-capability, DC)                                 <br />
+&nbsp;  LS Type: Router Links                                            <br />
+&nbsp;  Link State ID: 2.2.2.2                                           <br />
+&nbsp;  Advertising Router: 2.2.2.2                                      <br />
+&nbsp;  LS Seq Number: 80000002                                          <br />
+&nbsp;  Checksum: 0xA7BD                                                 <br />
+&nbsp;  Length: 60                                                       <br />
+&nbsp;  Number of Links: 3                                               <br />
+&nbsp;                                                                   <br />
+&nbsp;&nbsp;&nbsp;    Link connected to: a Stub Network                              <br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;     (Link ID) Network/subnet number: 10.0.210.1                   <br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;     (Link Data) Network Mask: 255.255.255.255                     <br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;             Number of MTID metrics: 0                                    <br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;        TOS 0 Metrics: 1                                            <br />
+&nbsp;                                                                   <br />
+&nbsp;&nbsp;&nbsp;    Link connected to: a Transit Network                           <br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;     (Link ID) Designated Router address: 10.0.12.1                <br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;     (Link Data) Router Interface address: 10.0.12.2               <br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;             Number of MTID metrics: 0                                    <br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;        TOS 0 Metrics: 100                                          <br />
+&nbsp;                                                                   <br />
+&nbsp;&nbsp;&nbsp;    Link connected to: a Stub Network                              <br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;     (Link ID) Network/subnet number: 10.0.26.0                    <br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;     (Link Data) Network Mask: 255.255.255.252                     <br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;             Number of MTID metrics: 0                                    <br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;        TOS 0 Metrics: 10                                           <br />
+<br />                                                                                                                   
+  <br />                                                                                                                   
+  <br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                Router Link States (Area 10) <br />                                                                         
+  <br />                                                                                                                   
+&nbsp;  LS age: 73<br />                                                                                                         
+&nbsp;  Options: (No TOS-capability, DC) <br />                                                                                  
+&nbsp;  LS Type: Router Links <br />                                                                                             
+&nbsp;  Link State ID: 1.1.1.1 <br />                                                                                            
+&nbsp;  Advertising Router: 1.1.1.1 <br />                                                                                       
+&nbsp;  LS Seq Number: 80000001 <br />                                                                                           
+&nbsp;  Checksum: 0x3FC3 <br />                                                                                                  
+&nbsp;  Length: 36  <br />                                                                                                       
+&nbsp;  Area Border Router <br />                                                                                                
+&nbsp;  AS Boundary Router       <br />                                                                                          
+&nbsp;  Number of Links: 1 <br />                                                                                                
+<br />                                                                                                                     
+&nbsp;&nbsp;&nbsp;    Link connected to: a Stub Network <br />                                                                               
+&nbsp;&nbsp;&nbsp;&nbsp;     (Link ID) Network/subnet number: 10.10.13.0 <br />                                                                    
+&nbsp;&nbsp;&nbsp;&nbsp;     (Link Data) Network Mask: 255.255.255.252 <br />                                                                      
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;      Number of MTID metrics: 0 <br />                                                                                     
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;       TOS 0 Metrics: 1                                                                                              
+                                                                                                                     
+</code>
+</div>
+
+<p>
+The Link ID value identifies the object that the link connects to, which could be: the router ID, 
+IP address of the interface of the DR, network address.
+
+A type 1 LSA is capable of advertising multiple links in one LSA. 
+In an area, all routers have an identical LSDB for that area.
+</p>
+
+<p>
+Links advertised in a type 1 LSA include stub links, point-to-point links, transit links.
+A stub link is a link without an OSPF neighbor; such as a link to connecting end-user devices to the network. With a stub 
+network, the traffic in this segment is either originating from this segment or has its destination in this segment. For a stub link advertisement, the Link ID is the network address and the link data is the subnet mask.
+</p>
+
+<p>
+For a transit network, neither the source nor the destination of the packets is on the link. Traffic on this link is in transit. A transit network indicates the presence of a Designated Router (DR) on the segment/link. 
+For transit links, the link ID is the RID of the DR, and link data is the interface IP address of the local router
+in that segment. 
+If the link ID and link data values are the same, then the advertising router is the DR. 
+The subnet mask of a transit link is contained in a type 2 LSA that is advertised by the DR in that segment.
+
+If the transit link has one neighbor and that neighbor becomes unavailable, the local router changes the type of link from transit to stub. Transit links imply the existence of a neighbor and that the network type is broadcast or non-broadcast.
+</p>
+
+<p>
+Point-to-point links do not necessarily require IP addressing. IP unnumbered can be used. With IP unnumbered configuration, the IP address is 
+borrowed from another interface of the router to represent the point-to-point link in the LSDB. The point-to-point link has as a single entry in the LSDB.
+
+If IP addressing is used on the interfaces of a point-to-point link, it is represented by two entries in the LSDB: (1)
+as a point-to-point link and (2) as a stub network. The point-to-point Link ID is the neighbor's RID. The link data is the 
+ip address of the router's interface in that segment. The stub link entry for this point-to-point link; the link ID is the network address of the point-to-point link. The link data is the subnet mask of the point-to-point network.
+
+If the network type is point-to-point or point-to-multipoint, the type 1 LSA entry contains the neighbor ID.
+</p>
+<p>
+In multi-area OSPF domains the ABRs and ASBRs flip a bit in the OSPF packet (hello) to indicate their role as an ABR 
+and/or ASBR.
+</p>
+<p>
+In the global/VRF RIB, type 1 LSAs received from other routers in the same area appear as intra-area routers 
+with the code "O"
+</p>
+
+<h3>Type 2 LSA Network</h3>
+<p> 
+The DR is the only router on a multi-access segment that advertises the type 2 LSA. A type 2 LSA identifies all the routers attached to that network segment. It lists the routers that are adjacent to the DR. It is used to reduce redundant information in database and flooding scalability issues.
+
+Type 1 LSAs advertise transit networks without subnet mask information. Type 2 LSAs include subnet mask information for transit links. 
+
+The DR advertises its IP address, subnet mask and attached routers including itself.
+
+If a DR is not elected, a type 2 LSA is not present. To view type 2 LSAs: issue the privileged command: 
+<code>show ip ospf database network</code>
+</p>
+
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#DCDCDC">
+<code>
+
+R2#<b>show ip ospf database network</b><br />
+&nbsp;                                                               <br />   
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;            OSPF Router with ID (2.2.2.2) (Process ID 2)<br />
+&nbsp;                                                               <br />   
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                Net Link States (Area 0) <br />
+&nbsp;                                                               <br />    
+&nbsp;  Routing Bit Set on this LSA in topology Base with MTID 0     <br />
+&nbsp;  LS age: 40                                                   <br />
+&nbsp;  Options: (No TOS-capability, DC)                             <br />
+&nbsp;  LS Type: Network Links                                       <br />
+&nbsp;  Link State ID: 10.0.12.1 (address of Designated Router)      <br />
+&nbsp;  Advertising Router: 1.1.1.1                                  <br />
+&nbsp;  LS Seq Number: 80000002                                      <br />
+&nbsp;  Checksum: 0xE232                                             <br />
+&nbsp;  Length: 32                                                   <br />
+&nbsp;  Network Mask: /30                                            <br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;        Attached Router: 1.1.1.1       <br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;        Attached Router: 2.2.2.2       <br />
+ </code>
+</div>
+
+<p>
+Type 1 and type 2 LSAs are used for building the routing topology within an area.
+The Link ID of a type 2 LSA is IP address of the DR interface in the segment. The advertising router 
+is the RID of the DR, the attached router is the RID of all the OSPF neighbors on that link.
+</p>
+
+<h3>Type 3 LSA - Network</h3>
+<p>
+ABRs act as a sort of default gateway between area 0 and a neighboring non-backbone area. Type 3 LSAs
+contain networks that are reachable in other areas through the ABR. Type 3 LSAs include the route cost but hide the ABR's 
+actual path to the destination, SPF is not run for ABR advertised type 3 LSA routes. This is because the ABR has 
+already run SPF for those routes (in their source area) from itself to the source routers when they were received as type 1 LSAs. Additionally, the local routers have already run SPF for the route from themselves to the ABR. 
+
+ABRs follow three fundamental rules when creating type 3 LSAs:
+
+<ol>
+  <li>Type 1 LSAs received from any area, the ABR creates a type 3 LSA for the backbone area and non-backbone area.
+  <li>Type 3 LSAs received from area 0, the ABR creates a new type 3 LSA for only non-backbone areas.
+  <li>Type 3 LSAs received from a non-backbone area are only inserted into the LSDB of the source area. ABRs do not create
+  a type 3 LSA for the other areas (including a segmented area 0). This enforces the two-tier hierarchy of OSPF.
+</ol>
+
+The advertising router for a type 3 LSA is the last ABR that advertises the prefix.
+</p>
+
+<p>
+LSA types 1,2 do not cross borders to other areas. An ABR extracts prefix information from type 1 and type 2
+ LSAs and inserts them into a type 3 LSA for advertisement into another area. 
+ 
+If an ABR receives a type 3 LSA, it changes the advertising router to itself and forwards the LSA to another area.
+
+To view type 3 LSAs, issue the following command: <code>show ip ospf database summary</code>
+</p>
+
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#DCDCDC">
+<code>
+ R2#<b>show ip ospf database summary</b> <br />
+                                                                    <br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            OSPF Router with ID (2.2.2.2) (Process ID 2)            <br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                                    <br />
+&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                Summary Net Link States (Area 0)                    <br />
+&nbsp;                                                                    <br />
+&nbsp;  Routing Bit Set on this LSA in topology Base with MTID 0          <br />
+&nbsp;  LS age: 69                                                        <br />
+&nbsp;  Options: (No TOS-capability, DC, Upward)                          <br />
+&nbsp;  LS Type: Summary Links(Network)                                   <br />
+&nbsp;  Link State ID: 10.7.7.0 (summary Network Number)                  <br />
+&nbsp;  Advertising Router: 6.6.6.6                                       <br />
+&nbsp;  LS Seq Number: 80000002                                           <br />
+&nbsp;  Checksum: 0xE820                                                  <br />
+&nbsp;  Length: 28                                                        <br />
+&nbsp;  Network Mask: /29                                                 <br />
+&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;      MTID: 0 &nbsp; &nbsp;&nbsp;        Metric: 10                                  <br />
+&nbsp;                                                                    <br />
+&nbsp;  Routing Bit Set on this LSA in topology Base with MTID 0          <br />
+&nbsp;  LS age: 172                                                       <br />
+&nbsp;  Options: (No TOS-capability, DC, Upward)                          <br />
+&nbsp;  LS Type: Summary Links(Network)                                   <br />
+&nbsp;  Link State ID: 10.10.13.0 (summary Network Number)                <br />
+&nbsp;  Advertising Router: 1.1.1.1                                       <br />
+&nbsp;  LS Seq Number: 80000003                                           <br />
+&nbsp;  Checksum: 0xD443                                                  <br />
+&nbsp;  Length: 28                                                        <br />
+&nbsp;  Network Mask: /30                                                 <br />
+&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;      MTID: 0   &nbsp; &nbsp;&nbsp;      Metric: 1                                   <br />
+&nbsp;                                                                    <br />
+&nbsp;  Routing Bit Set on this LSA in topology Base with MTID 0          <br />
+&nbsp;  LS age: 1571                                                      <br />
+&nbsp;  Options: (No TOS-capability, DC, Upward)                          <br />
+&nbsp;  LS Type: Summary Links(Network)                                   <br />
+&nbsp;  Link State ID: 10.10.31.1 (summary Network Number)                <br />
+&nbsp;  Advertising Router: 1.1.1.1                                       <br />
+&nbsp;  LS Seq Number: 80000001                                           <br />
+&nbsp;  Checksum: 0x24DE                                                  <br />
+&nbsp;  Length: 28                                                        <br />
+&nbsp;  Network Mask: /32                                                 <br />
+&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;      MTID: 0   &nbsp;&nbsp;&nbsp;      Metric: 2                                   <br />
+&nbsp;                                                                    <br />
+&nbsp;  Routing Bit Set on this LSA in topology Base with MTID 0          <br />
+&nbsp;  LS age: 1571                                                      <br />
+&nbsp;  Options: (No TOS-capability, DC, Upward)                          <br />
+&nbsp;  LS Type: Summary Links(Network)                                   <br />
+&nbsp;  Link State ID: 10.10.34.0 (summary Network Number)                <br />
+&nbsp;  Advertising Router: 1.1.1.1                                       <br />
+&nbsp;  LS Seq Number: 80000001                                           <br />
+&nbsp;  Checksum: 0xFA09                                                  <br />
+&nbsp;  Length: 28                                                        <br />
+&nbsp;  Network Mask: /30                                                 <br />
+&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;      MTID: 0 &nbsp; &nbsp;&nbsp;        Metric: 2
+&nbsp;
+</code>
+</div>
+
+<p>
+The LSID value is the advertised summary network number. Type 3 LSAs appear as inter-area routes with the code "O IA" in the global / VRF RIB. One type 3 LSA is generated per prefix. If a received type 1 LSA contains five  
+prefixes, the ABR will create five type 3 LSAs with one for each prefix. 
+A type 3 LSA is advertised into the neighboring area by the ABR. If a second ABR is to advertise the type 3 LSA into 
+a third area (after receiving it through the backbone), only the advertising router field is updated by the second ABR.
+
+Type 3 LSAs appear in the RIB as inter-area routes with the code "O IA".
+</p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#DCDCDC">
+<code>
+R2#<b>show ip route ospf</b>                                                           <br />
+Codes: L - local, C - connected, S - static, R - RIP, M - mobile, B - BGP       <br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;D - EIGRP, EX - EIGRP external, O - OSPF, IA - OSPF inter area           <br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;N1 - OSPF NSSA external type 1, N2 - OSPF NSSA external type 2           <br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;E1 - OSPF external type 1, E2 - OSPF external type 2                     <br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;i - IS-IS, su - IS-IS summary, L1 - IS-IS level-1, L2 - IS-IS level-2    <br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ia - IS-IS inter area, * - candidate default, U - per-user static route  <br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;o - ODR, P - periodic downloaded static route, H - NHRP, l - LISP        <br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ - replicated route, % - next hop override                              <br />
+                                                                                <br />
+Gateway of last resort is not set                                               <br />
+                                                                                <br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.0.0.0/8 is variably subnetted, 11 subnets, 4 masks                     <br />
+O&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.0.16.0/30 [110/101] via 10.0.12.1, 00:57:46, GigabitEthernet0/0     <br />
+<span style="background-color:#DCDCDC">
+O IA&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.7.7.0/29 [110/20] via 10.0.26.2, 00:47:06, GigabitEthernet1/0       <br />
+O IA&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.10.13.0/30 [110/101] via 10.0.12.1, 00:57:46, GigabitEthernet0/0    <br />
+O IA&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.10.31.1/32 [110/102] via 10.0.12.1, 00:42:34, GigabitEthernet0/0    <br />
+O IA&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.10.34.0/30 [110/102] via 10.0.12.1, 00:42:34, GigabitEthernet0/0    <br />
+</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;172.30.0.0/30 is subnetted, 1 subnets                                     <br />
+O E2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;172.30.45.0 [110/20] via 10.0.12.1, 00:19:44, GigabitEthernet0/0       <br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;172.31.0.0/24 is subnetted, 3 subnets                                     <br />
+O E2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;172.31.10.0 [110/20] via 10.0.12.1, 00:19:35, GigabitEthernet0/0       <br />
+O E2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;172.31.11.0 [110/20] via 10.0.12.1, 00:19:35, GigabitEthernet0/0       <br />
+O E2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;172.31.12.0 [110/20] via 10.0.12.1, 00:19:35, GigabitEthernet0/0       <br />
+O&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;192.168.6.0/24 [110/20] via 10.0.26.2, 00:47:06, GigabitEthernet1/0       <br />
+</code>
+</div>
+<h3>Type 5 External LSA</h3>
+<p>
+Type 5 LSAs are generated by an Autonomous-System Boundary Router (ASBR) to advertise 
+the routes that the ASBR is redistributing. Type 5 LSAs are flooded  
+throughout the OSPF domain to non-stubby areas with only the LSA age modified. They do not belong to any specific area. In the LSDB, type 5 LSAs are listed at the bottom of the output.
+ 
+Type 5 LSAs can be viewed in greater detail using the privileged mode command: <code>show ip ospf database external
+</code>
+</p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#DCDCDC">
+
+<code>                                                                   
+R2#<b>show ip ospf database external</b>                                 <br />                                      
+&nbsp;                                                                         <br />                                      
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;OSPF Router with ID (2.2.2.2) (Process ID 2)                 <br />                                      
+&nbsp;                                                                         <br />                                      
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Type-5 AS External Link States                           <br />                                      
+&nbsp;                                                                         <br />                                      
+&nbsp;  Routing Bit Set on this LSA in topology Base with MTID 0               <br />                                      
+&nbsp;  LS age: 1450                                                           <br />                                      
+&nbsp;  Options: (No TOS-capability, DC, Upward)                               <br />                                      
+&nbsp;  LS Type: AS External Link                                              <br />                                      
+&nbsp;  Link State ID: 172.30.45.0 (External Network Number )                  <br />                                      
+&nbsp;  Advertising Router: 1.1.1.1                                            <br />                                      
+&nbsp;  LS Seq Number: 80000008                                                <br />                                      
+&nbsp;  Checksum: 0x491F                                                       <br />                                      
+&nbsp;  Length: 36                                                             <br />                                      
+&nbsp;  Network Mask: /30                                                      <br />                                      
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Metric Type: 2 (Larger than any link state path)                 <br />                                      
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MTID: 0                                                          <br />                                      
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Metric: 20                                                       <br />                                      
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Forward Address: 10.10.34.2                                      <br />                                      
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;External Route Tag: 0                                            <br />                                      
+&nbsp;                                                                         <br />                                      
+&nbsp;  Routing Bit Set on this LSA in topology Base with MTID 0               <br />                                      
+&nbsp;  LS age: 1450                                                           <br />                                      
+&nbsp;  Options: (No TOS-capability, DC, Upward)                               <br />                                      
+&nbsp;  LS Type: AS External Link                                              <br />                                      
+&nbsp;  Link State ID: 172.31.10.0 (External Network Number )                  <br />                                      
+&nbsp;  Advertising Router: 1.1.1.1                                            <br />                                      
+&nbsp;  LS Seq Number: 80000008                                                <br />                                      
+&nbsp;  Checksum: 0xD1B5                                                       <br />                                      
+&nbsp;  Length: 36                                                             <br />                                      
+&nbsp;  Network Mask: /24                                                      <br />                                      
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Metric Type: 2 (Larger than any link state path)                 <br />                                      
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MTID: 0                                                          <br />                                      
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Metric: 20                                                       <br />                                      
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Forward Address: 10.10.34.2                                      <br />                                      
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;External Route Tag: 0                                            <br />                                      
+&nbsp;                                                                         <br />                                      
+&nbsp;  Routing Bit Set on this LSA in topology Base with MTID 0               <br />                                      
+&nbsp;  LS age: 1450                                                           <br />                                      
+&nbsp;  Options: (No TOS-capability, DC, Upward)                               <br />                                      
+&nbsp;  LS Type: AS External Link                                              <br />                                      
+&nbsp;  Link State ID: 172.31.11.0 (External Network Number )                  <br />                                      
+&nbsp;  Advertising Router: 1.1.1.1                                            <br />                                      
+&nbsp;  LS Seq Number: 80000008                                                <br />                                      
+&nbsp;  Checksum: 0xC6BF                                                       <br />                                      
+&nbsp;  Length: 36                                                             <br />                                      
+&nbsp;  Network Mask: /24                                                      <br />                                      
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Metric Type: 2 (Larger than any link state path)                 <br />                                      
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MTID: 0                                                          <br />                                      
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Metric: 20                                                       <br />                                      
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Forward Address: 10.10.34.2                                      <br />                                      
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;External Route Tag: 0                                            <br />                                      
+&nbsp;                                                                         <br />                                      
+&nbsp;  Routing Bit Set on this LSA in topology Base with MTID 0               <br />                                      
+&nbsp;  LS age: 1450                                                           <br />                                      
+&nbsp;  Options: (No TOS-capability, DC, Upward)                               <br />                                      
+&nbsp;  LS Type: AS External Link                                              <br />                                      
+&nbsp;  Link State ID: 172.31.12.0 (External Network Number )                  <br />                                      
+&nbsp;  Advertising Router: 1.1.1.1                                            <br />                                      
+&nbsp;  LS Seq Number: 80000008                                                <br />                                      
+&nbsp;  Checksum: 0xBBC9                                                       <br />                                      
+&nbsp;  Length: 36                                                             <br />                                      
+&nbsp;  Network Mask: /24                                                      <br />                                      
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Metric Type: 2 (Larger than any link state path)                 <br />                                      
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MTID: 0                                                          <br />                                      
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Metric: 20                                                       <br />                                      
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Forward Address: 10.10.34.2                                      <br />                                      
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;External Route Tag: 0                                            <br />                                                                                                                                                   
+R2#                                                                                                            
+</code>
+</div>
+
+<p>
+A type 5 LSA includes a forwarding address field.
+
+A forwarding address of 0.0.0.0 implies that traffic to the external routes should be forwarded to the ASBR that is 
+the advertising router for the external routes. If the forwarding address is not 0.0.0.0 , say it is 10.10.34.2 (as in
+the above output), and this address is not configured on the advertising router, then one implication 
+is that the advertising router is implementing Type 7 to Type 5 LSA translation and 
+is there an ABR to an NSSA area. In this case, this ABR will double as an ASBR because of the type 7/type 5 LSA translation.
+</p>
+<p>
+By default, external routes are redistributed as type 2 external routes (with code "O E2") with a metric of 20. 
+LSAs include forward address that indicate who should I route towards to reach the link. Usually, this is 
+the ASBR but it could be set to another router in some designs. A route tag is included in this LSA.
+</p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#DCDCDC">
+
+<code>                                                                                                              
+R2#<b>show ip route ospf </b>                                                                                                <br />
+Codes: L - local, C - connected, S - static, R - RIP, M - mobile, B - BGP                                             <br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;D - EIGRP, EX - EIGRP external, O - OSPF, IA - OSPF inter area              <br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;N1 - OSPF NSSA external type 1, N2 - OSPF NSSA external type 2              <br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;E1 - OSPF external type 1, E2 - OSPF external type 2                        <br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;i - IS-IS, su - IS-IS summary, L1 - IS-IS level-1, L2 - IS-IS level-2       <br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ia - IS-IS inter area, * - candidate default, U - per-user static route     <br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;o - ODR, P - periodic downloaded static route, H - NHRP, l - LISP           <br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ - replicated route, % - next hop override                                 <br />
+                                                                                                                      <br />
+Gateway of last resort is not set                                                                                     <br />
+                                                                                                                      <br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.0.0.0/8 is variably subnetted, 11 subnets, 4 masks                             <br />
+O&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.0.16.0/30 [110/101] via 10.0.12.1, 04:25:30, GigabitEthernet0/0                     <br />
+O IA&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.7.7.0/29 [110/20] via 10.0.26.2, 04:14:50, GigabitEthernet1/0                    <br />
+O IA&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.10.13.0/30 [110/101] via 10.0.12.1, 04:25:30, GigabitEthernet0/0                 <br />
+O IA&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.10.31.1/32 [110/102] via 10.0.12.1, 04:10:18, GigabitEthernet0/0                 <br />
+O IA&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.10.34.0/30 [110/102] via 10.0.12.1, 04:10:18, GigabitEthernet0/0                 <br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;172.30.0.0/30 is subnetted, 1 subnets                                             <br />
+<span style="background-color:#DCDCDC">
+O E2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;172.30.45.0 [110/20] via 10.0.12.1, 00:45:59, GigabitEthernet0/0                    <br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;172.31.0.0/24 is subnetted, 3 subnets                                             <br />
+O E2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;172.31.10.0 [110/20] via 10.0.12.1, 00:45:59, GigabitEthernet0/0                    <br />
+O E2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;172.31.11.0 [110/20] via 10.0.12.1, 00:45:59, GigabitEthernet0/0                    <br />
+O E2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;172.31.12.0 [110/20] via 10.0.12.1, 00:45:59, GigabitEthernet0/0                    <br />
+</span>
+O&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;192.168.6.0/24 [110/20] via 10.0.26.2, 04:14:50, GigabitEthernet1/0                    <br />
+
+</code>
+</div>
+
+<h4>External Type 1 vs Type 2 </h4>
+External routes are classified as Type 1 or Type 2. The main differences between Type 1 and Type 2 external
+OSPF routes are as follows:
+<ul> 
+  <li>The Type 1 metric equals the redistribution metric plus the total path metric to the ASBR. In other
+words, as the LSA propagates away from the originating ASBR, the metric increases.
+  <li>The Type 2 metric equals only the redistribution metric (by default 20). The metric is the same for the router next to
+the ASBR as the router 30 hops away from the originating ASBR. This is the default external metric
+type used by OSPF.
+</ul>
+Type 1 is preferred to type 2. If there's a tie in type 2 routes, then the cost 
+to reach the ASBR (forwarding metric) is the tie-breaker.
+</p>
+
+<h3>Type 4 LSA (ASBR-Summary)</h3>
+<p>
+Type 4 LSAs provide a way for routers to locate the ASBR when the router is in a different area from the ASBR. They provide information on the ABR's reachability to the ASBR in other areas. It includes the cost but does not include the 
+ABR's actual path to the destination. SPF is not run for type 4 LSAs.
+
+It is created by the first ABR in the area where the ASBR is resident and provides a summary route strictly for the ASBR of a type 5 LSA.
+
+To view type 4 LSAs:<code>show ip ospf database asbr-summary</code>
+</p>
+
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#DCDCDC">
+<code>
+R8#<b>show ip ospf database asbr-summary </b> <br />
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;OSPF Router with ID (8.8.8.8) (Process ID 8)<br />
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Summary ASB Link States (Area 7)<br />
+<br />
+&nbsp;  Adv Router is not-reachable in topology Base with MTID 0                           <br />
+&nbsp;  LS age: 1017                                                                       <br />
+&nbsp;  Options: (No TOS-capability, DC, Upward)                                           <br />
+&nbsp;  LS Type: Summary Links(AS Boundary Router)                                         <br />
+&nbsp;  Link State ID: 1.1.1.1 (AS Boundary Router address)                                <br />
+&nbsp;  Advertising Router: 6.6.6.6                                                        <br />
+&nbsp;  LS Seq Number: 8000000A                                                            <br />
+&nbsp;  Checksum: 0x7240                                                                   <br />
+&nbsp;  Length: 28                                                                         <br />
+&nbsp;  Network Mask: /0                                                                   <br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MTID: 0 &nbsp; &nbsp;&nbsp;        Metric: 100          <br />
+                                                                                           <br />
+&nbsp;  LS age: 709                                                                        <br />
+&nbsp;  Options: (No TOS-capability, DC, Upward)                                           <br />
+&nbsp;  LS Type: Summary Links(AS Boundary Router)                                         <br />
+&nbsp;  Link State ID: 1.1.1.1 (AS Boundary Router address)                                <br />
+&nbsp;  Advertising Router: 8.8.8.8                                                        <br />
+&nbsp;  LS Seq Number: 80000001                                                            <br />
+&nbsp;  Checksum: 0x5260                                                                   <br />
+&nbsp;  Length: 28                                                                         <br />
+&nbsp;  Network Mask: /0                                                                   <br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MTID: 0 &nbsp; &nbsp;&nbsp;        Metric: 101          <br />
+</code>
+</div>
+
+<p>
+The type 4 LSA does not contain prefix information but router ID information on how the ASBR 
+can be accessed from another area. Therefore, type 4 LSA information does not appear in the RIB.
+</p>
+<p>
+The ASBR generates type 1 LSA with a 
+flipped bit to identify as an ASBR. ABRs in the same area as the ASBR will notice the flipped bit triggering the 
+ generation of type 4 LSA to enable routers forward traffic to external networks towards the ASBR. Type 4 LSAs have the 
+ advertising router field updated by the ABR as the advertising router.
+</p>
+
+<h3>Type 7 LSA NSSA</h3>
+<p>
+Stubby areas prevent type 5 LSA propagation. Implementation of route redistribution is therefore not possible in a stubby area.
+However, local redistribution can be implemented in a not-so-stubby area (NSSA) while still preventing type 5 LSAs from
+being propagated into the NSSA.
+An ASBR advertises networks external to OSPF into NSSA as type 7 LSAs. These cannnot be advertised outside the NSSA. 
+This LSA includes a route tag.
+
+The NSSA ABR converts a type 7 LSA to a type 5 LSA. This makes the ABR have dual role of ABR and ASBR for other areas. 
+This second ABR generates a type 4 LSA. To view type 7 LSAs: <code>show ip ospf database nssa-external</code>
+</p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#DCDCDC">
+<code>
+R3#<b>show ip ospf database nssa-external </b>                                 <br />
+&nbsp;                                                                         <br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;OSPF Router with ID (3.3.3.3) (Process ID 3)                 <br />
+&nbsp;                                                                         <br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Type-7 AS External Link States (Area 10)                 <br />
+&nbsp;                                                                         <br />
+&nbsp;  Routing Bit Set on this LSA in topology Base with MTID 0               <br />
+&nbsp;  LS age: 415                                                            <br />
+&nbsp;  Options: (No TOS-capability, Type 7/5 translation, DC, Upward)         <br />
+&nbsp;  LS Type: AS External Link                                              <br />
+&nbsp;  Link State ID: 172.30.45.0 (External Network Number )                  <br />
+&nbsp;  Advertising Router: 4.4.4.4                                            <br />
+&nbsp;  LS Seq Number: 80000006                                                <br />
+&nbsp;  Checksum: 0x5EF5                                                       <br />
+&nbsp;  Length: 36                                                             <br />
+&nbsp;  Network Mask: /30                                                      <br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Metric Type: 2 (Larger than any link state path)                 <br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MTID: 0                                                          <br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Metric: 20                                                       <br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Forward Address: 10.10.34.2                                      <br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;External Route Tag: 0                                            <br />
+&nbsp;                                                                         <br />
+&nbsp;  Routing Bit Set on this LSA in topology Base with MTID 0               <br />
+&nbsp;  LS age: 414                                                            <br />
+&nbsp;  Options: (No TOS-capability, Type 7/5 translation, DC, Upward)         <br />
+&nbsp;  LS Type: AS External Link                                              <br />
+&nbsp;  Link State ID: 172.31.10.0 (External Network Number )                  <br />
+&nbsp;  Advertising Router: 4.4.4.4                                            <br />
+&nbsp;  LS Seq Number: 80000006                                                <br />
+&nbsp;  Checksum: 0xE68C                                                       <br />
+&nbsp;  Length: 36                                                             <br />
+&nbsp;  Network Mask: /24                                                      <br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Metric Type: 2 (Larger than any link state path)                 <br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MTID: 0                                                          <br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Metric: 20                                                       <br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Forward Address: 10.10.34.2                                      <br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;External Route Tag: 0                                            <br />
+&nbsp;                                                                         <br />
+&nbsp;  Routing Bit Set on this LSA in topology Base with MTID 0               <br />
+&nbsp;  LS age: 414                                                            <br />
+&nbsp;  Options: (No TOS-capability, Type 7/5 translation, DC, Upward)         <br />
+&nbsp;  LS Type: AS External Link                                              <br />
+&nbsp;  Link State ID: 172.31.11.0 (External Network Number )                  <br />
+&nbsp;  Advertising Router: 4.4.4.4                                            <br />
+&nbsp;  LS Seq Number: 80000006                                                <br />
+&nbsp;  Checksum: 0xDB96                                                       <br />
+&nbsp;  Length: 36                                                             <br />
+&nbsp;  Network Mask: /24                                                      <br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Metric Type: 2 (Larger than any link state path)                 <br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MTID: 0                                                          <br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Metric: 20                                                       <br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Forward Address: 10.10.34.2                                      <br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;External Route Tag: 0                                            <br />
+&nbsp;                                                                         <br />
+&nbsp;  Routing Bit Set on this LSA in topology Base with MTID 0               <br />
+&nbsp;  LS age: 415                                                            <br />
+&nbsp;  Options: (No TOS-capability, Type 7/5 translation, DC, Upward)         <br />
+&nbsp;  LS Type: AS External Link                                              <br />
+&nbsp;  Link State ID: 172.31.12.0 (External Network Number )                  <br />
+&nbsp;  Advertising Router: 4.4.4.4                                            <br />
+&nbsp;  LS Seq Number: 80000006                                                <br />
+&nbsp;  Checksum: 0xD0A0                                                       <br />
+&nbsp;  Length: 36                                                             <br />
+&nbsp;  Network Mask: /24                                                      <br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Metric Type: 2 (Larger than any link state path)                 <br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MTID: 0                                                          <br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Metric: 20                                                       <br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Forward Address: 10.10.34.2                                      <br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;External Route Tag: 0                                            <br />
+                                                                   
+R3#                                                                
+</code>
+</div>
+
+<p>
+The default NSSA route type advertisement is NSSA LSA type 2 and appear in the RIB as "O N2" routes.
+</p>
+
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#DCDCDC">
+<code>
+R3#<b>show ip route ospf</b>                                                                                       <br />
+Codes: L - local, C - connected, S - static, R - RIP, M - mobile, B - BGP                                          <br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;D - EIGRP, EX - EIGRP external, O - OSPF, IA - OSPF inter area           <br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;N1 - OSPF NSSA external type 1, N2 - OSPF NSSA external type 2           <br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;E1 - OSPF external type 1, E2 - OSPF external type 2                     <br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;i - IS-IS, su - IS-IS summary, L1 - IS-IS level-1, L2 - IS-IS level-2    <br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ia - IS-IS inter area, * - candidate default, U - per-user static route  <br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;o - ODR, P - periodic downloaded static route, H - NHRP, l - LISP        <br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ - replicated route, % - next hop override                              <br />
+                                                                                                                   <br />
+Gateway of last resort is not set                                                                                  <br />
+                                                                                                                   <br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.0.0.0/8 is variably subnetted, 11 subnets, 4 masks                          <br />
+O IA&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.0.12.0/30 [110/2] via 10.10.13.1, 04:39:36, GigabitEthernet1/0                <br />
+O IA&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.0.16.0/30 [110/2] via 10.10.13.1, 04:39:36, GigabitEthernet1/0                <br />
+O IA&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.0.26.0/30 [110/12] via 10.10.13.1, 04:39:36, GigabitEthernet1/0               <br />
+O IA&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.0.210.1/32 [110/3] via 10.10.13.1, 04:39:36, GigabitEthernet1/0               <br />
+O IA&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.7.7.0/29 [110/12] via 10.10.13.1, 04:38:30, GigabitEthernet1/0                <br />
+<span style="background-color:#DCDCDC">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;172.30.0.0/30 is subnetted, 1 subnets                                          <br />
+O N2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;172.30.45.0 [110/20] via 10.10.34.2, 00:16:51, GigabitEthernet0/0                <br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;172.31.0.0/24 is subnetted, 3 subnets                                          <br />
+O N2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;172.31.10.0 [110/20] via 10.10.34.2, 00:16:51, GigabitEthernet0/0                <br />
+O N2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;172.31.11.0 [110/20] via 10.10.34.2, 00:16:51, GigabitEthernet0/0                <br />
+O N2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;172.31.12.0 [110/20] via 10.10.34.2, 00:16:51, GigabitEthernet0/0                <br />
+</span>
+O IA&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;192.168.6.0/24 [110/12] via 10.10.13.1, 04:38:30, GigabitEthernet1/0             <br />
+R3#
+</code>
+</div>
+
+<h2>Neighbor and Topology Maintenance</h2>
+Once adjacencies have been established and SPT built, the OSPF state machine tracks neighbor and topology changes. Hello packets are used to monitor the availability of neighbors. LSUs update neighbors of network changes such as link failures, addition or removal of networks, change of link OSPF network types.
+
+<h3>Tracking Topology Changes</h3>
+When a new LSA is received, it is checked against the LSDB for changes such as:
+<ul>
+ <li>Sequence number: to track new LSAs.</li>
+ <li>Age: used to keep information updated and withdraw old information. Periodic
+ flooding occurs every 30 minutes (1800 secs) - paranoid update. LSAs whose LSA age 
+ is equal to the MaxAge value 3600 seconds are purged from the LSDB as they are considered invalid.
+ <li>Checksum: used to verify that transmission and memory corruption have not 
+ affected a packet.
+</ul>
+
+<h3>LSA Flooding</h3>
+When a change is detected in the network, a new LSA is generated and flooded out 
+all OSPF links in the area. OSPF does not use split-horizon. Self-originated LSAs are simply 
+dropped. Not all LSA changes require SPF to calculate for example link up/down 
+event vs sequence number, age.
+
+<h2>OSPF Virtual Links</h2>
+<p>
+Discontiguous areas arise when a non-backbone area is not directly connected to the backone. Also, when the backbone is 
+split-up into two or more sections with each section separated by a non-backbone area.
+
+Discontiguous areas cause the ABR not to be reachable via SPT. An ABR can only 
+advertise routes between areas when one of the areas it is connected to is the backbone(area 0).
+ 
+</p>
+<p>
+Discontiguous areas are eliminated by adding new area 0 links and adjacencies. The links could be either physical
+ or virtual for example GRE.
+ 
+ OSPF virtual-links are a form of virtual area 0 adjacencies. They are used to 
+ form multi-hop unicast area 0 adjacency. Virtual-links follow the already built shortest path first tree (SPT) 
+ between ABRs to connect to the backbone.
+</p>
+<p>
+As part of a two-tier hierarchy, area zero (0) must be contiguous. As indicated earlier, ABRs follow three fundamental rules when creating
+type 3 LSAs:
+</p>
+
+<ol>
+  <li>Type 1 LSAs received from any area, the ABR creates a type 3 LSA for the backbone area and non-backbone area.
+  <li>Type 3 LSAs received from area 0, the ABR creates a new type 3 LSA for only non-backbone areas.
+  <li>Type 3 LSAs received from a non-backbone area are only inserted into the LSDB of the source area. ABRs do not create
+  a type 3 LSA for the other areas (including a segmented area 0).
+</ol>
+<p>
+The tunnel (of a virtual-link) belongs to the backbone area and therefore the router terminating the virtual link becomes
+an ABR. The area in which the virtual-link endpoints
+are established is known as the transit area.  Each router identifies the remote router by its RID. The virtual-link 
+can be one hop or multiple hops away from the remote virtual-link endpoint.
+
+The virtual link is built using type 1 LSAs where the neighbor state is type 4 LSA.
+
+A virtual-link inherits costs from SPT cost between end-points. The cost must be below 65535.
+A virtual-link runs as a demand circuit so errors in configuration could be hidden until flooding 
+occurs.
+
+Configuration: (on both virtual-link endpoints)
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#DCDCDC">
+<code>
+R6(config)#<b>router ospf 6</b>                                                      <br />
+R6(config-router)#<b>area 7 virtual-link 8.8.8.8</b>                          <br />
+R6(config-router)#<b>end</b>                                                         <br />
+<br />
+------------------------------------ <br />
+<br />
+R8(config)#<b>router ospf 8</b>                                                      <br />
+R8(config-router)#<b>area 7 virtual-link 6.6.6.6</b>                          <br />
+R8(config-router)#<b>end</b>                                                         <br />                                                                                                         
+*Aug 15 14:59:34.035: %SYS-5-CONFIG_I: Configured from console by console     <br /> 
+R8# <br />
+R8#<b>show ip ospf virtual-links</b>                                                 <br />                 
+Virtual Link OSPF_VL0 to router 6.6.6.6 is up                                 <br />                 
+&nbsp;&nbsp;Run as demand circuit                                                       <br />                 
+&nbsp;&nbsp;DoNotAge LSA allowed.                                                       <br />                 
+&nbsp;&nbsp;Transit area 7, via interface GigabitEthernet0/0                            <br />                 
+&nbsp;Topology-MTID  &nbsp;&nbsp;&nbsp;  Cost &nbsp;&nbsp;&nbsp;   Disabled  &nbsp;&nbsp;&nbsp;   Shutdown  &nbsp;&nbsp;&nbsp;    Topology Name            <br />                 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;no     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;     no      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;      Base                  <br />                 
+&nbsp;&nbsp;Transmit Delay is 1 sec, State POINT_TO_POINT,                              <br />                 
+&nbsp;&nbsp;Timer intervals configured, Hello 10, Dead 40, Wait 40, Retransmit 5        <br />                 
+&nbsp;&nbsp;&nbsp;&nbsp;Hello due in 00:00:03                                                     <br />                 
+&nbsp;&nbsp;&nbsp;&nbsp;Adjacency State FULL (Hello suppressed)                                   <br />                 
+&nbsp;&nbsp;&nbsp;&nbsp;Index 1/2, retransmission queue length 0, number of retransmission 0      <br />                 
+&nbsp;&nbsp;&nbsp;&nbsp;First 0x0(0)/0x0(0) Next 0x0(0)/0x0(0)                                    <br />                 
+&nbsp;&nbsp;&nbsp;&nbsp;Last retransmission scan length is 0, maximum is 0                        <br />                 
+&nbsp;&nbsp;&nbsp;&nbsp;Last retransmission scan time is 0 msec, maximum is 0 msec                <br />                 
+&nbsp;&nbsp;Message digest authentication enabled                                       <br />                 
+&nbsp;&nbsp;&nbsp;&nbsp;Youngest key id is 1  <br />
+R8# <br />
+R8#<b>show ip ospf interface</b><br />
+<span style="background-color:#DCDCDC;">OSPF_VL0 is up, line protocol is up</span><br />
+&nbsp;&nbsp;Internet Address 10.7.7.3/29, Area 0, Attached via Not Attached     <br />
+&nbsp;&nbsp;Process ID 8, Router ID 8.8.8.8, Network Type<span style="background-color:#DCDCDC;"> VIRTUAL_LINK</span>, Cost: 1 <br />
+&nbsp;&nbsp;Topology-MTID  &nbsp;&nbsp;&nbsp;  Cost &nbsp;&nbsp;&nbsp;   Disabled  &nbsp;&nbsp;&nbsp;   Shutdown  &nbsp;&nbsp;&nbsp;    Topology Name            <br />                 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;no     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;     no      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;      Base                  <br />                 
+&nbsp;&nbsp;Configured as demand circuit                                        <br />
+&nbsp;&nbsp;Run as demand circuit                                               <br />
+&nbsp;&nbsp;DoNotAge LSA allowed                                                <br />
+&nbsp;&nbsp;Transmit Delay is 1 sec, State POINT_TO_POINT                       <br />
+&nbsp;&nbsp;Timer intervals configured, Hello 10, Dead 40, Wait 40, Retransmit 5<br />
+&nbsp;&nbsp;&nbsp;  oob-resync timeout 40                                             <br />
+&nbsp;&nbsp;&nbsp;  Hello due in 00:00:02                                             <br />
+&nbsp;&nbsp;Supports Link-local Signaling (LLS)                                 <br />
+&nbsp;&nbsp;Cisco NSF helper support enabled                                    <br />
+&nbsp;&nbsp;IETF NSF helper support enabled                                     <br />
+&nbsp;&nbsp;Index 1/2, flood queue length 0                                     <br />
+&nbsp;&nbsp;Next 0x0(0)/0x0(0)                                                  <br />
+&nbsp;&nbsp;Last flood scan length is 1, maximum is 1                           <br />
+&nbsp;&nbsp;Last flood scan time is 0 msec, maximum is 0 msec                   <br />
+&nbsp;&nbsp;Neighbor Count is 1, Adjacent neighbor count is 1                   <br />
+&nbsp;&nbsp;  Adjacent with neighbor 6.6.6.6  (Hello suppressed)                <br />
+&nbsp;&nbsp;Suppress hello for 1 neighbor(s)                                    <br />
+&nbsp;&nbsp;Message digest authentication enabled                               <br />
+&nbsp;&nbsp;&nbsp;  Youngest key id is 1                                              <br />
+GigabitEthernet0/0 is up, line protocol is up                                   <br />
+&nbsp;&nbsp;Internet Address 10.7.7.3/29, Area 7, Attached via Interface Enable           <br />
+&nbsp;&nbsp;Process ID 8, Router ID 8.8.8.8, Network Type BROADCAST, Cost: 1              <br />
+&nbsp;&nbsp;Topology-MTID  &nbsp;&nbsp;&nbsp;  Cost &nbsp;&nbsp;&nbsp;   Disabled  &nbsp;&nbsp;&nbsp;   Shutdown  &nbsp;&nbsp;&nbsp;    Topology Name            <br />                 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;no     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;     no      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;      Base                  <br />                 
+&nbsp;&nbsp;Enabled by interface config, including secondary ip addresses                 <br />
+&nbsp;&nbsp;Transmit Delay is 1 sec, State BDR, Priority 1                                <br />
+&nbsp;&nbsp;Designated Router (ID) 6.6.6.6, Interface address 10.7.7.1                    <br />
+&nbsp;&nbsp;Backup Designated router (ID) 8.8.8.8, Interface address 10.7.7.3             <br />
+&nbsp;&nbsp;Timer intervals configured, Hello 10, Dead 40, Wait 40, Retransmit 5          <br />
+&nbsp;&nbsp;&nbsp;  oob-resync timeout 40                                                       <br />
+&nbsp;&nbsp;&nbsp;  Hello due in 00:00:01                                                       <br />
+&nbsp;&nbsp;Supports Link-local Signaling (LLS)                                           <br />
+&nbsp;&nbsp;Cisco NSF helper support enabled                                              <br />
+&nbsp;&nbsp;IETF NSF helper support enabled                                               <br />
+&nbsp;&nbsp;Index 1/1, flood queue length 0                                               <br />
+&nbsp;&nbsp;Next 0x0(0)/0x0(0)                                                            <br />
+&nbsp;&nbsp;Last flood scan length is 1, maximum is 1                                     <br />
+&nbsp;&nbsp;Last flood scan time is 0 msec, maximum is 4 msec                             <br />
+&nbsp;&nbsp;Neighbor Count is 1, Adjacent neighbor count is 1                             <br />
+&nbsp;&nbsp;  Adjacent with neighbor 6.6.6.6  (Designated Router)                         <br />
+&nbsp;&nbsp;Suppress hello for 0 neighbor(s)                                              <br />
+R8#
+
+</code>
+</div>
+
+</p>
+<p>
+
+The commands <code>show ip ospf virtual-link</code> and <code>show ip ospf interface </code> 
+as indicated in the above command output verifies the operational state of the virtual-link.
+</p>
+<p>
+Hello packets are suppressed for virtual-links.
+</p>
+<h3>Virtual-link Preconditions</h3>
+<ul>
+  <li>End-points must be reachable via a normal area (not a stub area). 
+  OSPF stubby areas cannot be a transit area for a virtual-link.</li> 
+  <li>Transit area  must not have filtering applied i.e. LSA type 3 filters, distribute-lists. 
+</ul>
+
+<h2>OSPF Path Selection</h2>
+<p>
+The decision on the path the next hop for traffic is based on the path metric. 
+Metric is the cummulative OSPF interface cost along the path. The cost is calculated as follows;  
+</p>
+<code>
+reference bandwidth / interface bandwidth.
+</code>
+<p>
+The default OSPF reference bandwidth is 100mbps. With this default reference bandwidth, OSPF is unable to differentiate 
+between fastethernet(100mbps), gigabitethernet(1000mbps), ten gigabitethernet(10000) or high speeds. 
+All interfaces from fastethernet or faster will have an OSPF cost of one (1). It is
+imperative to modify the defaylt reference bandwidth in network environments with interfaces 
+having gigabitethernet or faster interfaces so that OSPF can make more accurate path selection decisions. 
+
+This default reference bandwidth can be 
+modified with the OSPF router mode command:
+<code>
+auto-cost reference-bandwidth <i>bandwidth </i>
+</code>
+The bandwidth value is in megabits per second.
+</p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#DCDCDC">
+<code>
+R8(config-router)#<b>auto-cost reference-bandwidth 10000</b>                  <br />
+% OSPF: Reference bandwidth is changed.                                       <br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Please ensure reference bandwidth is consistent across all routers.   <br />
+R8(config-router)#<b>do show ip ospf</b>                                      <br />
+&nbsp;Routing Process "ospf 8" with ID 8.8.8.8                                     <br />
+&nbsp;Start time: 00:00:40.364, Time elapsed: 01:49:26.920                         <br />
+&nbsp;Supports only single TOS(TOS0) routes                                        <br />
+&nbsp;.......                                                                      <br />
+&nbsp;Number of DoNotAge external and opaque AS LSA 0                              <br />
+&nbsp;Number of areas in this router is 2. 2 normal 0 stub 0 nssa                  <br />
+&nbsp;Number of areas transit capable is 1                                         <br />
+&nbsp;External flood list length 0                                                 <br />
+&nbsp;IETF NSF helper support enabled                                              <br />
+&nbsp;Cisco NSF helper support enabled                                             <br />
+&nbsp;<span style="background-color:#DCDCDC">                                         <br />
+&nbsp;Reference bandwidth unit is 10000 mbps</span>                                <br />
+&nbsp;&nbsp;&nbsp;&nbsp;Area BACKBONE(0)                                                          <br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Number of interfaces in this area is 1                                <br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Area has no authentication                                            <br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SPF algorithm last executed 01:49:00.076 ago                          <br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SPF algorithm executed 2 times                                        <br />
+        ........                                                       <br>
+</code>
+</div>
+<p>
+The reference bandwidth should be set to the same value for all routers in the OSPF domain, 
+otherwise sub-optimal routing may occur.
+Type 1 LSAs include the cost of each link which is in the range 1 - 65535.
+</p>
+
+<p>
+OSPF best path selection criteria (in order of preference);
+<ol>
+<li>Intra-area path with the lowest metric
+<li>Inter-area path with the lowest metric
+<li>External type 1 path with the lowest metric
+<li>External type 2 paths with the lowest metric
+<li>External type 2 paths with the lowest forwarding metric
+</ol>
+</p>
+<p>
+External routes are classified as type 1 or type 2.
+<ul>
+ <li>type 1 routes are preferred to type 2.
+ <li>type 1 metric is the combined metric of the path to the ASBR and redistribution metric.
+ <li>type 2 metric equals only the redistribution metric. This metric is the same for all routers in the OSPF domain
+  regardless of whether they are one hop from the ASBR or fifty hops away from the ASBR.
+  <li>Existence of N1 or N2 routes implies that E1 and E2 routes will not be existent in that area. </li>
+</ul>
+</p>
+
+<p>
+The link cost can be modified by changing the default values for:
+<ul>
+ <li><b>Interface bandwidth: </b>using the interface command <code>bandwidth <i>value</i></code> 
+ with the bandwidth value in kilobits per second:
+ <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#DCDCDC">
+ <code>
+ R8(config)#<b>interface g0/0</b> <br />
+ R8(config-if)#<b>bandwidth 10000</b> <br />
+R8(config-if)#<b>do show interface g0/0 </b> <br />
+GigabitEthernet0/0 is up, line protocol is up                                               <br />
+&nbsp;&nbsp;Hardware is i82543 (Livengood), address is ca08.05b3.0008 (bia ca08.05b3.0008)  <br />
+&nbsp;&nbsp;Internet address is 10.7.7.3/29                                                 <br />
+&nbsp;&nbsp;MTU 1500 bytes, <span style="background-color:#DCDCDC;">BW 10000 Kbit/sec</span>, DLY 10 usec,                                 <br />
+&nbsp;&nbsp;&nbsp;&nbsp;reliability 255/255, txload 1/255, rxload 1/255                     <br />
+&nbsp;&nbsp;Encapsulation ARPA, loopback not set                                            <br />
+&nbsp;&nbsp;Keepalive set (10 sec)                                                          <br />
+&nbsp;&nbsp;Full Duplex, 1Gbps, link type is auto, media type is SX                         <br />
+ ... <br/>
+ </code> 
+ </div>
+ However, it is not recommended to modify the OSPF interface cost by modifying the interface bandwidth as this modification 
+ affects not only OSPF metric calculation but potentially other metric calculations say for any other routing protocol.
+ </li>
+ <li><b>Interface cost: </b>modifying the OSPF interface cost using the interface mode command:
+ <code?ip ospf cost <i>value</i></code> where value is between 1 - 65535.
+ <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#DCDCDC">
+ <code>
+ R8(config-if)#<b>do show ip ospf interface brief </b>                                <br />    
+Interface&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;PID &nbsp;  Area &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;           IP Address/Mask  &nbsp;&nbsp;&nbsp;&nbsp;  Cost &nbsp;&nbsp; State &nbsp;&nbsp; Nbrs F/C     <br />   
+VL0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 8 &nbsp;&nbsp;&nbsp;  0 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;           10.7.7.3/29&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1000 &nbsp;&nbsp; P2P &nbsp;&nbsp;&nbsp;&nbsp; 1/1          <br />   
+Gi0/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 8 &nbsp;&nbsp;&nbsp;  7 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;           10.7.7.3/29&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1000 &nbsp;&nbsp; BDR &nbsp;&nbsp;&nbsp;&nbsp; 1/1          <br />   
+R8(config-if)#<b>ip ospf cost ? </b>                                                  <br />   
+  <1-65535>  Cost                                                              <br />   
+                                                                               <br />   
+R8(config-if)#<b>ip ospf cost 1 </b>                                                   <br />   
+R8(config-if)#do show ip ospf interface brief                                  <br />   
+Interface&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;PID &nbsp;  Area &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;           IP Address/Mask    Cost  State Nbrs F/C     <br />   
+VL0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 8 &nbsp;&nbsp;&nbsp;  0               10.7.7.3/29        1000  P2P   1/1          <br />   
+Gi0/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 8 &nbsp;&nbsp;&nbsp;  7               10.7.7.3/29        1     BDR   1/1          <br />   
+R8(config-if)#                                                                 <br />
+</code>
+</div>
+ </li>
+ <li><b>Process auto-cost: </b>Modification of the default reference bandwidth implicitly changes the OSPF cost for 
+ certain paths. </li>
+ <li><b>Process neighbor cost: </b>In NBMA networks, neighbors are statically configured using the OSPF router mode command 
+ <code>neighbor <i>RID</i></code>. A static cost can be assigned for the link to this neighbor.</li>
+</ul>
+
+<h3>Virtual-Link Costs</h3>
+<p>
+Virtual-links inherit their cost from SPT cost between the virtual-link endpoints.
+SPT cost may exceed maximum link cost. Virtual-link must have cost below 65535 to 
+initialise. Link costs higher than 65535 could occur if reference bandwidth is 
+higher and virtual-link transits legacy links.
+</p>
+
+<h1>Troubleshooting</h1>
+Common reasons for sub-optimal traffic flow;
+<ul>
+ <li>Auto-cost reference bandwidth is not configured the same throughout the OSPF domain.</li>
+ <li>Summarization is not consistently applied on ABRs for inter-area summarization.</li>
+ <li>Problems with route redistribution that do not address issues with route feedback.</li>
+</ul>
+
+<h1>OSPF Optimization</h1>
+<h2>Administrative Distance</h2>
+<p>
+There may be scenarios where more than one routing source is informing a router about the path to 
+a given network. Routers use the administrative distance as a measure of the trustworthiness of a 
+routing source. Administrative distance is a value ranging from 1 to 255 with 255 being an untrustworth source.
+The lower the AD, the more trustworthy the routing source.
+</p>
+
+The default administrative distance for OSPF is 110. When implementing traffic engineering, some situations may 
+require the modification of the default AD of OSPF. To change the default AD, use the 
+router OSPF mode command <code>distance <i>value</i></code> where value is in the range 1 - 255. 
+<div style="background-color: #f4f0ec; border-color:#DCDCDC; border-style: solid; border-width:1px">
+<code>
+#distance <1 - 255>  <br />
+#show ip route ospf
+</code>
+</div>
+To modify the AD of routes from a specific router;
+<div style="background-color: #f4f0ec; border-color:#DCDCDC; border-style: solid; border-width:1px">
+<code>
+#distance 109 4.4.4.4 255.255.255.255
+</code>
+</div>
+ACL can be used for changing the AD of specific routes from a specific router.
+<div style="background-color: #f4f0ec; border-color:#DCDCDC; border-style: solid; border-width:1px">
+<code>
+#distance 109 4.4.4.4 255.255.255.255 ALC_10Routes
+</code>
+</div>
+</p>
+
+<h2>Interface Cost</h2>
+OSPF uses egress interface costs of an upstream router for metric calculation.
+<div style="background-color: #f4f0ec; border-color:#DCDCDC; border-style: solid; border-width:1px">
+<code>
+#ip ospf cost <1 - 65535>
+</code>
+</div>
+
+<h2>Default Routes</h2>
+<p>
+On a router with a default route (usually static), the default route can be propagated 
+through OSPF using the command:
+</p>
+<div style="background-color: #f4f0ec; border-color:#DCDCDC; border-style: solid; border-width:1px">
+<code>
+#default-information originate
+</code>
+</div>
+
+<p>
+The above command only works if the local router has a default route. To 
+propagate a default route regardless of whether the local router has a default 
+route;
+<div style="background-color: #f4f0ec; border-color:#DCDCDC; border-style: solid; border-width:1px">
+<code>
+#default-information originate always
+</code>
+</div>
+</p>
+<p>
+The default route gets propagated as an external type 2 LSA. To modify characteristics 
+of the default route;
+<div style="background-color: #f4f0ec; border-color:#DCDCDC; border-style: solid; border-width:1px">
+<code>
+default-information originate metric <1 - 65535> metric-type <1 | 2>
+</code>
+</div>
+</p>
+
+<h2>OSPF Summarization and Filtering</h2>
+<p>
+OSPF scalability is  achieved by minimising the topology graph complexity (number of routers) and 
+volume of reachability information (number of prefixes). Topology summarization is achieved through implementation of 
+OSPF areas. NLRI summarization reduces the number of routes in the RIB.
+</p>
+
+<h2>NLRI Summarization</h2>
+OSPF summarization is implemented in two ways:
+<ul>
+  <li>Per-prefix summarization</li>
+  <li>Per-LSA summarization: remove all inter-area routes and replace them with 
+  the shortest possible match, a default route (essence of stub areas).
+  </li>
+</ul>
+
+<p>
+Prefix summarization can only occur between areas and at the OSPF domain boundary with an external domain. 
+Filtering is enforced at common transit points i.e. ABR. ABR controls which LSAs 
+enter the area. Network layer reachability information removed is replaced with a default route.
+All routers in the area must agree on the stub flag. 
+</p>
+
+<p>
+Internal summarization is performed by ABR and summarizes type 1 LSAs into type 3.
+External summarization summarizes type 5 into type 5 and type 7 into type 7 LSAs 
+by ASBR.
+</p>
+
+<h3>Summary Discard Route</h3>
+<p>
+When summarizing, OSPF creates a local discard route to Null0. The goal is to 
+drop traffic if longest match is summary. Summary router cannot fall back to default route.
+Discard route can be disabled with the command:
+<code>
+#no discard-route
+</code>
+</p>
+
+<h3>OSPF Route Summarization</h3>
+<h4>Inter-Area Summarization</h4>
+<p>
+Link flaps in aggregate prefixes do not trigger SPF calculations in other areas. Summarization is configured on the ABR 
+connected to the area with the source component routes.
+</p>
+<code>
+#area 0 range 10.0.0.0 255.255.128.0
+</code>
+<p>
+If multiple ABRs exist to a given area, summarization should be implemented on all the ABRs that connect to the 
+area whose routes are to be summarized. A summary discard route is installed on the ABR as a
+loop prevention mechanism.
+The default metric for the summary LSA is the smallest metric associated with a component network in the aggregated 
+summary route.  A cost can be configured to reduce CPU load or as part of traffic engineering.
+</p>
+<div style="background-color: #f4f0ec; border-color:#DCDCDC; border-style: solid; border-width:1px">
+<code>
+ #area o range 10.0.0.0 255.255.0.0 cost 1000
+</code>
+</div>
+
+<p>
+Routes can be filtered using the area summarization command by preventing type 3 LSAs from being advertised into another
+area by appending the <code>not-advertise</code> keyword.
+</p>
+<div style="background-color: #f4f0ec; border-color:#DCDCDC; border-style: solid; border-width:1px">
+<code>
+#area 0 range 10.0.0.0 255.255.0.0 not-advertise
+</code>
+</div>
+
+<p>
+Filtering routes using the 'not-advertise' keyword only works on ABRs that are directly
+donnected to the area whose networks are to the filtered.
+</p>
+
+<h4>External Summarization</h4>
+<p>
+External summarisation is performed on the redistributing ASBR. In the OSPF process
+<code>
+#summary-address 10.0.0.0 255.255.0.0
+</code>
+A discard route is installed.
+</p>
+
+<h2>Route Filtering</h2>
+OSPF route filtering can be implemented through the implementation of: 
+<ul>
+  <li>stubby areas </li>
+  <li>ABR and ASBR route filtering </li>
+</ul>
+<h3>Stubby Areas</h3>
+Stubby areas provde one way of reducing the number of external OSPF routes in an area.
+To configure a stubby area, every router in the stubby area needs to be configured as a stub. 
+Stubby areas are identified by the area flag in the hello packet.
+
+<h4>Stub Areas</h4>
+<p>
+Stub areas prohibit type 5 and thereby preventing type 4 LSAs from being generated. When a type 5 LSA reaches the ABR, it
+generates a type 3 default route for the stub area. Configuration of stubby areas is good for low-end or heavily-loaded 
+routers. The three rules of stubby areas:
+<ol>
+  <li>Area 0 cannot be a stubby area.</li>
+  <li>A stubby area can not be transit area for a virtual link.</li>
+  <li>An ASBR can not be present in a stubby area.</li>
+</ol>
+
+Configuration
+<code>
+#area 1 stub
+</code>
+All routers in the stub area should have the above command configured.
+</p>
+<h4>Totally Stubby Area</h4>
+<p>
+Prohibit type 3,4 and 5 LSAs. ABR generates a default route after receiving type 3 and 5 LSAs. Totally stubby areas do not
+allow redistribution inside of them. At the ABR, the configuration;
+<code>
+area 1 stub no-summary
+</code>
+</p>
+<h4>Not-So-Stubby Area (NSSA)</h4>
+<p>
+Prohibits type 5 LSA from entering at the ABR but allows for local redistribution. The ASBR advertises external networks 
+with type 7 LSAs. The ABR does not automatically advertise a default route when a type 5 LSA is blocked. The ABR of an NSSA
+area can be configured to advertise a default route using the command:
+<code>
+area 1 nssa default-information-originate
+</code>
+If the optional default-information-originate keyword is appended, the ABR generates a type 7 default route into the NSSA.
+<h5>Verification</h5>
+<code>
+#show ip ospf
+#show ip protocols
+</code>
+The ABR of an NSSA translates a type 7 LSA to type 5 LSA for area 0.
+While an NSSA cannot be a transit area, it can host an ASBR.
+</p>
+<h4>Totally Not-So-Stubby Area (Totally NSSA)</h4>
+<p>
+Prohibits type 3,4,5 LSAs but allows for local redistribution. When the ABR receives a type 3 or 5 LSA, it generates a default
+route automatically. The default route is a type 3 LSA route. The type 7 LSA arriving at the ABR of a totally NSSA is translated into a type 5 LSA.
+Configuration: At the ABR:
+<code>
+ #area 1 nssa no-summary
+</code>
+</p>
+
+<h3>Area Filter-List</h3>
+An ABR is able to filter routes from areas that it is not directly connected to.
+Filtering routes using a filter list at the ABR is a two-step process that 
+involves creation of a prefix list and application of the prefix list in the OSPF 
+process area command using the filter-list keyword.
+
+<div style="background-color: #f4f0ec">
+<code>
+#<b>ip prefix-list</b> PL_FILTER_120 deny 10.1.120.0/24 <br />
+#ip prefix-list PL_FILTER_120 permit 0.0.0.0/0 le 32 <br />
+
+#area 1 filter-list prefix PL_FILTER_120 in
+</code>
+</div>
+<p>
+Using the filter list, routes can be filtered as they leave an area or as the 
+enter an area. Either filtering option yields similar results.
+</p>
+
+<h4>Local OSPF Route Filtering</h4>
+<p>
+Local OSPF route filtering involves preventing a router from installing a network 
+from the LSDB into the RIB. This involves two steps: (1) identification of the 
+route (using an ACL, prefix-list, route-map) and applying the filtering using a 
+distribute-list command.
+</p>
+
+<div style="background-color: #f4f0ec">
+<code>
+#distribute-list 10 in
+</code>
+</div>
+
+<p>
+The filtered route still exists in the LSDB. It is advertised to other routers in 
+LSUs. However, it is not installed into the global/VRF RIB from the LSDB.
+</p>
+
+<h4>Filtering at ASBR</h4>
+<p>
+Filtering can be applied on the ASBR during redistribution or special treatment 
+of routes can be implemented such as seed-metric, metric type for specific routes 
+using a route-map. It involves the following steps:
+</p>
+
+<ol>
+
+<li><b>Step 1:</b> Identify the "interesting" using an ACL or prefix list.
+
+<div style="background-color: #f4f0ec">
+<code>
+#access-list 1 permit 10.1.1.0
+</code>
+</div>
+
+<li><b>Step 2: </b>Create a route-map:
+<div style="background-color: #f4f0ec">
+<code>
+#route-map no16 deny 10
+#match ip address 1
+
+#route-map no16 permit 20
+#set metric 6789
+#set metric-type type-1
+</code>
+</div>
+<li><b>Step 3</b>: Apply the route-map
+<div style="background-color: #f4f0ec">
+<code>
+#redistribute static subnets route-map no16
+</code>
+</div>
+
+</ol>
+
+<h3>Default Router Propagation</h3>
+To advertise an existing local router's default route:
+<code>
+#default-information originate <always> <metric-value>
+</code>
