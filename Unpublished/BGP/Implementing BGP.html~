@@ -6,7 +6,7 @@
     <li><a href="#MESSAGE_TYPES">BGP Message Types</a></li>
     <li><a href="#NEIGHBOR_STATE">Neighbor State</a></li>
     <li><a href="#SESSION_TYPES">Session Types</a></li>
-    <li><a href="#SECURITY_MECHANISMS">Security Mechanisms</a></li>
+    <li><a href="#SECURITY">BGP Security</a></li>
     <li><a href="#BGP_VERIFICATION">Verification</a></li>
     <li><a href="#BGP_TABLES">BGP Tables</a></li>
     <ol type="i">
@@ -693,7 +693,7 @@ OpenConfirm and Established.
 
 <h2>Idle</h2>
 <p>
-This is the state that the BGP routing process enters when initially configured 
+This is the state that the BGP process enters when initially configured 
 or reset. In this state, the device waits for a start event such as a peering configuration
 with a remote peer. After the device receives a TCP connection request from a 
 remote peer, the device initiates another start event to wait for a timer before 
@@ -716,7 +716,7 @@ If the TCP connection completes successfully;
   <li>the BGP state transitions to the OpenSent.</li> 
   <li>the ConnectRetry timer is reset.</li>
 </ul>
-During the connect state, the router with the higher IP address manages the 
+During the connect state, the router with the <b>higher IP address</b> manages the 
 connection. If successful, the BGP state transitions to OpenSent. If the 
 ConnectRetry timer times out before the TCP connection is successful, the BGP 
 state transitions to the Active state. If BGP is reset, the state transitions 
@@ -724,14 +724,16 @@ to the Idle state.
 </p>
 <h2>Active</h2> 
 <p>
-BGP is trying to initiate a TCP connection with its peer. If the TCP three-way handshake did not complete. TCP initiates 
-a new three-way handshake again to establish a connection and the ConnectRetry timer is started. Additionally, BGP is
-also listening for incoming TCP connections. If successful, an OPEN message is sent and the BGP state transitions 
-to OpenSent. 
+BGP is trying to initiate a TCP connection with its peer because the TCP three-way 
+handshake did not complete. TCP initiates a new three-way handshake again to 
+establish a connection and the ConnectRetry timer is started. Additionally, BGP is
+also listening for incoming TCP connections. If successful, an OPEN message is 
+sent and the BGP state transitions to OpenSent. 
 </p>
 <p>
-If the TCP connection fails, the state moves back to the Connect state and resets the ConnectRetry timer.
-If BGP is reset or an error occurs, the state moves back to Idle.
+If the TCP connection fails, the state moves back to the Connect state and resets
+the ConnectRetry timer. If BGP is reset or an error occurs, the state moves back 
+to Idle.
 </p>
 <h2>OpenSent</h2>
 <p>
@@ -740,10 +742,12 @@ a peering session with the remote peer. The local BGP device is waiting for the
 peer's matching OPEN message. If the peer's OPEN message is received, BGP checks 
 the following parameters:
 <ol>
-<li>BGP identifiers must be unique. If no BGP Router ID exists, condition requiring that BGP router IDs be unique 
-is not met and a BGP peering session will not be created.</li>
-<li>BGP versions must match</li>
-<li>OPEN message autonomous system number must match the configured neighbor's autonomous system number.</li>
+<li>BGP router IDs must be unique. If no BGP Router ID exists, the condition 
+requiring that BGP router IDs be unique is not met and a BGP peering session 
+will not be created.</li>
+<li>BGP versions must match.</li>
+<li>OPEN message autonomous system number must match the configured neighbor's 
+autonomous system number.</li>
 <li>OPEN message source IP address must match the configured neighbor IP.</li>
 </ol>
 </p>
@@ -775,8 +779,9 @@ With the established state, a TCP session between the two BGP peers can be displ
 </p>
 
 <p>
-As updates are received, the hold timer is reset. If it expires, BGP moves the peer back to idle state. The idle and 
-active states for BGP routers that were previously in the established state is usually not a good sign.
+As updates are received, the hold timer is reset. If the hold timer expires, BGP 
+moves the peer back to idle state. The idle and active states for BGP routers 
+that were previously in the established state is usually not a good sign.
 </p>
 
 <p>
@@ -859,12 +864,6 @@ R7(config-if)#Dec  4 01:29:45.394: %BGP-5-ADJCHANGE: neighbor 10.67.1.1 Up      
 </code>
 </div>
 
-<h2>Verification of Neighbor State</h2>
-<p>
-The neighbor state of BGP peers can be verified using the command <code style="font-size:120%;">
-<b>show ip bgp summary</b></code>.
-</p>
-
 <h1 id="SESSION_TYPES">BGP Session Types</h1>
 <p>
 A BGP session refers to an established adjacency between two BGP devices. BGP can
@@ -878,8 +877,7 @@ configured to create an internal BGP (iBGP) peering or external BGP (eBGP).
 
 <h2>Internal BGP (iBGP)</h2>
 <p>
-iBGP sessions are established within an AS; the BGP devices within the same AS 
-form iBGP peerings with each other.
+iBGP sessions are established within an AS.
  iBGP sessions are established with another BGP device that is in the same autonomous system or 
  participates in the same BGP confederation. iBGP is characterized by the 
  following features:
@@ -888,59 +886,62 @@ form iBGP peerings with each other.
  <li>iBGP uses a default TTL of 255 resulting in the possibility for iBGP peers 
  being multiple hops away from each other.</li> 
  <li>The AS_Path is not appended to a prefix when it is shared with an iBGP peer.</li>
- <li>iBGP uses full-mesh topology which allows for proper forwarding within the 
- autonomous systems. All BGP routers in a single AS must be fully meshed to 
- provide a complete loop free routing table and prevent traffic black-holing.</li>
  <li>Prefixes learned from an iBGP peer can not be sent to another iBGP peer. 
  This is iBGP's way of preventing the formation of routing loops. This is the 
- iBGP concept of split horizon.</li>
+ iBGP concept of <b>split horizon.</b>
+ In order to prevent the formation of "traffic blackholes", iBGP uses a variety 
+ of techniques such as full-mesh topology, route reflection, and confederations 
+ which ensure that all iBGP peers receive shared NLRI and eliminates traffic 
+ black-holing.
+ </li>
   <li>In iBGP, the next hop address field is left unchanged when advertising a 
   prefix to another iBGP peer if it is an address other than 0.0.0.0. </li>
   <li>The next-hop address must exist in the routing table in order for the 
   prefix to be advertised to iBGP peers.</li>
   <li>iBGP peers typically peer via loopbacks: this allows for rerouting around 
   failed paths with IGPs providing alternate paths. Additionally, this is 
-  required for some applications such as MPLS L3VPNs.</li>
+  required for some BGP implementations such as in MPLS L3VPNs.</li>
 </ul>
-
 </p>
 
 
 <h2>External BGP (eBGP)</h2>
 <p>
 eBGP sessions are established between autonomous systems. 
-eBGP peerings form the core of component of BGP on the Internet. 
+eBGP peerings are the core of component of BGP on the Internet. 
 </p>
 <p>
 eBGP has the following features:
 <ul>
    <li>eBGP prefixes are assigned an administrative distance of 20 in the 
-   routing table. The lower AD of eBGP compared to iBGP is an indication that BGP is 
-   designed for sharing prefixes between autonomous systems rather than within autonomous systems.</li>
-   <li>The advertising router prepends its autonomous system number to the AS_Path path attribute. The receiving 
-   router first confirms that the AS_Path does not contain the local autonomous system number and processes the packet. 
-   If the local autonomous system number is contained in the AS_Path, then the packet is discarded to prevent a routing 
-   loop.</li>
+   routing table. The lower AD of eBGP compared to iBGP is an indication that  
+   BGP is designed to share prefixes between autonomous systems rather than 
+   within autonomous systems.</li>
+   <li>The advertising BGP peer prepends its autonomous system number to the 
+   AS_Path path attribute. The receiving router first confirms that the AS_Path 
+   does not contain the local autonomous system number and processes the packet. 
+   If the local autonomous system number is contained in the AS_Path, then the 
+   packet is discarded to prevent a routing loop.</li>
    <li><b>External peers are directly connected (by default):</b> eBGP places a 
-   Time-to-live (TTL) of one (1) to avoid the use of any other routing path if 
-   any one of the directly connected interfaces fail. This results in eBGP 
-   peers being only one hop way. This can be modified using the BGP commands 
-   <code><b>neighbor ebgp-multihop &lt;1 - 255&gt;</b></code> and 
-   <code><b>neighbor ttl-security hops &lt;1 - 255&gt;</b></code>.
+   Time-to-live (TTL) of one (1) to avoid the use of any other routing path.
+   However, if any one of the directly connected interfaces fail, the eBGP session 
+   may get torn down. This can be modified using the BGP commands 
+   <code style="font-size:120%"><b>neighbor &lt;ip-address&gt;  
+   ebgp-multihop &lt;1 - 255&gt;</b></code> or  
+   <code style="font-size:120%"><b>neighbor  &lt;ip-address&gt; ttl-security hops &lt;1 - 255&gt;</b></code>.
    
-   The TTL-security feature can be configured to 
-   enforce the requirement for the neighbors to be directly adjacent. The TTL-security 
-   can be configured to 255. This ensures that when the packet is received by the 
-   directly connected neighbor, it has a TTL value of 255. TTL-security needs to 
-   be configured on both BGP peers.
+   The TTL-security feature can be configured to enforce the requirement for the 
+   neighbors to be directly adjacent. TTL-security needs to be configured on both 
+   BGP peers. TTL-Security is covered in depth in the section 
+   <a href="#SECURITY">BGP Security</a>
    </li>
-   <li>Non multi-hop peers must be directly connected by default. However, the 
-   peering may be through the loopback interfaces. In such a configuration, the 
-   requirement for directly connected peers can be disabled using the BGP command 
-   <code><b>neighbor &lt;ip-address&gt; disable-connected-check</b></code>.
+   <li>eBGP peering can use a loopback interface as the outgoing interface. 
+   In such a configuration, the requirement for directly connected peers can be 
+   disabled using the BGP command 
+   <code style="font-size:120%"><b>neighbor &lt;ip-address&gt; disable-connected-check</b></code>.
    <li>The next-hop field is changed for prefixes received from an eBGP peer. 
-   The local router modifies the next hop to itself  when it advertises to an 
-   iBGP peer a prefix received from an eBGP peer. </li>
+   The local router modifies the next hop to the IP address of its exit interface 
+   when it advertises to an iBGP peer a prefix received from an eBGP peer. </li>
  </ul>
 </p>
 
@@ -952,10 +953,10 @@ VPNv6, IPv4 multicast) or per address family. The policy commands are always
 per address family.
 </p>
 <p>
-BGP configuration is completed in three sections: BGP session parameters, 
-address-family initialization and activation of neighbor under the appropriate 
-address family. By default, BGP on Cisco devices has IPv4 address family enabled. 
-The default IPv4 address family can be disabled using the BGP router command: 
+BGP configuration involves defining session parameters, address-family initialization 
+and activation of the neighbor under the appropriate address family. By default, BGP
+on Cisco devices has IPv4 address family enabled. The default IPv4 address family
+can be disabled using the BGP router command: 
 <code style="font-size:120%"><b>no bgp default ipv4-unicast</b></code>.
 
 If the default IPv4 address-family is disabled, the following three-phase BGP configuration must be completed:
@@ -967,14 +968,19 @@ authentication, keepalive timers, source and destination IP address settings.
 The configuration of BGP session involves the following commands:
 </p>
 <p>
-<b>Step 1:</b> initialize the BGP process.
+<b>Step 1:</b> initialize the BGP process using the privileged mode command 
+<code><b>router bgp &lt;asn&gt;</b></code>:
 </p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
 <code style="font-size:120%">R8(config)#<b>router bgp 1.3</b></code>
 </div>
+<p>
+The configured ASN is 1.3.
+</p>
 
 <p>
-<b>Step 2: </b> define the BGP router ID statically with the command:
+<b>Step 2: </b> define the BGP router ID statically with the command <code><b>
+bgp router-id &lt;router-id&gt;</b></code>:
 </p>
 
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
@@ -983,19 +989,23 @@ R8(config-router)#<b>bgp router-id 8.8.8.8</b>
 </code>
 </div>
 <p>
-IOS automatically assigns the RID using the following criteria:
+Like IGPs, IOS automatically assigns the RID using the following criteria:
 <ol>
+ <li>Statically defined router-id.</li>
  <li>Highest IP address configured on any loopback interface. </li>
  <li>Highest IP address of any physical interface.</li>
 </ol>
-It is recommended that the router ID be statically configured. This ensures that 
-it does not change even when the interface IP addresses for the loopback and 
+It is recommended that the BGP router ID be statically configured. This ensures 
+that it does not change even when the interface IP addresses for the loopback and 
 physical interfaces are modified.
 </p>
 <p>
 <b>Step 3: </b> define the BGP neighbor's IP address and autonomous system number with the command: 
-<code style="font-size:120%"><b>neighbor &lt;ip_address&gt; remote-as <i> asn</i></b></code>
-You need to know the outbound interface IP address of the remote router.
+<code style="font-size:120%"><b>neighbor &lt;ip_address&gt; remote-as 
+&lt;asn&gt;</b></code>. 
+You need to know the outbound interface IP address of the remote router. For 
+iBGP peers, the ASN will be same as that of the local BGP device. For eBGP peers,
+the ASN values will be different.
 </p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
 <code style="font-size:120%">
@@ -1004,7 +1014,7 @@ R8(config-router)#<b>neighbor 7.7.7.7 remote-as 65536</b>
 </div>
 <p>
 <b>Step 4 (Optional): </b> define the BGP session's password with MD5 authentication using the command: 
-<code style="font-size:120%"><b>neighbor &lt;ip_address&gt; password <i>password</i></b></code>
+<code style="font-size:120%"><b>neighbor &lt;ip_address&gt; password &lt;password&gt;</b></code>
 </p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
 <code style="font-size:120%">
@@ -1016,7 +1026,8 @@ to BGP operations.
 </p>
 <p>
 <b>Step 5 (Optional): </b> modify the BGP session timers with the command: 
-<code style="font-size:120%"><b>neighbor &lt;ip_address&gt; timers <i>keepalive holdtime [minimum-holdtime]</i></b></code>
+<code style="font-size:120%"><b>neighbor &lt;ip_address&gt; timers &lt;keepalive&gt; 
+&lt;holdtime&gt; &lt;[minimum-holdtime]&gt;</b></code>. 
 A neighbor relationship does not form if the configured holdtime on one neighbor is lower than the minimum-holdtime on 
 another neighbor.
 </p>
@@ -1030,14 +1041,15 @@ seconds.
 </p>
 
 <p>
-<b>Step 6 (Optional):</b> specify the source interface of the BGP session. 
-By default, the IP address of the exit interface (as determined by the RIB) is 
-used as the source IP address of a BGP packet. However, during configuration, 
-it is possible to use an IP address of an interface 
-that is not the exit interface. In such scenarios, usually a loopback interface is used. This guards against losing a 
-BGP peering due to link failure. This is important in highly redundant networks with more than one path to a router.
+<b>Step 6 (if using the IP address of a loopback interface):</b> specify the 
+source interface of the BGP session. By default, the IP address of the exit 
+interface (as determined by the RIB) is used as the source IP address of a BGP 
+packet. However, during configuration, it is possible to use an IP address of an
+interface that is not the exit interface. In such scenarios, usually a loopback 
+interface is used. This guards against losing a BGP peering due to link failure. 
+This is important in highly redundant networks with more than one path to a peer.
 The interface to be used for a BGP session can be configured using the command:
-<code style="font-size:120%"><b>neighbor &lt;ip_address&gt; update-source <i>interface-id</i></b></code>
+<code style="font-size:120%"><b>neighbor &lt;ip_address&gt; update-source &lt;interface-id&gt;</b></code>.
 </p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
 <code style="font-size:120%">
@@ -1052,7 +1064,7 @@ behaviour prevents multihop eBGP sessions that could be necessary when providers
 would like to peer via loopback addresses. This requires changing the TTL on 
 BGP packets between eBGP peers. To change the TTL for multihop eBGP 
 <code style="font-size:120%"><b>neighbor &lt;ip_address&gt; ebgp-multihop 
-<i>hop_count</i></b></code>.
+&lt;hop_count&gt;</b></code>.
 </p>
 
 
@@ -1062,22 +1074,31 @@ R8(config-router)#<b>neighbor 7.7.7.7 ebgp-multihop 2</b>
 </code></div>
 
 <p>
-Note: eBGP sessions using loopback interfaces can be enabled using the keyword 
+<b>Note:</b> eBGP sessions using loopback interfaces can be enabled using the keyword 
 <code style="font-size:120%;"><b>disable-connected-check</b></code> fo the <code style="font-size:120%;"><b>neighbor</b></code>
 command. This keyword disables the default eBGP checks for a TTL of one and the 
 requirement for the eBGP neighbors to be in the same subnet. You can use this 
 keyword to replace the keyword of <code style="font-size:120%;"><b>ebgp-multihop</b></code>. However, 
 this still requires the eBGP neighbors to be directly connected. eBGP multihop 
 sessions cannot be enabled using this command. The ebgp-multihop keyword will 
-be required in this case.
+be required in such a scenario.
 </p>
+
+<h2>Verification of Neighbor State</h2>
+<p>
+The neighbor state of BGP peers can be verified using the command <code style="font-size:120%;">
+<b>show ip bgp summary</b></code>.
+</p>
+
 
 <h2>Phase 2: Address family initialization and Prefix Advertisement</h2>
 <p>
 Network advertisement and route summarization are implemented under the address family mode.
 </p>
 <p>
-<b>Step 7: Initialize the address family:</b> using the command <code style="font-size:120%"><b>address-family <i>afi safi</i></b></code></li>
+<b>Step 7: Initialize the address family:</b> using the BGP command 
+<code style="font-size:120%"><b>address-family &lt;afi&gt; &lt;safi&gt;</b></code></li>.
+In this configuration, we initialize IPv4 unicast address family.
 </p>
 
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
@@ -1085,51 +1106,46 @@ Network advertisement and route summarization are implemented under the address 
 R8(config-router)#<b>address-family ipv4 unicast</b>
 </code></div>
 <p>
-<b>Step 8: Advertise prefixes</b> 
-</p>
-<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-<code style="font-size:120%">
-R8(config-router-af)#<b>network 10.8.10.0 mask 255.255.255.0</b> <br>
-R8(config-router-af)#<b>network 10.8.11.0 mask 255.255.255.0</b> <br>
-</code></div>
-<p>
-Care must be taken when configuring the prefixes to be advertised. The prefix and subnet mask must be configured exactly 
-as they appear in the routing table. These prefixes must already exist in the routing table.
-The source of the prefixes in the routing table  may be static, connected, or known from another routing protocol.
+<b>Step 8: Advertise the network layer reachability information (NLRI) i.e. 
+prefixes and their attributes.</b>
 </p>
 
-<h3>NLRI</h3>
 <p>
-BGP uses the UPDATE message to send updates and withdraw NLRI.
-BGP NLRI can be originated in multiple ways:
+BGP uses the UPDATE message to advertise and withdraw NLRI.
+NLRI can be originated in multiple ways:
 <ul>
-  <li><b>Network statement:</b> 
-    <ul>
-      <li>this requires an exact match in the routing table.</li>
-      <li>Originates prefixes with the ORIGIN if IGP(i). </li>
-      <li>Requires an exact match in the RIB. Does not have to be a connected 
-      prefix, can be learned from IGP. </li>
-      <li>Without the mask keyword, assumes classful mask. If dealing with subnets 
-      or supernets, then the <code><b>mask</b></code> keyword may be required.</li>
-      <li>Sets the weight to 32768.</li>
-  </ul>
+  <li><b>Network statement:</b> The syntax of the network statement is <code><b>network &lt;ip-address&gt; 
+     mask &lt;netmask&gt;</b></code>. 
+     <ul> 
+      <li>Prefixes originated using the network statement have an ORIGIN path 
+      attribute of IGP with the status symbol "i" in the BGP table.</li>
+      <li>Prefixes have to exist in the routing table before they are advertised.
+      They do not have to be a connected or static routes; they can be sourced  
+      from IGPs.</li> 
+      <li>When configuring the network statement, the routes to be advertised 
+      must match the prefix in the routing table.</li>
+      <li>Without the <code><b>mask</b></code> keyword, the BGP uses a classful
+      mask instead. If subnets or supernets are to be advertised, then the 
+      <code style="font-size:120%"><b>mask</b></code> keyword may be required.</li>
+      <li>BGP sets the weight path attribute to 32768 for these prefixes.</li>
+      </ul>
   </li>
   <li><b>redistribute statement:</b> 
   <ul>
      <li>Won't include OSPF external by default. 
-     <li>To include OSPF external prefixes add the <code><b>match ospf external</b></code>
+     <li>To include OSPF external prefixes add the <code style="font-size:120%"><b>match ospf external</b></code>
      keywords.</li>
      <li>Originates prefixes with ORIGIN INCOMPLETE(?).</li> 
-     <li>Originates classful summary if <code><b>auto-summary</b></code> is enabled. 
+     <li>Originates classful summary if <code style="font-size:120%"><b>auto-summary</b></code> is enabled. 
      <li>Automatically copies IGP metric to BGP MED.</li>
-     <li>Won't include OSPF external by default. <code><b>redistribute ospf [pid] 
+     <li>Won't include OSPF external by default. <code style="font-size:120%"><b>redistribute ospf [pid] 
      match internal external</b></code> to include OSPF external routes.</li>
      <li>Sets the weight to 32768.</li>
      <b>BGP Redistribute Internal</b>
      <uL>
        <li>By default, only external BGP routes are redistributed into IGP with
        redistribution.</li>
-       <li><code><b>bgp redistribute internal</b></code> command lets internal 
+       <li><code style="font-size:120%"><b>bgp redistribute internal</b></code> command lets internal 
        BGP routes to be redistributed into IGP. Can result in a routing loop if 
        not carefully planned and implemented.</li>
      </uL>
@@ -1159,7 +1175,7 @@ and originating longer match prefixes from it for traffic engineering.
 <h4>BGP Conditional Route Injection Configuration</h4>
 <p>
 
-Configured as <code><b>bgp inject-map inject-map exist-map exist-map [copy-attributes]
+Configured as <code style="font-size:120%"><b>bgp inject-map inject-map exist-map exist-map [copy-attributes]
 </b></code>. 
 <ul>
 Inject Map
@@ -1176,8 +1192,8 @@ Inject Map
 </ul>
 In the exist-map, two matches need to be done;
 <ol>
-  <li>Match the prefix using the <code><b>match ip address</b></code> command</li>
-  <li>Match the source using a <code><b>match ip route-source</b></code> command
+  <li>Match the prefix using the <code style="font-size:120%"><b>match ip address</b></code> command</li>
+  <li>Match the source using a <code style="font-size:120%"><b>match ip route-source</b></code> command
 </ol>
 </p>
 <h4>Example Configuration</h4>
@@ -1185,21 +1201,21 @@ In the exist-map, two matches need to be done;
 Given an aggregate prefix 150.1.0.0/16 received from a peer 150., we want to 
 advertise a component route 150.1.1.0/24. <br>
 Step 1: Match the aggregate in a prefix-list: 
-<code>
+<code style="font-size:120%">
 ip prefix-list AGGREGATE permit 150.1.0.0/16.
 </code>
 <br>
 Step 2: Match the prefix that we want to originate:<br>
-<code><b>
+<code style="font-size:120%"><b>
 ip prefix-list R1_LOOPBACK permit 150.1.1.0/24
 </b></code>
 <br>
 Step 3: Match the route source i.e. prefix best path: <br>
-<code><b>
+<code style="font-size:120%"><b>
 ip prefix-list ROUTE_SOURCE 150.1.28.5/32
 </b></code>
 Step 4: Configure route-map that is the inject-map:<br>
-<code><b>
+<code style="font-size:120%"><b>
 route-map INJECT_MAP<br>
 set ip address prefix-list R1_LOOPBACK<br>
 route-map EXIST_MAP<br>
@@ -1208,14 +1224,25 @@ match ip route-source prefix-list ROUTE_SOURCE<br>
 </b></code> <br>
 
 Step 5: Apply the inject-map and exist-map;<br>
-<code><b>
+<code style="font-size:120%"><b>
 router bgp 801.1<br>
 bgp inject-map INJECT_MAP exist-map EXIST_MAP<br>
 </b></code>
 </p>
 <p>
-Verify configuration with the command <code><b>show ip bgp injected-paths</b></code>.
+Verify configuration with the command <code style="font-size:120%"><b>show ip bgp injected-paths</b></code>.
 </p>
+
+<p>
+Care must be taken when configuring the prefixes to be advertised. The prefix and subnet mask must be configured exactly 
+as they appear in the routing table. These prefixes must already exist in the routing table.
+The source of the prefixes in the routing table  may be static, connected, or known from another routing protocol.
+</p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+<code style="font-size:120%">
+R8(config-router-af)#<b>network 10.8.10.0 mask 255.255.255.0</b> <br>
+R8(config-router-af)#<b>network 10.8.11.0 mask 255.255.255.0</b> <br>
+</code></div>
 
 <h2>Phase 3: Activation of the BGP Peer</h2
 <p>
@@ -1224,7 +1251,7 @@ to the neighbor table and BGP attempts to establish a BGP session or accepts a B
 </p>
 
 <p>
-<b>Step 9: Activate the neighbor:</b> using the command <code style="font-size:120%"><b>neighbor <i>ip_address></i> activate</b></code> 
+<b>Step 9: Activate the neighbor:</b> using the command <code style="font-size:120%"><b>neighbor &lt;ip_address>&gt; activate</b></code> 
 </p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
 <code style="font-size:120%">
@@ -1247,7 +1274,7 @@ BGP peer groups simplify BGP configuration when there are multiple routers
 assigned to a peer group. A BGP peer group is created through the following steps:
 <ul>
   <li><b>Step 1:</b> Create the peer group using the BGP router command 
-<code style="font-size:120%"><b>neighbor <i>group_name</i> peer-group</b></code>.
+<code style="font-size:120%"><b>neighbor &lt;group_name&gt; peer-group</b></code>.
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
 <code style="font-size:120%">
@@ -1256,7 +1283,7 @@ R6(config-router)#<b>neighbor AS65000 peer-group        </b>
 </p>
 </li>
   <li><b>Step 2:</b> Add BGP peers to the peer group using the command:
-<code style="font-size:120%"><b>neighbor <i>ip_address </i>peer-group <i>group_name</i></b></code>.
+<code style="font-size:120%"><b>neighbor &lt;ip_address &gt;peer-group &lt;group_name&gt;</b></code>.
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
 <code style="font-size:120%">
@@ -1269,7 +1296,7 @@ R6(config-router)#<b>neighbor 5.5.5.5 peer-group AS65000</b> <br>
 </li>
   <li>
   <p>
-  <b>Step 3:</b> All BGP parameters are configured using <code style="font-size:120%"><b>peer-group <i>group_name</i></b></code> in lieu of 
+  <b>Step 3:</b> All BGP parameters are configured using <code style="font-size:120%"><b>peer-group &lt;group_name&gt;</b></code> in lieu of 
 <code style="font-size:120%"><b>neighbor &lt;ip_address&gt;</b></code>.
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
 <code style="font-size:120%">
@@ -1333,7 +1360,7 @@ up to seven additional peer session templates.
 </p>
 <p>
 You define peer session template settings with the BGP configuration command 
-<code style="font-size:120%"><b>template peer-session <i>template-name</i></b></code> and then
+<code style="font-size:120%"><b>template peer-session &lt;template-name&gt;</b></code> and then
 enter any BGP session related configuration commands.
 </p>
 
@@ -1391,7 +1418,7 @@ be applied to a neighbor or neighbor group.
 <p>
 BGP policy configuration commands that are configured only for a specific address family.
 You define peer policy template settings with the BGP configuration command 
-<code style="font-size:120%"><b>template peer-policy <i>template-name</i></b></code> and
+<code style="font-size:120%"><b>template peer-policy &lt;template-name&gt;</b></code> and
 then enter any BGP address family–related configuration commands. 
 </p>
 
@@ -1614,14 +1641,14 @@ The route refresh capability is
 negotiated for each address family when the
 session is established. Performing a soft refresh on sessions that support route refresh capability actually initiates a 
 route refresh. Soft resets can be performed for a specific address family with the command:
-<code style="font-size:120%"><b>clear bgp afi safi &lt;ip_address&gt; soft <i>(in | out)</i></b></code>
+<code style="font-size:120%"><b>clear bgp afi safi &lt;ip_address&gt; soft &lt;(in | out)&gt;</b></code>
 </p>
 <p>
 Soft reconfiguration is used in environments where route refresh capability is 
 not supported.
 </p>
 
-<h1 id="#SECURITY_MECHANISMS">BGP Security Mechanisms</h1>
+<h1 id="SECURITY">BGP Security</h1>
 
 <h2>Peer Authentication</h2>
 <p>
@@ -1854,10 +1881,10 @@ right from the start by using the
 client, passive means server.
 </p>
 <p>
-Client connections can be viewed using the command <code><b>show control-plane 
+Client connections can be viewed using the command <code style="font-size:120%"><b>show control-plane 
 host open-ports</b></code>; this command may be version specific. The client's 
 packet is sourced from the outgoing interface in the routing table. However, 
-this can be modified using the BGP command <code><b>update-source</b></code> 
+this can be modified using the BGP command <code style="font-size:120%"><b>update-source</b></code> 
 per neighbor.
 </p>
 
@@ -2606,7 +2633,7 @@ available ASNs (4,294,967,295).
 <tr><td  style="border-bottom: solid 1px;" >() (parentheses)</td>
    <td>  style="border-bottom: solid 1px;" Used for nesting search patterns</td></tr>
 <tr><td  style="border-bottom: solid 1px;" >| (pipe)</td>
-    <td  style="border-bottom: solid 1px;" ><i>OR</i> functionality in a query</td></tr>
+    <td  style="border-bottom: solid 1px;" >&lt;OR&gt; functionality in a query</td></tr>
 <tr><td  style="border-bottom: solid 1px;" >. (period)</td>
     <td  style="border-bottom: solid 1px;" >Matches a single character including a space.</td></tr>
 <tr><td  style="border-bottom: solid 1px;" >* (asterisk)</td>
@@ -3181,10 +3208,10 @@ the route cannot be used. The result of a failed next hop recursion is a failed
 best path selection i.e. the route is not installed in the RIB or advertised.
 The next-hop validity check is to prevent a route recursion failure.
 By default, outbound iBGP updates do not modify the next-hop attribute regardless 
-of iBGP peer type. This can be modified using the BGP command <code><b>neighbor 
+of iBGP peer type. This can be modified using the BGP command <code style="font-size:120%"><b>neighbor 
 &lt;ip-address&gt; next-hop-self</b></code> or in a route-map using the action 
-command <code><b>set ip next-hop</b></code>. More recent IOS versions include the 
-command <code><b>next-hop-self all</b></code> to insert the route reflector in 
+command <code style="font-size:120%"><b>set ip next-hop</b></code>. More recent IOS versions include the 
+command <code style="font-size:120%"><b>next-hop-self all</b></code> to insert the route reflector in 
 the data-path. This is usually used in Unified MPLS design.
 </p>
 <p>
@@ -3216,8 +3243,8 @@ Cons:
 <p>
 By default, outbound eBGP updates have a local update-source for neighbor set as 
 next-hop e.g. if update-source is the interface loopback0, next-hop is loopback0.
-This behaviour can be modified using a route-map action <code><b>set ip next-hop
-</b></code>, <code><b>neighbor next-hop-unchanged</b></code>; this can be used 
+This behaviour can be modified using a route-map action <code style="font-size:120%"><b>set ip next-hop
+</b></code>, <code style="font-size:120%"><b>neighbor next-hop-unchanged</b></code>; this can be used 
 for third-party next-hops.
 </p>
 
@@ -3228,11 +3255,11 @@ prevention technique.
 </p>
 <h4>AS-Path must not contain Local-AS</h4>
 <p>
-Normal EBGP loop prevention. Can be disabled with <code><b>allow-as in</b></code>.
+Normal EBGP loop prevention. Can be disabled with <code style="font-size:120%"><b>allow-as in</b></code>.
 </p>
 <h4>First ASN in path must be neighbor's ASN</h4>
 <p>
-<code><b>bgp enforce-first-as</b></code> command. This helps provide an added layer of 
+<code style="font-size:120%"><b>bgp enforce-first-as</b></code> command. This helps provide an added layer of 
 security to BGP. For additional BGP security, see security section.
 </p>
 
@@ -3357,7 +3384,7 @@ R1(config-router-af)#<b>do clear bgp ipv4 unicast 3.3.3.3 in</b><br>
 
 <p>
 Weight can be set for specific routes with an inbound route map or for all routes learned from a specific neighbor. 
-The command <code style="font-size:120%"><b>set weight <i>value</i></b></code> in a route map sets the weight value for a matching prefix. 
+The command <code style="font-size:120%"><b>set weight &lt;value&gt;</b></code> in a route map sets the weight value for a matching prefix. 
 The weight is set for all prefixes received by a neighbor using the BGP address family command:
 <code style="font-size:120%"><b>neighbor &lt;ip_address&gt; weight &lt;1-65535&gt;</b></code>. 
 After changing the weight value, carryout a soft reset of BGP.
@@ -3398,10 +3425,10 @@ Local preference has a type code of 5.
 
 <p>
 LOCAL_PREF can be set for specific routes with an inbound route map using the command:
-<code style="font-size:120%"><b>set local-preference <i>value</i></b></code>
+<code style="font-size:120%"><b>set local-preference &lt;value&gt;</b></code>
 The default local preference value can be modified from 100 to a different value 
 using the command <code style="font-size:120%"><b>bgp default 
-local-preference <i>&lt;0-4294967295&gt;</i></b></code>. 
+local-preference &lt;&lt;0-4294967295&gt;&gt;</b></code>. 
 The LOCAL PREFERENCE values can be modified to alter routing behaviour using a route map:
 </p>
 <p>
@@ -3554,9 +3581,9 @@ Paths: (1 available, best #1, table default)                                    
 Preference is given in best path selection using the following criteria:
 <ol>
   <li>Routes that were advertised locally: these are paths that were sourced 
-  into the Loc-RIB table using the BGP <code><b>network</b></code> command.</li>.
+  into the Loc-RIB table using the BGP <code style="font-size:120%"><b>network</b></code> command.</li>.
   <li>Prefer local paths that were redistributed into BGP.</li>
-  <li>Networks that have been aggregated locally using the BGP command <code><b>
+  <li>Networks that have been aggregated locally using the BGP command <code style="font-size:120%"><b>
   aggregate-address</b></code> (summarization).</li>
   <li>Routes received by BGP peers</li>
 </ol>
@@ -3761,7 +3788,7 @@ to get to the external prefix.
 Use the lowest IGP metric/cost to reach the BGP next-hop address. Lower metric 
 value is preferred. This path attribute is relevant to best path selection in iBGP.
 Can use multi-path of all equal after this step. There is a command to allow 
-multipath if AS_PATH is not the same (has to be same length): <code><b>bgp 
+multipath if AS_PATH is not the same (has to be same length): <code style="font-size:120%"><b>bgp 
 best-path as-path multipath-relax</b></code>.
 </p>
 <h4>Oldest eBGP Path</h4>
@@ -3798,21 +3825,21 @@ peerings used the oldest received path as the tie-breaker.
 <h3>Exceptions to the Best Path Selection</h3>
 <p>
 <ul>
-  <li><b>AS-Path:</b> <code><b>bgp bestpath as-path ignore</b></code></li>
+  <li><b>AS-Path:</b> <code style="font-size:120%"><b>bgp bestpath as-path ignore</b></code></li>
   <li><b>MED:</b>
     <ul>
-      <li><code><b>bgp always-compare-med</b></code></li>
-      <li><code><b>bgp bestpath med-confed</b></code>: compares MED for routes locally originated in 
+      <li><code style="font-size:120%"><b>bgp always-compare-med</b></code></li>
+      <li><code style="font-size:120%"><b>bgp bestpath med-confed</b></code>: compares MED for routes locally originated in 
       the confederation</li>
-      <li><code><b>bgp bestpath med-missing-as-worst</b></code>: assigns MED of 
+      <li><code style="font-size:120%"><b>bgp bestpath med-missing-as-worst</b></code>: assigns MED of 
       4294967294 to NULL MED.</li>
-      <li><code><b>bgp deterministic med</b></code>: Compare MED against all possible 
+      <li><code style="font-size:120%"><b>bgp deterministic med</b></code>: Compare MED against all possible 
       paths.
     </ul>
   </li>
-  <li><b>IGP Metric:</b> <code><b>bgp bestpath igp-metric ignore</b></code>. This 
+  <li><b>IGP Metric:</b> <code style="font-size:120%"><b>bgp bestpath igp-metric ignore</b></code>. This 
   was introduced in IOS-XE3.4s</li>
-  <li><b>Router-ID:</b> <code><b>no bgp bestpath compare-routerid</b></code>.
+  <li><b>Router-ID:</b> <code style="font-size:120%"><b>no bgp bestpath compare-routerid</b></code>.
 </ul>
 </p>
 
@@ -3857,8 +3884,8 @@ system is the furthest to the right of the AS_Path attribute and the most recent
 to the left. AS_Path is used as a loop prevention mechanism in BGP. If a BGP router 
 receives a prefix advertisement with its AS listed in the AS_Path attribute, 
 it discards the prefix because the router thinks the advertisement forms a loop. 
-This behaviour can be modified using the BGP command <code><b>neighbor &lt;ip-address&gt; 
-allowas-in</b></code> or <code><b>as-override</b></code>.
+This behaviour can be modified using the BGP command <code style="font-size:120%"><b>neighbor &lt;ip-address&gt; 
+allowas-in</b></code> or <code style="font-size:120%"><b>as-override</b></code>.
 </p>
 
 <h1 id="BGP_ECMP">BGP Equal-Cost Multipath</h1>
@@ -3889,7 +3916,7 @@ path attributes need to have the same values:
 <h2>eBGP Equal Cost Multipath</h2>
 <p>
 eBGP multipath is enabled  on IOS routers with the address-family command: 
-<code style="font-size:120%"><b>maximum-paths <i>number</i></i></b></code>.
+<code style="font-size:120%"><b>maximum-paths &lt;number&gt;&gt;</b></code>.
 eBGP paths to qualify for multipath need to match the best path path attributes: 
 <ul>
  <li>Weight</li> 
@@ -4161,7 +4188,7 @@ R9(config-router-af)#                                              <br>
 <h2>iBGP Multipath</h2>
 <p>
 iBGP multipath is enabled with the address-family command: 
-<code style="font-size:120%"><b>maximum-paths ibgp <i>number</i></b></code>. 
+<code style="font-size:120%"><b>maximum-paths ibgp &lt;number&gt;</b></code>. 
 To become candidate for iBGP multipath, iBGP paths need to match the best path 
 path attributes: 
 <ul>
@@ -4442,9 +4469,9 @@ CLUSTER_LIST has a type code of 10.
 </p>
 <p>
 The CLUSTER_ID can be set manually using the 
-command <code><b>bgp cluster-id &lt;cluster-id&gt;</b></code> where the cluster 
+command <code style="font-size:120%"><b>bgp cluster-id &lt;cluster-id&gt;</b></code> where the cluster 
 ID is a 32-bit quantity in the range 1 - 4294967294 or in the form of an IPv4 address.
-The cluster IDs can be viewed using the command <code><b>show bgp ipv4 unicast 
+The cluster IDs can be viewed using the command <code style="font-size:120%"><b>show bgp ipv4 unicast 
 cluster-ids</b></code>
 </p>
 <p>
@@ -4579,7 +4606,7 @@ virtual RR, there's no need to install the 900K+ routes in the RIB/FIB if the
 RR is not in the data path. The selective RIB download feature can be considered:
 <ul>
   <li>It prevents BGP paths from being installed in the RIB/FIB.</li>
-  <li>It is implemented using the BGP command <code><b>table-map [route-map] filter</b></code>.
+  <li>It is implemented using the BGP command <code style="font-size:120%"><b>table-map [route-map] filter</b></code>.
   <li>Scales to 20m+ VPNv4 routes.</li>
 </ul>
 </p>
@@ -4600,7 +4627,7 @@ When advertising to eBGP peers, sub-AS numbers are stripped from the updates.
 <p>
 Confederations are configured using private autonomous system numbers i.e. 
 64512 - 65534. 
-Different IGPs can be configured in each sub-AS with <code><b>next-hop-self</b></code> 
+Different IGPs can be configured in each sub-AS with <code style="font-size:120%"><b>next-hop-self</b></code> 
 command configured on the Sub-AS border routes. 
 Confederation eBGP peerings are created between each of the 
 confederations. Confederation eBGP peering does not follow the all same rules of standard eBGP.
@@ -5060,11 +5087,11 @@ Not additive by default. Can delete a community by setting to none in a route-ma
 </p>
 <p>
 <b>Matching communities</b> match occurs via community list: <br>Define list<br>
-standard list matches community name or number: <code><b>ip community-list 1 
+standard list matches community name or number: <code style="font-size:120%"><b>ip community-list 1 
 standard permit no-export</b></code>. <br>
-Expanded matches regular expression: <code><b>ip community-list expanded AS100 
+Expanded matches regular expression: <code style="font-size:120%"><b>ip community-list expanded AS100 
 permit 100:[0-9]+</b></code>.<br>
-Reference from a route-map: <code><b>match community AS100</b></code>.
+Reference from a route-map: <code style="font-size:120%"><b>match community AS100</b></code>.
 </p>
 
 <p>
@@ -5336,7 +5363,7 @@ Conditionally matching BGP communities allows for selection of routes based on t
 path attributes so that selective processing can occur in route maps. You display the entire BGP table by using the 
 command <code style="font-size:120%"><b>show bgp ipv4 unicast detail</b></code> and then manually select a route with a specific community. 
 However, if the BGP community is known, you can display all the routes by using the command 
-<code style="font-size:120%"><b>show bgp <i>ipv4 unicast</i> community <i>community</i></b></code>.
+<code style="font-size:120%"><b>show bgp &lt;ipv4 unicast&gt; community &lt;community&gt;</b></code>.
 
 </p>
 <p>
@@ -5344,7 +5371,7 @@ Conditionally matching requires the creation of a community list. A community li
 It can be standard or expanded. The community list can be referenced by a number or name. Standard community lists are 
 numbered 1 to 99 and match either well-known communities or a private community number i.e. (AS-number:16-bit number).
 Expanded community lists are numbered 100 to 500 and use regex patterns. The configuration syntax for a community list is:
-<code style="font-size:120%"><b>ip community-list [1-500 | standard <i>list_name</i> | expanded <i>list_name</i></i>] [permit | deny] <i>community_pattern</i></b></code>
+<code style="font-size:120%"><b>ip community-list [1-500 | standard &lt;list_name&gt; | expanded &lt;list_name&gt;&gt;] [permit | deny] &lt;community_pattern&gt;</b></code>
 </p>
 <p>
 Community patterns can be one or multiple entries. If multiple communities are listed in the same entry, then all items 
@@ -5354,13 +5381,13 @@ the command <code style="font-size:120%"><b>match community [1 - 500]</b></code>
 </p>
 <p>
 A private BGP community can be set in a route-map by using the command:
-<code style="font-size:120%"><b>set community <i>bgp_community</i> [additive]</b></code>
+<code style="font-size:120%"><b>set community &lt;bgp_community&gt; [additive]</b></code>
 By default, when you set a community, any existing communities are overwritten, but you can preserve them by using the 
 optional additive keyword.
 </p>
 
 <h3>Verification of BGP Communities</h3>
-<h4><code style="font-size:120%">show bgp ipv4 unicast neighbor <i>bgp_router_ID</i></code></h4>
+<h4><code style="font-size:120%">show bgp ipv4 unicast neighbor &lt;bgp_router_ID&gt;</code></h4>
 <p>
 
 </p>
@@ -5450,10 +5477,10 @@ a community value of 100:90.
 <p>
 To implement this feature, configure a community list:
 <ol>
-  <li>Configure community-lists:<code><b>ip community-list 1 permit 100:90</b></code> and 
-  <code><b>ip community-list 2 permit 100:110</b></code>.</li>
+  <li>Configure community-lists:<code style="font-size:120%"><b>ip community-list 1 permit 100:90</b></code> and 
+  <code style="font-size:120%"><b>ip community-list 2 permit 100:110</b></code>.</li>
   <li>Configure a route-map: see picture for outbound policy. For inbound policy:
-  <code><b>
+  <code style="font-size:120%"><b>
   #route-map BGP_IN<br>
   #match community 1<br>
   set local-preference 90<br>
@@ -5461,9 +5488,9 @@ To implement this feature, configure a community list:
   set local-community 110<br>
   route-map BGP_IN 30
   </b></code></li>
-  <li>Apply the route-map to the neighbor: <code><b>neighbor 155.1.37.7 route-map 
+  <li>Apply the route-map to the neighbor: <code style="font-size:120%"><b>neighbor 155.1.37.7 route-map 
   BGP_IN in</b></code> (on router R3).</li>
-  <li>To view the community values easier, in global mode,<code><b>ip bgp-community 
+  <li>To view the community values easier, in global mode,<code style="font-size:120%"><b>ip bgp-community 
   new-format</b></code>.
 </ol>
 </p>
@@ -6503,21 +6530,21 @@ ORF seeks to answer the question: "Why send me prefixes I am going to filter
 anyway??". 
 
 ORF is configured on both BGP routers using 
-the BGP command <code><b>neighbor &lt;ip-address&gt; capability orf 
+the BGP command <code style="font-size:120%"><b>neighbor &lt;ip-address&gt; capability orf 
 prefix-list [both | receive | send]</b></code>. Verification can be done 
-using the command <code><b>show ip bgp neighbor &lt;ip-address&gt; received 
+using the command <code style="font-size:120%"><b>show ip bgp neighbor &lt;ip-address&gt; received 
 prefix-filter</b></code>.
 </p>
 <p>
 On the device that does not want certain prefixes sent to it:
-<div><code><b>
+<div><code style="font-size:120%"><b>
 #neighbor 10.0.0.9 capability orf prefix-list send<br>
 #neighbor 10.0.0.9 prefix-list MYLIST in
 </b></code></div>
 </p>
 
 <p>
-After configuring ORF, clear the process using the command <code><b>clear ip bgp 
+After configuring ORF, clear the process using the command <code style="font-size:120%"><b>clear ip bgp 
 * in prefix-filter</b></code>. Also show advertised routes on upstream router 
 towards the downstream router.
 </p>
@@ -6953,7 +6980,7 @@ R6(config-route-map)#<b>exit                                         </b>
 </code></div>
 <p>
 <b>Step 3:</b> Associate with route-map with the BGP peer. The route map is associated to a BGP neighbor with the command:
-<code style="font-size:120%"><b>neighbor &lt;ip_address&gt; route-map <i>RM_name</i> [in | out]</b></code>
+<code style="font-size:120%"><b>neighbor &lt;ip_address&gt; route-map &lt;RM_name&gt; [in | out]</b></code>
  under the address-family mode.
 </p>
 
@@ -7046,7 +7073,7 @@ Total number of prefixes 55
 <p>
 Next hop tracking involves the IGP sharing next hop information and their viability 
 so that when there is a problem, the IGP informs BGP. Next hop tracking is enabled 
-in IOS by default. It can be enabled using the command <code><b>bgp nexthop trigger enable<br>
+in IOS by default. It can be enabled using the command <code style="font-size:120%"><b>bgp nexthop trigger enable<br>
 bgp nexthop trigger delay 5</b></code>. The delay ensures that BGP does not react 
 to a flapping route.
 </p>
@@ -7057,9 +7084,9 @@ BGP fast external fallover is critical for failovers for eBGP peers. It allows
 BGP to instantly detect failures of eBGP peers such as link failure between eBGP 
 peers. It is not applicable to iBGP peers. It is enabled by default. If disabled, 
 BGP fast external fallover can be enabled in the BGP configuration using the command
- <code><b>bgp fast-external-fallover</b></code> or on an interface to enable BGP 
+ <code style="font-size:120%"><b>bgp fast-external-fallover</b></code> or on an interface to enable BGP 
  fast external failover for the specific interface using the command 
- <code><b>ip bgp fast-external-fallover</b></code>.  
+ <code style="font-size:120%"><b>ip bgp fast-external-fallover</b></code>.  
 </p>
 
 <h2>Bidirectional Forwarding Detection (BFD)</h2>
@@ -7071,9 +7098,9 @@ BGP fast external fallover can be enabled in the BGP configuration using the com
  sure the CPU is nto involved in the BFD process.
 </p>
 <p>
-After globally enabling BFD using the command <code><b>bfd interval &lt;milliseconds&gt; 
+After globally enabling BFD using the command <code style="font-size:120%"><b>bfd interval &lt;milliseconds&gt; 
 min_rx &lt;milliseconds&gt; multiplier value</b></code>; BFD can be enabled in BGP 
-using the command <code><b>neighbor &lt;ip-address&gt; fall-over bfd</b></code>
+using the command <code style="font-size:120%"><b>neighbor &lt;ip-address&gt; fall-over bfd</b></code>
 </p>
 
 <h2>Prefix Independent Convergence</h2>
@@ -7084,13 +7111,13 @@ the following commands:
 </p>
 <p>
 <ul>
-  <li><code><b>bgp additional-paths install</b></code>: applies this behaviour 
+  <li><code style="font-size:120%"><b>bgp additional-paths install</b></code>: applies this behaviour 
   on the BGP database.</li>
-  <li><code><b>no bgp recursion host</b></code>: speeds things by stopping the 
+  <li><code style="font-size:120%"><b>no bgp recursion host</b></code>: speeds things by stopping the 
   scanning behaviour of the forwarding information base to get the info of the next hop. </li>
-  <li><code><b>bgp additional-paths [send|receive]</b></code>: BGP devices are 
+  <li><code style="font-size:120%"><b>bgp additional-paths [send|receive]</b></code>: BGP devices are 
   configured to send or receive these additional paths or both.</li>
-  <li><code><b>bgp additional-paths select ...</b></code>: Dictate which paths are 
+  <li><code style="font-size:120%"><b>bgp additional-paths select ...</b></code>: Dictate which paths are 
   in the set that can be selected as the backup paths.</li>
 </ul>
 </p>
@@ -7115,7 +7142,7 @@ is the time that the BGP peer is expected to complete the restart otherwise the
 peering will fail. By default, the graceful restart restart time is 120 sceonds. 
 and a stalepath time is 360 (how long stalepaths are maintained until restart is 
 complete). To confiigure graceful restart, under the BGP configuration issue the
- command <code><b>bgp graceful-restart</b></code>. The IOS will prompt to reset 
+ command <code style="font-size:120%"><b>bgp graceful-restart</b></code>. The IOS will prompt to reset 
  peering for the configuration to take effect.
 </p>
 
@@ -7123,7 +7150,7 @@ complete). To confiigure graceful restart, under the BGP configuration issue the
 <p>
 By default, a full view is allowed from all peers. A full view generally should 
 not come from downstream customers. Simple solution is to filter based on the 
-number of prefixes i.e. <code><b>neighbor maximum-prefix</b></code>. The result 
+number of prefixes i.e. <code style="font-size:120%"><b>neighbor maximum-prefix</b></code>. The result 
 can be log or shutdown peer.
 </p>
 
@@ -7135,7 +7162,7 @@ works with both eBGP and iBGP peers; though in production, it is typically
 configured for eBGP peers.
 
 Routers can place prefix restrictions on a BGP neighbor by using the BGP address family configuration command 
-<code style="font-size:120%"><b>neighbor ip-address maximum-prefix <i>prefix-count</i> [warning-percentage] [restart <i>minutes</i>] [warning-only]</b></code>.
+<code style="font-size:120%"><b>neighbor ip-address maximum-prefix &lt;prefix-count&gt; [warning-percentage] [restart &lt;minutes&gt;] [warning-only]</b></code>.
 </p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
 <code style="font-size:120%">
@@ -7168,7 +7195,7 @@ when a peer advertises more routes than the maximum prefix count:
   <li>and sends out the appropriate syslog message.</li>
   <li>The BGP session is not automatically reestablished by default.</li>
   <li>If you want to restart the BGP session after a certain amount of time, you can use the optional 
-  keyword <code style="font-size:120%"><b>restart <i>minutes</i></b></code>.</li>
+  keyword <code style="font-size:120%"><b>restart &lt;minutes&gt;</b></code>.</li>
  </ol>
 </p>
 <p>
@@ -7177,9 +7204,9 @@ Configuration of the maximum prefix takes effect immediately and does not requir
 
 <h2>Tuning CPU and Memory</h2>
 <p>
-CPU usage can be viewed using the command <code><b>show processes cpu sorted</b></code>.
+CPU usage can be viewed using the command <code style="font-size:120%"><b>show processes cpu sorted</b></code>.
 In production environments, CPU consumption may rise to over 60%. Processes can 
-be filtered for BGP as follows: <code><b>show process | include utilization | Runtime|BGP</b></code>.
+be filtered for BGP as follows: <code style="font-size:120%"><b>show process | include utilization | Runtime|BGP</b></code>.
 </p>
 <p>
 To optimize BGP for efficiency with CPU utilization:
@@ -7332,7 +7359,7 @@ penalty is 6000 - suppress limit is easily reached
 
 <H4>Examples</H4>
 <p>
-Example configurations using IOS defaults: <code><b>bgp dampening 15 750 2000 60</b></code>
+Example configurations using IOS defaults: <code style="font-size:120%"><b>bgp dampening 15 750 2000 60</b></code>
 <ul>
   <li>half-life of 15 minutes</li>
   <li>reuse-limiit of 750 and suppress time of 60 minutes means maximum possible 
@@ -7391,7 +7418,7 @@ another path to the loopback address. In essence, turning a single hop iBGP sess
 If the BGP packet source does not match an entry in the neighbor table, the BGP packet cannot be associated to a neighbor 
 and it is discarded. The source IP address of the BGP packets still reflects the IP address of the outbound interface.
 The source of BGP packets needs to be set with each neighbor with the command:
-<code style="font-size:120%"><b>neighbor <i>ip_addr</i> update-source<i> interface_id </i> </b></code>
+<code style="font-size:120%"><b>neighbor &lt;ip_addr&gt; update-source&lt; interface_id &gt; </b></code>
 Links with loopback interfaces is recommended best practice. Verification of neighborship:
 <code style="font-size:120%"><b>show bgp ipv4 unicast neighbors 192.168.3.3</b></code>
 </p>
@@ -7440,13 +7467,13 @@ The following are some of the reasons a BGP neighbor relationship might not form
   The two routers forming a BGP peering must have routes to each other. The state of Idle or Active will be displayed in 
   the State/Pfx column of the command <code style="font-size:120%"><b>show bgp ipv4 unicast summary</b></code>.</li>
   <li><b>Incorrect neighbor statement:</b> The IP address and autonomous system number in the peer configuration command
-  <code style="font-size:120%"><b>neighbor &lt;ip_address&gt; remote-as <i>as_number</i></b></code> statement must be accurate.                            </li>
+  <code style="font-size:120%"><b>neighbor &lt;ip_address&gt; remote-as &lt;as_number&gt;</b></code> statement must be accurate.                            </li>
   <li><b>ACLs:</b> An access control list (ACL) or a firewall may be blocking TCP port 179. BGP uses TCP port 179 when 
   operating in the server role. If the ACL is blocking incoming packets to this port and not outbound packets to port 179, 
   then the local BGP device can be made to operate in client-mode.</li>
   <li><b>BGP packets sourced from the wrong IP address:</b> The source IP address of an inbound BGP packet
   must match the local neighbor statement. If packets are sourced from a loopback interface, ensure that the 
-  command <code style="font-size:120%"><b>neighbor <i>ip_addresss</i> update-source</b></code> is configured.</li>
+  command <code style="font-size:120%"><b>neighbor &lt;ip_addresss&gt; update-source</b></code> is configured.</li>
   <li><b>The TTL (time-to-live) of the BGP packet expires:</b> The peer may be further away than is permitted. In the case
   of eBGP, increase the TTL if packets are sourced from a loopback interface. TTL can be verified using the command:
   <code style="font-size:120%"><b>show bgp ipv4 unicast neighbors | include BGP neighbor|TTL</b></code></li>
@@ -7551,26 +7578,26 @@ The configuration of BGP session involves the following commands:
 </p>
 <p>
 <b>Step 2:</b> Initialise the BGP process with the command: 
-<code style="font-size:120%"><b>router bgp <i>as_number</i></b></code>
+<code style="font-size:120%"><b>router bgp &lt;as_number&gt;</b></code>
 </p>
 <p>
 <b>Step 3 (Optional if IPv4 address configured on any interface):</b> Define the 
 BGP router ID statically with the command: 
-<code style="font-size:120%"><b>bgp router-id <i>id</i></b></code>
+<code style="font-size:120%"><b>bgp router-id &lt;id&gt;</b></code>
 If no IP address is configured, the router will dynamically choose an ID of 
 0.0.0.0 and a BGP session will not be able to establish.
 </p>
 <p>
 <b>Step 4:</b> Define the BGP neighbors's remote ASN with the command:
-<code style="font-size:120%"><b>neighbor &lt;ip_address&gt; remote-as <i>as_number</i></b></code>
+<code style="font-size:120%"><b>neighbor &lt;ip_address&gt; remote-as &lt;as_number&gt;</b></code>
 </p>
 <p>
 <b>Step 5 (Optional):</b> Define the BGP sessions password with MD5 hash:
-<code style="font-size:120%"><b>neighbor &lt;ip_address&gt; password <i>password</i></b></code>
+<code style="font-size:120%"><b>neighbor &lt;ip_address&gt; password &lt;password&gt;</b></code>
 </p>
 <p>
 <b>Step 6 (Optional):</b> Modify the BGP session timers with the command:
-<code style="font-size:120%"><b>neighbor &lt;ip_address&gt; timers <i>keep-alive_time hold_time</i></b></code>
+<code style="font-size:120%"><b>neighbor &lt;ip_address&gt; timers &lt;keep-alive_time hold_time&gt;</b></code>
 </p>
 <p>
 <b>Step 7:</b> Initialize the address family with the command:
@@ -7582,12 +7609,12 @@ If no IP address is configured, the router will dynamically choose an ID of
 </p>
 <p>
 <b>Step 9:</b> Advertise IPv6 prefixes that are in the Loc-RIB with the command:
-<code style="font-size:120%"><b>network <i>prefix/prefix-length</i> [route-map <i>rmap_name</i>]</b></code>
+<code style="font-size:120%"><b>network &lt;prefix/prefix-length&gt; [route-map &lt;rmap_name&gt;]</b></code>
 It is recommended not to use the same route-map for IPv4 and IPv6 prefixes.
 </p>
 <p>
 BGP configuration can be made hierarchical when viewing configuration using the 
-command <code><b>bgp upgrade-cli</b></code>
+command <code style="font-size:120%"><b>bgp upgrade-cli</b></code>
 
 </p>
 <p>
@@ -7599,12 +7626,12 @@ The following commands are helpful for understanding the current status of the r
 <td>Description</td>
 </tr>
 <tr>
-<td><code style="font-size:120%"><b>show bgp <i>afi safi</i> summary</b></code></td>
+<td><code style="font-size:120%"><b>show bgp &lt;afi safi&gt; summary</b></code></td>
 <td>Displays a brief summary of the BGP process, neighbor state and prefixes received or transmitted from a high-level
 perspective</td>
 </tr>
 <tr>
-<td><code style="font-size:120%"><b>show bgp <i>afi safi</i> neighbor &lt;ip_address&gt;</b></code></td>
+<td><code style="font-size:120%"><b>show bgp &lt;afi safi&gt; neighbor &lt;ip_address&gt;</b></code></td>
 <td>Displays a brief summary of the BGP process, neighbor state and capabilities. Prefixes</td>
 </tr>
 <tr>
@@ -7631,18 +7658,18 @@ RIB for installation.
 </td>
 </tr>
 <tr>
-<td><code style="font-size:120%"><b>show bgp <i>afi safi</i></b></code></td>
+<td><code style="font-size:120%"><b>show bgp &lt;afi safi&gt;</b></code></td>
 <td>
 Displays the BGP Loc-RIB table with all the network prefixes and paths that are available. A brief list of common 
 BGP path attributes are included.
 </td>
 </tr>
 <tr>
-<td><code style="font-size:120%"><b>show bgp <i>afi safi prefix</i></b></code></td>
+<td><code style="font-size:120%"><b>show bgp &lt;afi safi prefix&gt;</b></code></td>
 <td>It displays the BGP Loc-RIB for the specified network prefix with all path attributes and determines the best path.</td>
 </tr>
 <tr>
-<td><code style="font-size:120%"><b>show bgp <i>afi safi</i> neighbor &lt;ip_address&gt; advertised-routes</b></code></td>
+<td><code style="font-size:120%"><b>show bgp &lt;afi safi&gt; neighbor &lt;ip_address&gt; advertised-routes</b></code></td>
 <td>Displays a brief summary of the BGP paths that were advertised to the specific BGP peer.
 </tr>
 </table>
@@ -7684,20 +7711,20 @@ with other provider=edge routers. Enabling VRF support on BGP is accomplished by
 </p>
 <p>
 <b>Step 1:</b> Define the BGP route distinguisher for teh VRF under the BRF definition with the command:
-<code style="font-size:120%"><b>rd <i>route_distinguisher</i></b></code>. The RD is a path attribute used in ampulous layer 3 VPN that ensures 
+<code style="font-size:120%"><b>rd &lt;route_distinguisher&gt;</b></code>. The RD is a path attribute used in ampulous layer 3 VPN that ensures 
 uniqueness of a prefix. A VPN prefix is an RD+Prefix. There is only one ED associated to a prefix.
 </p>
 <p>
 <b>Step 2:</b> Initialize the BGP process with the command:
-<code style="font-size:120%"><b>router bgp  <i>as_number</i></b></code>.
+<code style="font-size:120%"><b>router bgp  &lt;as_number&gt;</b></code>.
 </p>
 <p>
 <b>Step 3:</b> Initialize the address family for the VRF with the command 
-<code style="font-size:120%"><b>address-family <i>afi safi</i></b> vrf <i>vrf_name</i></code>.
+<code style="font-size:120%"><b>address-family &lt;afi safi&gt;</b> vrf &lt;vrf_name&gt;</code>.
 </p>
 <p>
 <b>Step 4:</b> Define the BGP neighbor's remote autonomous system number:
-<code style="font-size:120%"><b>neighbor <b>ip_address</b> remote-as <i>as_number</i></code>
+<code style="font-size:120%"><b>neighbor <b>ip_address</b> remote-as &lt;as_number&gt;</code>
 </p>
 <h2>BGP VPNv4 Diagnostic Commands</h2>
 <table>
@@ -7705,7 +7732,7 @@ uniqueness of a prefix. A VPN prefix is an RD+Prefix. There is only one ED assoc
 <td>Command</td><td>Description</td>
 </tr>
 <tr>
-<td><code style="font-size:120%"><b>show bgp vpnv4 unicast [all | rd <i>route-distinguisher</i> | vrf <i>vrf_name</i>]</b></code></td>
+<td><code style="font-size:120%"><b>show bgp vpnv4 unicast [all | rd &lt;route-distinguisher&gt; | vrf &lt;vrf_name&gt;]</b></code></td>
 <td><code style="font-size:120%"><b>rd:</b></code> Displays the routes associated on the router with the identified route distinguisher. <br/>
 <code style="font-size:120%"><b>vrf:</b></code> Displays all the routes associated on the router with the locally configured VRF. <br />
 <code style="font-size:120%"><b>all:</b></code> Displays the routes associated with all network prefixes learned within the VPNv4 address family.
