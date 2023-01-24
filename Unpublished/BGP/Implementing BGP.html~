@@ -23,6 +23,8 @@
     <li><a href="#COMMUNITIES">BGP Communities</a></li>
     <li><a href="#OPTIMIZATION">BGP Optimization</a></li>
       <ol type="i">
+        <li><a href="#PEER_GROUPS">Peer Groups</a></li>
+        <li><a href="#PEER_TEMPLATES">Peer Templates: Session and Policy Templates</a></li>
       	<li><a href="#SUMMARIZATION">Summarization</a></li>
       	<li><a href="#FILTERING">Filtering</a></li>
         <li><a href="#MAXIMUM_PREFIX">Maximum Prefix</a></li>
@@ -969,7 +971,7 @@ The configuration of BGP session involves the following commands:
 </p>
 <p>
 <b>Step 1:</b> initialize the BGP process using the privileged mode command 
-<code><b>router bgp &lt;asn&gt;</b></code>:
+<code style="font-size:120%;"><b>router bgp &lt;asn&gt;</b></code>:
 </p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
 <code style="font-size:120%">R8(config)#<b>router bgp 1.3</b></code>
@@ -979,7 +981,7 @@ The configured ASN is 1.3.
 </p>
 
 <p>
-<b>Step 2: </b> define the BGP router ID statically with the command <code><b>
+<b>Step 2: </b> define the BGP router ID statically with the command <code style="font-size:120%;"><b>
 bgp router-id &lt;router-id&gt;</b></code>:
 </p>
 
@@ -1113,8 +1115,8 @@ prefixes and their attributes.</b>
 <p>
 BGP uses the UPDATE message to advertise and withdraw NLRI.
 NLRI can be originated in multiple ways:
-<ul>
-  <li><b>Network statement:</b> The syntax of the network statement is <code><b>network &lt;ip-address&gt; 
+<ol>
+  <li><b>Network statement:</b> The syntax of the network statement is <code style="font-size:120%;"><b>network &lt;ip-address&gt; 
      mask &lt;netmask&gt;</b></code>. 
      <ul> 
       <li>Prefixes originated using the network statement have an ORIGIN path 
@@ -1124,134 +1126,147 @@ NLRI can be originated in multiple ways:
       from IGPs.</li> 
       <li>When configuring the network statement, the routes to be advertised 
       must match the prefix in the routing table.</li>
-      <li>Without the <code><b>mask</b></code> keyword, the BGP uses a classful
+      <li>Without the <code style="font-size:120%;"><b>mask</b></code> keyword, the BGP uses a classful
       mask instead. If subnets or supernets are to be advertised, then the 
       <code style="font-size:120%"><b>mask</b></code> keyword may be required.</li>
       <li>BGP sets the weight path attribute to 32768 for these prefixes.</li>
       </ul>
-  </li>
-  <li><b>redistribute statement:</b> 
-  <ul>
-     <li>Won't include OSPF external by default. 
-     <li>To include OSPF external prefixes add the <code style="font-size:120%"><b>match ospf external</b></code>
-     keywords.</li>
-     <li>Originates prefixes with ORIGIN INCOMPLETE(?).</li> 
-     <li>Originates classful summary if <code style="font-size:120%"><b>auto-summary</b></code> is enabled. 
-     <li>Automatically copies IGP metric to BGP MED.</li>
-     <li>Won't include OSPF external by default. <code style="font-size:120%"><b>redistribute ospf [pid] 
-     match internal external</b></code> to include OSPF external routes.</li>
-     <li>Sets the weight to 32768.</li>
-     <b>BGP Redistribute Internal</b>
-     <uL>
-       <li>By default, only external BGP routes are redistributed into IGP with
-       redistribution.</li>
-       <li><code style="font-size:120%"><b>bgp redistribute internal</b></code> command lets internal 
-       BGP routes to be redistributed into IGP. Can result in a routing loop if 
-       not carefully planned and implemented.</li>
-     </uL>
-  </ul>
-  </li>
-  <li><b>aggregate-address statement:</b> requires one subnet in the BGP table first.</li>
-  <li><b>bgp inject-map statement:</b> Opposite of aggregation.</li>
-</ul>
-</p>
-<h4>BGP Conditional Advertisement</h4>
-<p>
-<ul>
- <li>Neighbor adverise-map map1 [non-exist-map map2 | exist-map map2].</li>
- <li>Advertise prefix matched in advertise-map; if prefix matched in non-exist-map
- does not exist or prefix matched in exist-map does exist.</li>
- <li>Typically used to track failure of a transit link e.g. advertise to backup 
- provider, only if primary provider is down.</li>
- </ul>
-</p>
-<h3>Conditional Route Injection</h3>
-<p>
-Originates subnets(s) from aggregate for purpose of longest match traffic 
-engineering. This is the opposite of aggregation where the shorter match is taken 
-and originating longer match prefixes from it for traffic engineering.
-</p>
 
-<h4>BGP Conditional Route Injection Configuration</h4>
-<p>
-
-Configured as <code style="font-size:120%"><b>bgp inject-map inject-map exist-map exist-map [copy-attributes]
-</b></code>. 
-<ul>
-Inject Map
-  <ul>
-  <li>Subnet to be advertised</li>
-  <li>set ip address prefix-list [list]</li>
-  </ul>
-  Exist Map
-  <ul>
-    <li>Aggregate to be originated from i.e. learned path.</li>
-    <li>match ip address prefix-list [list]</li>
-    <li>match ip route-source prefix-list [list]</li>
-  </ul>
-</ul>
-In the exist-map, two matches need to be done;
-<ol>
-  <li>Match the prefix using the <code style="font-size:120%"><b>match ip address</b></code> command</li>
-  <li>Match the source using a <code style="font-size:120%"><b>match ip route-source</b></code> command
-</ol>
-</p>
-<h4>Example Configuration</h4>
-<p>
-Given an aggregate prefix 150.1.0.0/16 received from a peer 150., we want to 
-advertise a component route 150.1.1.0/24. <br>
-Step 1: Match the aggregate in a prefix-list: 
-<code style="font-size:120%">
-ip prefix-list AGGREGATE permit 150.1.0.0/16.
-</code>
-<br>
-Step 2: Match the prefix that we want to originate:<br>
-<code style="font-size:120%"><b>
-ip prefix-list R1_LOOPBACK permit 150.1.1.0/24
-</b></code>
-<br>
-Step 3: Match the route source i.e. prefix best path: <br>
-<code style="font-size:120%"><b>
-ip prefix-list ROUTE_SOURCE 150.1.28.5/32
-</b></code>
-Step 4: Configure route-map that is the inject-map:<br>
-<code style="font-size:120%"><b>
-route-map INJECT_MAP<br>
-set ip address prefix-list R1_LOOPBACK<br>
-route-map EXIST_MAP<br>
-match ip address prefix-list AGGREGATE<br>
-match ip route-source prefix-list ROUTE_SOURCE<br>  
-</b></code> <br>
-
-Step 5: Apply the inject-map and exist-map;<br>
-<code style="font-size:120%"><b>
-router bgp 801.1<br>
-bgp inject-map INJECT_MAP exist-map EXIST_MAP<br>
-</b></code>
-</p>
-<p>
-Verify configuration with the command <code style="font-size:120%"><b>show ip bgp injected-paths</b></code>.
-</p>
-
-<p>
-Care must be taken when configuring the prefixes to be advertised. The prefix and subnet mask must be configured exactly 
-as they appear in the routing table. These prefixes must already exist in the routing table.
-The source of the prefixes in the routing table  may be static, connected, or known from another routing protocol.
-</p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
 <code style="font-size:120%">
 R8(config-router-af)#<b>network 10.8.10.0 mask 255.255.255.0</b> <br>
 R8(config-router-af)#<b>network 10.8.11.0 mask 255.255.255.0</b> <br>
 </code></div>
 
+      
+  </li>
+  <li><b>Redistribution:</b> To redistribute IGP prefixes into OSPF, use the 
+  BGP command <code style="font-size:120%;"><b>redistribute &lt;igp-protocol&gt; &lt;process | asn&gt;</b></code>. 
+  <ul>
+     <li>Prefixes originated throgh redistribution have the value of 
+     INCOMPLETE(?) for the ORIGIN path attribute.</li>
+     <li>Originates classful summary prefixes if <code style="font-size:120%">
+     <b>auto-summary</b></code> is enabled.
+     <li>The IGP metric of the prefix is automatically copied to the BGP MED
+     path attribute.</li>
+     <li>The weight path attribute has its value set to 32768.</li>
+     <li>When redistributing OSPF routes into BGP, by default, OSPF external routes 
+     are not redistributed.</li>
+     <li>To include OSPF external routes add the
+     <code style="font-size:120%"><b>match ospf external</b></code>
+     keywords to the redistribute command; <code style="font-size:120%"><b>redistribute ospf [pid] 
+     match internal external</b></code></li> 
+     <b>BGP Redistribute Internal: Redistribution of BGP NLRI into IGP</b>
+     <p>
+     Redistribution of BGP NLRI into IGP is not recommended as the number of 
+     prefixes being redistributed may overwhelm the IGP affecting its optimal 
+     operation. However, if there is an unavoidable requirement to redistribute 
+     BGP prefixes into an IGP, take note of the following:
+     </p>
+     <ul>
+       <li>By default, only external BGP routes are redistributed into the IGP.</li>
+       <li><code style="font-size:120%"><b>bgp redistribute internal</b></code> command lets internal 
+       BGP routes to be redistributed into IGP. This increases the possibility 
+       of introducing routing loops if not carefully planned and implemented.</li>
+     </ul>
+  </ul>
+  </li>
+  <li><b>aggregate-address statement:</b> This method of NLRI origination aggregates 
+  prefixes into a summary. It requires at least one component subnet to be present 
+  in the BGP table before the aggregate prefix is advertised. Prefix aggregation 
+  is covered in depth in the secion: <a href="#SUMMARIZATION">Summarization</a>.</li>
+  <li><b>bgp inject-map statement:</b> Advertises prefixes a component prefix of 
+  aggregate route. The component prefix does not have to exist in the routing table.
+  It is generated by applying the inject-map.
+Originates subnets(s) from aggregate for purpose of longest match traffic 
+engineering. This is the opposite of aggregation where the shorter match is taken 
+and originating longer match prefixes from it for traffic engineering.
+<ul>
+
+<p>
+Prefix origination using inject-map command can be configured using the following 
+command: <code style="font-size:120%"><b>bgp inject-map &lt;inject-map&gt; 
+exist-map &lt;exist-map&gt; [copy-attributes]
+</b></code>. 
+The <code style="font-size:120%;"><b>inject-map</b></code> parameter is a route-map that specifies the subnet to be advertised. 
+This component prefix can be specified in a prefix-list which is then referenced 
+by the route-map. The <code style="font-size:120%;"><b>exist-map</b></code> parameter is a route-map that 
+specifies the aggregate route to match. If the route in the exist-map is matched, 
+the route in the inject-map will be advertised. In the route-map referenced by 
+the exist-map, two matches need to be done;
+<ol type="i">
+  <li>Match the prefix using the <code style="font-size:120%"><b>match ip address</b></code> command.</li>
+  <li>Match the source using a <code style="font-size:120%"><b>match ip route-source</b></code> command.</li>
+</ol>
+</p>
+<h4>Example Configuration</h4>
+<p>
+Given an aggregate prefix 150.1.0.0/16 received from a peer 150.1.28.5, we want to
+advertise a component route 150.1.1.0/24.
+<ul>
+  <li><b>Step 1:</b> Match the aggregate in a prefix-list: <code style="font-size:120%">
+  <b>ip prefix-list AGGREGATE permit 150.1.0.0/16</b>.</code>
+  </li>
+  <li><b>Step 2:</b> Match the prefix that we want to originate:
+  <code style="font-size:120%"><b>
+  ip prefix-list R1_LOOPBACK permit 150.1.1.0/24</b></code>.
+  </li>
+  <li><b>Step 3:</b> Match the route source i.e. prefix best path:
+  <code style="font-size:120%"><b>  ip prefix-list ROUTE_SOURCE 150.1.28.5/32
+  </b></code>.</li>
+  <li><b>Step 4:</b> Configure route-map that is the inject-map:<br>
+  <code style="font-size:120%"><b>
+  route-map INJECT_MAP<br>
+  set ip address prefix-list R1_LOOPBACK<br>
+  route-map EXIST_MAP<br>
+  match ip address prefix-list AGGREGATE<br>
+  match ip route-source prefix-list ROUTE_SOURCE</b></code>.
+  </li>
+  <li><b>Step 5:</b> Apply the inject-map and exist-map;<br>
+  <code style="font-size:120%"><b>
+  router bgp 801.1<br>
+  bgp inject-map INJECT_MAP exist-map EXIST_MAP<br>
+  </b></code>.
+  </li>
+</ul>
+</p>
+<p>
+Verify configuration with the command <code style="font-size:120%"><b>show ip bgp injected-paths</b></code>.
+</p>
+</li>
+</ul>
+  <li><b>BGP Conditional Advertisement:</b> provides additional control of route 
+  advertisement, depending on the existence of other prefixes in the BGP table.
+  Typically, the BGP conditional advertisement feature is used to track failure 
+  of a transit link e.g. advertise to backup provider, only if primary provider 
+  is down. It uses the following command <code style="font-size:120%;"><b>neighbor advertise-map 
+  &lt;map1&gt; [non-exist-map &lt;map2&gt; | exist-map &lt;map2&gt;]</b></code>.
+  The <code style="font-size:120%;"><b>non-exist-map</b></code> and the <code style="font-size:120%;"><b>advertise-map</b></code>
+  keywords of the <code style="font-size:120%;"><b>neighbor advertise-map</b></code> 
+  command are used to track routes by the route prefix. Advertise prefix matched 
+  in advertise-map; if prefix matched in non-exist-map does not exist or prefix 
+  matched in exist-map does exist.
+</li>
+</ol></p>
+</ul>
+  </li>
+
+</ol>
+</p>
+
+
 <h2>Phase 3: Activation of the BGP Peer</h2
 <p>
-A BGP peer must be activated in order for BGP to initiate a session with that peer. The router's IP address is added 
-to the neighbor table and BGP attempts to establish a BGP session or accepts a BGP session initiated from the peer.
+A BGP peer must be activated in order for BGP to initiate a session with that peer. 
+The router's IP address is added to the neighbor table and BGP attempts to 
+establish a BGP session or accepts a BGP session initiated from the peer. This 
+step is required only if the BGP command <code><b>no bgp default ipv4-unicast</b></code> 
+has been configured to disable the default IPv4 address family.
 </p>
 
 <p>
-<b>Step 9: Activate the neighbor:</b> using the command <code style="font-size:120%"><b>neighbor &lt;ip_address>&gt; activate</b></code> 
+<b>Step 9: Activate the neighbor:</b> using the command <code style="font-size:120%"><b>
+neighbor &lt;ip_address&gt; activate</b></code>.
 </p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
 <code style="font-size:120%">
@@ -1261,337 +1276,12 @@ R8(config-router-af)#<b>neighbor 7.7.7.7 activate</b>
 If the default BGP IPv4 address family is enabled, then activation of a neighbor is done automatically.
 </p>
 
-<h2>Peer Groups</h2>
-<p>
-Peer groups simplify BGP configuration and reduce system resource use (CPU and memory) by grouping BGP peers together 
-into BGP update groups. Configuration of multiple neighbors can be done in one place.
-BGP update groups enable a BGP device to perform outbound routing policy processing one time and then replicate the 
-update to all members. All members in the peer group are in the same update group and therefore must be of the same 
-session type i.e. iBGP or eBGP but not mixed up.
-</p>
-<p>
-BGP peer groups simplify BGP configuration when there are multiple routers 
-assigned to a peer group. A BGP peer group is created through the following steps:
-<ul>
-  <li><b>Step 1:</b> Create the peer group using the BGP router command 
-<code style="font-size:120%"><b>neighbor &lt;group_name&gt; peer-group</b></code>.
-<p>
-<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-<code style="font-size:120%">
-R6(config-router)#<b>neighbor AS65000 peer-group        </b>
-</code></div>
-</p>
-</li>
-  <li><b>Step 2:</b> Add BGP peers to the peer group using the command:
-<code style="font-size:120%"><b>neighbor &lt;ip_address &gt;peer-group &lt;group_name&gt;</b></code>.
-<p>
-<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-<code style="font-size:120%">
-R6(config-router)#<b>neighbor 4.4.4.4 remote-as 65000   </b> <br>
-R6(config-router)#<b>neighbor 5.5.5.5 remote-as 65000   </b> <br>
-R6(config-router)#<b>neighbor 4.4.4.4 peer-group AS65000</b> <br>
-R6(config-router)#<b>neighbor 5.5.5.5 peer-group AS65000</b> <br>
-</code></div>
-</p>
-</li>
-  <li>
-  <p>
-  <b>Step 3:</b> All BGP parameters are configured using <code style="font-size:120%"><b>peer-group &lt;group_name&gt;</b></code> in lieu of 
-<code style="font-size:120%"><b>neighbor &lt;ip_address&gt;</b></code>.
-<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-<code style="font-size:120%">
-R6(config-router)#<b>neighbor AS65000 next-hop-self     </b> <br>
-</code></div>
-</p>
-</li>
-</ul>
-</p>
-<p>
-BGP neighbors cannot be activated by a peer group name and must be activated for each address family by IP address.
-</p>
-
-<p>
-The following actions can be implemented against a peer-group that will affect the peer-group's individual members:
-<ol>
-  <li><b>Reset of BGP neighborship:</b> This can be a soft reset or hard reset e.g. 
-  <code style="font-size:120%"><b>R6#clear bgp ipv4 unicast peer-group AS65000 soft out</b></code>.</li>
-  <li><b>Route-filtering using route-maps, distribute-lists and filter-lists.</b>
-</ol>
-Peer groups can be verified using the command <code style="font-size:120%"><b>show ip bgp update-group</b></code>.
-</p>
-<h3>Troubleshooting Peer Groups</h3>
-<p>
-When troubleshooting peer group issues, you need to take note of the following:
-<ul>
-  <li>The neighbor ip address was not associated with the configured peer group.
-  <li>The peer group is not configured correctly; what works for one neighbor might not work for the other. 
-  <li>The route filter applied to the group is not appropriate for all the peers.
-  <li>If there are conflicting entries between the peer group and a specific neighbor statement, 
-  the neighbor statement wins.</li>
-</ul>
-</p>
-
-<h2>Peer Templates</h2>
-<p>
-BGP peer templates are BGP configurations that can be applied to one or more BGP peers. 
-BGP peer templates can inherit configurations from other peer templates.
-If a conflict exists between an inherited configuration and the invoking
-peer template, the invoking template preempts the inherited value.
-There are two types of BGP peer templates: peer session templates and peer policy 
-templates.
-
-</p>
-
-<h3>Peer session</h3> 
-<p>
-This type of template involves configuration settings specifically for the BGP session.
-Peer session templates are used to group and apply the configuration of general BGP session commands to
-groups of neighbors that share session configuration. 
-Peer session templates can be applied regardless of address families of the neighbors.
-</p>
-<p>
-General session commands can be configured once in a peer session template and then applied to many
-neighbors through the direct application of a peer session template or through indirect inheritance from a peer
-session template.
-Peer session templates support direct and indirect inheritance. A BGP neighbor can be configured with only
-one peer session template at a time, and that peer session template can contain only one indirectly inherited
-peer session template. A BGP neighbor can directly inherit only one session template and can indirectly inherit
-up to seven additional peer session templates.
-</p>
-<p>
-You define peer session template settings with the BGP configuration command 
-<code style="font-size:120%"><b>template peer-session &lt;template-name&gt;</b></code> and then
-enter any BGP session related configuration commands.
-</p>
-
-<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-<code style="font-size:120%">
-R6#<b>configure terminal</b><br>
-R6(config)#<b>router bgp 65000</b><br>
-R6(config-router)#<b>template peer-session BGP_SESSION_TEMPLATE_AS65000</b><br>
-R6(config-router-stmp)#<b>remote-as 65000</b><br>
-R6(config-router-stmp)#<b>update-source loopback0</b><br>
-R6(config-router-stmp)#<b>timers 30 90 60</b>
-</code></div>
-<p>
-The peer-session template can then be applied to a group of BGP peers using the <code style="font-size:120%"><b>inherit</b></code> keyword 
-in BGP router mode.
-</p>
-<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-<code style="font-size:120%">
-R6(config-router)#<b>neighbor 4.4.4.4 inherit peer-session BGP_SESSION_TEMPLATE_AS65000</b><br>
-R6(config-router)#<b>neighbor 5.5.5.5 inherit peer-session BGP_SESSION_TEMPLATE_AS65000</b>
-</code></div>
-
-<p>
-Verification of the peer-session can be done using the privileged mode command: 
-<code style="font-size:120%"><b>show bgp ipv4 unicast template peer-session</b></code>
-</p>
-<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-<code style="font-size:120%">
-R6#<b>show bgp ipv4 unicast template peer-session</b><br>
-Template:BGP_SESSION_TEMPLATE_AS65000, index:1 <br>
-Local policies:0xA1, Inherited polices:0x0     <br>
-Locally configured session commands:           <br>
-&nbsp;remote-as 65000                               <br>
-&nbsp;update-source Loopback0                       <br>
-&nbsp;timers 30 90 60                               <br>
-Inherited session commands:                    <br>
-                                               <br>
-R6#
-</code></div>
-
-<h3>Peer policy</h3>
-<p>
-Peer policy templates are used to configure BGP policy commands for neighbors that
-belong to specific address families. Peer policy templates are configured once and then applied to many
-neighbors through the direct application of a peer policy template or through inheritance from peer policy
-templates. The configuration of peer policy templates simplifies the configuration of BGP policy commands
-that are applied to all neighbors within an autonomous system.
-</p>
-<p>
-Peer policy templates support inheritance. A directly applied peer policy template can directly or indirectly
-inherit configurations from up to seven peer policy templates. So, a total of eight peer policy templates can
-be applied to a neighbor or neighbor group.
-</p>
-
-<p>
-BGP policy configuration commands that are configured only for a specific address family.
-You define peer policy template settings with the BGP configuration command 
-<code style="font-size:120%"><b>template peer-policy &lt;template-name&gt;</b></code> and
-then enter any BGP address family–related configuration commands. 
-</p>
-
-<p>
-BGP peer policy templates are applied to a BGP peer in address-family mode using 
-the <code style="font-size:120%"><b>inherit</b></code> keyword.
-</p>
-<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-<code style="font-size:120%">
-R6(config-router)#<b>template peer-policy BGP_POLICY_TEMPLATE_AS65000</b><br>
-R6(config-router-ptmp)#<b>send-community both</b><br>
-R6(config-router-ptmp)#<b>route-reflector-client</b><br>
-R6(config-router-ptmp)#<b>exit</b><br>
-R6(config-router)#<b>address-family ipv4 unicast</b><br>
-R6(config-router-af)#<b>neighbor 4.4.4.4 inherit peer-policy BGP_POLICY_TEMPLATE_AS65000</b><br>
-R6(config-router-af)#<b>neighbor 5.5.5.5 inherit peer-policy BGP_POLICY_TEMPLATE_AS65000</b><br>
-</code></div>
-<p>
-Peer-policies can be verified using the privileged mode command: 
-<code style="font-size:120%"><b>show bgp ipv4 unicast template peer-policy</b></code>
-</p>
-<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-<code style="font-size:120%">
-R6#<b>show bgp ipv4 unicast template peer-policy </b>        <br>
-Template:BGP_POLICY_TEMPLATE_AS65000, index:1.               <br>
-Local policies:0x20000008200, Inherited polices:0x0          <br>
-Local disable policies:0x0, Inherited disable policies:0x0   <br>
-Locally configured policies:                                 <br>
-&nbsp;&nbsp;route-reflector-client                                     <br>
-&nbsp;&nbsp;send-community both                                        <br>
-Inherited policies:                                          <br>
-                                                             <br>
-R6#
-</code></div>
-
-<p>
-<b>Note:</b> A BGP peer cannot inherit from a peer-policy template or peer-session 
-template and be configured as a peer group member at the same time. BGP templates 
-and BGP peer groups are mutually exclusive.
-</p>
-<p>
-The peer session and peer policy templates configured for a BGP peer can be verified using the privileged mode command: 
-<code style="font-size:120%"><b>show bgp ipv4 unicast neighbor &lt;ip_address&gt;</b></code>
-</p>
-
-<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-<code style="font-size:120%">
-R6#<b>show bgp ipv4 unicast neighbor 4.4.4.4 </b>                                                 <br>                             
-BGP neighbor is 4.4.4.4,  remote AS 65000, internal link                                          <br>                             
-&nbsp;<span style="background-color: #A8A8A8">Inherits from template BGP_SESSION_TEMPLATE_AS65000 for session parameters </span>                      <br>                             
-&nbsp;&nbsp;&nbsp;BGP version 4, remote router ID 4.4.4.4                                                         <br>                             
-&nbsp;&nbsp;&nbsp;Neighbor under common administration                                                            <br>                             
-&nbsp;&nbsp;&nbsp;BGP state = Established, up for 01:44:19                                                        <br>                             
-&nbsp;&nbsp;&nbsp;Last read 00:00:16, last write 00:00:05, hold time is 90, keepalive interval is 30 seconds      <br>                             
-&nbsp;&nbsp;&nbsp;Configured hold time is 90, keepalive interval is 30 seconds                                    <br>                             
-&nbsp;&nbsp;&nbsp;Minimum holdtime from neighbor is 60 seconds                                                    <br>                             
-&nbsp;&nbsp;&nbsp;Neighbor sessions:                                                                              <br>                             
-&nbsp;&nbsp;&nbsp;  1 active, is not multisession capable (disabled)                                              <br>                             
-&nbsp;&nbsp;&nbsp;Neighbor capabilities:                                                                          <br>                             
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Route refresh: advertised and received(new)                                                   <br>                             
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Four-octets ASN Capability: advertised and received                                           <br>                             
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Address family IPv4 Unicast: advertised and received                                          <br>                             
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Enhanced Refresh Capability: advertised and received                                          <br>                             
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Multisession Capability:                                                                      <br>                             
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Stateful switchover support enabled: NO for session 1                                         <br>                             
-&nbsp;&nbsp;&nbsp;Message statistics:                                                                             <br>                             
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;InQ depth is 0                                                                                <br>                             
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;OutQ depth is 0                                                                               <br>                             
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                                                              <br>                             
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Sent&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Rcvd                                                          <br>                             
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Opens:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1                                                          <br>                             
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Notifications:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0                                                          <br>                             
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Updates:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2                                                          <br>                             
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Keepalives:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;230&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;144                                                          <br>                             
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Route Refresh:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0                                                          <br>                             
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Total:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;237&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;147                                                          <br>                             
-&nbsp;&nbsp;&nbsp;Default minimum time between advertisement runs is 0 seconds                                    <br>                             
-&nbsp;&nbsp;                                                                                                 <br>                             
-&nbsp;For address family: IPv4 Unicast                                                                 <br>                             
-&nbsp;&nbsp;Session: 4.4.4.4                                                                                <br>                             
-&nbsp;&nbsp;BGP table version 65, neighbor version 65/0                                                     <br>                             
-&nbsp;&nbsp;Output queue size : 0                                                                           <br>                             
-&nbsp;&nbsp;Index 3, Advertise bit 1                                                                        <br>                             
-&nbsp;&nbsp;Route-Reflector Client                                                                          <br>                             
-&nbsp;&nbsp;3 update-group member                                                                           <br>                             
-&nbsp;&nbsp;<span style="background-color: #A8A8A8">Inherits from template BGP_POLICY_TEMPLATE_AS65000</span>                                              <br>                             
-&nbsp;&nbsp;Community attribute sent to this neighbor                                                       <br>                             
-&nbsp;&nbsp;Slow-peer detection is disabled                                                                 <br>                             
-&nbsp;&nbsp;Slow-peer split-update-group dynamic is disabled                                                <br>                             
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Sent&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Rcvd                                                  <br>                             
-&nbsp;&nbsp;Prefix activity:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;----&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;----                                                  <br>                             
-&nbsp;&nbsp;&nbsp;&nbsp;Prefixes Current: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;20&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3 (Consumes 192 bytes)                             <br>                             
-&nbsp;&nbsp;&nbsp;&nbsp;Prefixes Total:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;32&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3                                                  <br>                             
-&nbsp;&nbsp;&nbsp;&nbsp;Implicit Withdraw:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;9&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0                                                  <br>                             
-&nbsp;&nbsp;&nbsp;&nbsp;Explicit Withdraw:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0                                                  <br>                             
-&nbsp;&nbsp;&nbsp;&nbsp;Used as bestpath:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;n/a&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3                                                  <br>                             
-&nbsp;&nbsp;&nbsp;&nbsp;Used as multipath:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;n/a&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0                                                  <br>                             
-&nbsp;&nbsp;&nbsp;&nbsp;                                                                                              <br>                             
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Outbound&nbsp;&nbsp;&nbsp;&nbsp;Inbound                                            <br>                             
-&nbsp;&nbsp;Local Policy Denied Prefixes:&nbsp;&nbsp;&nbsp;&nbsp;--------&nbsp;&nbsp;&nbsp;&nbsp;-------                                            <br>                             
-&nbsp;&nbsp;&nbsp;&nbsp;Bestpath from this peer:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;8&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;n/a                                            <br>                             
-&nbsp;&nbsp;&nbsp;&nbsp;Invalid Path:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;14&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;n/a                                            <br>                             
-&nbsp;&nbsp;&nbsp;&nbsp;Total:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;22&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0                                            <br>                             
-&nbsp;&nbsp;Number of NLRIs in the update sent: max 9, min 0                                                <br>                             
-&nbsp;&nbsp;Last detected as dynamic slow peer: never                                                       <br>                             
-&nbsp;&nbsp;Dynamic slow peer recovered: never                                                              <br>                             
-&nbsp;&nbsp;Refresh Epoch: 1                                                                                <br>                             
-&nbsp;&nbsp;Last Sent Refresh Start-of-rib: 01:44:19                                                        <br>                             
-&nbsp;&nbsp;Last Sent Refresh End-of-rib: 01:44:19                                                          <br>                             
-&nbsp;&nbsp;Refresh-Out took 0 seconds                                                                      <br>                             
-&nbsp;&nbsp;Last Received Refresh Start-of-rib: never                                                       <br>                             
-&nbsp;&nbsp;Last Received Refresh End-of-rib: never                                                         <br>                             
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Sent&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Rcvd                                            <br>                             
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Refresh activity:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;----&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;----                                            <br>                             
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Refresh Start-of-RIB&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0                                              <br>                             
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Refresh End-of-RIB&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0                                              <br>                             
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                                                        <br>                             
-&nbsp;&nbsp;Address tracking is enabled, the RIB does have a route to 4.4.4.4                               <br>                             
-&nbsp;&nbsp;Connections established 2; dropped 1                                                            <br>                             
-&nbsp;&nbsp;Last reset 01:44:19, due to RR client config change of session 1                                <br>                             
-&nbsp;&nbsp;Transport(tcp) path-mtu-discovery is enabled                                                    <br>                             
-&nbsp;&nbsp;Graceful-Restart is disabled                                                                    <br>                             
-Connection state is ESTAB, I/O status: 1, unread input bytes: 0                                   <br>                             
-Connection is ECN Disabled, Mininum incoming TTL 0, Outgoing TTL 255                              <br>                             
-Local host: 6.6.6.6, Local port: 57887                                                            <br>                             
-Foreign host: 4.4.4.4, Foreign port: 179                                                          <br>                             
-Connection tableid (VRF): 0                                                                       <br>                             
-Maximum output segment queue size: 50                                                             <br>                             
-                                                                                                  <br>                             
-Enqueued packets for retransmit: 0, input: 0  mis-ordered: 0 (0 bytes)                            <br>                             
-                                                                                                  <br>                             
-Event Timers (current time is 0x92DCB0):                                                          <br>                             
-Timer&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Starts&nbsp;&nbsp;&nbsp;&nbsp;Wakeups&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Next                                                  <br>                             
-Retrans&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;233&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0x0                                                  <br>                             
-TimeWait&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0x0                                                  <br>                             
-AckHold&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;145&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;138&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0x0                                                  <br>                             
-SendWnd&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0x0                                                  <br>                             
-KeepAlive&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0x0                                                  <br>                             
-GiveUp&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0x0                                                  <br>                             
-PmtuAger&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;5597&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;5596&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0x92DF17                                                  <br>                             
-DeadWait&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0x0                                                  <br>                             
-Linger&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0x0                                                  <br>                             
-ProcessQ&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0x0                                                  <br>                             
-                                                                                                  <br>                             
-iss: 2305547986&nbsp;&nbsp;snduna: 2305552744&nbsp;&nbsp;sndnxt: 2305552744                                           <br>                             
-irs: 1586087929&nbsp;&nbsp;rcvnxt: 1586090809                                                               <br>                             
-                                                                                                  <br>                             
-sndwnd:&nbsp;&nbsp;16023&nbsp;&nbsp;scale:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;maxrcvwnd:&nbsp;&nbsp;16384                                                  <br>                             
-rcvwnd:&nbsp;&nbsp;14978&nbsp;&nbsp;scale:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;delrcvwnd:&nbsp;&nbsp;&nbsp;1406                                                  <br>                             
-                                                                                                  <br>                             
-SRTT: 1000 ms, RTTO: 1003 ms, RTV: 3 ms, KRTT: 0 ms                                               <br>                             
-minRTT: 8 ms, maxRTT: 1000 ms, ACK hold: 200 ms                                                   <br>                             
-Status Flags: active open                                                                         <br>                             
-Option Flags: nagle, path mtu capable                                                             <br>                             
-IP Precedence value : 6                                                                           <br>                             
-                                                                                                  <br>                             
-Datagrams (max data segment is 1460 bytes):                                                       <br>                             
-Rcvd: 377 (out of order: 0), with data: 146, total data bytes: 2879                               <br>                             
-Sent: 377 (retransmit: 0, fastretransmit: 0, partialack: 0, Second Congestion: 0), with data: 234, total data bytes: 4757 <br>      
-                                                                                                  <br>                             
- Packets received in fast path: 0, fast processed: 0, slow path: 0                                <br>                             
- fast lock acquisition failures: 0, slow path: 0                                                  <br>                             
-TCP Semaphore      0x6B259A44  FREE                                                               <br>                             
-R6#                                                                                               <br>                             
-</code></div>
-
 <h2>BGP Session Resets</h2>
 <p>
-If a policy configuration change is made to the BGP, such as route 
-manipulation using a route map, after a BGP device forms a peering with another 
-BGP device, depending on the change to the BGP route manipulation technique, 
-the BGP session may need to be refreshed to take effect. 
-BGP supports two methods of cleaning a session:
+If a policy configuration change is made to the BGP, such as a change in routing  
+policy, after a BGP device forms a peering with another BGP device the BGP 
+session may need to be reset for the changes to take effect. 
+BGP supports two methods of cleaning a session; hard reset and soft reset:
 <ul>
 <li><b>Hard reset:</b> tears down a BGP session and removes routes from a peer. 
 When a hard reset is initiated, BGP ends the session by closing the TCP connection to the BGP peer. It does this by 
@@ -1599,37 +1289,46 @@ sending a TCP message with the connection finish flag set (FIN) and a TCP handsh
 initiated. No ROUTE-REFRESH messages are exchanged with a hard reset.
 <p>
 A hard reset is implemented using the command
-<code style="font-size:120%"><b>clear bgp ipv4 unicast &lt;ip_address&gt;</b></code>.
+<code style="font-size:120%"><b>clear bgp ipv4 unicast 
+&lt;[ip_address|*]&gt;</b></code>. The IP address is for the peer whose BGP 
+session is to be reset. The "*" refers to all BGP peers.
+  <ul>
+    <li><code style="font-size:120%"><b>clear bgp ipv4 unicast &lt;*&gt;</b></code>:
+      <ul>
+        <li>The BGP sessions with all peers are reset. BGP sessions transition 
+        from Established to Idle and the re-establishment of peering starts again.</li>
+        <li>The entire BGP table is flushed.</li>
+        <li>All NLRI is learned again.</li>
+        <li>Hard reset can be a resource intensive process i.e. bandwidth, time, 
+        memory, CPU.</li>
+        </ul>
+     </li>
+     <li><code style="font-size:120%"><b>clear bgp ipv4 unicast &lt;ip_address&gt;</b></code>
+       <ul>
+         <li>Resets the BGP session with the specified peer.</li>
+         <li>High impact on network but less severe than <code style="font-size:120%"><b>
+         clear bgp ipv4 unicast &lt;*&gt;</b></code>.</li>
+       </ul>
+     </li>
+  </ul>
+
 A hard reset is not recommended in production networks as it clears the entire 
 Loc-RIB table which may be massive and may additionally have a cascading effect.
 </p>
 </li>
-<li><b>Soft Reset: </b>invalidates the cache and requests full advertisement.
+<li><b>Soft Reset: </b>invalidates the cache and requests full advertisement 
+without tearing down the TCP connection and BGP session.
 <code style="font-size:120%"><b>clear bgp ipv4 unicast &lt;ip_address&gt; soft</b></code>.
-<b>Soft reconfiguration: </b>
-We can configure a neighbor to support soft reconfiguration for inbound updates.
-For outbound soft reconfig is supported by default. Soft reconfiguration can be 
-enabled for a neighbor using the BGP address family command <code style="font-size:120%"><b>neighbor 
-&lt;ip-address&gt; soft-reconfiguration inbound</b></code>. For Outbound soft 
-reconfiguration, no neighbor manipulation in configuration is required as the 
-command <code style="font-size:120%"><b>clear ip bgp &lt;ip-address&gt; soft out</b></code> is sufficient.
-</li>
-</ul>
-Sessions can be cleared with all neighbors by using an asterisk in lieu of the peer's IP address. ROUTE-REFRESH messages 
-are sent by the device that initiated the route refresh to all BGP peers if an asterisk is used or to the BGP peer 
-whose IP address has been used in the refresh command in lieu of the asterisk.
-
-</p>
+This option is highly recommended when changing routing policy.
+<p>
+<p>
 <h3>BGP Route Refresh Capability</h3>
 <p>
-Negotiated capability sent in OPEN message. The TCP connnection between the peers
-is not cut off. Can ask peer to send an update without having to hard clear the 
-session. It does not consume memory like soft reconfigure inbound. Can be 
-implemented using the command:
-clear bgp ipv4 unicast [neighbor] soft in,
-clear bgp ipv4 unicast [neighbor] in
-clear bgp ipv4 unicast * in
-
+Route refresh capacity is negotiated shared OPEN message during the intial stages 
+of formation of a BGP session. The TCP connnection between the peers
+is not torn down. A BGP router can request a peer to send an update without 
+having to hard reset the session. Route refresh capacity does not consume memory
+like soft reconfigure inbound.
 </p>
 <p>
 When a BGP policy changes, the BGP table must be updated and the neighbors 
@@ -1643,6 +1342,29 @@ session is established. Performing a soft refresh on sessions that support route
 route refresh. Soft resets can be performed for a specific address family with the command:
 <code style="font-size:120%"><b>clear bgp afi safi &lt;ip_address&gt; soft &lt;(in | out)&gt;</b></code>
 </p>
+</p>
+<b>Soft reconfiguration: </b>   
+We can configure a neighbor to support soft reconfiguration for inbound updates.
+For outbound soft reconfig is supported by default. Soft reconfiguration can be 
+enabled for a neighbor using the BGP address family command <code style="font-size:120%"><b>neighbor 
+&lt;ip-address&gt; soft-reconfiguration inbound</b></code>. For Outbound soft 
+reconfiguration, no neighbor manipulation in configuration is required as the 
+command <code style="font-size:120%"><b>clear ip bgp &lt;ip-address&gt; soft out</b></code> is sufficient.
+The <code><b>soft out</b></code> option has no effect if the inbound policy is 
+modified. This method of soft reset can be used when both BGP peers do not support 
+automatic route refresh capability. On the downside, soft-reconfiguration is 
+memory intensive because a separate cache is maintained to store prefixes 
+before routing policy changes are applied to them.
+</p>
+</li>
+</ul>
+Sessions can be cleared with all neighbors by using an asterisk in lieu of the peer's IP address. ROUTE-REFRESH messages 
+are sent by the device that initiated the route refresh to all BGP peers if an asterisk is used or to the BGP peer 
+whose IP address has been used in the refresh command in lieu of the asterisk.
+
+</p>
+
+
 <p>
 Soft reconfiguration is used in environments where route refresh capability is 
 not supported.
@@ -5497,6 +5219,333 @@ To implement this feature, configure a community list:
 
 
 <h1 id="OPTIMIZATION">BGP Optimization</h1>
+
+
+<h2 id="PEER_GROUPS">Peer Groups</h2>
+<p>
+Peer groups simplify BGP configuration and reduce system resource use (CPU and memory) by grouping BGP peers together 
+into BGP update groups. Configuration of multiple neighbors can be done in one place.
+BGP update groups enable a BGP device to perform outbound routing policy processing one time and then replicate the 
+update to all members. All members in the peer group are in the same update group and therefore must be of the same 
+session type i.e. iBGP or eBGP but not mixed up.
+</p>
+<p>
+BGP peer groups simplify BGP configuration when there are multiple routers 
+assigned to a peer group. A BGP peer group is created through the following steps:
+<ul>
+  <li><b>Step 1:</b> Create the peer group using the BGP router command 
+<code style="font-size:120%"><b>neighbor &lt;group_name&gt; peer-group</b></code>.
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+<code style="font-size:120%">
+R6(config-router)#<b>neighbor AS65000 peer-group        </b>
+</code></div>
+</p>
+</li>
+  <li><b>Step 2:</b> Add BGP peers to the peer group using the command:
+<code style="font-size:120%"><b>neighbor &lt;ip_address &gt;peer-group &lt;group_name&gt;</b></code>.
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+<code style="font-size:120%">
+R6(config-router)#<b>neighbor 4.4.4.4 remote-as 65000   </b> <br>
+R6(config-router)#<b>neighbor 5.5.5.5 remote-as 65000   </b> <br>
+R6(config-router)#<b>neighbor 4.4.4.4 peer-group AS65000</b> <br>
+R6(config-router)#<b>neighbor 5.5.5.5 peer-group AS65000</b> <br>
+</code></div>
+</p>
+</li>
+  <li>
+  <p>
+  <b>Step 3:</b> All BGP parameters are configured using <code style="font-size:120%"><b>peer-group &lt;group_name&gt;</b></code> in lieu of 
+<code style="font-size:120%"><b>neighbor &lt;ip_address&gt;</b></code>.
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+<code style="font-size:120%">
+R6(config-router)#<b>neighbor AS65000 next-hop-self     </b> <br>
+</code></div>
+</p>
+</li>
+</ul>
+</p>
+<p>
+BGP neighbors cannot be activated by a peer group name and must be activated for each address family by IP address.
+</p>
+
+<p>
+The following actions can be implemented against a peer-group that will affect the peer-group's individual members:
+<ol>
+  <li><b>Reset of BGP neighborship:</b> This can be a soft reset or hard reset e.g. 
+  <code style="font-size:120%"><b>R6#clear bgp ipv4 unicast peer-group AS65000 soft out</b></code>.</li>
+  <li><b>Route-filtering using route-maps, distribute-lists and filter-lists.</b>
+</ol>
+Peer groups can be verified using the command <code style="font-size:120%"><b>show ip bgp update-group</b></code>.
+</p>
+<h3>Troubleshooting Peer Groups</h3>
+<p>
+When troubleshooting peer group issues, you need to take note of the following:
+<ul>
+  <li>The neighbor ip address was not associated with the configured peer group.
+  <li>The peer group is not configured correctly; what works for one neighbor might not work for the other. 
+  <li>The route filter applied to the group is not appropriate for all the peers.
+  <li>If there are conflicting entries between the peer group and a specific neighbor statement, 
+  the neighbor statement wins.</li>
+</ul>
+</p>
+
+<h2 id="PEER_TEMPLATES">Peer Templates</h2>
+<p>
+BGP peer templates are BGP configurations that can be applied to one or more BGP peers. 
+BGP peer templates can inherit configurations from other peer templates.
+If a conflict exists between an inherited configuration and the invoking
+peer template, the invoking template preempts the inherited value.
+There are two types of BGP peer templates: peer session templates and peer policy 
+templates.
+
+</p>
+
+<h3>Peer session</h3> 
+<p>
+This type of template involves configuration settings specifically for the BGP session.
+Peer session templates are used to group and apply the configuration of general BGP session commands to
+groups of neighbors that share session configuration. 
+Peer session templates can be applied regardless of address families of the neighbors.
+</p>
+<p>
+General session commands can be configured once in a peer session template and then applied to many
+neighbors through the direct application of a peer session template or through indirect inheritance from a peer
+session template.
+Peer session templates support direct and indirect inheritance. A BGP neighbor can be configured with only
+one peer session template at a time, and that peer session template can contain only one indirectly inherited
+peer session template. A BGP neighbor can directly inherit only one session template and can indirectly inherit
+up to seven additional peer session templates.
+</p>
+<p>
+You define peer session template settings with the BGP configuration command 
+<code style="font-size:120%"><b>template peer-session &lt;template-name&gt;</b></code> and then
+enter any BGP session related configuration commands.
+</p>
+
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+<code style="font-size:120%">
+R6#<b>configure terminal</b><br>
+R6(config)#<b>router bgp 65000</b><br>
+R6(config-router)#<b>template peer-session BGP_SESSION_TEMPLATE_AS65000</b><br>
+R6(config-router-stmp)#<b>remote-as 65000</b><br>
+R6(config-router-stmp)#<b>update-source loopback0</b><br>
+R6(config-router-stmp)#<b>timers 30 90 60</b>
+</code></div>
+<p>
+The peer-session template can then be applied to a group of BGP peers using the <code style="font-size:120%"><b>inherit</b></code> keyword 
+in BGP router mode.
+</p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+<code style="font-size:120%">
+R6(config-router)#<b>neighbor 4.4.4.4 inherit peer-session BGP_SESSION_TEMPLATE_AS65000</b><br>
+R6(config-router)#<b>neighbor 5.5.5.5 inherit peer-session BGP_SESSION_TEMPLATE_AS65000</b>
+</code></div>
+
+<p>
+Verification of the peer-session can be done using the privileged mode command: 
+<code style="font-size:120%"><b>show bgp ipv4 unicast template peer-session</b></code>
+</p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+<code style="font-size:120%">
+R6#<b>show bgp ipv4 unicast template peer-session</b><br>
+Template:BGP_SESSION_TEMPLATE_AS65000, index:1 <br>
+Local policies:0xA1, Inherited polices:0x0     <br>
+Locally configured session commands:           <br>
+&nbsp;remote-as 65000                               <br>
+&nbsp;update-source Loopback0                       <br>
+&nbsp;timers 30 90 60                               <br>
+Inherited session commands:                    <br>
+                                               <br>
+R6#
+</code></div>
+
+<h3>Peer policy</h3>
+<p>
+Peer policy templates are used to configure BGP policy commands for neighbors that
+belong to specific address families. Peer policy templates are configured once and then applied to many
+neighbors through the direct application of a peer policy template or through inheritance from peer policy
+templates. The configuration of peer policy templates simplifies the configuration of BGP policy commands
+that are applied to all neighbors within an autonomous system.
+</p>
+<p>
+Peer policy templates support inheritance. A directly applied peer policy template can directly or indirectly
+inherit configurations from up to seven peer policy templates. So, a total of eight peer policy templates can
+be applied to a neighbor or neighbor group.
+</p>
+
+<p>
+BGP policy configuration commands that are configured only for a specific address family.
+You define peer policy template settings with the BGP configuration command 
+<code style="font-size:120%"><b>template peer-policy &lt;template-name&gt;</b></code> and
+then enter any BGP address family–related configuration commands. 
+</p>
+
+<p>
+BGP peer policy templates are applied to a BGP peer in address-family mode using 
+the <code style="font-size:120%"><b>inherit</b></code> keyword.
+</p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+<code style="font-size:120%">
+R6(config-router)#<b>template peer-policy BGP_POLICY_TEMPLATE_AS65000</b><br>
+R6(config-router-ptmp)#<b>send-community both</b><br>
+R6(config-router-ptmp)#<b>route-reflector-client</b><br>
+R6(config-router-ptmp)#<b>exit</b><br>
+R6(config-router)#<b>address-family ipv4 unicast</b><br>
+R6(config-router-af)#<b>neighbor 4.4.4.4 inherit peer-policy BGP_POLICY_TEMPLATE_AS65000</b><br>
+R6(config-router-af)#<b>neighbor 5.5.5.5 inherit peer-policy BGP_POLICY_TEMPLATE_AS65000</b><br>
+</code></div>
+<p>
+Peer-policies can be verified using the privileged mode command: 
+<code style="font-size:120%"><b>show bgp ipv4 unicast template peer-policy</b></code>
+</p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+<code style="font-size:120%">
+R6#<b>show bgp ipv4 unicast template peer-policy </b>        <br>
+Template:BGP_POLICY_TEMPLATE_AS65000, index:1.               <br>
+Local policies:0x20000008200, Inherited polices:0x0          <br>
+Local disable policies:0x0, Inherited disable policies:0x0   <br>
+Locally configured policies:                                 <br>
+&nbsp;&nbsp;route-reflector-client                                     <br>
+&nbsp;&nbsp;send-community both                                        <br>
+Inherited policies:                                          <br>
+                                                             <br>
+R6#
+</code></div>
+
+<p>
+<b>Note:</b> A BGP peer cannot inherit from a peer-policy template or peer-session 
+template and be configured as a peer group member at the same time. BGP templates 
+and BGP peer groups are mutually exclusive.
+</p>
+<p>
+The peer session and peer policy templates configured for a BGP peer can be verified using the privileged mode command: 
+<code style="font-size:120%"><b>show bgp ipv4 unicast neighbor &lt;ip_address&gt;</b></code>
+</p>
+
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+<code style="font-size:120%">
+R6#<b>show bgp ipv4 unicast neighbor 4.4.4.4 </b>                                                 <br>                             
+BGP neighbor is 4.4.4.4,  remote AS 65000, internal link                                          <br>                             
+&nbsp;<span style="background-color: #A8A8A8">Inherits from template BGP_SESSION_TEMPLATE_AS65000 for session parameters </span>                      <br>                             
+&nbsp;&nbsp;&nbsp;BGP version 4, remote router ID 4.4.4.4                                                         <br>                             
+&nbsp;&nbsp;&nbsp;Neighbor under common administration                                                            <br>                             
+&nbsp;&nbsp;&nbsp;BGP state = Established, up for 01:44:19                                                        <br>                             
+&nbsp;&nbsp;&nbsp;Last read 00:00:16, last write 00:00:05, hold time is 90, keepalive interval is 30 seconds      <br>                             
+&nbsp;&nbsp;&nbsp;Configured hold time is 90, keepalive interval is 30 seconds                                    <br>                             
+&nbsp;&nbsp;&nbsp;Minimum holdtime from neighbor is 60 seconds                                                    <br>                             
+&nbsp;&nbsp;&nbsp;Neighbor sessions:                                                                              <br>                             
+&nbsp;&nbsp;&nbsp;  1 active, is not multisession capable (disabled)                                              <br>                             
+&nbsp;&nbsp;&nbsp;Neighbor capabilities:                                                                          <br>                             
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Route refresh: advertised and received(new)                                                   <br>                             
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Four-octets ASN Capability: advertised and received                                           <br>                             
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Address family IPv4 Unicast: advertised and received                                          <br>                             
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Enhanced Refresh Capability: advertised and received                                          <br>                             
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Multisession Capability:                                                                      <br>                             
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Stateful switchover support enabled: NO for session 1                                         <br>                             
+&nbsp;&nbsp;&nbsp;Message statistics:                                                                             <br>                             
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;InQ depth is 0                                                                                <br>                             
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;OutQ depth is 0                                                                               <br>                             
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                                                              <br>                             
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Sent&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Rcvd                                                          <br>                             
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Opens:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1                                                          <br>                             
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Notifications:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0                                                          <br>                             
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Updates:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2                                                          <br>                             
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Keepalives:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;230&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;144                                                          <br>                             
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Route Refresh:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0                                                          <br>                             
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Total:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;237&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;147                                                          <br>                             
+&nbsp;&nbsp;&nbsp;Default minimum time between advertisement runs is 0 seconds                                    <br>                             
+&nbsp;&nbsp;                                                                                                 <br>                             
+&nbsp;For address family: IPv4 Unicast                                                                 <br>                             
+&nbsp;&nbsp;Session: 4.4.4.4                                                                                <br>                             
+&nbsp;&nbsp;BGP table version 65, neighbor version 65/0                                                     <br>                             
+&nbsp;&nbsp;Output queue size : 0                                                                           <br>                             
+&nbsp;&nbsp;Index 3, Advertise bit 1                                                                        <br>                             
+&nbsp;&nbsp;Route-Reflector Client                                                                          <br>                             
+&nbsp;&nbsp;3 update-group member                                                                           <br>                             
+&nbsp;&nbsp;<span style="background-color: #A8A8A8">Inherits from template BGP_POLICY_TEMPLATE_AS65000</span>                                              <br>                             
+&nbsp;&nbsp;Community attribute sent to this neighbor                                                       <br>                             
+&nbsp;&nbsp;Slow-peer detection is disabled                                                                 <br>                             
+&nbsp;&nbsp;Slow-peer split-update-group dynamic is disabled                                                <br>                             
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Sent&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Rcvd                                                  <br>                             
+&nbsp;&nbsp;Prefix activity:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;----&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;----                                                  <br>                             
+&nbsp;&nbsp;&nbsp;&nbsp;Prefixes Current: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;20&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3 (Consumes 192 bytes)                             <br>                             
+&nbsp;&nbsp;&nbsp;&nbsp;Prefixes Total:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;32&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3                                                  <br>                             
+&nbsp;&nbsp;&nbsp;&nbsp;Implicit Withdraw:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;9&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0                                                  <br>                             
+&nbsp;&nbsp;&nbsp;&nbsp;Explicit Withdraw:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0                                                  <br>                             
+&nbsp;&nbsp;&nbsp;&nbsp;Used as bestpath:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;n/a&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3                                                  <br>                             
+&nbsp;&nbsp;&nbsp;&nbsp;Used as multipath:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;n/a&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0                                                  <br>                             
+&nbsp;&nbsp;&nbsp;&nbsp;                                                                                              <br>                             
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Outbound&nbsp;&nbsp;&nbsp;&nbsp;Inbound                                            <br>                             
+&nbsp;&nbsp;Local Policy Denied Prefixes:&nbsp;&nbsp;&nbsp;&nbsp;--------&nbsp;&nbsp;&nbsp;&nbsp;-------                                            <br>                             
+&nbsp;&nbsp;&nbsp;&nbsp;Bestpath from this peer:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;8&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;n/a                                            <br>                             
+&nbsp;&nbsp;&nbsp;&nbsp;Invalid Path:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;14&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;n/a                                            <br>                             
+&nbsp;&nbsp;&nbsp;&nbsp;Total:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;22&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0                                            <br>                             
+&nbsp;&nbsp;Number of NLRIs in the update sent: max 9, min 0                                                <br>                             
+&nbsp;&nbsp;Last detected as dynamic slow peer: never                                                       <br>                             
+&nbsp;&nbsp;Dynamic slow peer recovered: never                                                              <br>                             
+&nbsp;&nbsp;Refresh Epoch: 1                                                                                <br>                             
+&nbsp;&nbsp;Last Sent Refresh Start-of-rib: 01:44:19                                                        <br>                             
+&nbsp;&nbsp;Last Sent Refresh End-of-rib: 01:44:19                                                          <br>                             
+&nbsp;&nbsp;Refresh-Out took 0 seconds                                                                      <br>                             
+&nbsp;&nbsp;Last Received Refresh Start-of-rib: never                                                       <br>                             
+&nbsp;&nbsp;Last Received Refresh End-of-rib: never                                                         <br>                             
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Sent&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Rcvd                                            <br>                             
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Refresh activity:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;----&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;----                                            <br>                             
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Refresh Start-of-RIB&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0                                              <br>                             
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Refresh End-of-RIB&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0                                              <br>                             
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                                                        <br>                             
+&nbsp;&nbsp;Address tracking is enabled, the RIB does have a route to 4.4.4.4                               <br>                             
+&nbsp;&nbsp;Connections established 2; dropped 1                                                            <br>                             
+&nbsp;&nbsp;Last reset 01:44:19, due to RR client config change of session 1                                <br>                             
+&nbsp;&nbsp;Transport(tcp) path-mtu-discovery is enabled                                                    <br>                             
+&nbsp;&nbsp;Graceful-Restart is disabled                                                                    <br>                             
+Connection state is ESTAB, I/O status: 1, unread input bytes: 0                                   <br>                             
+Connection is ECN Disabled, Mininum incoming TTL 0, Outgoing TTL 255                              <br>                             
+Local host: 6.6.6.6, Local port: 57887                                                            <br>                             
+Foreign host: 4.4.4.4, Foreign port: 179                                                          <br>                             
+Connection tableid (VRF): 0                                                                       <br>                             
+Maximum output segment queue size: 50                                                             <br>                             
+                                                                                                  <br>                             
+Enqueued packets for retransmit: 0, input: 0  mis-ordered: 0 (0 bytes)                            <br>                             
+                                                                                                  <br>                             
+Event Timers (current time is 0x92DCB0):                                                          <br>                             
+Timer&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Starts&nbsp;&nbsp;&nbsp;&nbsp;Wakeups&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Next                                                  <br>                             
+Retrans&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;233&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0x0                                                  <br>                             
+TimeWait&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0x0                                                  <br>                             
+AckHold&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;145&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;138&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0x0                                                  <br>                             
+SendWnd&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0x0                                                  <br>                             
+KeepAlive&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0x0                                                  <br>                             
+GiveUp&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0x0                                                  <br>                             
+PmtuAger&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;5597&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;5596&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0x92DF17                                                  <br>                             
+DeadWait&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0x0                                                  <br>                             
+Linger&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0x0                                                  <br>                             
+ProcessQ&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0x0                                                  <br>                             
+                                                                                                  <br>                             
+iss: 2305547986&nbsp;&nbsp;snduna: 2305552744&nbsp;&nbsp;sndnxt: 2305552744                                           <br>                             
+irs: 1586087929&nbsp;&nbsp;rcvnxt: 1586090809                                                               <br>                             
+                                                                                                  <br>                             
+sndwnd:&nbsp;&nbsp;16023&nbsp;&nbsp;scale:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;maxrcvwnd:&nbsp;&nbsp;16384                                                  <br>                             
+rcvwnd:&nbsp;&nbsp;14978&nbsp;&nbsp;scale:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;delrcvwnd:&nbsp;&nbsp;&nbsp;1406                                                  <br>                             
+                                                                                                  <br>                             
+SRTT: 1000 ms, RTTO: 1003 ms, RTV: 3 ms, KRTT: 0 ms                                               <br>                             
+minRTT: 8 ms, maxRTT: 1000 ms, ACK hold: 200 ms                                                   <br>                             
+Status Flags: active open                                                                         <br>                             
+Option Flags: nagle, path mtu capable                                                             <br>                             
+IP Precedence value : 6                                                                           <br>                             
+                                                                                                  <br>                             
+Datagrams (max data segment is 1460 bytes):                                                       <br>                             
+Rcvd: 377 (out of order: 0), with data: 146, total data bytes: 2879                               <br>                             
+Sent: 377 (retransmit: 0, fastretransmit: 0, partialack: 0, Second Congestion: 0), with data: 234, total data bytes: 4757 <br>      
+                                                                                                  <br>                             
+ Packets received in fast path: 0, fast processed: 0, slow path: 0                                <br>                             
+ fast lock acquisition failures: 0, slow path: 0                                                  <br>                             
+TCP Semaphore      0x6B259A44  FREE                                                               <br>                             
+R6#                                                                                               <br>                             
+</code></div>
+
+
 
 <h2 id="SUMMARIZATION">Route Summarization</h2>
 <p>
