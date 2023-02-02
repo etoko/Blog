@@ -928,9 +928,9 @@ eBGP has the following features:
    Time-to-live (TTL) of one (1) to avoid the use of any other routing path.
    However, if any one of the directly connected interfaces fail, the eBGP session 
    may get torn down. This can be modified using the BGP commands 
-   <code style="font-size:120%"><b>neighbor &lt;ip-address&gt;  
+   <code style="font-size:120%"><b>neighbor &lt;ip_address&gt;  
    ebgp-multihop &lt;1 - 255&gt;</b></code> or  
-   <code style="font-size:120%"><b>neighbor  &lt;ip-address&gt; ttl-security hops &lt;1 - 255&gt;</b></code>.
+   <code style="font-size:120%"><b>neighbor  &lt;ip_address&gt; ttl-security hops &lt;1 - 255&gt;</b></code>.
    
    The TTL-security feature can be configured to enforce the requirement for the 
    neighbors to be directly adjacent. TTL-security needs to be configured on both 
@@ -940,7 +940,7 @@ eBGP has the following features:
    <li>eBGP peering can use a loopback interface as the outgoing interface. 
    In such a configuration, the requirement for directly connected peers can be 
    disabled using the BGP command 
-   <code style="font-size:120%"><b>neighbor &lt;ip-address&gt; disable-connected-check</b></code>.
+   <code style="font-size:120%"><b>neighbor &lt;ip_address&gt; disable-connected-check</b></code>.
    <li>The next-hop field is changed for prefixes received from an eBGP peer. 
    The local router modifies the next hop to the IP address of its exit interface 
    when it advertises to an iBGP peer a prefix received from an eBGP peer. </li>
@@ -1119,7 +1119,7 @@ prefixes and their attributes.</b>
 BGP uses the UPDATE message to advertise and withdraw NLRI.
 NLRI can be originated in multiple ways:
 <ol>
-  <li><b>Network statement:</b> The syntax of the network statement is <code style="font-size:120%;"><b>network &lt;ip-address&gt; 
+  <li><b>Network statement:</b> The syntax of the network statement is <code style="font-size:120%;"><b>network &lt;ip_address&gt; 
      mask &lt;netmask&gt;</b></code>. 
      <ul> 
       <li>Prefixes originated using the network statement have an ORIGIN path 
@@ -1350,9 +1350,9 @@ route refresh. Soft resets can be performed for a specific address family with t
 We can configure a neighbor to support soft reconfiguration for inbound updates.
 For outbound soft reconfig is supported by default. Soft reconfiguration can be 
 enabled for a neighbor using the BGP address family command <code style="font-size:120%"><b>neighbor 
-&lt;ip-address&gt; soft-reconfiguration inbound</b></code>. For Outbound soft 
+&lt;ip_address&gt; soft-reconfiguration inbound</b></code>. For Outbound soft 
 reconfiguration, no neighbor manipulation in configuration is required as the 
-command <code style="font-size:120%"><b>clear ip bgp &lt;ip-address&gt; soft out</b></code> is sufficient.
+command <code style="font-size:120%"><b>clear ip bgp &lt;ip_address&gt; soft out</b></code> is sufficient.
 The <code><b>soft out</b></code> option has no effect if the inbound policy is 
 modified. This method of soft reset can be used when both BGP peers do not support 
 automatic route refresh capability. On the downside, soft-reconfiguration is 
@@ -1439,17 +1439,11 @@ attacks that attempt to degrade the network by flooding it with
 IP packets that contain forged source and destination IP addresses.
 </p>
 <p>
-The BGP Support for TTL Security Check feature is configured with the 
-<code style="font-size:120%"><b>neighbor &lt;ip-address&gt; ttl-security hops &lt;1-254&gt;</b></code> command in
-router configuration mode or address family configuration mode.
-The hop-count argument is used
-to configure the maximum number of hops that separate the two peers. The TTL value is determined by the
-router from the configured hop count. The value for this argument is a number from 1 to 254.
-Configuring a hop value to one (1) results in the dropping of a peer session that 
-is more than one hop away, although the BGP messages will contain a TTL value 
-of 255.
-</p>
-<p>
+The TTL security feature is configured with the 
+<code style="font-size:120%"><b>neighbor &lt;ip_address&gt; ttl-security hops &lt;1-254&gt;</b></code> command in
+BGP configuration mode or BGP address family configuration mode.
+The hop count argument is used to configure the maximum number of hops that 
+separate the two peers. 
 The TTL security check protects the eBGP neighbor session by comparing the value in the TTL field
 of received IP packets against a hop count that is configured locally for each eBGP neighbor session. If the
 value in the TTL field of the incoming IP packet is greater than or equal to the locally configured value, the
@@ -1464,7 +1458,8 @@ has been compromised.
 TTL security check supports both directly connected neighbor sessions and multihop eBGP
 neighbor sessions. The BGP neighbor session is not affected by incoming packets that contain invalid TTL
 values. The BGP neighbor session will remain open, and the router will silently discard the invalid packet.
-The BGP session, however, can still expire if keepalive packets are not received before the session timer
+The BGP session, however, eventually are closed after the expiry of the hold timer 
+value due to the discarding of keepalive messages.
 expires. This results in a NOTIFICATION message being sent with the error code of Hold Timer Expired.
 </p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
@@ -1565,7 +1560,7 @@ R8(config-router)#<b>neighbor 7.7.7.7 ttl-security hops 2 </b> <br>
 The following commands are helpful for understanding the operational state of 
 BGP:
 <h2>Verifying BGP Session and Neighbors</h2>
-<h4><code style="font-size:120%">show tcp brief</code></h4>
+<h3><code style="font-size:120%">show tcp brief</code></h3>
 <p>
 Displays the status of the TCP connections.
 </p>
@@ -1585,36 +1580,65 @@ and 4.4.4.4. The local device acts as a BGP server to the remote BGP peer 10.67.
 <p>
 BGP sessions are server/client relationships with one peer acting as a server and 
 another as the client. The BGP peer acting as the server opens TCP port 179 
-and listens for connections on this port. The client initiates connections to 
-the server on port 179 using an ephemeral port as the source TCP port. The TCP 
-server must agree on where the clients session is coming from i.e. the IP address 
-of the client. If a client's IP address has not be preconfigured on the server, 
-it will frop the TCP connection attempt from the client with a TCP RST packet.
+and listens for connections from BGP clients on this port. The client initiates 
+a connection to the server on port 179 using an ephemeral port as the source TCP port.
+The BGP peer acting as the server will accept connections from clients with 
+preconfigured IP address to connect to it. If a client's IP address has not been preconfigured on the server, 
+it will drop the TCP connection attempt from the client with a TCP RST reply message.
 </p>
 <p>
 BGP peers use the TCP three-way handshake to create a BGP session. If both peers 
 try to create a TCP session at the same time, when initiating the TCP three-way 
 handshake, both peers send a TCP SYN packet sourced from an ephemeral port and 
-destined to port 179. If the TCP SYN lpacket is sent at the the same type by both peers, both BGP peers respond with 
-an ACK to the request on port 179, resulting in two BGP sessions being created.  
+destined to port 179. If the TCP SYN packet is sent at the same time by both 
+peers, both BGP peers respond with an ACK to the request on port 179, resulting 
+in two BGP sessions being created.  
 This condition is called a <b>BGP connection collision</b>. BGP handles this 
 condition by making the BGP peer with the higher BGP RID to become the server 
 and maintaining only one TCP session between the two BGP peers. 
 To avoid BGP connection collisions, the server and client roles can be predetermined 
 right from the start by using the
-<code style="font-size:120%"><b>neighbor &lt;ip_address&gt; transport connection-mode &lt;active | passive&gt;</b></code> command where active means 
-client, passive means server.
+<code style="font-size:120%"><b>neighbor &lt;ip_address&gt; transport connection-mode 
+&lt;active | passive&gt;</b></code> command where active means client, passive 
+means server.
 </p>
 <p>
 Client connections can be viewed using the command <code style="font-size:120%"><b>show control-plane 
-host open-ports</b></code>; this command may be version specific. The client's 
-packet is sourced from the outgoing interface in the routing table. However, 
+host open-ports</b></code>; this command may be version specific. The output 
+of this command is shown below:
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+<code style="font-size:120%">
+R1#<b>show control-plane host open-ports</b>                                                      <br>
+Active internet connections (servers and established)                                             <br>
+Prot&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Local Address&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Foreign Address&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Service&nbsp;&nbsp;&nbsp;&nbsp;State    <br>
+&nbsp;tcp&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*:23&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*:0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Telnet&nbsp;&nbsp;&nbsp;LISTEN    <br>
+&nbsp;tcp&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*:14272&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;41.250.250.1:179&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;IOS host service&nbsp;ESTABLIS    <br>
+&nbsp;tcp&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*:179&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.255.255.3:50138&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BGP&nbsp;ESTABLIS    <br>
+&nbsp;tcp&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*:56801&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.255.255.5:179&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;IOS host service&nbsp;ESTABLIS    <br>
+&nbsp;tcp&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*:179&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.255.255.4:33629&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BGP&nbsp;ESTABLIS    <br>
+&nbsp;tcp&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*:179&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*:0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BGP&nbsp;&nbsp;&nbsp;LISTEN    <br>
+&nbsp;tcp&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*:179&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*:0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BGP&nbsp;&nbsp;&nbsp;LISTEN    <br>
+&nbsp;tcp&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*:179&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*:0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BGP&nbsp;&nbsp;&nbsp;LISTEN    <br>
+&nbsp;tcp&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*:179&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*:0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BGP&nbsp;&nbsp;&nbsp;LISTEN    <br>
+&nbsp;tcp&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*:179&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*:0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BGP&nbsp;&nbsp;&nbsp;LISTEN    <br>
+&nbsp;tcp&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*:179&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*:0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BGP&nbsp;&nbsp;&nbsp;LISTEN    <br>
+&nbsp;tcp&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*:40321&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.255.255.6:179&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;IOS host service&nbsp;ESTABLIS    <br>
+&nbsp;tcp&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*:179&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.255.255.2:52089&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BGP&nbsp;ESTABLIS    <br>
+
+R1#
+</code></div>
+
+</p>
+<p>
+It is important to note that the client's packet is sourced from the outgoing 
+interface in the routing table. However, 
 this can be modified using the BGP command <code style="font-size:120%"><b>update-source</b></code> 
-per neighbor.
+for each BGP neighbor. i.e. <code style="font-size:120%"><b>
+neighbor 10.255.255.2 update-source Loopback255</b></code>.
 </p>
 
 
-<h4><code style="font-size:120%">show bgp ipv4 unicast summary</code></h4> 
+<h3><code style="font-size:120%">show bgp ipv4 unicast summary</code></h3> 
 <p>
 Summary of BGP neighbor status. The following information can be learned from the output of this command: 
 <ul>
@@ -1660,7 +1684,9 @@ R6#                                                                             
 </thead>
 <tbody>
 <tr><td style="border-bottom: solid 1px; font-weight:bold;">Neighbor:</td>
-    <td style="border-bottom: solid 1px;">IP address of the BGP peer</td></tr>
+    <td style="border-bottom: solid 1px;">IP address of the BGP peer. This 
+    address is the same that was configured when configuring the peering using the  
+    <code style="font-size:120%;"><b>neighbor &lt;ip_address&gt; remote-as &lt;asn&gt;</b></code> command.</td></tr>
 <tr><td style="border-bottom: solid 1px; font-weight:bold;">V</td>
     <td style="border-bottom: solid 1px;">BGP version used by the BGP peer</td></tr>
 <tr><td style="border-bottom: solid 1px; font-weight:bold;">AS</td>
@@ -1696,7 +1722,8 @@ that the local BGP device or remote BGP peer does not have a route to the neighb
 <h4><code style="font-size:120%">show bgp ipv4 unicast neighbors &lt;ip_address&gt;</code></h4>
 <p>
 Displays detailed information on the BGP process, prefixes received from 
-neighbors and transmitted to neighbors, neighbor state and capabilities.
+neighbors and transmitted to neighbors, neighbor state and capabilities. Additional 
+keywords to the above command display additional information for each neighbor:
 </p>
 <p>
 <table cellspacing="0" width="100%">
@@ -2227,16 +2254,17 @@ The four major BGP processes include:
 <ol>
   <li><b>Scheduler:</b> schedules the various processes used by BGP.</li>
   <li><b>Router:</b> processes policy, best path algorithm.</li>
-  <li><b>IO:</b> responsible for moving prefixes into the InQ and and out of the OutQ.</li>
+  <li><b>I/O:</b> responsible for moving prefixes into the InQ and and out of the OutQ.</li>
   <li><b>Scanner:</b> watches for changes such as next hop unreachability and removal 
   of prefixes because of this. It evaluates prefixes as a result of the configuration 
   of the network command. The scanner runs every 60 seconds by default. 
-  This can be modified using the BGP command <code style="font-size:120%;"><b>bgp scan-time &lt;5-60&gt;</b></code></li>
+  This can be modified using the BGP command <code style="font-size:120%;">
+  <b>bgp scan-time &lt;5-60&gt;</b></code>.</li>
 </ol>
 </p>
 <p>
-Other significant BGP processes include the following: these processes support the 
-operation of the scanner process;
+Other significant BGP processes include the following (these processes support the 
+operation of the scanner process):
 <ol>
   <li><b>BMP Server:</b> for the BGP monitoring protocol for monitoring the BGP neighborships.</li>
   <li><b>NHT:</b> next hop tracker process helps the scanner for scanning changes in the 
@@ -2269,12 +2297,11 @@ this default configuration is disabled.
 
 <p>
 Locally originated network prefixes are installed into the BGP table with the 
-command: <code style="font-size:120%"><b>network &lt;ip-address&gt; mask &lt;subnetmask&gt; 
+command: <code style="font-size:120%"><b>network &lt;ip_address&gt; mask &lt;subnetmask&gt; 
 [route-map &lt;route-map-name&gt;]</b></code>. 
 The optional route map can be used to modify BGP path attributes at the time the 
 route is installed into the Loc-RIB.  
-</p>
-<p>
+
 The BGP <code style="font-size:120%; font-weight:bold;">network</code> command 
 does not enable BGP on a specific interface. It is used to identify networks that 
 already exist in the RIB that should be installed in the Loc-RIB table. The 
@@ -2294,14 +2321,31 @@ the following path attributes are set, depending on the RIB prefix type:
    <li>The next-hop path attribute is set to 0.0.0.0</li>
    <li>BGP origin attribute is set to i (for IGP)</li>
    <li>BGP weight is set to 32,768.</li>
-   </ol></li>
-<li><b>Static route or routing protocol:</b> for prefixes that are learnt through 
+   </ol>
+   </li>
+   <li>
+   <b>Static routes:</b> for static routes;
+     <ol>
+       <li>The next-hop is set to 0.0.0.0.</li>
+       <li>The origin is set to IGP.</li>
+       <li>The loclpref is set to 100.</li>
+       <li>The weight is set to 32,768</li>
+     </ol>
+   </li>
+<li><b>Prefixes learned from a routing protocol:</b> for prefixes that are learnt through 
 a routing protocol or statically configured:
   <ol>
   <li>Next-hop path attribute is set to the next-hop IP address in the RIB.</li> 
   <li>BGP origin attribute is set to i (for IGP)</li>
   <li>BGP weight is set to 32,768</li>
+  <li>The Local Pref is set to 100.</li>
   <li>Multi-exit discriminator (MED) is set to the IGP metric.</li>
+  <li><b>Redistributed prefixes:</b> prefixes explicitly redistributed from 
+  another routing protocol into BGP;</li>
+  <ol>
+    <li>The origin is set to incomplete with the symbol <b>?</b>.</li>
+    <li>
+  </ol>
   </ol>
   </li>
 </ul>
@@ -2313,10 +2357,11 @@ this command under the section: <a href="#PREFIX_VERIFICATION">Verifying BGP Pre
 </p>
 
 <p>
-In the Loc-RIB table, redistributed routes have "?" for origin code. When receiving 
+When receiving 
 prefixes, inbound route policies are checked prior to the route being inserted 
 into the Loc-RIB. After insertion into the Loc-RIB, a next-hop check is performed.
-Then identification of the best BGP path is performed and prefix is then inserted into the RIB.
+Then identification of the best BGP path is performed and prefix is then offered 
+for installation into the RIB.
 </p>
 <p>
 Outbound route policies are performed before prefixes enter Adj-RIB-out and then advertised to peers.
@@ -2327,15 +2372,16 @@ apply to the best paths.
 
 <h3>Parsing the BGP Table using Regexp Queries</h3>
 <p>
-The Internet BGP table contains over 800,000 prefixes. When querying this massive 
+The Internet BGP table contains over 940,000 prefixes. When querying this massive 
 BGP table, the use of regular expressions makes it easier to retrieve required 
 information.
 
 The BGP table can be parsed with regular expressions using the command 
 <code style="font-size:120%"><b>show bgp &lt;afi&gt; &lt;safi&gt; regexp &lt;regex-pattern&gt;</b></code>. 
-These regular expressions can also be used to filter through the large number of 
-available ASNs (4,294,967,295). 
-
+These regular expressions can also be used to filter through the prefixes received 
+from the large number of ASNs (4,294,967,295). 
+</p>
+<p>
 <table width="100%" cellspacing="0">
 <thead>
 <tr>
@@ -2356,7 +2402,7 @@ available ASNs (4,294,967,295).
 <tr><td  style="border-bottom: solid 1px;" >[^] (caret in brackets)</td>
     <td  style="border-bottom: solid 1px;" >Excludes the characters listed in brackets</td></tr>
 <tr><td  style="border-bottom: solid 1px;" >() (parentheses)</td>
-   <td>  style="border-bottom: solid 1px;" Used for nesting search patterns</td></tr>
+    <td  style="border-bottom: solid 1px;"> Used for nesting search patterns</td></tr>
 <tr><td  style="border-bottom: solid 1px;" >| (pipe)</td>
     <td  style="border-bottom: solid 1px;" >&lt;OR&gt; functionality in a query</td></tr>
 <tr><td  style="border-bottom: solid 1px;" >. (period)</td>
@@ -2370,7 +2416,10 @@ available ASNs (4,294,967,295).
 </tbody>
 </table>
 </p>
+<h3>Examples</h3>
+<p>
 
+</p>
 <h3>Loc-RIB Table Version</h3>
 <p>
 The BGP table can be viewed using the command <code style="font-size:120%"><b>show bgp ipv4 unicast summary</b></code>.
@@ -2703,7 +2752,7 @@ the routing table. Using the Adj-RIB-in, it is possible to view routes prior to 
 The Adj-RIB-out table contains NLRI after outbound route policies have been processed. 
 The Adj-RIB-Out table is maintained for each BGP peer. It contains routes advertised 
 to a specific router. The command <code style="font-size:120%"><b>show bgp ipv4 unicast neighbors 
-&lt;ip-address&gt; advertised-routes</b></code> displays the contents of the Adj-RIB-Out 
+&lt;ip_address&gt; advertised-routes</b></code> displays the contents of the Adj-RIB-Out 
 table for a neighbor.
 </p>
 
@@ -2934,7 +2983,7 @@ best path selection i.e. the route is not installed in the RIB or advertised.
 The next-hop validity check is to prevent a route recursion failure.
 By default, outbound iBGP updates do not modify the next-hop attribute regardless 
 of iBGP peer type. This can be modified using the BGP command <code style="font-size:120%"><b>neighbor 
-&lt;ip-address&gt; next-hop-self</b></code> or in a route-map using the action 
+&lt;ip_address&gt; next-hop-self</b></code> or in a route-map using the action 
 command <code style="font-size:120%"><b>set ip next-hop</b></code>. More recent IOS versions include the 
 command <code style="font-size:120%"><b>next-hop-self all</b></code> to insert the route reflector in 
 the data-path. This is usually used in Unified MPLS design.
@@ -3609,7 +3658,7 @@ system is the furthest to the right of the AS_Path attribute and the most recent
 to the left. AS_Path is used as a loop prevention mechanism in BGP. If a BGP router 
 receives a prefix advertisement with its AS listed in the AS_Path attribute, 
 it discards the prefix because the router thinks the advertisement forms a loop. 
-This behaviour can be modified using the BGP command <code style="font-size:120%"><b>neighbor &lt;ip-address&gt; 
+This behaviour can be modified using the BGP command <code style="font-size:120%"><b>neighbor &lt;ip_address&gt; 
 allowas-in</b></code> or <code style="font-size:120%"><b>as-override</b></code>.
 </p>
 
@@ -4259,7 +4308,7 @@ by the first route reflector. Its value is set to the router ID of the BGP devic
 that advertised the route into the autonomous system. If a prefix contains an 
 ORIGINATOR_ID path attribute, this value is not to be overwritten. The 
 ORIGINATOR_ID path attribute can be verified by issuing the
-command: <code style="font-size:120%"><b>show bgp ipv4 unicast &lt;ip-address&gt;</b></code>
+command: <code style="font-size:120%"><b>show bgp ipv4 unicast &lt;ip_address&gt;</b></code>
 
 </p>
 
@@ -4285,7 +4334,7 @@ This attribute is <b>appended (not over-written)</b> by the <b>route reflector
 with its CLUSTER_ID</b> which, by default, is the BGP router ID. 
 If a route reflector receives a prefix with its CLUSTER ID in the CLUSTER_LIST attribute, the prefix will be discarded 
 because it has been looped. The CLUSTER_LIST path attribute can be verified by the command: 
-<code style="font-size:120%"><b>show bgp ipv4 unicast &lt;ip-address&gt;</b></code>.
+<code style="font-size:120%"><b>show bgp ipv4 unicast &lt;ip_address&gt;</b></code>.
 </p>
 
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
@@ -4827,7 +4876,7 @@ prefix can have many BGP communities added.
 
 <p>
 Communities are enabled on a neighbor-by-neighbor basis with the BGP address-family configuration command: 
-<code style="font-size:120%"><b>neighbor &lt;ip-address&gt; send-community [standard | extended | both]</b></code>.
+<code style="font-size:120%"><b>neighbor &lt;ip_address&gt; send-community [standard | extended | both]</b></code>.
 If a keyword is not specified, standard communities are sent by default. Without configuration of this command, the BGP 
 community path attribute is not included in BGP Update packets for affected prefixes.
 </p>
@@ -6582,9 +6631,9 @@ ORF seeks to answer the question: "Why send me prefixes I am going to filter
 anyway??". 
 
 ORF is configured on both BGP routers using 
-the BGP command <code style="font-size:120%"><b>neighbor &lt;ip-address&gt; capability orf 
+the BGP command <code style="font-size:120%"><b>neighbor &lt;ip_address&gt; capability orf 
 prefix-list [both | receive | send]</b></code>. Verification can be done 
-using the command <code style="font-size:120%"><b>show ip bgp neighbor &lt;ip-address&gt; received 
+using the command <code style="font-size:120%"><b>show ip bgp neighbor &lt;ip_address&gt; received 
 prefix-filter</b></code>.
 </p>
 <p>
@@ -7152,7 +7201,7 @@ BGP fast external fallover can be enabled in the BGP configuration using the com
 <p>
 After globally enabling BFD using the command <code style="font-size:120%"><b>bfd interval &lt;milliseconds&gt; 
 min_rx &lt;milliseconds&gt; multiplier value</b></code>; BFD can be enabled in BGP 
-using the command <code style="font-size:120%"><b>neighbor &lt;ip-address&gt; fall-over bfd</b></code>
+using the command <code style="font-size:120%"><b>neighbor &lt;ip_address&gt; fall-over bfd</b></code>
 </p>
 
 <h2>Prefix Independent Convergence</h2>
