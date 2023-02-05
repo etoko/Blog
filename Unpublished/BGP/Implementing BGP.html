@@ -16,6 +16,9 @@
     <li><a href="#BGP_VERIFICATION">Verification</a></li>
     <li><a href="#BGP_TABLES">BGP Tables</a></li>
     <ol type="i">
+        <li><a href="#LOC-RIB">Loc-RIB</a></li>
+        <li><a href="#ADJ-RIB-IN">Adj-RIB-in</a></li>
+        <li><a href="#ADJ-RIB-OUT">Adj-RIB-out</a></li>
         <li><a href="#PREFIX_ADVERTISEMENT">Prefix Advertisement</a></li>
         <li><a href="#PREFIX_PROCESSING">Prefix Processing</a></li>
     </ol>
@@ -305,6 +308,11 @@ internally within the AS as well.</li>
 </p>
 <p>
 BGP is recommended to be used in multihomed and dual multihomed type of connections.
+It is important to note that unless the enterprise network provides transit 
+capability, multihomed connections, if not carefully configured, may provide 
+transit capability resulting in transit traffic consuming bandwidth. Ensure that 
+ the BGP configuration for a multihomed connectivity does not provide transit 
+ capability.
 </p>
 
 <h2 id="ISP_PREFIX_SHARING">BGP Route Reception from ISPs</h2>
@@ -2488,26 +2496,52 @@ from the large number of ASNs (4,294,967,295).
 </p>
 <h3>Examples</h3>
 <p>
-
+<table width="100%" cellspacing="0">
+  <thead>
+    <tr>
+      <td width="30%"  style="border-top: solid 1px; border-bottom: solid 1px; font-weight: bold; background: #D3D3D3;">Intent</td>
+      <td  style="border-top: solid 1px; border-bottom: solid 1px; font-weight: bold; background: #D3D3D3;">Command</td>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="border-bottom: 1px solid;">
+        Display locally originated prefixes.
+      </td>
+      <td style="border-bottom: 1px solid;">
+        <code><b>show bgp ipv4 unicast regexp ^$</b></code>
+      </td>
+    </tr>
+    <tr>
+      <td style="border-bottom: 1px solid;">
+        Display externally originated prefixes.
+      </td>
+      <td style="border-bottom: 1px solid;">
+        <code><b>show bgp ipv4 unicast regexp [^_]</b></code>
+      </td>
+    </tr>
+  </tbody>
+</table>
 </p>
 <h3>Loc-RIB Table Version</h3>
 <p>
-The BGP table can be viewed using the command <code style="font-size:120%"><b>show bgp ipv4 unicast summary</b></code>.
+The BGP table version can be viewed using the command <code style="font-size:120%">
+<b>show bgp ipv4 unicast summary</b></code>.
 Two table version information is displayed in the output: BGP table version and 
 main routing table version. When update messages are received, the BGP table version 
-increments by one and the main routing table version remains stale in comparison.
-This is triggered by prefix manipulations.
-</p>
-<p>
+increments by one and the main routing table version is incremented as well when 
+these updates are installed into it. These updates can be triggered by traffic  
+manipulation through change in path attributes.
+
 A rapidly incrementing BGP table version may point to instability of the BGP. This 
 can be a clue to assisting with troubleshooting.
 </p>
 <p>
-To view the BGP table version for a specific NLRI, issue the command 
+To view the BGP table entry version for a specific NLRI, issue the command 
 <code style="font-size:120%"><b>show bgp ipv4 unicast &lt;prefix&gt;</b></code>.
 </p>
 
-<h2>Adj-RIB-in</h2>
+<h2 id="ADJ-RIB-IN">Adj-RIB-in</h2>
 <p>
 The Adj-RIB-in table contains NLRI (prefixes and their path attributes) received from a 
 neighbor before processing of inbound route policies. After all route policies 
@@ -2536,7 +2570,7 @@ R7#
 The output above indicates that the display of the Adj-RIB-in table is not enabled. 
 Viewing the Adj-RIB-in table is disabled by default.
 To enable the Adj-RIB-in table, issue the command: <code style="font-size:120%">
-<b>neighbor &lt;ip_address&gt; soft-reconfiguration inbound</b></code> in 
+<b>neighbor &lt;ip_address&gt; soft-reconfiguration inbound</b></code> in BGP  
 address-family mode. To implement any new route policies, carry out a soft BGP reset.
 </p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
@@ -2545,8 +2579,9 @@ R7(config-router)#<b>address-family ipv4 unicast</b> <br>
 R7(config-router-af)#<b>neighbor 10.67.1.1 soft-reconfiguration inbound</b>
 </code></div>
 <p>
-The BGP route policy can then be configured and applied to the neighbor. In this case, the local preference of all prefixes 
-from a neighbor is set to 500 using a route-map named RM_LOCALPREF_500.
+The BGP route policy can then be configured and applied to the neighbor. In this 
+example, the local preference of all prefixes from a neighbor is set to 500 using 
+a route-map named RM_LOCALPREF_500.
 </p>
 
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
@@ -2813,17 +2848,22 @@ Total number of prefixes 17                                                     
 R7#                                                                              
 </code></div>
 <p>
-The above output shows that the local preference of the routes received was updated by the route map and installed into 
-the routing table. Using the Adj-RIB-in, it is possible to view routes prior to the implementation of routing policies.
+The above output shows that the local preference of the routes received was 
+updated by the route map and installed into the routing table. 
+The command <code style="font-size:120%"><b>show bgp ipv4 unicast neighbor &lt;ip_address&gt; routes</b></code> 
+is used to view prefixes received from the specified BGP peer after the 
+implementation of inbound policies. 
+Using the Adj-RIB-in, it is possible to view routes prior to the implementation of routing policies.
 </p>
 
-<h2>Adj-RIB-out</h2>
+<h2 id="ADJ-RIB-OUT">Adj-RIB-out</h2>
 <p>
 The Adj-RIB-out table contains NLRI after outbound route policies have been processed. 
 The Adj-RIB-Out table is maintained for each BGP peer. It contains routes advertised 
 to a specific router. The command <code style="font-size:120%"><b>show bgp ipv4 unicast neighbors 
 &lt;ip_address&gt; advertised-routes</b></code> displays the contents of the Adj-RIB-Out 
-table for a neighbor.
+table for a neighbor. The Loc-RIB table stores path attributes before outbout 
+policies are applied.
 </p>
 
 <p>
@@ -2843,13 +2883,12 @@ BGP <code style="font-size:120%;"><b>redistribution</b></code> command. This com
 options among which includes the route-map option to reference a route map that 
 can be used to filter prefixes to be redistributed as well as modify the path 
 attributes of these prefixes.
-</p>
-<p>
+
 Redistributed prefixes have an origin code of incomplete.
 </p>
 <p>
 IGPs were not designed for the massive number of prefixes that BGP was designed 
-for. It is therefore not recommended to redistributing NLRI into IGPs.
+for. It is therefore not recommended to redistribute NLRI into IGPs.
 </p>
 
 <h3>RIB-Failure</h3>
@@ -2858,25 +2897,27 @@ The BGP table may show some prefixes with a status code of <b>rib-failure (r)</b
 A rib-failure indicates that BGP best path for a prefix cannot be installed into 
 the routing table in spite of the prefix being valid and having a path to the 
 BGP next hop. One of the primary reasons for rib-failures is the higher 
-administrative distance (AD). This is particularly the case if a prefix is learned 
-through iBGP and an IGP. iBGP has a higher default administrative distance of 200 
-than most IGPs.
-</p>
-<p>
+administrative distance (AD). This is particularly the case if the same prefix 
+is learned through iBGP and an IGP. iBGP has a higher default administrative 
+distance of 200 than most IGPs.
+
 The list of prefixes with a rib-failure and the reason for the rib-failure can 
-be viewed using the command <code style="font-size:120%;"><b>show ip bgp rib-failure</b></code>.
+be viewed using the command <code style="font-size:120%;"><b>show bgp 
+ipv4 unicast rib-failure</b></code>.
 </p>
 
 <p>
-A rib-failure does not prevent the propagation of a prefix by BGP. To stop the 
-propagation of prefixes that experience a rib-failure or any other prefix that 
-is not marked as "active", issue the BGP commmand <code style="font-size:120%;"><b>bgp suppress-inactive</b></code>
-. This stops the propagation, through BGP, of any prefixes that are not marked 
-as active in the BGP table.
+A rib-failure does not prevent the propagation of the best path for a prefix by 
+BGP. To stop the propagation of prefixes that experience a rib-failure or any 
+other prefix that is not marked as "active", issue the BGP commmand 
+<code style="font-size:120%;"><b>bgp suppress-inactive</b></code>. 
+This stops the propagation, through BGP, of any prefixes that are not marked 
+as active in the BGP table i.e., prefixes that were not installed into the RIB.
 </p>
 <p>
-To force the injection of BGP prefixes with a rib-failure into the routing table
- would be to lower the administrative distance of iBGP to lower that of the IGP.
+If the network design provides for the installation into the RIB of BGP prefixes 
+with a rib-failure; this can be accomplished by lowering the administrative 
+distance of iBGP to lower that of the IGP.
 </p>
 
 <h2 id="PREFIX_PROCESSING">Prefix Processing</h2>
