@@ -1,8 +1,14 @@
-<h1>Implementing BGP on Cisco IOS</h1>
+<h1>Implementing BGP in Enterprise Autonomous Systems using Cisco IOS</h1>
 <h2>Contents</h2>
   <ol>
     <li><a href="#INTRODUCTION">Introduction</a></li>
-    <li><a href="#AUTONOMOUS_SYSTEMS">Autonomous Systems</a></li>
+    <li><a href="#AUTONOMOUS_SYSTEMS">Autonomous Systems</a>
+      <ol type="i">
+        <li><a href="#TYPES_OF_AS">Types of Autonomous Systems</a></li>
+        <li><a href="#ISP_CONNECTIONS">Connections to ISPs</a></li>
+        <li><a href="#ISP_PREFIX_SHARING">Prefix Sharing with ISPs</a></li>
+      </ol>
+    </li>
     <li><a href="#MESSAGE_TYPES">BGP Message Types</a></li>
     <li><a href="#NEIGHBOR_STATE">Neighbor State</a></li>
     <li><a href="#SESSION_TYPES">Session Types</a></li>
@@ -51,7 +57,7 @@ BGP does not use hello packets to discover neighbors and due to this,
 BGP routers can not discover each other dynamically. Neighbor relationships need to be configured manually.
 BGP is able to form neighbor relationships across many hops; what is commonly referred to as 
 a multihop relationship. This is possible because BGP uses TCP as the transport 
-protocol.
+protocol. BGP updates are incremental and triggered.
 </p>
 <p>
 BGP makes extensive use of TCP in its operations using TCP port 179 and depends 
@@ -59,7 +65,7 @@ on TCP reliability mechanisms for transmission of messages.
 
  TCP is responsible for:
 <ol>
-<li>handling of fragmentation</li>
+<li>handling of fragmentation</li> 
 <li>sequencing of packets</li>
 <li>ensuring packets are reliably transmitted</li>
 </ol>
@@ -70,8 +76,7 @@ first in the network.
 
 <p>
 BGP provides high scalability and flexibility that does not compare to interior 
-gateway protocols. 
-BGP can support millions of prefixes. As of this writing, the Internet routing 
+gateway protocols. BGP can support millions of prefixes. As of this writing, the Internet routing 
 table size is approximately 940,000+ (Jan 2023) prefixes and counting.
 </p>
 <p>
@@ -99,14 +104,18 @@ The following are selected use cases under which the use of BGP can be considere
   IGPs.</li>
   <li>Scaling DMVPN: hubs in DMVPN can be configured as route reflectors.</li>
   <li>Scaling data centers</li>
+  <li>When the autonomous system is working as a transit autonomous system for 
+  example, an Internet service provider (ISP).</li>
+  <li>AS is connected to multiple AS i.e. multihomed and data traffic path entering 
+  or leaving the AS needs to be manipulated.</li>
 </ul>
 </p>
 
 <h1 id="AUTONOMOUS_SYSTEMS">Autonomous Systems</h1>
 <p>
 An autonomous system is a collection of routing devices under a single organization's control. 
-Autonomous systems can use one or
-more interior gateway protocols (IGPs) and common metrics to route packets within the autonomous system.
+Autonomous systems can use one or more interior gateway protocols (IGPs) and 
+common metrics to route packets within the autonomous system.
 If multiple IGPs or metrics are used within an autonomous system, the autonomous system must appear consistent to 
 external autonomous systems in routing policy. An IGP is not required within an autonomous system; 
 an autonomous system could use BGP as the only routing protocol. 
@@ -222,7 +231,7 @@ cellspacing="0">
       </tbody>
     </table>
 
-<h2>Types of Autonomous Systems</h2>
+<h2 id="TYPES_OF_AS">Types of Autonomous Systems</h2>
 <p>
 There are three different kinds of Autonomous Systems:
 <ul>
@@ -262,6 +271,63 @@ There are three ways of representing 32-bit autonomous system numbers:
 </ol>
 </p>
 
+<h2 id="ISP_CONNECTIONS">Types of Connections to ISPs</h2>
+<p>
+An AS can be connected to an ISP through four possible ways: single homed, 
+dual-homed, multi-homing, and dual multi-homed.
+
+<ol> 
+<li><b>Single-homed:</b> 
+AS has a single connection to one ISP i.e. single exit point from the AS. This  
+type of connectivity is convinient for an AS that does not depend heavily on the 
+Internet or WAN connectivity. The sharing of prefixes by the AS is usually through 
+static routes and the ISP advertises a default route.
+</li>
+<li><b>Dual-homed:</b>
+AS has two connections to the same ISP either through the same router or two 
+separate routers. One link may be the primary and the other the backup. The AS  
+might load balance traffic over both links. In this connectivity type, the AS can 
+advertise prefixes through static configuration and a default route is received 
+from the ISP. The use of BGP may not be recommended in this scenario.
+</li>
+<li>
+<b>Multihoming:</b> connection to more than one ISP at the same time. This provides  
+increased redundancy and backup if one ISP fails. Path manipulation is possible
+providing better performance for traffic by ensuring that critical traffic transits 
+through one ISP and other traffic is sent through a second ISP. This type of 
+connectivity ensures that path manipulation is ISP-independent. BGP is typically 
+used with multihomed connections.
+</li>
+<li><b>Dual-multihomed:</b> The AS connects to the multihomed ISPs using more than 
+one connection. Here, BGP is used to share prefixes with the ISPs and potentially 
+internally within the AS as well.</li>
+</ol>
+</p>
+<p>
+BGP is recommended to be used in multihomed and dual multihomed type of connections.
+</p>
+
+<h2 id="ISP_PREFIX_SHARING">BGP Route Reception from ISPs</h2>
+<p>
+There are three different types of BGP route reception options; default route 
+from provider(s), some routes together with the default route, and all routes 
+i.e. full BGP table.
+
+<ol>
+  <li><b>Default route from ISP:</b> the ISP shares a default route with the 
+  AS only. Path manipulation is not possible. Is a good option with the AS does 
+  not have the requisite resources. Good for small and medium sized AS.</li>
+  <li><b>Default route and specific routes:</b> receive a specific subset of 
+  prefixes from the ISPs. This subset may be for destinations of interest to the 
+  AS. Path manipulation can be implemented for these specific prefixes such as 
+  exit through a specific link and all other traffic uses the default route.
+  Good for medium AS.
+  </li>
+  <li><b>Full BGP table:</b> entire BGP table is shared between the ISPs and the 
+  AS. Requires extensive high-end routers. Appropriate for large AS such as ISPs.
+  </li>
+</ol>
+</p>
 
 <h1 id="MESSAGE_TYPES">BGP Messages</h1>
 <p>
@@ -574,6 +640,10 @@ Total Path Attribute Length: 0                                                  
 
 </code>
 </div>
+<p>
+BGP updates are sent to manually defined neighbors as unicast.
+</p>
+
 <h3>NOTIFICATION</h3>
 <p>
 BGP NOTIFICATION messages are sent when an error is detected with the BGP session 
@@ -2314,9 +2384,10 @@ or prefix learned from an interior gateway protocol such as OSPF, IS-IS.
 After verifying that the <code style="font-size:120%; font-weight:bold;">network
 </code> command matches the prefix in the global RIB, the prefix is installed 
 into the BGP Loc-RIB table. As the prefix is installed into the Loc-RIB table, 
-the following path attributes are set, depending on the RIB prefix type:
+the following path attributes are set, depending on the source of the route in 
+the RIB:
 <ul>
-<li><b>Connected network:</b> for prefixes that are directly connected: 
+<li><b>Connected networks:</b>  
  <ol>
    <li>The next-hop path attribute is set to 0.0.0.0</li>
    <li>BGP origin attribute is set to i (for IGP)</li>
@@ -2324,16 +2395,15 @@ the following path attributes are set, depending on the RIB prefix type:
    </ol>
    </li>
    <li>
-   <b>Static routes:</b> for static routes;
+   <b>Static routes:</b>
      <ol>
        <li>The next-hop is set to 0.0.0.0.</li>
        <li>The origin is set to IGP.</li>
-       <li>The loclpref is set to 100.</li>
+       <li>The local preference is set to 100.</li>
        <li>The weight is set to 32,768</li>
      </ol>
    </li>
-<li><b>Prefixes learned from a routing protocol:</b> for prefixes that are learnt through 
-a routing protocol or statically configured:
+<li><b>Prefixes learned from a routing protocol:</b>
   <ol>
   <li>Next-hop path attribute is set to the next-hop IP address in the RIB.</li> 
   <li>BGP origin attribute is set to i (for IGP)</li>
@@ -2344,7 +2414,7 @@ a routing protocol or statically configured:
   another routing protocol into BGP;</li>
   <ol>
     <li>The origin is set to incomplete with the symbol <b>?</b>.</li>
-    <li>
+    
   </ol>
   </ol>
   </li>
@@ -2358,7 +2428,7 @@ this command under the section: <a href="#PREFIX_VERIFICATION">Verifying BGP Pre
 
 <p>
 When receiving 
-prefixes, inbound route policies are checked prior to the route being inserted 
+prefixes, inbound route policies are processed prior to the route being inserted 
 into the Loc-RIB. After insertion into the Loc-RIB, a next-hop check is performed.
 Then identification of the best BGP path is performed and prefix is then offered 
 for installation into the RIB.

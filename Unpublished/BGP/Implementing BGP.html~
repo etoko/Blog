@@ -2301,8 +2301,7 @@ command: <code style="font-size:120%"><b>network &lt;ip_address&gt; mask &lt;sub
 [route-map &lt;route-map-name&gt;]</b></code>. 
 The optional route map can be used to modify BGP path attributes at the time the 
 route is installed into the Loc-RIB.  
-</p>
-<p>
+
 The BGP <code style="font-size:120%; font-weight:bold;">network</code> command 
 does not enable BGP on a specific interface. It is used to identify networks that 
 already exist in the RIB that should be installed in the Loc-RIB table. The 
@@ -2315,21 +2314,38 @@ or prefix learned from an interior gateway protocol such as OSPF, IS-IS.
 After verifying that the <code style="font-size:120%; font-weight:bold;">network
 </code> command matches the prefix in the global RIB, the prefix is installed 
 into the BGP Loc-RIB table. As the prefix is installed into the Loc-RIB table, 
-the following path attributes are set, depending on the RIB prefix type:
+the following path attributes are set, depending on the source of the route in 
+the RIB:
 <ul>
-<li><b>Connected network:</b> for prefixes that are directly connected: 
+<li><b>Connected networks:</b>  
  <ol>
    <li>The next-hop path attribute is set to 0.0.0.0</li>
    <li>BGP origin attribute is set to i (for IGP)</li>
    <li>BGP weight is set to 32,768.</li>
-   </ol></li>
-<li><b>Static route or routing protocol:</b> for prefixes that are learnt through 
-a routing protocol or statically configured:
+   </ol>
+   </li>
+   <li>
+   <b>Static routes:</b>
+     <ol>
+       <li>The next-hop is set to 0.0.0.0.</li>
+       <li>The origin is set to IGP.</li>
+       <li>The local preference is set to 100.</li>
+       <li>The weight is set to 32,768</li>
+     </ol>
+   </li>
+<li><b>Prefixes learned from a routing protocol:</b>
   <ol>
   <li>Next-hop path attribute is set to the next-hop IP address in the RIB.</li> 
   <li>BGP origin attribute is set to i (for IGP)</li>
   <li>BGP weight is set to 32,768</li>
+  <li>The Local Pref is set to 100.</li>
   <li>Multi-exit discriminator (MED) is set to the IGP metric.</li>
+  <li><b>Redistributed prefixes:</b> prefixes explicitly redistributed from 
+  another routing protocol into BGP;</li>
+  <ol>
+    <li>The origin is set to incomplete with the symbol <b>?</b>.</li>
+    
+  </ol>
   </ol>
   </li>
 </ul>
@@ -2341,10 +2357,11 @@ this command under the section: <a href="#PREFIX_VERIFICATION">Verifying BGP Pre
 </p>
 
 <p>
-In the Loc-RIB table, redistributed routes have "?" for origin code. When receiving 
-prefixes, inbound route policies are checked prior to the route being inserted 
+When receiving 
+prefixes, inbound route policies are processed prior to the route being inserted 
 into the Loc-RIB. After insertion into the Loc-RIB, a next-hop check is performed.
-Then identification of the best BGP path is performed and prefix is then inserted into the RIB.
+Then identification of the best BGP path is performed and prefix is then offered 
+for installation into the RIB.
 </p>
 <p>
 Outbound route policies are performed before prefixes enter Adj-RIB-out and then advertised to peers.
@@ -2355,15 +2372,16 @@ apply to the best paths.
 
 <h3>Parsing the BGP Table using Regexp Queries</h3>
 <p>
-The Internet BGP table contains over 800,000 prefixes. When querying this massive 
+The Internet BGP table contains over 940,000 prefixes. When querying this massive 
 BGP table, the use of regular expressions makes it easier to retrieve required 
 information.
 
 The BGP table can be parsed with regular expressions using the command 
 <code style="font-size:120%"><b>show bgp &lt;afi&gt; &lt;safi&gt; regexp &lt;regex-pattern&gt;</b></code>. 
-These regular expressions can also be used to filter through the large number of 
-available ASNs (4,294,967,295). 
-
+These regular expressions can also be used to filter through the prefixes received 
+from the large number of ASNs (4,294,967,295). 
+</p>
+<p>
 <table width="100%" cellspacing="0">
 <thead>
 <tr>
@@ -2384,7 +2402,7 @@ available ASNs (4,294,967,295).
 <tr><td  style="border-bottom: solid 1px;" >[^] (caret in brackets)</td>
     <td  style="border-bottom: solid 1px;" >Excludes the characters listed in brackets</td></tr>
 <tr><td  style="border-bottom: solid 1px;" >() (parentheses)</td>
-   <td>  style="border-bottom: solid 1px;" Used for nesting search patterns</td></tr>
+    <td  style="border-bottom: solid 1px;"> Used for nesting search patterns</td></tr>
 <tr><td  style="border-bottom: solid 1px;" >| (pipe)</td>
     <td  style="border-bottom: solid 1px;" >&lt;OR&gt; functionality in a query</td></tr>
 <tr><td  style="border-bottom: solid 1px;" >. (period)</td>
@@ -2398,7 +2416,10 @@ available ASNs (4,294,967,295).
 </tbody>
 </table>
 </p>
+<h3>Examples</h3>
+<p>
 
+</p>
 <h3>Loc-RIB Table Version</h3>
 <p>
 The BGP table can be viewed using the command <code style="font-size:120%"><b>show bgp ipv4 unicast summary</b></code>.
