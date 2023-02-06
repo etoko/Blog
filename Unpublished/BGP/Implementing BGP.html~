@@ -1,8 +1,14 @@
-<h1>Implementing BGP on Cisco IOS</h1>
+<h1>Implementing BGP in Enterprise Autonomous Systems using Cisco IOS</h1>
 <h2>Contents</h2>
   <ol>
     <li><a href="#INTRODUCTION">Introduction</a></li>
-    <li><a href="#AUTONOMOUS_SYSTEMS">Autonomous Systems</a></li>
+    <li><a href="#AUTONOMOUS_SYSTEMS">Autonomous Systems</a>
+      <ol type="i">
+        <li><a href="#TYPES_OF_AS">Types of Autonomous Systems</a></li>
+        <li><a href="#ISP_CONNECTIONS">Connections to ISPs</a></li>
+        <li><a href="#ISP_PREFIX_SHARING">Prefix Sharing with ISPs</a></li>
+      </ol>
+    </li>
     <li><a href="#MESSAGE_TYPES">BGP Message Types</a></li>
     <li><a href="#NEIGHBOR_STATE">Neighbor State</a></li>
     <li><a href="#SESSION_TYPES">Session Types</a></li>
@@ -10,6 +16,9 @@
     <li><a href="#BGP_VERIFICATION">Verification</a></li>
     <li><a href="#BGP_TABLES">BGP Tables</a></li>
     <ol type="i">
+        <li><a href="#LOC-RIB">Loc-RIB</a></li>
+        <li><a href="#ADJ-RIB-IN">Adj-RIB-in</a></li>
+        <li><a href="#ADJ-RIB-OUT">Adj-RIB-out</a></li>
         <li><a href="#PREFIX_ADVERTISEMENT">Prefix Advertisement</a></li>
         <li><a href="#PREFIX_PROCESSING">Prefix Processing</a></li>
     </ol>
@@ -51,7 +60,7 @@ BGP does not use hello packets to discover neighbors and due to this,
 BGP routers can not discover each other dynamically. Neighbor relationships need to be configured manually.
 BGP is able to form neighbor relationships across many hops; what is commonly referred to as 
 a multihop relationship. This is possible because BGP uses TCP as the transport 
-protocol.
+protocol. BGP updates are incremental and triggered.
 </p>
 <p>
 BGP makes extensive use of TCP in its operations using TCP port 179 and depends 
@@ -59,7 +68,7 @@ on TCP reliability mechanisms for transmission of messages.
 
  TCP is responsible for:
 <ol>
-<li>handling of fragmentation</li>
+<li>handling of fragmentation</li> 
 <li>sequencing of packets</li>
 <li>ensuring packets are reliably transmitted</li>
 </ol>
@@ -70,8 +79,7 @@ first in the network.
 
 <p>
 BGP provides high scalability and flexibility that does not compare to interior 
-gateway protocols. 
-BGP can support millions of prefixes. As of this writing, the Internet routing 
+gateway protocols. BGP can support millions of prefixes. As of this writing, the Internet routing 
 table size is approximately 940,000+ (Jan 2023) prefixes and counting.
 </p>
 <p>
@@ -99,14 +107,18 @@ The following are selected use cases under which the use of BGP can be considere
   IGPs.</li>
   <li>Scaling DMVPN: hubs in DMVPN can be configured as route reflectors.</li>
   <li>Scaling data centers</li>
+  <li>When the autonomous system is working as a transit autonomous system for 
+  example, an Internet service provider (ISP).</li>
+  <li>AS is connected to multiple AS i.e. multihomed and data traffic path entering 
+  or leaving the AS needs to be manipulated.</li>
 </ul>
 </p>
 
 <h1 id="AUTONOMOUS_SYSTEMS">Autonomous Systems</h1>
 <p>
 An autonomous system is a collection of routing devices under a single organization's control. 
-Autonomous systems can use one or
-more interior gateway protocols (IGPs) and common metrics to route packets within the autonomous system.
+Autonomous systems can use one or more interior gateway protocols (IGPs) and 
+common metrics to route packets within the autonomous system.
 If multiple IGPs or metrics are used within an autonomous system, the autonomous system must appear consistent to 
 external autonomous systems in routing policy. An IGP is not required within an autonomous system; 
 an autonomous system could use BGP as the only routing protocol. 
@@ -222,7 +234,7 @@ cellspacing="0">
       </tbody>
     </table>
 
-<h2>Types of Autonomous Systems</h2>
+<h2 id="TYPES_OF_AS">Types of Autonomous Systems</h2>
 <p>
 There are three different kinds of Autonomous Systems:
 <ul>
@@ -262,6 +274,68 @@ There are three ways of representing 32-bit autonomous system numbers:
 </ol>
 </p>
 
+<h2 id="ISP_CONNECTIONS">Types of Connections to ISPs</h2>
+<p>
+An AS can be connected to an ISP through four possible ways: single homed, 
+dual-homed, multi-homing, and dual multi-homed.
+
+<ol> 
+<li><b>Single-homed:</b> 
+AS has a single connection to one ISP i.e. single exit point from the AS. This  
+type of connectivity is convinient for an AS that does not depend heavily on the 
+Internet or WAN connectivity. The sharing of prefixes by the AS is usually through 
+static routes and the ISP advertises a default route.
+</li>
+<li><b>Dual-homed:</b>
+AS has two connections to the same ISP either through the same router or two 
+separate routers. One link may be the primary and the other the backup. The AS  
+might load balance traffic over both links. In this connectivity type, the AS can 
+advertise prefixes through static configuration and a default route is received 
+from the ISP. The use of BGP may not be recommended in this scenario.
+</li>
+<li>
+<b>Multihoming:</b> connection to more than one ISP at the same time. This provides  
+increased redundancy and backup if one ISP fails. Path manipulation is possible
+providing better performance for traffic by ensuring that critical traffic transits 
+through one ISP and other traffic is sent through a second ISP. This type of 
+connectivity ensures that path manipulation is ISP-independent. BGP is typically 
+used with multihomed connections.
+</li>
+<li><b>Dual-multihomed:</b> The AS connects to the multihomed ISPs using more than 
+one connection. Here, BGP is used to share prefixes with the ISPs and potentially 
+internally within the AS as well.</li>
+</ol>
+</p>
+<p>
+BGP is recommended to be used in multihomed and dual multihomed type of connections.
+It is important to note that unless the enterprise network provides transit 
+capability, multihomed connections, if not carefully configured, may provide 
+transit capability resulting in transit traffic consuming bandwidth. Ensure that 
+ the BGP configuration for a multihomed connectivity does not provide transit 
+ capability.
+</p>
+
+<h2 id="ISP_PREFIX_SHARING">BGP Route Reception from ISPs</h2>
+<p>
+There are three different types of BGP route reception options; default route 
+from provider(s), some routes together with the default route, and all routes 
+i.e. full BGP table.
+
+<ol>
+  <li><b>Default route from ISP:</b> the ISP shares a default route with the 
+  AS only. Path manipulation is not possible. Is a good option with the AS does 
+  not have the requisite resources. Good for small and medium sized AS.</li>
+  <li><b>Default route and specific routes:</b> receive a specific subset of 
+  prefixes from the ISPs. This subset may be for destinations of interest to the 
+  AS. Path manipulation can be implemented for these specific prefixes such as 
+  exit through a specific link and all other traffic uses the default route.
+  Good for medium AS.
+  </li>
+  <li><b>Full BGP table:</b> entire BGP table is shared between the ISPs and the 
+  AS. Requires extensive high-end routers. Appropriate for large AS such as ISPs.
+  </li>
+</ol>
+</p>
 
 <h1 id="MESSAGE_TYPES">BGP Messages</h1>
 <p>
@@ -574,6 +648,10 @@ Total Path Attribute Length: 0                                                  
 
 </code>
 </div>
+<p>
+BGP updates are sent to manually defined neighbors as unicast.
+</p>
+
 <h3>NOTIFICATION</h3>
 <p>
 BGP NOTIFICATION messages are sent when an error is detected with the BGP session 
@@ -2281,7 +2359,8 @@ BGP uses three tables for maintaining the network paths and path attributes for
 a prefix: Loc-RIB (BGP table), Adj-RIB-in,
 and Adj-RIB-out tables.
 </p>
-<h2>Loc-RIB (BGP Table)</h2>
+
+<h2 id="LOC-RIB">Loc-RIB (BGP Table)</h2>
 <p>
 Loc-RIB is used by BGP to present routes to the IP routing table. It contains 
 NLRI for prefixes locally originated or received from other peers. After the 
@@ -2362,8 +2441,7 @@ prefixes, inbound route policies are processed prior to the route being inserted
 into the Loc-RIB. After insertion into the Loc-RIB, a next-hop check is performed.
 Then identification of the best BGP path is performed and prefix is then offered 
 for installation into the RIB.
-</p>
-<p>
+
 Outbound route policies are performed before prefixes enter Adj-RIB-out and then advertised to peers.
 Only the best paths are advertised to peers and therefore outbound route policies 
 apply to the best paths.
@@ -2385,7 +2463,7 @@ from the large number of ASNs (4,294,967,295).
 <table width="100%" cellspacing="0">
 <thead>
 <tr>
-<td style="border-top: solid 1px; border-bottom: solid 1px; font-weight: bold; background: #D3D3D3;">Modifier</td>
+<td width="20%" style="border-top: solid 1px; border-bottom: solid 1px; font-weight: bold; background: #D3D3D3;">Modifier</td>
 <td style="border-top: solid 1px; border-bottom: solid 1px; font-weight: bold; background: #D3D3D3; ">Description</td></tr>
 </thead>
 <tbody>
@@ -2418,26 +2496,68 @@ from the large number of ASNs (4,294,967,295).
 </p>
 <h3>Examples</h3>
 <p>
-
+<table width="100%" cellspacing="0">
+  <thead>
+    <tr>
+      <td width="30%"  style="border-top: solid 1px; border-bottom: solid 1px; font-weight: bold; background: #D3D3D3;">Intent</td>
+      <td  style="border-top: solid 1px; border-bottom: solid 1px; font-weight: bold; background: #D3D3D3;">Command</td>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="border-bottom: 1px solid;">
+        Display locally originated prefixes.
+      </td>
+      <td style="border-bottom: 1px solid;">
+        <code><b>show bgp ipv4 unicast regexp ^$</b></code>
+      </td>
+    </tr>
+    <tr>
+      <td style="border-bottom: 1px solid;">
+        Display externally originated prefixes.
+      </td>
+      <td style="border-bottom: 1px solid;">
+        <code><b>show bgp ipv4 unicast regexp [^_]</b></code>
+      </td>
+    </tr>
+    <tr>
+      <td style="border-bottom: 1px solid;">
+        Display locally originated prefixes.
+      </td>
+      <td style="border-bottom: 1px solid;">
+        <code><b>show bgp ipv4 unicast regexp ^$</b></code>
+      </td>
+    </tr>
+    <tr>
+      <td style="border-bottom: 1px solid;">
+        Display prefixes originated by a specific AS.
+      </td>
+      <td style="border-bottom: 1px solid;">
+        <code><b>show bgp ipv4 unicast regexp 65537000$</b></code>
+      </td>
+    </tr>
+  </tbody>
+</table>
 </p>
 <h3>Loc-RIB Table Version</h3>
 <p>
-The BGP table can be viewed using the command <code style="font-size:120%"><b>show bgp ipv4 unicast summary</b></code>.
+The BGP table version can be viewed using the command <code style="font-size:120%">
+<b>show bgp ipv4 unicast summary</b></code>.
 Two table version information is displayed in the output: BGP table version and 
 main routing table version. When update messages are received, the BGP table version 
-increments by one and the main routing table version remains stale in comparison.
-This is triggered by prefix manipulations.
-</p>
-<p>
+increments by one and the main routing table version is incremented as well when 
+these updates are installed into it. These updates can be triggered by traffic  
+manipulation through change in path attributes.
+
 A rapidly incrementing BGP table version may point to instability of the BGP. This 
 can be a clue to assisting with troubleshooting.
 </p>
 <p>
-To view the BGP table version for a specific NLRI, issue the command 
+To view the BGP table entry version for a specific NLRI, issue the command 
 <code style="font-size:120%"><b>show bgp ipv4 unicast &lt;prefix&gt;</b></code>.
 </p>
 
-<h2>Adj-RIB-in</h2>
+<h2 id="ADJ-RIB-IN">Adj-RIB-in</h2>
 <p>
 The Adj-RIB-in table contains NLRI (prefixes and their path attributes) received from a 
 neighbor before processing of inbound route policies. After all route policies 
@@ -2466,7 +2586,7 @@ R7#
 The output above indicates that the display of the Adj-RIB-in table is not enabled. 
 Viewing the Adj-RIB-in table is disabled by default.
 To enable the Adj-RIB-in table, issue the command: <code style="font-size:120%">
-<b>neighbor &lt;ip_address&gt; soft-reconfiguration inbound</b></code> in 
+<b>neighbor &lt;ip_address&gt; soft-reconfiguration inbound</b></code> in BGP  
 address-family mode. To implement any new route policies, carry out a soft BGP reset.
 </p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
@@ -2475,8 +2595,9 @@ R7(config-router)#<b>address-family ipv4 unicast</b> <br>
 R7(config-router-af)#<b>neighbor 10.67.1.1 soft-reconfiguration inbound</b>
 </code></div>
 <p>
-The BGP route policy can then be configured and applied to the neighbor. In this case, the local preference of all prefixes 
-from a neighbor is set to 500 using a route-map named RM_LOCALPREF_500.
+The BGP route policy can then be configured and applied to the neighbor. In this 
+example, the local preference of all prefixes from a neighbor is set to 500 using 
+a route-map named RM_LOCALPREF_500.
 </p>
 
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
@@ -2743,17 +2864,22 @@ Total number of prefixes 17                                                     
 R7#                                                                              
 </code></div>
 <p>
-The above output shows that the local preference of the routes received was updated by the route map and installed into 
-the routing table. Using the Adj-RIB-in, it is possible to view routes prior to the implementation of routing policies.
+The above output shows that the local preference of the routes received was 
+updated by the route map and installed into the routing table. 
+The command <code style="font-size:120%"><b>show bgp ipv4 unicast neighbor &lt;ip_address&gt; routes</b></code> 
+is used to view prefixes received from the specified BGP peer after the 
+implementation of inbound policies. 
+Using the Adj-RIB-in, it is possible to view routes prior to the implementation of routing policies.
 </p>
 
-<h2>Adj-RIB-out</h2>
+<h2 id="ADJ-RIB-OUT">Adj-RIB-out</h2>
 <p>
 The Adj-RIB-out table contains NLRI after outbound route policies have been processed. 
 The Adj-RIB-Out table is maintained for each BGP peer. It contains routes advertised 
 to a specific router. The command <code style="font-size:120%"><b>show bgp ipv4 unicast neighbors 
 &lt;ip_address&gt; advertised-routes</b></code> displays the contents of the Adj-RIB-Out 
-table for a neighbor.
+table for a neighbor. The Loc-RIB table stores path attributes before outbout 
+policies are applied.
 </p>
 
 <p>
@@ -2773,13 +2899,12 @@ BGP <code style="font-size:120%;"><b>redistribution</b></code> command. This com
 options among which includes the route-map option to reference a route map that 
 can be used to filter prefixes to be redistributed as well as modify the path 
 attributes of these prefixes.
-</p>
-<p>
+
 Redistributed prefixes have an origin code of incomplete.
 </p>
 <p>
 IGPs were not designed for the massive number of prefixes that BGP was designed 
-for. It is therefore not recommended to redistributing NLRI into IGPs.
+for. It is therefore not recommended to redistribute NLRI into IGPs.
 </p>
 
 <h3>RIB-Failure</h3>
@@ -2788,25 +2913,27 @@ The BGP table may show some prefixes with a status code of <b>rib-failure (r)</b
 A rib-failure indicates that BGP best path for a prefix cannot be installed into 
 the routing table in spite of the prefix being valid and having a path to the 
 BGP next hop. One of the primary reasons for rib-failures is the higher 
-administrative distance (AD). This is particularly the case if a prefix is learned 
-through iBGP and an IGP. iBGP has a higher default administrative distance of 200 
-than most IGPs.
-</p>
-<p>
+administrative distance (AD). This is particularly the case if the same prefix 
+is learned through iBGP and an IGP. iBGP has a higher default administrative 
+distance of 200 than most IGPs.
+
 The list of prefixes with a rib-failure and the reason for the rib-failure can 
-be viewed using the command <code style="font-size:120%;"><b>show ip bgp rib-failure</b></code>.
+be viewed using the command <code style="font-size:120%;"><b>show bgp 
+ipv4 unicast rib-failure</b></code>.
 </p>
 
 <p>
-A rib-failure does not prevent the propagation of a prefix by BGP. To stop the 
-propagation of prefixes that experience a rib-failure or any other prefix that 
-is not marked as "active", issue the BGP commmand <code style="font-size:120%;"><b>bgp suppress-inactive</b></code>
-. This stops the propagation, through BGP, of any prefixes that are not marked 
-as active in the BGP table.
+A rib-failure does not prevent the propagation of the best path for a prefix by 
+BGP. To stop the propagation of prefixes that experience a rib-failure or any 
+other prefix that is not marked as "active", issue the BGP commmand 
+<code style="font-size:120%;"><b>bgp suppress-inactive</b></code>. 
+This stops the propagation, through BGP, of any prefixes that are not marked 
+as active in the BGP table i.e., prefixes that were not installed into the RIB.
 </p>
 <p>
-To force the injection of BGP prefixes with a rib-failure into the routing table
- would be to lower the administrative distance of iBGP to lower that of the IGP.
+If the network design provides for the installation into the RIB of BGP prefixes 
+with a rib-failure; this can be accomplished by lowering the administrative 
+distance of iBGP to lower that of the IGP.
 </p>
 
 <h2 id="PREFIX_PROCESSING">Prefix Processing</h2>
@@ -2846,16 +2973,21 @@ the NLRI if it fails the AS_Path loop-prevention check.
 
 <h3>eBGP and iBGP Route Advertisement</h3>
 <p>
-It is common for the validity check to fail on external routes learned from an iBGP peer. iBGP peers do not modify the 
+It is common for the validity check to fail for external prefixes learned from 
+an iBGP peer. iBGP peers do not modify the 
 next-hop address if the NLRI has a next-hop address other than 0.0.0.0. The next-hop address must be resolvable in the 
 global RIB in order for it to be considered valid and advertised to other BGP peers.
 eBGP peering links must be installed in the RIB of intermediate iBGP peers for forwarding to occur or use an IGP between 
 iBGP peers.
 </p>
 <p>
-The BGP next-hop-self feature can be used to advertise peering links of eBGP neighbors into iBGP in address-family mode using the 
-command <code style="font-size:120%"><b>neighbor &lt;ip_address&gt; next-hop-self [all]</b></code> is used for each neighbor. The next-hop-self 
-does not modify the next-hop address for iBGP prefixes by default. The <code style="font-size:120%"><b>all</b></code> keyword modifies the
+The BGP next-hop-self feature can be used to advertise external prefixes to iBGP 
+neighbors replacing the next-hop path attribute of the prefix with the peering 
+link IP address of the local BGP device. This can be done in address-family mode 
+using the command <code style="font-size:120%"><b>neighbor &lt;ip_address&gt; 
+next-hop-self [all]</b></code> is used for each neighbor. The next-hop-self 
+does not modify the next-hop address for iBGP prefixes by default. The 
+<code style="font-size:120%"><b>all</b></code> keyword modifies the
 next-hop for iBGP too.
 </p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">

@@ -815,6 +815,19 @@ If the TCP connection fails, the state moves back to the Connect state and reset
 the ConnectRetry timer. If BGP is reset or an error occurs, the state moves back 
 to Idle.
 </p>
+<h3>Troubleshooting</h3>
+<p>
+A BGP peer state may remain in active due to the following potential reasons:
+<ul>
+  <li>The neighbor is peering with the wrong address.</li>
+  <li>Neighbor does not have a neighbor statement for this router.</li>
+  <li>AS number mismatch.</li>
+  <li>Neighbor does not have a route to the source IP address of the Open packet.
+  </li>
+</ul>
+</p>
+
+
 <h2>OpenSent</h2>
 <p>
 In this state, the TCP session is up and BGP has sent an OPEN message to establish
@@ -952,7 +965,9 @@ away (multi-hop adjacency). In the case of multi-hop adjacency, the BGP device
 uses a route in the routing table to form a TCP session with the remote peer. 
 This route may be a static route or dynamically learned from any routing protocol. 
 BGP sessions are always point-to-point between two devices. BGP peering can be 
-configured to create an internal BGP (iBGP) peering or external BGP (eBGP).
+configured to create an internal BGP (iBGP) peering or external BGP (eBGP). 
+BGP neighbors are configured manually. Exchange of routes takes place only after 
+the peering session has been established.
 </p>
 
 <h2>Internal BGP (iBGP)</h2>
@@ -1125,13 +1140,18 @@ seconds.
 
 <p>
 <b>Step 6 (if using the IP address of a loopback interface):</b> specify the 
-source interface of the BGP session. By default, the IP address of the exit 
+source interface of the BGP session. It is important to ensure that the remote 
+BGP peer has reachability to the IP address of the loopback interface. It may be 
+required for this IP address to be advertised by the IGP or added to a 
+static route.
+
+By default, the IP address of the exit 
 interface (as determined by the RIB) is used as the source IP address of a BGP 
 packet. However, during configuration, it is possible to use an IP address of an
 interface that is not the exit interface. In such scenarios, usually a loopback 
 interface is used. This guards against losing a BGP peering due to link failure. 
 This is important in highly redundant networks with more than one path to a peer.
-The interface to be used for a BGP session can be configured using the command:
+The interface to be used for a BGP session can be specified using the command:
 <code style="font-size:120%"><b>neighbor &lt;ip_address&gt; update-source &lt;interface-id&gt;</b></code>.
 </p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
@@ -1139,7 +1159,8 @@ The interface to be used for a BGP session can be configured using the command:
 R8(config-router)#<b>neighbor 7.7.7.7 update-source loopback 0</b>
 </code></div>
 <p>
-If the <code style="font-size:120%"><b>update-source</b></code> command is issued, then, for eBGP sessions, the TTL must be increased from one (1) to 
+If the <code style="font-size:120%"><b>update-source</b></code> command is issued, 
+then, for eBGP sessions, the TTL must be increased from one (1) to 
 a higher value (two in this case).
 
 eBGP sessions use a TTL of one for BGP packets as a security measure. This default 
@@ -1452,6 +1473,13 @@ not supported.
 </p>
 
 <h1 id="SECURITY">BGP Security</h1>
+<p>
+BGP supports an authentication mechanism using Message Digest 5(MD5). When enabled, 
+any TCP packets exchanged between the BGP peers are veried and received if the 
+authentication is successful. For peer authentication to be successful, the BGP 
+peers need to be configured with the same password. If authentication fails, the 
+BGP devices will not form a peer relationship.
+</p>
 
 <h2>Peer Authentication</h2>
 <p>
@@ -2359,7 +2387,8 @@ BGP uses three tables for maintaining the network paths and path attributes for
 a prefix: Loc-RIB (BGP table), Adj-RIB-in,
 and Adj-RIB-out tables.
 </p>
-<h2>Loc-RIB (BGP Table)</h2>
+
+<h2 id="LOC-RIB">Loc-RIB (BGP Table)</h2>
 <p>
 Loc-RIB is used by BGP to present routes to the IP routing table. It contains 
 NLRI for prefixes locally originated or received from other peers. After the 
@@ -2440,8 +2469,7 @@ prefixes, inbound route policies are processed prior to the route being inserted
 into the Loc-RIB. After insertion into the Loc-RIB, a next-hop check is performed.
 Then identification of the best BGP path is performed and prefix is then offered 
 for installation into the RIB.
-</p>
-<p>
+
 Outbound route policies are performed before prefixes enter Adj-RIB-out and then advertised to peers.
 Only the best paths are advertised to peers and therefore outbound route policies 
 apply to the best paths.
@@ -2463,7 +2491,7 @@ from the large number of ASNs (4,294,967,295).
 <table width="100%" cellspacing="0">
 <thead>
 <tr>
-<td style="border-top: solid 1px; border-bottom: solid 1px; font-weight: bold; background: #D3D3D3;">Modifier</td>
+<td width="20%" style="border-top: solid 1px; border-bottom: solid 1px; font-weight: bold; background: #D3D3D3;">Modifier</td>
 <td style="border-top: solid 1px; border-bottom: solid 1px; font-weight: bold; background: #D3D3D3; ">Description</td></tr>
 </thead>
 <tbody>
@@ -2518,6 +2546,22 @@ from the large number of ASNs (4,294,967,295).
       </td>
       <td style="border-bottom: 1px solid;">
         <code><b>show bgp ipv4 unicast regexp [^_]</b></code>
+      </td>
+    </tr>
+    <tr>
+      <td style="border-bottom: 1px solid;">
+        Display locally originated prefixes.
+      </td>
+      <td style="border-bottom: 1px solid;">
+        <code><b>show bgp ipv4 unicast regexp ^$</b></code>
+      </td>
+    </tr>
+    <tr>
+      <td style="border-bottom: 1px solid;">
+        Display prefixes originated by a specific AS.
+      </td>
+      <td style="border-bottom: 1px solid;">
+        <code><b>show bgp ipv4 unicast regexp 65537000$</b></code>
       </td>
     </tr>
   </tbody>
@@ -2957,16 +3001,21 @@ the NLRI if it fails the AS_Path loop-prevention check.
 
 <h3>eBGP and iBGP Route Advertisement</h3>
 <p>
-It is common for the validity check to fail on external routes learned from an iBGP peer. iBGP peers do not modify the 
+It is common for the validity check to fail for external prefixes learned from 
+an iBGP peer. iBGP peers do not modify the 
 next-hop address if the NLRI has a next-hop address other than 0.0.0.0. The next-hop address must be resolvable in the 
 global RIB in order for it to be considered valid and advertised to other BGP peers.
 eBGP peering links must be installed in the RIB of intermediate iBGP peers for forwarding to occur or use an IGP between 
 iBGP peers.
 </p>
 <p>
-The BGP next-hop-self feature can be used to advertise peering links of eBGP neighbors into iBGP in address-family mode using the 
-command <code style="font-size:120%"><b>neighbor &lt;ip_address&gt; next-hop-self [all]</b></code> is used for each neighbor. The next-hop-self 
-does not modify the next-hop address for iBGP prefixes by default. The <code style="font-size:120%"><b>all</b></code> keyword modifies the
+The BGP next-hop-self feature can be used to advertise external prefixes to iBGP 
+neighbors replacing the next-hop path attribute of the prefix with the peering 
+link IP address of the local BGP device. This can be done in address-family mode 
+using the command <code style="font-size:120%"><b>neighbor &lt;ip_address&gt; 
+next-hop-self [all]</b></code> is used for each neighbor. The next-hop-self 
+does not modify the next-hop address for iBGP prefixes by default. The 
+<code style="font-size:120%"><b>all</b></code> keyword modifies the
 next-hop for iBGP too.
 </p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
