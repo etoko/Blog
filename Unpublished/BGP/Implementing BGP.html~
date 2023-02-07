@@ -815,6 +815,19 @@ If the TCP connection fails, the state moves back to the Connect state and reset
 the ConnectRetry timer. If BGP is reset or an error occurs, the state moves back 
 to Idle.
 </p>
+<h3>Troubleshooting</h3>
+<p>
+A BGP peer state may remain in active due to the following potential reasons:
+<ul>
+  <li>The neighbor is peering with the wrong address.</li>
+  <li>Neighbor does not have a neighbor statement for this router.</li>
+  <li>AS number mismatch.</li>
+  <li>Neighbor does not have a route to the source IP address of the Open packet.
+  </li>
+</ul>
+</p>
+
+
 <h2>OpenSent</h2>
 <p>
 In this state, the TCP session is up and BGP has sent an OPEN message to establish
@@ -952,7 +965,9 @@ away (multi-hop adjacency). In the case of multi-hop adjacency, the BGP device
 uses a route in the routing table to form a TCP session with the remote peer. 
 This route may be a static route or dynamically learned from any routing protocol. 
 BGP sessions are always point-to-point between two devices. BGP peering can be 
-configured to create an internal BGP (iBGP) peering or external BGP (eBGP).
+configured to create an internal BGP (iBGP) peering or external BGP (eBGP). 
+BGP neighbors are configured manually. Exchange of routes takes place only after 
+the peering session has been established.
 </p>
 
 <h2>Internal BGP (iBGP)</h2>
@@ -1125,13 +1140,18 @@ seconds.
 
 <p>
 <b>Step 6 (if using the IP address of a loopback interface):</b> specify the 
-source interface of the BGP session. By default, the IP address of the exit 
+source interface of the BGP session. It is important to ensure that the remote 
+BGP peer has reachability to the IP address of the loopback interface. It may be 
+required for this IP address to be advertised by the IGP or added to a 
+static route.
+
+By default, the IP address of the exit 
 interface (as determined by the RIB) is used as the source IP address of a BGP 
 packet. However, during configuration, it is possible to use an IP address of an
 interface that is not the exit interface. In such scenarios, usually a loopback 
 interface is used. This guards against losing a BGP peering due to link failure. 
 This is important in highly redundant networks with more than one path to a peer.
-The interface to be used for a BGP session can be configured using the command:
+The interface to be used for a BGP session can be specified using the command:
 <code style="font-size:120%"><b>neighbor &lt;ip_address&gt; update-source &lt;interface-id&gt;</b></code>.
 </p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
@@ -1139,7 +1159,8 @@ The interface to be used for a BGP session can be configured using the command:
 R8(config-router)#<b>neighbor 7.7.7.7 update-source loopback 0</b>
 </code></div>
 <p>
-If the <code style="font-size:120%"><b>update-source</b></code> command is issued, then, for eBGP sessions, the TTL must be increased from one (1) to 
+If the <code style="font-size:120%"><b>update-source</b></code> command is issued, 
+then, for eBGP sessions, the TTL must be increased from one (1) to 
 a higher value (two in this case).
 
 eBGP sessions use a TTL of one for BGP packets as a security measure. This default 
@@ -1452,6 +1473,13 @@ not supported.
 </p>
 
 <h1 id="SECURITY">BGP Security</h1>
+<p>
+BGP supports an authentication mechanism using Message Digest 5(MD5). When enabled, 
+any TCP packets exchanged between the BGP peers are veried and received if the 
+authentication is successful. For peer authentication to be successful, the BGP 
+peers need to be configured with the same password. If authentication fails, the 
+BGP devices will not form a peer relationship.
+</p>
 
 <h2>Peer Authentication</h2>
 <p>
@@ -1632,6 +1660,14 @@ enable this feature with the neighbor ttl-security command.
 R8(config-router)#<b>no neighbor 7.7.7.7 ebgp-multihop 2  </b> <br>
 R8(config-router)#<b>neighbor 7.7.7.7 ttl-security hops 2 </b> <br>
 </code></div>
+
+<h2>First ASN in path must be neighbor's ASN</h2>
+<p>
+The BGP command <code style="font-size:120%"><b>bgp enforce-first-as</b></code> 
+ can be configured to enforce additional security. This helps provide an 
+added layer of security to BGP. For additional BGP security, see security 
+section.
+</p>
 
 <h1 id="BGP_VERIFICATION">Verification of BGP</h1>
 <p>
@@ -3028,30 +3064,19 @@ Total number of prefixes 10
 <h1 id="PATH_ATTRIBUTES">Path Attributes</h1>
 <p>
 Every prefix in a BGP update contains path attributes (PAs). Path attributes can 
-be thought of as properties or characteristics of a prefix. They are used by BGP 
-in the best path selection process for NLRI. Network Layer Reachability 
-Information (NLRI) is a routing update that consists of the network prefix, 
-prefix length and any other PAs for the specific route.
+be thought of as properties or characteristics of a prefix or network layer 
+reachability information (NLRI). NLRI is a routing update that consists of the 
+network prefix, prefix length and any other PAs for the specific route.
 Path attributes can be modified with granularity providing complete control of 
-BGP's routing policies. They serve a variety of purposes with some path attributes 
-serving more than one purpose.:
-<ul>
-  <li>Best path selection process</li>
-  <li>Loop prevention</li>
-  <li>Prefix classification for further processing e.g. route tags used by BGP communities that are processed by a 
-  downstream router.</li>
-  <li>Informative e.g. atomic aggregate which indicates that some path information is missing due to prefix 
-  summarization.</li>
-</ul>
-</p>
+BGP's routing policies.
 <p>
-BGP attributes are contained in every Update message except withdrawal messages.
-Each attribute is a TLV that consists of attribute type, length and value. Every 
-attribute is two bytes (1 byte for flags and the other for attribute details).
+Path attributes are contained in every BGP update message except withdrawal messages.
+Each attribute consists of attribute type, length and value(TLV)and is two bytes 
+(1 byte for flags and the other for attribute details).
 
 </p>
 
-<h2>Types of Path Attributes</h2>
+<h2>Classification of Path Attributes</h2>
 <p>
 BGP prefix path attributes are classified as;
 <ol>
@@ -3059,8 +3084,8 @@ BGP prefix path attributes are classified as;
   understand these attributes. Every BGP update must include these attributes. 
   These include: next-hop, AS_PATH and origin code.</li>
   <li><b>Well-known discretionary:</b> every BGP speaker should understand these 
-  types of attributes. As it is discretionary, it may or may not be included with 
-  every prefix advertisement.</li>
+  types of attributes, however they may or may not be included with 
+  every BGP update message.</li>
   <li><b>Optional transitive:</b> optional indicates that no devices are 
   guaranteed to understand this attribute. Transitive indicates that this path 
   attribute is permitted to transit from one autonomous system to another. 
@@ -3081,14 +3106,28 @@ Optional attributes do not have to be recognised by all BGP implementations.
 </p>
 
 <h2>Use of Path Attributes</h2>
+<p>
+ Path attributes serve a variety of purposes with some path attributes 
+serving more than one purpose:
+<ul>
+  <li>Best path selection process</li>
+  <li>Loop prevention</li>
+  <li>Prefix classification for further processing e.g. route tags used by BGP 
+  communities that are processed by a downstream router.</li>
+  <li>Informative e.g. atomic aggregate which indicates that some path information 
+  is missing due to prefix summarization.</li>
+</ul>
+They offer BGP the extensive flexibility in route manipulation that is not seen 
+in any other routing protocol/application.
+</p>
+</p>
+
 <h3>Prerequisites to Best Path Selection</h3>
 
 <h4>Next Hop</h4>
 <p>
-Routers always select the path a packet should take by examining the prefix length, 
-where the longest prefix length is always preferred. 
-Path attributes could be modified as they are advertised externally to influence 
-the path taken. The NEXT_HOP path attribute has a type code of 3.
+The next hop path attribute is a well-known transitive attribute and has a type code
+of 3.
 
 In eBGP, the next hop IP is the IP address of the exit interface of an eBGP peer
 that sent the update. An iBGP peer that receives NLRI from an eBGP does not 
@@ -3097,19 +3136,22 @@ hop attribute should be thought of in the context of autonomous system to
 autonomous system instead of router to router. This approach helps in troubleshooting 
 reachability issues that my arise.
 
-in iBGP, the next hop IP address is the address of the iBGP peer that originated 
+In iBGP, the next hop IP address is the address of the iBGP peer that originated 
 the prefix. The originator of a prefix has a next hop value of 0.0.0.0 in the 
 BGP table. When advertising internal prefixes, a BGP peer should override the 
 next hop value to its exit interface using the <code style="font-size:120%;"><b>next-hop-self</b></code> 
 keyword of the command <code style="font-size:120%;"><b>neighbor</b></code>.
-When a router receives a BGP update, it first verifies whether the next-hop is 
-reachable. If the next-hop is not reachable,
-the best path selection process will not even start for the prefix. If the next hop is reachable, then the best path 
+When a router receives a BGP update, before the start of the best path selection 
+process, the BGP process first verifies whether the next-hop is reachable. If 
+the next-hop is not reachable, the best path selection process will not even 
+start for the prefix. If the next hop is reachable, then the best path 
 selection process starts.
 </p>
 <p>
-BGP Next hop controls the IGP route recursion i.e. BGP knows the next-hop but 
-does not know the egress interface. The IGP must perform recursion otherwise, 
+The next hop path attribute controls the IGP route recursion i.e. BGP knows the 
+next-hop but does not know the egress interface. It is important to note that 
+BGP entries in the routing table do not have an exit interface specified.
+The IGP must perform recursion otherwise, 
 the route cannot be used. The result of a failed next hop recursion is a failed 
 best path selection i.e. the route is not installed in the RIB or advertised.
 The next-hop validity check is to prevent a route recursion failure.
@@ -3121,52 +3163,43 @@ command <code style="font-size:120%"><b>next-hop-self all</b></code> to insert t
 the data-path. This is usually used in Unified MPLS design.
 </p>
 <p>
-Updates sent to an iBGP peer does not modify the next hop by default. Update 
-source IP address is used as the next hop.
+Updates sent to an iBGP peer does not modify the next hop by default. The source 
+IP address of the update message is used as the next hop.
 </p>
 <p>
 <b>Note:</b> All BGP prefixes must pass the route validity check, and the next-hop IP address
 must be resolvable for the route to be eligible as a best path. Some vendors and publications consider this as the first 
 step in the BGP best path selection process.
 </p>
-<h5>Next-hop-self at Edge</h5>
+<h5><code>next-hop-self</code> at Edge</h5>
 <p>
-Pros:
+If the keyword <code><b>next-hop-self</b></code> is added when configuring an 
+iBGP peer, on a BGP router that is at the edge of the autonomous system, the 
+following are the effects:
+<ol>
+<li>Pros:</li>
 <ul>
-  <li>Peer can use the same next-hop on outbout updates to iBGP peers.</li>
+  <li>Peer can use the same next-hop on outbound updates to iBGP peers.</li>
   <li>Result is same dynamic update-group.</li>
-  <li>Don't need to include external links in IGP.</li>
+  <li>There will be no need to include external links in IGP.</li>
 </ul>
-Cons:
+<li>Cons:</li>
 <ul>
-  <li>Hinders fast convergence of external uplink failure. This has to do with 
+  <li>Hinders fast convergence if the external uplink fails. This has to do with 
   BGP's next hop tracking; if the next hop is lost, all routes accessible through 
-  the lost next hop are flushed and begins reconvergence.</li>
+  the lost next hop are flushed and reconvergence is initiated.</li>
 </ul>
+</ol>
+
 </p>
 
 <h5>eBGP Next Hop Processing</h5>
 <p>
 By default, outbound eBGP updates have a local update-source for neighbor set as 
 next-hop e.g. if update-source is the interface loopback0, next-hop is loopback0.
-This behaviour can be modified using a route-map action <code style="font-size:120%"><b>set ip next-hop
-</b></code>, <code style="font-size:120%"><b>neighbor next-hop-unchanged</b></code>; this can be used 
-for third-party next-hops.
-</p>
-
-<h4>BGP Synchronization</h4>
-<p>
-Synchronization rile must be met or disabled. Synchronization is a legacy black-hole 
-prevention technique.
-</p>
-<h4>AS-Path must not contain Local-AS</h4>
-<p>
-Normal EBGP loop prevention. Can be disabled with <code style="font-size:120%"><b>allow-as in</b></code>.
-</p>
-<h4>First ASN in path must be neighbor's ASN</h4>
-<p>
-<code style="font-size:120%"><b>bgp enforce-first-as</b></code> command. This helps provide an added layer of 
-security to BGP. For additional BGP security, see security section.
+This behaviour can be modified using a route-map action <code style="font-size:120%">
+<b>set ip next-hop</b></code>, <code style="font-size:120%"><b>
+neighbor next-hop-unchanged</b></code>; this can be used for third-party next-hops.
 </p>
 
 <h3> Best Path Selection</h3>
@@ -3781,6 +3814,14 @@ eBGP, eiBGP. However, still only one best path is advertised to peers.
 In addition of being used in best path selection, the AS_Path attribute is used 
 for loop prevention.
 </p>
+
+
+<h4>AS-Path must not contain Local-AS</h4>
+<p>
+Normal EBGP loop prevention. Can be disabled with <code style="font-size:120%"><b>allow-as in</b></code>.
+</p>
+
+
 <h3>AS_Path</h3>
 <p>
 AS_Path is a well-known mandatory attribute and includes a complete list of all 
@@ -7681,6 +7722,12 @@ used today because of the use of BGP scalability techniques such as full mesh,
 route reflection, and BGP confederations.
 
 </p>
+<h4>BGP Synchronization</h4>
+<p>
+Synchronization rule must be met or disabled. BGP Synchronization is a legacy 
+black-hole prevention technique.
+</p>
+
 
 <h1>Troubleshooting BGP</h1>
 <h2>Troubleshooting BGP Neighborship Failure</h2>
