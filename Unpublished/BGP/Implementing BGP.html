@@ -23,6 +23,11 @@
         <li><a href="#PREFIX_PROCESSING">Prefix Processing</a></li>
     </ol>
     <li><a href="#PATH_ATTRIBUTES">Path Attributes</a></li>
+      <ol type="i">
+        <li><a href="#BEST_PATH_SELECTION">Best Path Selection</a></li>
+        <li><a href="#LOOP_PREVENTION">Loop Prevention</a></li>
+
+      </ol>
     <li><a href="#BGP_ECMP">BGP Equal-Cost Multipath</a></li>
     <li><a href="#iBGP_SCALABILITY">iBGP Scalability</a></li>
       <ol type="i">
@@ -1362,7 +1367,7 @@ Verify configuration with the command <code style="font-size:120%"><b>show ip bg
 A BGP peer must be activated in order for BGP to initiate a session with that peer. 
 The router's IP address is added to the neighbor table and BGP attempts to 
 establish a BGP session or accepts a BGP session initiated from the peer. This 
-step is required only if the BGP command <code><b>no bgp default ipv4-unicast</b></code> 
+step is required only if the BGP command <code style="font-size:120%"><b>no bgp default ipv4-unicast</b></code> 
 has been configured to disable the default IPv4 address family.
 </p>
 
@@ -1452,7 +1457,7 @@ enabled for a neighbor using the BGP address family command <code style="font-si
 &lt;ip_address&gt; soft-reconfiguration inbound</b></code>. For Outbound soft 
 reconfiguration, no neighbor manipulation in configuration is required as the 
 command <code style="font-size:120%"><b>clear ip bgp &lt;ip_address&gt; soft out</b></code> is sufficient.
-The <code><b>soft out</b></code> option has no effect if the inbound policy is 
+The <code style="font-size:120%"><b>soft out</b></code> option has no effect if the inbound policy is 
 modified. This method of soft reset can be used when both BGP peers do not support 
 automatic route refresh capability. On the downside, soft-reconfiguration is 
 memory intensive because a separate cache is maintained to store prefixes 
@@ -2545,7 +2550,7 @@ from the large number of ASNs (4,294,967,295).
         Display locally originated prefixes.
       </td>
       <td style="border-bottom: 1px solid;">
-        <code><b>show bgp ipv4 unicast regexp ^$</b></code>
+        <code style="font-size:120%"><b>show bgp ipv4 unicast regexp ^$</b></code>
       </td>
     </tr>
     <tr>
@@ -2553,7 +2558,7 @@ from the large number of ASNs (4,294,967,295).
         Display externally originated prefixes.
       </td>
       <td style="border-bottom: 1px solid;">
-        <code><b>show bgp ipv4 unicast regexp [^_]</b></code>
+        <code style="font-size:120%"><b>show bgp ipv4 unicast regexp [^_]</b></code>
       </td>
     </tr>
     <tr>
@@ -2561,7 +2566,7 @@ from the large number of ASNs (4,294,967,295).
         Display locally originated prefixes.
       </td>
       <td style="border-bottom: 1px solid;">
-        <code><b>show bgp ipv4 unicast regexp ^$</b></code>
+        <code style="font-size:120%"><b>show bgp ipv4 unicast regexp ^$</b></code>
       </td>
     </tr>
     <tr>
@@ -2569,7 +2574,7 @@ from the large number of ASNs (4,294,967,295).
         Display prefixes originated by a specific AS.
       </td>
       <td style="border-bottom: 1px solid;">
-        <code><b>show bgp ipv4 unicast regexp 65537000$</b></code>
+        <code style="font-size:120%"><b>show bgp ipv4 unicast regexp 65537000$</b></code>
       </td>
     </tr>
   </tbody>
@@ -3122,7 +3127,7 @@ in any other routing protocol/application.
 </p>
 </p>
 
-<h3>Best Path Selection</h3>
+<h3 id="BEST_PATH_SELECTION">Best Path Selection</h3>
 <h4>Prerequisites</h4>
 
 <h4>Next Hop</h4>
@@ -3172,9 +3177,9 @@ IP address of the update message is used as the next hop.
 must be resolvable for the route to be eligible as a best path. Some vendors and 
 publications consider this as the first step in the BGP best path selection process.
 </p>
-<h5><code>next-hop-self</code> at Edge</h5>
+<h5><code style="font-size:120%">next-hop-self</code> at Edge</h5>
 <p>
-If the keyword <code><b>next-hop-self</b></code> is added when configuring an 
+If the keyword <code style="font-size:120%"><b>next-hop-self</b></code> is added when configuring an 
 iBGP peer, on a BGP router that is at the edge of the autonomous system, the 
 following are the effects:
 <ol>
@@ -3198,7 +3203,7 @@ following are the effects:
 <p>
 By default, outbound eBGP updates have their next hop path attribute value as 
 the IP address of the interface that was configured using the 
-<code><b>update-source</b></code> keyword e.g. if <code><b>update-source</b></code>
+<code style="font-size:120%"><b>update-source</b></code> keyword e.g. if <code style="font-size:120%"><b>update-source</b></code>
 command points to the interface loopback0, next-hop is set to the IP address 
 configured on the interface loopback0.
 This behaviour can be modified using the route-map action statement 
@@ -3267,12 +3272,13 @@ selecting the best path on Cisco devices. Weight only influences outbound
 traffic from a router or an autonomous system and is not advertised to peers. 
 It is locally significant and is not contained in updates. 
 It can be thought of in the context of the administrative distance assigned to different routing
-protocols by a router. BGP peers have no idea that a local router is using weight for best path selection.
+protocols by a router. BGP peers do not know the values for weight that are used 
+by the local router in the best path selection process.
 </p>
 <p>
 By default, locally originated prefixes have a weight value of 32768. 
 For prefixes received from other BGP peers, the weight is assigned a value of zero (0).
-Use the route-map command <code><b>set weight &lt;0-65535&gt;</b></code> to 
+Use the route-map command <code style="font-size:120%"><b>set weight &lt;0-65535&gt;</b></code> to 
 modify the weight path attribute. 
 If modifying the weight path attribute, take note of the following; 
 
@@ -3371,7 +3377,7 @@ R1(config-router-af)#
 <p>
 Local preference (LOCAL_PREF) is a well-known discretionary path attribute that 
 indicates the preference for exiting the autonomous system to a remote prefix. 
-It is 32-bit. The higher value is preferred. The local preference does not have 
+It is 32-bit. A higher value is preferred. The local preference does not have 
 to be present in a BGP update. If the value is not specified, then a default value 
 of 100 is used. LOCAL_PREF is not advertised between eBGP peers as such it is 
 not transitive. However, it is advertised to confederation eBGP peers in BGP 
@@ -3462,7 +3468,7 @@ R3(config-router-af)#<b>end</b><br>
 </p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
 <code style="font-size:120%">
-R3#<b>clear bgp ipv4 unicast 65000 out</b>
+R3#<b>clear bgp ipv4 unicast 65000 soft out</b>
 
 </code></div>
 <p>
@@ -3482,10 +3488,13 @@ VRF info: (vrf in name/id, vrf out name/id)<br>
 </code></div>
 
 <p>
-<b>Note:</b> Changing the LOCAL_PREF can produce interesting results. If two routers having different paths to a
-prefix advertise their paths, both will receive the other's prefix advertisement. However, with changed LOCAL_PREF, the 
-router whose path has a lower LOCAL_PREF will send a prefix withdraw to the one with a better path. It will have two paths 
-to the same prefix and the one with the better path will have one. Always remember BGP peers only share their best path.
+<b>Note:</b> Changing the LOCAL_PREF can produce interesting results. If two 
+routers having different paths to a prefix advertise their paths to each other, 
+both will receive the other's prefix advertisement. However, with changed 
+LOCAL_PREF, the router whose path has a lower LOCAL_PREF will send a prefix 
+withdraw to the one with a better path. It will have two paths to the same prefix 
+and the one with the better path will have one. Always remember BGP peers only 
+share their best path.
 </p>
 <p>
 The downstream iBGP peers will have one path.
@@ -3521,7 +3530,7 @@ Paths: (2 available, best #1, table default)<br>
 &nbsp;&nbsp;65512 65538                                                                        <br>
 &nbsp;&nbsp;&nbsp;&nbsp;9.9.9.9 from 9.9.9.9 (10.9.13.1)                                       <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Origin IGP, localpref 100, valid, external                 <br>
-R1#                                                                                            <br>
+*********************************************************                                <br>
                                                                                                <br>
 R3#<b>show bgp ipv4 unicast 10.10.10.0</b>                                                     <br>
 BGP routing table entry for 10.10.10.0/24, version 19                                          <br>
@@ -3541,7 +3550,7 @@ Paths: (1 available, best #1, table default)                                    
 Preference is given in best path selection using the following criteria:
 <ol>
   <li>Routes that were advertised locally: these are paths that were sourced 
-  into the Loc-RIB table using the BGP <code style="font-size:120%"><b>network</b></code> command.</li>.
+  into the Loc-RIB table using the BGP <code style="font-size:120%"><b>network</b></code> command.</li>
   <li>Prefer local paths that were redistributed into BGP.</li>
   <li>Networks that have been aggregated locally using the BGP command <code style="font-size:120%"><b>
   aggregate-address</b></code> (summarization).</li>
@@ -3634,9 +3643,7 @@ are advertised on Cisco routers using the network statement are set with the
 code <b>i</b> (for IGP). Redistributed networks are assigned the code <b>?</b> (incomplete)
 origin attribute. 
 The Origin path attribute has a type code of 1 (one). The types of origin include:
-IGP (code 0), EGP, and redistributed.<br> 
-(<b>TODO:</b> (1).Determine the origin code for EGP and redistributed prefixes. 
-(2) Create route-map and modify the origin code).<br>
+IGP (code 0), EGP, and redistributed.
 
 When using the origin attribute to determine the best path, the 
 order of preference is;
@@ -3711,8 +3718,7 @@ originated within the local confederation.
 The paths are stored in the order in which they are received and stored in the BGP table. If the keyword 
 <code style="font-size:120%"><b>always-compare-med</b></code> is not enabled, the path MED is only compared against the existing best path and 
 not against all the paths in the Loc-RIB table which can cause variations in the best path comparison process.
-</p>
-<p>
+
 BGP deterministic MED corrects the problem by grouping together paths with identical AS_PATH values as part of the best path 
 identification process. Each group's MED is compared against the other group's MED. BGP deterministic MED is enabled 
 with the configuration command: <code style="font-size:120%"><b>bgp deterministic-med</b></code>. It is recommended for all BGP deployments
@@ -3747,8 +3753,9 @@ to get to the external prefix.
 <p>
 Use the lowest IGP metric/cost to reach the BGP next-hop address. Lower metric 
 value is preferred. This path attribute is relevant to best path selection in iBGP.
-Can use multi-path of all equal after this step. There is a command to allow 
-multipath if AS_PATH is not the same (has to be same length): <code style="font-size:120%"><b>bgp 
+Multiple paths can be used (multi-path) if all the paths available have the same 
+path attributes by this stage. There is a command to allow multipath if AS_PATH 
+is not the same (BUT has to be same length): <code style="font-size:120%"><b>bgp 
 best-path as-path multipath-relax</b></code>.
 </p>
 <h4>Oldest eBGP Path</h4>
@@ -3784,11 +3791,16 @@ peerings used the oldest received path as the tie-breaker.
 
 <h3>Exceptions to the Best Path Selection</h3>
 <p>
+The following configurations to BGP alter the aforementioned default best path 
+selection process:
 <ul>
-  <li><b>AS-Path:</b> <code style="font-size:120%"><b>bgp bestpath as-path ignore</b></code></li>
+  <li><b>AS-Path:</b> <code style="font-size:120%"><b>bgp bestpath as-path ignore</b></code>:
+  Ignore AS_PATH path attribute in best path selection process.</li>
   <li><b>MED:</b>
     <ul>
-      <li><code style="font-size:120%"><b>bgp always-compare-med</b></code></li>
+      <li><code style="font-size:120%"><b>bgp always-compare-med</b></code>: 
+      Compare the MED regardless of the AS that he prefix is originated from i.e.,
+      do not care whether the paths are from the same AS or different AS.</li>
       <li><code style="font-size:120%"><b>bgp bestpath med-confed</b></code>: compares MED for routes locally originated in 
       the confederation</li>
       <li><code style="font-size:120%"><b>bgp bestpath med-missing-as-worst</b></code>: assigns MED of 
@@ -3797,9 +3809,10 @@ peerings used the oldest received path as the tie-breaker.
       paths.
     </ul>
   </li>
-  <li><b>IGP Metric:</b> <code style="font-size:120%"><b>bgp bestpath igp-metric ignore</b></code>. This 
-  was introduced in IOS-XE3.4s</li>
-  <li><b>Router-ID:</b> <code style="font-size:120%"><b>no bgp bestpath compare-routerid</b></code>.
+  <li><b>IGP Metric:</b> <code style="font-size:120%"><b>bgp bestpath igp-metric ignore</b></code>. 
+  Ignore the IGP metric to the next hop. This was introduced in IOS-XE3.4s</li>
+  <li><b>Router-ID:</b> <code style="font-size:120%"><b>no bgp bestpath compare-routerid</b></code>; 
+  ignore the router-id from the best path selection process.
 </ul>
 </p>
 
@@ -3830,15 +3843,16 @@ eBGP, eiBGP. However, still only one best path is advertised to peers.
 </p>
 
 
-<h2>Loop Prevention</h2>
+<h2 id="LOOP_PREVENTION">Loop Prevention</h2>
 <p>
-In addition of being used in best path selection, the AS_Path attribute is used 
-for loop prevention.
+
 </p>
 
 
 <h3>AS_Path</h3>
 <p>
+In addition of being used in best path selection, the AS_Path attribute is used 
+for loop prevention.
 AS_Path is a well-known mandatory attribute and includes a complete list of all 
 ASNs that the prefix advertisement has traversed from its source AS. 
 The source autonomous 

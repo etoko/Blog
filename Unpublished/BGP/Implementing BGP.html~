@@ -3122,7 +3122,8 @@ in any other routing protocol/application.
 </p>
 </p>
 
-<h3>Prerequisites to Best Path Selection</h3>
+<h3>Best Path Selection</h3>
+<h4>Prerequisites</h4>
 
 <h4>Next Hop</h4>
 <p>
@@ -3168,8 +3169,8 @@ IP address of the update message is used as the next hop.
 </p>
 <p>
 <b>Note:</b> All BGP prefixes must pass the route validity check, and the next-hop IP address
-must be resolvable for the route to be eligible as a best path. Some vendors and publications consider this as the first 
-step in the BGP best path selection process.
+must be resolvable for the route to be eligible as a best path. Some vendors and 
+publications consider this as the first step in the BGP best path selection process.
 </p>
 <h5><code>next-hop-self</code> at Edge</h5>
 <p>
@@ -3195,32 +3196,42 @@ following are the effects:
 
 <h5>eBGP Next Hop Processing</h5>
 <p>
-By default, outbound eBGP updates have a local update-source for neighbor set as 
-next-hop e.g. if update-source is the interface loopback0, next-hop is loopback0.
-This behaviour can be modified using a route-map action <code style="font-size:120%">
-<b>set ip next-hop</b></code>, <code style="font-size:120%"><b>
-neighbor next-hop-unchanged</b></code>; this can be used for third-party next-hops.
+By default, outbound eBGP updates have their next hop path attribute value as 
+the IP address of the interface that was configured using the 
+<code><b>update-source</b></code> keyword e.g. if <code><b>update-source</b></code>
+command points to the interface loopback0, next-hop is set to the IP address 
+configured on the interface loopback0.
+This behaviour can be modified using the route-map action statement 
+<code style="font-size:120%">
+<b>set ip next-hop</b></code>. The command <code style="font-size:120%"><b>
+neighbor next-hop-unchanged</b></code> can be used for third-party next-hops.
 </p>
 
-<h3> Best Path Selection</h3>
+<h3> Best Path Selection Process</h3>
 <p>
 A BGP router only advertises the best path to neighboring routers.
-Inside the Loc-RIB, all the prefixes and their path attributes are maintained with the best path calculated. 
-The best path selection is based on multiple path attributes. The best path is presented to the RIB for installation. 
-If the best path is no longer available, the BGP device can use the existing paths to quickly identify a new best path. 
-BGP recalculates the best path for a prefix when the following events occur:
+Inside the Loc-RIB, all the prefixes and their path attributes are maintained 
+with the best path calculated. The best path selection process evaluates multiple 
+path attributes of the list of available paths from which the best path is selected. 
+The best path is presented to the RIB for installation. If the best path is no 
+longer available, the BGP device can use the existing paths to quickly identify 
+a new best path. BGP recalculates the best path for a prefix when the following 
+events occur:
 <ol>
-  <li>Change in the next-hop or next-hop reachability of a prefix</li>
+  <li>Change in the next-hop or the reachability of the next-hop of a prefix</li>
   <li>Failure of an interface connected to an eBGP peer</li>
   <li>Redistribution change</li>
-  <li>Reception of new or removed paths for a network prefix.</li>
+  <li>BGP update containing updated path information i.e., added or removed 
+  paths and path attributes for a network prefix.</li>
 </ol>
 </p>
 
 <p>
-BGP autonomatically installs the first received path as the best path. When additional paths are received for the same 
-network prefix, the newer paths are compared against the current best path. If there is a tie, processing continues until 
-a best path winner is identified. The BGP best path algorithm selects the best path in this order. 
+By default, BGP automatically installs the first received path as the best path. 
+When additional paths are received for the same network prefix, the newer paths 
+are compared against the current best path. If there is a tie, processing continues until 
+a best path winner is identified. The BGP best path algorithm, on Cisco devices, 
+selects the best path in this order. 
 <ol>
   <li>Prefer the path with the highest weight</li>
   <li>Prefer the path with the highest local preference.</li>
@@ -3234,7 +3245,7 @@ a best path winner is identified. The BGP best path algorithm selects the best p
   </li>
   <li>Prefer the path with the lower Accumulated Interior Gateway Protocol (AIGP) metric.</li>
   <li>Prefer the path with the shortest AS_PATH.</li>
-  <li>Prefer the path with the lowest origin type. IGP is lower than external 
+  <li>Prefer the path with the lowest origin type where IGP is lower than external 
   gateway protocol (EGP), and EGP is lower than incomplete.</li>
   <li>Prefer the path with the lowest Multi-Exit Discriminator (MED).</li>
   <li>Prefer the external path over the internal path.</li>
@@ -3244,9 +3255,7 @@ a best path winner is identified. The BGP best path algorithm selects the best p
   <li>Prefer the path with the lowest cluster length for iBGP paths.</li>
   <li>Prefer the path with the lowest neighbor BGP router ID for iBGP peers.</li>
 </ol>
-Some consider the next-hop validity as the path selection criteria. This is because when a BGP device receives an update, 
-it first verifies whether the next-hop is reachable. If the next-hop is not reachable, the path selection process will not 
-even start for the prefix. If the next-hop is reachable, then the best path selection process starts.
+Some consider the next-hop validity as the path selection criteria.
 </p>
 
 <h4>Weight</h4>
@@ -3263,7 +3272,19 @@ protocols by a router. BGP peers have no idea that a local router is using weigh
 <p>
 By default, locally originated prefixes have a weight value of 32768. 
 For prefixes received from other BGP peers, the weight is assigned a value of zero (0).
-The following sequence of steps shows the process for setting the weight of a prefix:
+Use the route-map command <code><b>set weight &lt;0-65535&gt;</b></code> to 
+modify the weight path attribute. 
+If modifying the weight path attribute, take note of the following; 
+
+<ul>
+<li>Weight attribute should be modified in the "in" direction i.e., the path 
+attribute of the prefix is modified before it is installed in the Loc-RIB table.</li>
+<li>Apply the route-map to the BGP peer which is advertising the NLRI whose 
+weight path attribute is to be modified.</li>
+</ul>
+
+The following sequence of steps shows how the weight attribute can be modified 
+to influence the best path selection process of a prefix:
 </p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
 <code style="font-size:120%">
@@ -3816,12 +3837,6 @@ for loop prevention.
 </p>
 
 
-<h4>AS-Path must not contain Local-AS</h4>
-<p>
-Normal EBGP loop prevention. Can be disabled with <code style="font-size:120%"><b>allow-as in</b></code>.
-</p>
-
-
 <h3>AS_Path</h3>
 <p>
 AS_Path is a well-known mandatory attribute and includes a complete list of all 
@@ -3833,6 +3848,12 @@ receives a prefix advertisement with its AS listed in the AS_Path attribute,
 it discards the prefix because the router thinks the advertisement forms a loop. 
 This behaviour can be modified using the BGP command <code style="font-size:120%"><b>neighbor &lt;ip_address&gt; 
 allowas-in</b></code> or <code style="font-size:120%"><b>as-override</b></code>.
+</p>
+
+
+<h4>AS-Path must not contain Local-AS</h4>
+<p>
+Normal EBGP loop prevention. Can be disabled with <code style="font-size:120%"><b>allow-as in</b></code>.
 </p>
 
 <h1 id="BGP_ECMP">BGP Equal-Cost Multipath</h1>
@@ -3863,7 +3884,7 @@ path attributes need to have the same values:
 <h2>eBGP Equal Cost Multipath</h2>
 <p>
 eBGP multipath is enabled  on IOS routers with the address-family command: 
-<code style="font-size:120%"><b>maximum-paths &lt;number&gt;&gt;</b></code>.
+<code style="font-size:120%"><b>maximum-paths &lt;number&gt;</b></code>.
 eBGP paths to qualify for multipath need to match the best path path attributes: 
 <ul>
  <li>Weight</li> 
