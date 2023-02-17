@@ -31,6 +31,7 @@
     <li><a href="#BGP_ECMP">BGP Equal-Cost Multipath</a></li>
     <li><a href="#iBGP_SCALABILITY">iBGP Scalability</a></li>
       <ol type="i">
+      <li><a href="#FULL_MESH">Full Mesh</a></li>
         <li><a href="#ROUTE_REFLECTOR">Route Reflector</a></li>
         <li><a href="#CONFEDERATIONS">Confederations</a></li>
     </ol>
@@ -3873,17 +3874,17 @@ Normal EBGP loop prevention. Can be disabled with <code style="font-size:120%"><
 <h1 id="BGP_ECMP">BGP Equal-Cost Multipath</h1>
 <p>
 BGP advertises only one best path but it allows for the installation of multiple
-paths into the RIB. BGP supports only equal-cost multipaths and unequal cost 
+paths into the RIB. BGP supports equal-cost multipaths and unequal cost 
 multipathing through the configuration of BGP Link Bandwidth. BGP multipathing 
 has three different variances in behaviour: eBGP multipath, iBGP multipath, eBGP 
-and iBGP multipath (eiBGP). This is traditionally used in service providers with 
+and iBGP multipath (eiBGP). eiBGP is traditionally used in service providers with 
 Layer 3 VPNs. Enabling BGP multipathing does not alter  the best-path algorithm 
 or change the behaviour of paths advertisement to other BGP peers. Only the BGP 
 best path is advertised to peers.
 </p>
 
 <p>
-To become a candidate for multipath, paths to the same destination, the following 
+To become a candidate for multipath i.e., paths to the same destination, the following 
 path attributes need to have the same values:
 <ul>
   <li>Origin</li>
@@ -3891,15 +3892,16 @@ path attributes need to have the same values:
   <li>Neighboring As or sub-AS (in the case of confederations)</li>
   <li>Weight</li>
   <li>MED</li>
-  <li>
 </ul>
 </p>
 
 <h2>eBGP Equal Cost Multipath</h2>
 <p>
 eBGP multipath is enabled  on IOS routers with the address-family command: 
-<code style="font-size:120%"><b>maximum-paths &lt;number&gt;</b></code>.
-eBGP paths to qualify for multipath need to match the best path path attributes: 
+<code style="font-size:120%"><b>maximum-paths &lt;1-32&gt;</b></code>. Up to 
+32 multipaths are supported on some IOS versions.
+To qualify for multipath, eBGP paths need to match the following path attributes
+of the best path: 
 <ul>
  <li>Weight</li> 
   <li>Local Preference</li>
@@ -4170,7 +4172,7 @@ R9(config-router-af)#                                              <br>
 <h2>iBGP Multipath</h2>
 <p>
 iBGP multipath is enabled with the address-family command: 
-<code style="font-size:120%"><b>maximum-paths ibgp &lt;number&gt;</b></code>. 
+<code style="font-size:120%"><b>maximum-paths ibgp &lt;1-32&gt;</b></code>. 
 To become candidate for iBGP multipath, iBGP paths need to match the best path 
 path attributes: 
 <ul>
@@ -4198,18 +4200,22 @@ eiBGP multipath is configured using the command <code style="font-size:120%;"><b
 In a bid to prevent the formation of loops, prefixes received from an iBGP peer 
 cannot be advertised to another iBGP peer. To scale iBGP so that prefixes are 
 advertised across the autonomous-system to other iBGP peers, the following 
-options are available: full-mesh configuration, route reflectors and BGP confederations.
+options are available: 
+<ul>
+  <li>Full-mesh configuration</li>
+  <li>Route reflectors</li>
+  <li>BGP confederations.</li>
+</ul>
 You do not have to select one design over another; one implementation would 
 consist of a full mesh in one section of the network for path diversity and 
 inter-cluster route reflectors for scaling in another section of the network.
-</p>
-<p>
+
 Both route reflection and confederations accomplish the same goal; iBGP scalability.
 Migration to a confederation is more complicated, however, greenfield confederation 
 is easier. Migration to route reflection is easier. 
 </p>
 
-<h2>iBGP Full Mesh</h2>
+<h2 id="FULL_MESH">iBGP Full Mesh</h2>
 <p>
 iBGP peers do not prepend their ASN to the AS-Path because the NLRI would fail the validity check and would not install 
 the prefix into the Loc-RIB and RIB. iBGP rules prohibit the advertisement of an NLRI received from an iBGP peer to 
@@ -4245,16 +4251,17 @@ Key disadvantages of full mesh designs include the following:
 <h2 id="ROUTE_REFLECTOR">Route Reflectors</h2>
 
 <p>
-Route reflectors enable iBGP peers to advertise prefixes without the need to form full-mesh iBGP neighborships.
+Route reflectors enable iBGP peers to advertise prefixes without the need to form
+full-mesh iBGP neighborships.
 Route reflectors are configured per address family; a route reflector for the IPv4 
 address family will not act as a route reflector for the IPv6 address family 
-unless it is configured for this purpose.
+unless it is configured explicitly for this purpose.
 
+The BGP device that is reflecting prefixes is known as a <b>route reflector(RR)</b>.
 Route reflectors are defined by <a href="https://www.ietf.org/rfc/rfc1966.txt">
 RFC 1966</a> and updated by <a href="https://www.rfc-editor.org/rfc/rfc4456">
 RFC 4456</a>. Through route reflectors, BGP devices are able to advertise prefixes to iBGP 
-peers by "reflecting" the prefixes; RR only reflects its best path. The BGP 
-device that is reflecting prefixes is known as a <b>route reflector(RR)</b>.
+peers by "reflecting" the prefixes; RR only reflects its best path. 
 Route reflection eliminates the need for full mesh. iBGP peers only need to peer 
 with the route reflector. This is similar in context to the operation of the OSPF 
 designated router(DR) where updates are sent to the RR which then sends the update 
@@ -4297,8 +4304,8 @@ of BGP confederations, implementing route reflectors does not affect the existin
 BGP sessions.
 </p>
 <p>
-Both MuED and IGP metrics may impact the BGP route selection... with certain 
-route relection technologies the route reflection approach may not yield the 
+Both MED and IGP metrics may impact the BGP best path selection decisions. With 
+certain route reflection technologies the route reflection approach may not yield the 
 same route selection result as that of the full iBGP mesh approach. A way to make 
 route selection the same..[is] by configuring the intra-cluster IGP metrics to be 
 better than the inter-cluster IGP metrics, and maintaining full mesh within the 

@@ -31,6 +31,7 @@
     <li><a href="#BGP_ECMP">BGP Equal-Cost Multipath</a></li>
     <li><a href="#iBGP_SCALABILITY">iBGP Scalability</a></li>
       <ol type="i">
+      <li><a href="#FULL_MESH">Full Mesh</a></li>
         <li><a href="#ROUTE_REFLECTOR">Route Reflector</a></li>
         <li><a href="#CONFEDERATIONS">Confederations</a></li>
     </ol>
@@ -4214,7 +4215,7 @@ Migration to a confederation is more complicated, however, greenfield confederat
 is easier. Migration to route reflection is easier. 
 </p>
 
-<h2>iBGP Full Mesh</h2>
+<h2 id="FULL_MESH">iBGP Full Mesh</h2>
 <p>
 iBGP peers do not prepend their ASN to the AS-Path because the NLRI would fail the validity check and would not install 
 the prefix into the Loc-RIB and RIB. iBGP rules prohibit the advertisement of an NLRI received from an iBGP peer to 
@@ -4250,16 +4251,17 @@ Key disadvantages of full mesh designs include the following:
 <h2 id="ROUTE_REFLECTOR">Route Reflectors</h2>
 
 <p>
-Route reflectors enable iBGP peers to advertise prefixes without the need to form full-mesh iBGP neighborships.
+Route reflectors enable iBGP peers to advertise prefixes without the need to form
+full-mesh iBGP neighborships.
 Route reflectors are configured per address family; a route reflector for the IPv4 
 address family will not act as a route reflector for the IPv6 address family 
-unless it is configured for this purpose.
+unless it is configured explicitly for this purpose.
 
+The BGP device that is reflecting prefixes is known as a <b>route reflector(RR)</b>.
 Route reflectors are defined by <a href="https://www.ietf.org/rfc/rfc1966.txt">
 RFC 1966</a> and updated by <a href="https://www.rfc-editor.org/rfc/rfc4456">
 RFC 4456</a>. Through route reflectors, BGP devices are able to advertise prefixes to iBGP 
-peers by "reflecting" the prefixes; RR only reflects its best path. The BGP 
-device that is reflecting prefixes is known as a <b>route reflector(RR)</b>.
+peers by "reflecting" the prefixes; RR only reflects its best path. 
 Route reflection eliminates the need for full mesh. iBGP peers only need to peer 
 with the route reflector. This is similar in context to the operation of the OSPF 
 designated router(DR) where updates are sent to the RR which then sends the update 
@@ -4269,14 +4271,18 @@ The BGP device that is receiving reflected prefixes is referred to as a <b>route
 A route reflector will not modify the next-hop ip address for the routes that are advertised from iBGP peers.
 Route reflectors are guided by three rules:
 <ol>
-  <li><b>Rule 1: </b>If route reflector receives a prefix from a BGP peer that is not a route reflector client, 
-  the route reflector advertises the prefixes to a route reflector client. It does not advertise the prefixes to a 
+  <li><b>Rule 1: </b>If route reflector receives a prefix from a BGP peer that 
+  is not a route reflector client, the route reflector advertises the prefixes 
+  to a route reflector client (and eBGP peer). It does not advertise the prefixes to a 
   non-route reflector client.</li>
   <li><b>Rule 2: </b>If a route reflector receives a prefix from a route reflector client, it advertises the prefixes to 
-  route reflector clients and non-route reflector clients.</li>
- <li><b>Rule 3: </b>If a route reflector receives a prefix from an eBGP peer. It advertises the prefix to route reflector 
- clients and non-route reflector clients.</li> 
+  route reflector clients and non-route reflector clients (as well as eBGP peers).</li>
+ <li><b>Rule 3: </b>If a route reflector receives a prefix from an eBGP peer. 
+ It advertises the prefix to route reflector clients and non-route reflector 
+ clients. <i>Note:</i> this update will also be sent to eBGP peers.</li> 
 </ol>
+The placement of the RR in the topology should be guided by these rules.
+
 </p>
 <p>
 BGP Route reflection is a BGP policy command and so it is configured under the 
@@ -4297,21 +4303,22 @@ R2(config-router-af#<b>neighbor AS65000 route-reflector-client</b>
 </code>
 </div>
 <p>
-No further BGP configuration is applied to route-reflector clients. Unlike implementation 
-of BGP confederations, implementing route reflectors does not affect the existing 
+No further BGP configuration is applied to route-reflector clients. Unlike BGP 
+confederations, implementing route reflectors does not affect the existing 
 BGP sessions.
 </p>
 <p>
-Both MuED and IGP metrics may impact the BGP route selection... with certain 
-route relection technologies the route reflection approach may not yield the 
-same route selection result as that of the full iBGP mesh approach. A way to make 
-route selection the same..[is] by configuring the intra-cluster IGP metrics to be 
-better than the inter-cluster IGP metrics, and maintaining full mesh within the 
-cluster i.e. full mesh and route reflectors together.
+Both MED and IGP metrics may impact the BGP best path selection decisions. With 
+certain route reflection technologies the route reflection approach may not yield the 
+same route selection result as that of the full iBGP mesh approach. One way in 
+which route selection can be configured to be similar to the path selection under 
+full mesh topologies is by configuring the 
+intra-cluster IGP metrics to be better than the inter-cluster IGP metrics, and 
+maintaining full mesh within the cluster i.e. full mesh and route reflectors together.
 </p>
 <p>
-Route reflectors are the very critical devices when implementing iBGP scalability 
-using route reflection. It is important that they have accurate information as 
+Route reflectors are very critical devices when implementing iBGP scalability 
+using route reflection; they have accurate information as 
 they are the principle source of path information for other iBGP devices. 
 Path attribute modification should be implemented on the route reflectors.
 </p>
@@ -4323,35 +4330,29 @@ A route reflector can have three types of peers:
   <li>iBGP client peers</li>
   <li>iBGP non-client peers</li>
 </ul>
-Route reflectors process updates differently depending on what type of peer they 
-came from:
-<ul>
-  <li>eBGP learning routes: pass to eBGP peers, clients and non-clients</li>
-  <li>Client learned routes: pass to eBGP peers, clients and non-clients</li>
-  <li>Non-client learned routes: pass to eBGP peers and clients</li>
-</ul>
-The placement of the RR in the topology should be guided by these rules.
 </p>
 
 <h3>Developments in BGP</h3>
 <p>
 In more recent BGP topologies, virtual route reflectors are gaining prominence. 
 These virtual route reflectors are usually virtual machines and share NLRI information 
-in the autonomous system.
+in the autonomous system. These RRs are normally not present in the path of 
+the traffic.
 </p>
 <p>
-In iBGP topologies with route reflectors, the BGP selective route download has 
-exists. This feature allows a network administrator to selectively download some 
-or none of the BGP routes into the RIB. The primary application for this feature 
+In iBGP topologies with route reflectors, a feature known as BGP selective route
+download exists. This feature allows a network administrator to selectively download some 
+or none of the BGP routes into the RIB. The primary purpose of this feature 
 is to suppress the unnecessary downloading of certain BGP routes to the RIB or FIB on 
 a dedicated route reflector, which propagates BGP updates without carrying 
 transit traffic. The feature thereby helps to maximize resources available and 
 to improve routing scalability and convergence on the dedicated route reflector.
 This is useful if the dedicated route reflector does not have sufficient hardware
- resources
+ resources.
 </p>
 
 <h3>Verification of Route Reflection</h3>
+<h4><code style="font-size:120%;">show ip protocols</code></h4>
 <p>
 The route reflector status of a BGP device can be verified by the command <code style="font-size:120%"><b>show ip protocols</b></code>:
 </p>
@@ -4377,6 +4378,7 @@ Routing Protocol is "bgp 65000"                                                <
                                                                    
 R2#   
 </code></div>
+<h4><code style="font-size:120%;">show bgp ipv4 unicast neighbor &lt;ip_address&gt;</code></h4>
 <p>
 The route reflector client status of the BGP peers can be verified by issuing the command: 
 <code style="font-size:120%"><b>show bgp ipv4 unicast neighbor &lt;peer-IP-address&gt;</b></code> 
@@ -4405,7 +4407,7 @@ BGP neighbor is 1.1.1.1,  remote AS 65000, internal link                        
 &nbsp;&nbsp;Slow-peer detection is disabled                                                              <br>
 &nbsp; ...                                                                                          <br>
 </code></div>
-
+<h4><code style="font-size:120%;">show bgp ipv4 unicast &lt;prefix&gt;</code></h4>
 <p>
 For BGP prefixes that have been received from a route reflector client, these prefixes are tagged as having been 
 received from a route reflector client: 
@@ -4425,8 +4427,9 @@ R2#
 </code></div>
 <h3>High Availability</h3>
 <p>
-A simple BGP topology with a single route reflector may not provide the high-availability requirement of autonomous 
-systems. High availability can be provided by adding redundant route reflectors, nested route reflectors where route 
+A simple BGP topology with a single route reflector may not provide the 
+high-availability requirement of autonomous systems. High availability can be 
+provided by adding redundant route reflectors, nested route reflectors where route 
 reflector clients are route reflectors themselves. These different route reflectors 
 will have different route reflector IDs.
 </p>
@@ -4436,19 +4439,19 @@ will have different route reflector IDs.
 
 <h3>Route Reflector Loop Prevention</h3>
 <p>
-Route reflection relaxes the iBGP restrictions of loop prevention by permitting the advertisement of a prefix received 
-from an iBGP peer to another iBGP peer. The design of route reflection poses a 
-great risk of introducing routing loops. 
+Route reflection relaxes the iBGP restrictions of loop prevention by permitting 
+the advertisement of a prefix received from an iBGP peer to another iBGP peer. 
+The design of route reflection poses the great risk of introducing routing loops. 
 Nested route reflection with intra-cluster loops occuring on peerings between 
 route reflector clients and inter-cluster loops occuring in connections between 
 route reflector clients peering with route reflector clients of different route reflector clusters. 
 </p>
 <p>
-Route reflectors prevent loop formation by the use of the cluster-ID; an RR discards 
+Route reflectors prevent loop formation through the use of the cluster-ID; an RR discards 
 routes received with its own cluster-ID. Additionally, 
-o prevent routing loop formation in iBGP, route reflectors sets the <b>ORIGINATOR_ID</b>
-attribute to the router-ID of the RR client on prefixes received from route reflector 
-client. The client uses Originator-ID for loop prevention. 
+to prevent routing loop formation in iBGP, route reflectors set the <b>ORIGINATOR_ID</b>
+attribute to the router-ID of the RR client of prefixes received from the specific 
+route reflector client. The client uses Originator-ID for loop prevention. 
 Together with the and <b>CLUSTER_LIST</b> path attribute, these two path attributes 
 are used to guard against inter-cluster and 
 intra-cluster loops from being formed. The ORIGINATOR_ID has a type code of 9 and 
@@ -4600,8 +4603,8 @@ RR is not in the data path. The selective RIB download feature can be considered
 
 <h2 id="CONFEDERATIONS">Confederations</h2>
 <p>
-BGP confederations are another alternative to full iBGP mesh implementing iBGP 
-scalability. Defined by RFC 3065, BGP confederations split the autonomous system 
+BGP confederations are another way in which iBGP can be scaled. 
+Defined by RFC 3065, BGP confederations split the autonomous system 
 into smaller sub-autonomous systems known as member autonomous systems that combine into a larger 
 autonomous system known as autonomous system confederation. 
 Inside the sub-AS, full mesh or RR can be implemented. The peering between BGP 
@@ -4609,13 +4612,13 @@ routers in different sub-ASs acts like eBGP.
 eBGP peers have no knowledge that they are peering with a confederation and they reference the 
 confederation identifier in their configuration. 
 Confederations can be further scaled by performing route reflection inside a confederation.
-When advertising to eBGP peers, sub-AS numbers are stripped from the updates.
+When advertising to eBGP peers, sub-AS numbers are stripped from the updates messages.
 </p>
 <p>
 Confederations are configured using private autonomous system numbers i.e. 
 64512 - 65534. 
 Different IGPs can be configured in each sub-AS with <code style="font-size:120%"><b>next-hop-self</b></code> 
-command configured on the Sub-AS border routes. 
+command configured on the Sub-AS border routers. 
 Confederation eBGP peerings are created between each of the 
 confederations. Confederation eBGP peering does not follow the all same rules of standard eBGP.
 Some changes occur in the operation of confederation eBGP peerings such as: 
@@ -4641,7 +4644,7 @@ R4(config-router)#<b>bgp router-id 4.4.4.4</b>
 </code></div>
 <p>
 <b>Step 2: </b>Identify the BGP confederation with the command  
-<code style="font-size:120%"><b>bgp confederation identifier</b></code>.
+<code style="font-size:120%"><b>bgp confederation identifier &lt;asn&gt;</b></code>.
 The AS number will be known to external BGP peers i.e. peers not part of the confederation.
 </p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
@@ -4711,9 +4714,9 @@ R4#<b>show ip protocols</b><br>
 Routing Protocol is "bgp 65000"<br>
 &nbsp;&nbsp;Outgoing update filter list for all interfaces is not set<br>
 &nbsp;&nbsp;Incoming update filter list for all interfaces is not set<br>
-&nbsp;&nbsp;BGP confederation consists of ASs: 64512 65500<br>
+&nbsp;&nbsp;<span style="background-color:gray;">BGP confederation consists of ASs: 64512 65500</span><br>
 &nbsp;&nbsp;<br>
-&nbsp;&nbsp;BGP confederation advertised as AS 112<br>
+&nbsp;&nbsp;<span style="background-color:gray;">BGP confederation advertised as AS 112</span><br>
 &nbsp;&nbsp;IGP synchronization is disabled<br>
 &nbsp;&nbsp;Automatic route summarization is disabled<br>
 &nbsp;&nbsp;Neighbor(s):<br>
@@ -4730,7 +4733,7 @@ Routing Protocol is "bgp 65000"<br>
 R4#
 </code></div>
 
-<h4><code style="font-size:120%">show bgp ipv4 unicast &lt;neighbor_ip_address&gt;</code></h4>
+<h4><code style="font-size:120%">show bgp ipv4 unicast neighbor &lt;ip_address&gt;</code></h4>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
 <code style="font-size:120%">
 R4#<b>show bgp ipv4 unicast neighbor 7.7.7.7</b>             <br>
