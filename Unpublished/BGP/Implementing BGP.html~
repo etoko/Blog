@@ -4271,14 +4271,18 @@ The BGP device that is receiving reflected prefixes is referred to as a <b>route
 A route reflector will not modify the next-hop ip address for the routes that are advertised from iBGP peers.
 Route reflectors are guided by three rules:
 <ol>
-  <li><b>Rule 1: </b>If route reflector receives a prefix from a BGP peer that is not a route reflector client, 
-  the route reflector advertises the prefixes to a route reflector client. It does not advertise the prefixes to a 
+  <li><b>Rule 1: </b>If route reflector receives a prefix from a BGP peer that 
+  is not a route reflector client, the route reflector advertises the prefixes 
+  to a route reflector client (and eBGP peer). It does not advertise the prefixes to a 
   non-route reflector client.</li>
   <li><b>Rule 2: </b>If a route reflector receives a prefix from a route reflector client, it advertises the prefixes to 
-  route reflector clients and non-route reflector clients.</li>
- <li><b>Rule 3: </b>If a route reflector receives a prefix from an eBGP peer. It advertises the prefix to route reflector 
- clients and non-route reflector clients.</li> 
+  route reflector clients and non-route reflector clients (as well as eBGP peers).</li>
+ <li><b>Rule 3: </b>If a route reflector receives a prefix from an eBGP peer. 
+ It advertises the prefix to route reflector clients and non-route reflector 
+ clients. <i>Note:</i> this update will also be sent to eBGP peers.</li> 
 </ol>
+The placement of the RR in the topology should be guided by these rules.
+
 </p>
 <p>
 BGP Route reflection is a BGP policy command and so it is configured under the 
@@ -4299,21 +4303,22 @@ R2(config-router-af#<b>neighbor AS65000 route-reflector-client</b>
 </code>
 </div>
 <p>
-No further BGP configuration is applied to route-reflector clients. Unlike implementation 
-of BGP confederations, implementing route reflectors does not affect the existing 
+No further BGP configuration is applied to route-reflector clients. Unlike BGP 
+confederations, implementing route reflectors does not affect the existing 
 BGP sessions.
 </p>
 <p>
 Both MED and IGP metrics may impact the BGP best path selection decisions. With 
 certain route reflection technologies the route reflection approach may not yield the 
-same route selection result as that of the full iBGP mesh approach. A way to make 
-route selection the same..[is] by configuring the intra-cluster IGP metrics to be 
-better than the inter-cluster IGP metrics, and maintaining full mesh within the 
-cluster i.e. full mesh and route reflectors together.
+same route selection result as that of the full iBGP mesh approach. One way in 
+which route selection can be configured to be similar to the path selection under 
+full mesh topologies is by configuring the 
+intra-cluster IGP metrics to be better than the inter-cluster IGP metrics, and 
+maintaining full mesh within the cluster i.e. full mesh and route reflectors together.
 </p>
 <p>
-Route reflectors are the very critical devices when implementing iBGP scalability 
-using route reflection. It is important that they have accurate information as 
+Route reflectors are very critical devices when implementing iBGP scalability 
+using route reflection; they have accurate information as 
 they are the principle source of path information for other iBGP devices. 
 Path attribute modification should be implemented on the route reflectors.
 </p>
@@ -4325,35 +4330,29 @@ A route reflector can have three types of peers:
   <li>iBGP client peers</li>
   <li>iBGP non-client peers</li>
 </ul>
-Route reflectors process updates differently depending on what type of peer they 
-came from:
-<ul>
-  <li>eBGP learning routes: pass to eBGP peers, clients and non-clients</li>
-  <li>Client learned routes: pass to eBGP peers, clients and non-clients</li>
-  <li>Non-client learned routes: pass to eBGP peers and clients</li>
-</ul>
-The placement of the RR in the topology should be guided by these rules.
 </p>
 
 <h3>Developments in BGP</h3>
 <p>
 In more recent BGP topologies, virtual route reflectors are gaining prominence. 
 These virtual route reflectors are usually virtual machines and share NLRI information 
-in the autonomous system.
+in the autonomous system. These RRs are normally not present in the path of 
+the traffic.
 </p>
 <p>
-In iBGP topologies with route reflectors, the BGP selective route download has 
-exists. This feature allows a network administrator to selectively download some 
-or none of the BGP routes into the RIB. The primary application for this feature 
+In iBGP topologies with route reflectors, a feature known as BGP selective route
+download exists. This feature allows a network administrator to selectively download some 
+or none of the BGP routes into the RIB. The primary purpose of this feature 
 is to suppress the unnecessary downloading of certain BGP routes to the RIB or FIB on 
 a dedicated route reflector, which propagates BGP updates without carrying 
 transit traffic. The feature thereby helps to maximize resources available and 
 to improve routing scalability and convergence on the dedicated route reflector.
 This is useful if the dedicated route reflector does not have sufficient hardware
- resources
+ resources.
 </p>
 
 <h3>Verification of Route Reflection</h3>
+<h4><code style="font-size:120%;">show ip protocols</code></h4>
 <p>
 The route reflector status of a BGP device can be verified by the command <code style="font-size:120%"><b>show ip protocols</b></code>:
 </p>
@@ -4379,6 +4378,7 @@ Routing Protocol is "bgp 65000"                                                <
                                                                    
 R2#   
 </code></div>
+<h4><code style="font-size:120%;">show bgp ipv4 unicast neighbor &lt;ip_address&gt;</code></h4>
 <p>
 The route reflector client status of the BGP peers can be verified by issuing the command: 
 <code style="font-size:120%"><b>show bgp ipv4 unicast neighbor &lt;peer-IP-address&gt;</b></code> 
@@ -4407,7 +4407,7 @@ BGP neighbor is 1.1.1.1,  remote AS 65000, internal link                        
 &nbsp;&nbsp;Slow-peer detection is disabled                                                              <br>
 &nbsp; ...                                                                                          <br>
 </code></div>
-
+<h4><code style="font-size:120%;">show bgp ipv4 unicast &lt;prefix&gt;</code></h4>
 <p>
 For BGP prefixes that have been received from a route reflector client, these prefixes are tagged as having been 
 received from a route reflector client: 
@@ -4427,8 +4427,9 @@ R2#
 </code></div>
 <h3>High Availability</h3>
 <p>
-A simple BGP topology with a single route reflector may not provide the high-availability requirement of autonomous 
-systems. High availability can be provided by adding redundant route reflectors, nested route reflectors where route 
+A simple BGP topology with a single route reflector may not provide the 
+high-availability requirement of autonomous systems. High availability can be 
+provided by adding redundant route reflectors, nested route reflectors where route 
 reflector clients are route reflectors themselves. These different route reflectors 
 will have different route reflector IDs.
 </p>
@@ -4438,19 +4439,19 @@ will have different route reflector IDs.
 
 <h3>Route Reflector Loop Prevention</h3>
 <p>
-Route reflection relaxes the iBGP restrictions of loop prevention by permitting the advertisement of a prefix received 
-from an iBGP peer to another iBGP peer. The design of route reflection poses a 
-great risk of introducing routing loops. 
+Route reflection relaxes the iBGP restrictions of loop prevention by permitting 
+the advertisement of a prefix received from an iBGP peer to another iBGP peer. 
+The design of route reflection poses the great risk of introducing routing loops. 
 Nested route reflection with intra-cluster loops occuring on peerings between 
 route reflector clients and inter-cluster loops occuring in connections between 
 route reflector clients peering with route reflector clients of different route reflector clusters. 
 </p>
 <p>
-Route reflectors prevent loop formation by the use of the cluster-ID; an RR discards 
+Route reflectors prevent loop formation through the use of the cluster-ID; an RR discards 
 routes received with its own cluster-ID. Additionally, 
-o prevent routing loop formation in iBGP, route reflectors sets the <b>ORIGINATOR_ID</b>
-attribute to the router-ID of the RR client on prefixes received from route reflector 
-client. The client uses Originator-ID for loop prevention. 
+to prevent routing loop formation in iBGP, route reflectors set the <b>ORIGINATOR_ID</b>
+attribute to the router-ID of the RR client of prefixes received from the specific 
+route reflector client. The client uses Originator-ID for loop prevention. 
 Together with the and <b>CLUSTER_LIST</b> path attribute, these two path attributes 
 are used to guard against inter-cluster and 
 intra-cluster loops from being formed. The ORIGINATOR_ID has a type code of 9 and 
@@ -4602,8 +4603,8 @@ RR is not in the data path. The selective RIB download feature can be considered
 
 <h2 id="CONFEDERATIONS">Confederations</h2>
 <p>
-BGP confederations are another alternative to full iBGP mesh implementing iBGP 
-scalability. Defined by RFC 3065, BGP confederations split the autonomous system 
+BGP confederations are another way in which iBGP can be scaled. 
+Defined by RFC 3065, BGP confederations split the autonomous system 
 into smaller sub-autonomous systems known as member autonomous systems that combine into a larger 
 autonomous system known as autonomous system confederation. 
 Inside the sub-AS, full mesh or RR can be implemented. The peering between BGP 
@@ -4611,13 +4612,13 @@ routers in different sub-ASs acts like eBGP.
 eBGP peers have no knowledge that they are peering with a confederation and they reference the 
 confederation identifier in their configuration. 
 Confederations can be further scaled by performing route reflection inside a confederation.
-When advertising to eBGP peers, sub-AS numbers are stripped from the updates.
+When advertising to eBGP peers, sub-AS numbers are stripped from the updates messages.
 </p>
 <p>
 Confederations are configured using private autonomous system numbers i.e. 
 64512 - 65534. 
 Different IGPs can be configured in each sub-AS with <code style="font-size:120%"><b>next-hop-self</b></code> 
-command configured on the Sub-AS border routes. 
+command configured on the Sub-AS border routers. 
 Confederation eBGP peerings are created between each of the 
 confederations. Confederation eBGP peering does not follow the all same rules of standard eBGP.
 Some changes occur in the operation of confederation eBGP peerings such as: 
@@ -4643,7 +4644,7 @@ R4(config-router)#<b>bgp router-id 4.4.4.4</b>
 </code></div>
 <p>
 <b>Step 2: </b>Identify the BGP confederation with the command  
-<code style="font-size:120%"><b>bgp confederation identifier</b></code>.
+<code style="font-size:120%"><b>bgp confederation identifier &lt;asn&gt;</b></code>.
 The AS number will be known to external BGP peers i.e. peers not part of the confederation.
 </p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
@@ -4713,9 +4714,9 @@ R4#<b>show ip protocols</b><br>
 Routing Protocol is "bgp 65000"<br>
 &nbsp;&nbsp;Outgoing update filter list for all interfaces is not set<br>
 &nbsp;&nbsp;Incoming update filter list for all interfaces is not set<br>
-&nbsp;&nbsp;BGP confederation consists of ASs: 64512 65500<br>
+&nbsp;&nbsp;<span style="background-color:gray;">BGP confederation consists of ASs: 64512 65500</span><br>
 &nbsp;&nbsp;<br>
-&nbsp;&nbsp;BGP confederation advertised as AS 112<br>
+&nbsp;&nbsp;<span style="background-color:gray;">BGP confederation advertised as AS 112</span><br>
 &nbsp;&nbsp;IGP synchronization is disabled<br>
 &nbsp;&nbsp;Automatic route summarization is disabled<br>
 &nbsp;&nbsp;Neighbor(s):<br>
@@ -4732,7 +4733,7 @@ Routing Protocol is "bgp 65000"<br>
 R4#
 </code></div>
 
-<h4><code style="font-size:120%">show bgp ipv4 unicast &lt;neighbor_ip_address&gt;</code></h4>
+<h4><code style="font-size:120%">show bgp ipv4 unicast neighbor &lt;ip_address&gt;</code></h4>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
 <code style="font-size:120%">
 R4#<b>show bgp ipv4 unicast neighbor 7.7.7.7</b>             <br>
@@ -5012,23 +5013,31 @@ R3(config-router)#
 
 <h2 id="COMMUNITIES">BGP Communities</h2>
 <p>
-BGP's implementation of a route-tag. BGP has not route-tag matching or setting 
-support. BGP Communities are used to group prefixes together for...1) advertisement 
-policy 2)filtering policy 3)best path selection policy.
-</p>
-<p>
 BGP communities are an optional transitive BGP attribute that can traverse from 
 autonomous system to autonomous system. 
-A BGP community is a 32-bit value that can be included with a prefix in an update. 
+A BGP community is a 32-bit value that can be included with a prefix in an update
+message. 
 By default, BGP communities are not included in BGP updates. It is a recommended 
 best practice to enable the sending of BGP communities to peers during BGP configuration.
-BGP communities provide the capability to tag routes as well as 
-modifying BGP routing policy on upstream and downstream BGP devices. BGP communities can be used to add common policies
-to large groups of prefixes. A custom BGP community value can be applied to a group of prefixes and 
-subsequently, a policy can be set on any prefix that possesses that custom BGP community value.
-When prefixes are identified by tagging using a BGP community attribute, some policy can then be applied to these prefixes.
-One prefix can have many community values attached resulting in many actions taken on a prefix when the community values  
-are evaluated. 
+BGP communities provide the capability to tag routes for the purpose of 
+modifying BGP routing policy of upstream and downstream BGP devices. 
+It is important to note that BGP does not have route-tag matching or setting 
+support. 
+BGP communities can be used to add common policies
+to large groups of prefixes. 
+BGP communities are used to group prefixes together for:
+<ol>
+  <li>Advertisement policy</li>
+  <li>Filtering policy</li>
+  <li>Best path selection policy</li>
+  </ol>
+A custom BGP community value can be applied to a group of prefixes and 
+subsequently, a policy can be set on any prefix that possesses that custom BGP 
+community value.
+When prefixes are identified by tagging using a BGP community attribute, some 
+policy can then be applied to these prefixes. One prefix can be tagged with many
+community values resulting in many policy actions taken on a prefix when the 
+community values are evaluated. 
 </p>
 
 <p>
@@ -5051,36 +5060,53 @@ Standard BGP communities are further classified as well-known and private commun
 <p>
 A BGP community can be displayed in different formats:
 <ol>
-  <li>Full 32-bit number now referred to as older format and can be displayed in decimal (0 - 4294967200) or 
+  <li><b>Full 32-bit number(older format):</b> can be displayed in decimal (0 - 4294967200) or 
   Hex 0x0 - 0xFFFFFFA0. This format is not commonly used nowadays.</li>
-  <li>Two 16-bit numbers i.e. (0 - 65535) commonly referred to as new format. This new format is usually 
-  represented in the form AA:NN where AA is the autonomous system number and NN is any number that can be used to 
-  represent a specific routing policy in the autonomous system. This may require documentation with some sort of 
-  code book that guides on what the number correlates to and the policy description 
-  of that policy. This can be contrasted with well-known communities that are 
-  known by their names i.e. No_Export, Local AS, No_Advertise.
-  BGP communities can be displayed in new format using the global configuration command:
-<code style="font-size:120%"><b>ip bgp-community new-format</b></code>
+  <li><b>Two 16-bit numbers (new format):</b> This new format with values in the 
+  range  0 - 65535 is usually represented in the form AA:NN where AA is the 
+  autonomous system number and NN is any number that can be used to represent a 
+  specific routing policy in the autonomous system. This may require documentation
+  with some sort of code book that guides on what the number correlates to and 
+  the policy description of that policy. This can be contrasted with well-known 
+  communities that are known by their names i.e. No_Export, Local AS, No_Advertise.
   </li>
 </ol>
 </p>
 
 <p>
-community values are denoted in decimal according to RFC 1997 by default. To display 
-communities in AA:NN format use #ip bgp new-format or ip bgp-community new-format.
-
-<b>Setting Communities</b> 
-To set communities in a route-map: 
-#set community {community-number [additive] [well-knonw-community] | none}. 
-Not additive by default. Can delete a community by setting to none in a route-map.
+Community values are denoted in decimal according to RFC 1997 by default. To display 
+communities in AA:NN (new format) use the global configuration command:
+<code style="font-size:120%"><b>ip bgp-community new-format</b></code> 
+for <code style="font-size:120%"><b>ip bgp new-format</b></code>.
 </p>
+
+<h3>Setting Communities</h3>
 <p>
-<b>Matching communities</b> match occurs via community list: <br>Define list<br>
-standard list matches community name or number: <code style="font-size:120%"><b>ip community-list 1 
-standard permit no-export</b></code>. <br>
-Expanded matches regular expression: <code style="font-size:120%"><b>ip community-list expanded AS100 
-permit 100:[0-9]+</b></code>.<br>
-Reference from a route-map: <code style="font-size:120%"><b>match community AS100</b></code>.
+To set communities in a route-map, use the command <code style="font-size:120%"><b>set community 
+{community-number [additive] [well-knonw-community] | none}</b></code>. 
+Setting of BGP communities values is not additive by default. BGP community values 
+can be deleted by setting to value to <code style="font-size:120%"><b>none</b></code> in a route-map.
+</p>
+<h3>Matching communities</h3>
+<p>
+BGP community values can be matched through the use of a community list. A community 
+list can be configured through the following steps:
+<ol>
+  <li><b>Configure a community list:</b> The community list can a standard list 
+  or an extended list.
+  <ul>
+  <li><b>Standard community list:</b> matches community name or number: 
+  <code style="font-size:120%"><b>ip community-list 1 standard permit no-export</b></code>. 
+  </li>
+  <li><b>Extended community list:</b> matches regular expression: <code style="font-size:120%">
+  <b>ip community-list expanded AS100 permit 100:[0-9]+</b></code>.</li>
+</ul>
+</li>
+ 
+  <li>Reference the configured community list from a route-map using the <code style="font-size:120%">
+  <b>match community &lt;community-list&gt;</b></code> statement: 
+  <code style="font-size:120%"><b>match community AS100</b></code>.</li>
+</ol>
 </p>
 
 <p>
@@ -5093,7 +5119,7 @@ prefix can have many BGP communities added.
 Communities are enabled on a neighbor-by-neighbor basis with the BGP address-family configuration command: 
 <code style="font-size:120%"><b>neighbor &lt;ip_address&gt; send-community [standard | extended | both]</b></code>.
 If a keyword is not specified, standard communities are sent by default. Without configuration of this command, the BGP 
-community path attribute is not included in BGP Update packets for affected prefixes.
+community path attribute is not included in BGP update messages for affected prefixes.
 </p>
 
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
@@ -5118,7 +5144,7 @@ Advertise the prefix to any BGP peer.
 
 <h4>NO_ADVERTISE (0xFFFFFF02)</h4>
 <P>
-All routes received carrying a communities attribute containing this value MUST 
+All NLRI received carrying a communities attribute containing this value MUST 
 NOT be advertised to other BGP peers.
 The No-Advertise community indicates that prefixes should not be advertised to 
 any BGP peer. The No_Advertise BGP community can be advertised from an upstream 
@@ -5317,14 +5343,14 @@ Border Gateway Protocol - UPDATE Message                               <br>
 
 <h4>NO_EXPORT_SUBCONFED (0xFFFFFF03)</h4>
 <p>
+The No-Export sub confed community known as the Local-AS community prevents the 
+advertisement of a route outside of the local autonomous system.
 All routes received carrying a communities attribute
 containing this value MUST NOT be advertised to external BGP
 peers (this includes peers in other members autonomous
 systems inside a BGP confederation).
-</p>
-<p>
-The No-Export sub confed community known as the Local-AS community prevents the advertisement of a route outside of the 
-local autonomous system. If the router receiving a route with the Local-AS community is a confederation member, the route 
+
+ If the router receiving a route with the Local-AS community is a confederation member, the route 
 can be advertised only within the Sub-AS (member-AS) and is not advertise between member autonomous systems. The Local-AS 
 community is set within a route map with the command: 
 <code style="font-size:120%"><b>set community local-as</b></code>
@@ -5334,8 +5360,9 @@ The command <code style="font-size:120%"><b>show bgp ipv4 unicast community loca
 </p>
 <h3>Private Communities</h3>
 <p>
-Community patterns can vary from organisation to organisation. It does not need to be registered and can signify 
-geographic locations for one autonomous system while signifying a method of route advertisement in another autonomous 
+Community patterns can vary from organisation to organisation. It does not need 
+to be registered and can signify geographic locations for one autonomous system 
+while signifying a method of route advertisement in another autonomous 
 system. 
 </p>
 <p>
@@ -5348,11 +5375,12 @@ Two simple concepts are involved with private communities:
 
 <h3>Conditionally-Matching Communities</h3>
 <p>
-Conditionally matching BGP communities allows for selection of routes based on the BGP communities within the route’s 
-path attributes so that selective processing can occur in route maps. You display the entire BGP table by using the 
+Conditionally matching BGP communities allows for selection of routes based on 
+the BGP communities within the route’s path attributes so that selective processing 
+can occur in route maps. You display the entire BGP table by using the 
 command <code style="font-size:120%"><b>show bgp ipv4 unicast detail</b></code> and then manually select a route with a specific community. 
 However, if the BGP community is known, you can display all the routes by using the command 
-<code style="font-size:120%"><b>show bgp &lt;ipv4 unicast&gt; community &lt;community&gt;</b></code>.
+<code style="font-size:120%"><b>show bgp ipv4 unicast community &lt;community&gt;</b></code>.
 
 </p>
 <p>
@@ -5510,7 +5538,7 @@ R6(config-router)#<b>neighbor AS65000 peer-group        </b>
 </p>
 </li>
   <li><b>Step 2:</b> Add BGP peers to the peer group using the command:
-<code style="font-size:120%"><b>neighbor &lt;ip_address &gt;peer-group &lt;group_name&gt;</b></code>.
+<code style="font-size:120%"><b>neighbor &lt;ip_address&gt; peer-group &lt;group_name&gt;</b></code>.
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
 <code style="font-size:120%">
@@ -5534,14 +5562,17 @@ R6(config-router)#<b>neighbor AS65000 next-hop-self     </b> <br>
 </ul>
 </p>
 <p>
-BGP neighbors cannot be activated by a peer group name and must be activated for each address family by IP address.
+BGP neighbors cannot be activated by a peer group name and must be activated for 
+each address family by IP address (if the default IPv4 address family has been
+disabled).
 </p>
 
 <p>
-The following actions can be implemented against a peer-group that will affect the peer-group's individual members:
+The following actions can be implemented against a peer-group that will affect 
+the peer-group's individual members:
 <ol>
   <li><b>Reset of BGP neighborship:</b> This can be a soft reset or hard reset e.g. 
-  <code style="font-size:120%"><b>R6#clear bgp ipv4 unicast peer-group AS65000 soft out</b></code>.</li>
+  <code style="font-size:120%"><b>clear bgp ipv4 unicast peer-group AS65000 soft out</b></code>.</li>
   <li><b>Route-filtering using route-maps, distribute-lists and filter-lists.</b>
 </ol>
 Peer groups can be verified using the command <code style="font-size:120%"><b>show ip bgp update-group</b></code>.
@@ -5572,17 +5603,18 @@ templates.
 <h3>Peer session</h3> 
 <p>
 This type of template involves configuration settings specifically for the BGP session.
-Peer session templates are used to group and apply the configuration of general BGP session commands to
-groups of neighbors that share session configuration. 
+Peer session templates are used to group and apply the configuration of general 
+BGP session commands to groups of neighbors that share session configuration. 
 Peer session templates can be applied regardless of address families of the neighbors.
 </p>
 <p>
-General session commands can be configured once in a peer session template and then applied to many
-neighbors through the direct application of a peer session template or through indirect inheritance from a peer
-session template.
-Peer session templates support direct and indirect inheritance. A BGP neighbor can be configured with only
-one peer session template at a time, and that peer session template can contain only one indirectly inherited
-peer session template. A BGP neighbor can directly inherit only one session template and can indirectly inherit
+General session commands can be configured once in a peer session template and 
+then applied to many neighbors through the direct application of a peer session 
+template or through indirect inheritance from a peer session template.
+Peer session templates support direct and indirect inheritance. A BGP device can
+be configured with only one peer session template at a time, and that peer session 
+template can contain only one indirectly inherited peer session template. A BGP 
+device can directly inherit only one session template and can indirectly inherit
 up to seven additional peer session templates.
 </p>
 <p>
@@ -5635,8 +5667,7 @@ belong to specific address families. Peer policy templates are configured once a
 neighbors through the direct application of a peer policy template or through inheritance from peer policy
 templates. The configuration of peer policy templates simplifies the configuration of BGP policy commands
 that are applied to all neighbors within an autonomous system.
-</p>
-<p>
+
 Peer policy templates support inheritance. A directly applied peer policy template can directly or indirectly
 inherit configurations from up to seven peer policy templates. So, a total of eight peer policy templates can
 be applied to a neighbor or neighbor group.
@@ -5644,7 +5675,7 @@ be applied to a neighbor or neighbor group.
 
 <p>
 BGP policy configuration commands that are configured only for a specific address family.
-You define peer policy template settings with the BGP configuration command 
+You define peer policy template configurations with the BGP configuration command 
 <code style="font-size:120%"><b>template peer-policy &lt;template-name&gt;</b></code> and
 then enter any BGP address family–related configuration commands. 
 </p>
@@ -5816,15 +5847,18 @@ R6#                                                                             
 
 <h2 id="SUMMARIZATION">Route Summarization</h2>
 <p>
-BGP auto-summary is disabled by default. It automatically summarizes prefixes on 
-classful boundaries, no mask required on the network statemetn and requires 
-subnet of network to be present in the IGP.
+BGP route summarization automatically summarizes prefixes on classful boundaries, 
+no mask required on the when defining networks to be advertised using the BGP 
+<code style="font-size:120%"><b>network</b></code> command and requires subnet of network to be 
+present in the IGP. BGP auto-summary is disabled by default. 
 </p>
 <p>
-<b>BGP aggregation:</b><br>
-BGP hierarchy is arbitrary: path vector is like distance vector i.e. you learn 
-from your neighbor. OSPF and IS-IS is strict leaf-spine-leaf. Imples summarization 
-can apply anywhere: only requirement is that subnet must exist in BGP table.
+<h3>BGP Aggregation</h3>
+The hierarchy of a BGP topology is arbitrary; learning of routes in path vector 
+protocols like BGP is simlar to distance vector routing protocols i.e. you learn 
+from your neighbor. OSPF and IS-IS is strict leaf-spine-leaf. This, therefore, 
+implies that summarization can be implemented anywhere in the toplogy. The only 
+requirement is that the subnet must exist in BGP table.
 </p>
 <p>
 Network prefix summarization is extremely important with BGP due to the large 
@@ -5843,65 +5877,59 @@ Two techniques exist for BGP route summarization: static and dynamic route summa
 prevention) for the prefix and advertise that prefix with the network statement.</li>
 <li><b>Dynamic:</b> configure an aggregation network prefix. When valid component 
 routes are present in the Loc-RIB, the router will create an aggregate prefix.
+ For routes to be aggregated, they must be in the BGP table and not only in the 
+ routing table. 
  Dynamic aggregation uses the command <code style="font-size:120%"><b>aggregate-address 
- &lt;network&gt; &lt;subnetmask&gt; [summary-only] [as-set]</b></code>. For routes 
- to be aggregated, they must be in the BGP table and not only in the routing table.
+ &lt;network&gt; &lt;subnetmask&gt; [summary-only] [as-set]</b></code>. 
+ Additional command arguments include:
+<ul>
+  <li><code style="font-size:120%"><b>summary-only:</b></code> suppress more specific routes</li>
+  <li><code style="font-size:120%"><b>suppress-map:</b></code> suppress subset of more specific routes</li>
+  <li><code style="font-size:120%"><b>as-set:</b></code> un-order list of AS numbers and communities 
+  are associated with the aggregate; inherited from more specific routes.</li>
+  <li><code style="font-size:120%"><b>advertise-map:</b></code> attributes of prefix or prefixes matched 
+  with advertised-map are inherited in aggregate address. When used in 
+  conjunction with <code style="font-size:120%"><b>as-set</b></code> prevents a specific AS from being included 
+  in the AS_SET of the new aggregate and circumvents loop prevention.</li>
+  <li><code style="font-size:120%"><b>attribute-map|route-map</b></code>: used to modify attributes associated with aggregate 
+  address. When used in conjunction with <code style="font-size:120%"><b>as-set</b></code> can set or 
+  remove attributes e.g. remove no-export community, add MED.</li>
+  <li><code style="font-size:120%"><b>unsuppress-map</b></code>: selectively advertises prefixes that 
+  were previously suppressed by aggregate-address.
+</ul>
+ 
 </li>
 </ul>
 </p>
 <p>
 In both methods, a new network prefix with a shorter prefix length is advertised 
 into BGP. Because the aggregated prefix is a new route, the summarizing router 
-is the originator for the new aggregate route. Route aggregation does not 
+is the originator for the new aggregate route. Dynamic aggregation does not 
 suppress the component routes by default. The <code style="font-size:120%"><b>summary-only</b></code>
 keyword is required to suppress the component prefixes. The suppressed component 
-prefixes have a status code of 's' for suppressed. 
+prefixes have a status code of 's' for suppressed in the BGP table. 
 
 If component prefixes 
 need to be advertised to some neighbors and not others, then do not use 
  <code style="font-size:120%"><b>summary-only</b></code> but filter the component 
  prefix advertisement using a route filter.
 </p>
-<p>
-Command Arguments:
-<ul>
-  <li>summary-only: suppress more specific routes</li>
-  <li>suppress-map: suppress subset of more specific routes</li>
-  <li>as-set: un-order list of AS numbers and communities are associated with the 
-  aggregate; inherited from more specific routes.</li>
-  <li>Advertise-map: attributes of prefix or prefixes matched with advrtised-map 
-  are inherited in aggregate address</li>
-  <li>Used in conjunction with as-set: prevents a specific AS from being included 
-  in the AS_SET of the new aggregate. and circumvents loop prevention.</li>
-  <li>attribute-map|route-map: used to modify attributes associated with aggregate 
-  address. Used in conjunction with as-set: Can set or remove attributes e.g. remove 
-  no-export community, add MED.</li>
-  <li>unsuppress-map: selectively advertises prefixes that were previously suppressed 
-  by aggregate-address.
-</ul>
-</p>
+
+<h3>Atomic Aggregate Attribute</h3>
 <p>
 Aggregated prefixes act like new BGP routes with a shorter prefix length. BGP 
 path attributes like AS_PATH, MED and BGP communities are not included in the 
 new BGP summary advertisement  by default. A new path attribute is added to the 
 summary prefix known as atomic aggregate. The atomic aggregate path attribute 
 indicates that loss of path information has occurred during summarization.
+The atomic aggregate attribute has a type code of 6.
 </p>
 <p>
 To inject the original BGP path information from the component routes, the 
 <code style="font-size:120%"><b>as-set</b></code> keyword is required. AS_PATH settings get copied into
-the AS_Set portion of AS_PATH of the aggregate prefix from smaller component routes.
+the AS_SET portion of AS_PATH of the aggregate prefix from smaller component routes.
 The new AS_PATH, which is included in brackets only counts as one hop.
 </p>
-
-<h3>Atomic Aggregate Attribute</h3>
-<p>
-When a BGP router summarizes a route, it does not advertise the AS_PATH information
-from before the aggregation. The atomic aggregate attribute indicates that a 
-loss of path information has occurred such as AS_PATH. The atomic aggregate 
-attribute has a type code of 6.
-</p>
-
 <h3>AS_SET</h3>
 <p>
 To keep the BGP path information history, the optional <code style="font-size:120%"><b>as-set </b></code> 
@@ -5948,111 +5976,111 @@ RPKI validation codes: V valid, I invalid, N Not found                          
 &nbsp;*m&nbsp;&nbsp;6.6.6.6/32&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3.3.3.3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
 &nbsp;*>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1.1.1.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
 &nbsp;*>&nbsp;&nbsp;9.9.9.9/32&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.0.0.0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;32768 i                <br>
-&nbsp;*m  10.1.0.0/16      3.3.3.3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
-&nbsp;*>                   1.1.1.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
-&nbsp;*m  10.1.10.0/24     3.3.3.3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
-&nbsp;*>                   1.1.1.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
-&nbsp;*m  10.1.11.0/24     3.3.3.3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
-&nbsp;*>                   1.1.1.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
-&nbsp;*m  10.1.12.0/24     3.3.3.3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
-&nbsp;*>                   1.1.1.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
-&nbsp;*m  10.1.13.0/24     3.3.3.3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
-&nbsp;*>                   1.1.1.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
-&nbsp;*m  10.2.8.0/24      1.1.1.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
-&nbsp;*>                   3.3.3.3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
-&nbsp;*m  10.2.9.0/24      1.1.1.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
-&nbsp;*>                   3.3.3.3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
-&nbsp;*m  10.2.10.0/24     1.1.1.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
-&nbsp;*>                   3.3.3.3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
-&nbsp;*m  10.2.11.0/24     1.1.1.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
-&nbsp;*>                   3.3.3.3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
-&nbsp;*m  10.2.12.0/24     1.1.1.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
-&nbsp;*>                   3.3.3.3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
-&nbsp;*m  10.2.13.0/24     1.1.1.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
-&nbsp;*>                   3.3.3.3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
-&nbsp;*m  10.2.14.0/24     1.1.1.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
-&nbsp;*>                   3.3.3.3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
-&nbsp;*m  10.2.15.0/24     1.1.1.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
-&nbsp;*>                   3.3.3.3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
-&nbsp;*m  10.2.16.0/24     1.1.1.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
-&nbsp;*>                   3.3.3.3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
-&nbsp;*>  10.3.5.0/24      1.1.1.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
-&nbsp;*m                   3.3.3.3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
-&nbsp;*>  10.3.6.0/24      1.1.1.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
-&nbsp;*m                   3.3.3.3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
-&nbsp;*>  10.3.7.0/24      1.1.1.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
-&nbsp;*m                   3.3.3.3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
-&nbsp;*>  10.3.8.0/24      1.1.1.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
-&nbsp;*m                   3.3.3.3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
-&nbsp;*>  10.3.9.0/24      1.1.1.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
-&nbsp;*m                   3.3.3.3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
-&nbsp;*>  10.3.10.0/24     1.1.1.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
-&nbsp;*m                   3.3.3.3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
-&nbsp;*m  10.4.10.0/24     1.1.1.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
-&nbsp;*>                   3.3.3.3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
-&nbsp;*m  10.4.11.0/24     1.1.1.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
-&nbsp;*>                   3.3.3.3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
-&nbsp;*m  10.4.12.0/24     1.1.1.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
-&nbsp;*>                   3.3.3.3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
-&nbsp;*m  10.4.13.0/24     1.1.1.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
-&nbsp;*>                   3.3.3.3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
-&nbsp;*m  10.5.1.0/24      3.3.3.3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
-&nbsp;*>                   1.1.1.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
-&nbsp;*m  10.5.2.0/24      3.3.3.3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
-&nbsp;*>                   1.1.1.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
-&nbsp;*m  10.5.10.0/24     3.3.3.3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
-&nbsp;*>                   1.1.1.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
-&nbsp;*m  10.5.11.0/24     3.3.3.3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
-&nbsp;*>                   1.1.1.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
-&nbsp;*m  10.5.12.0/24     3.3.3.3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
-&nbsp;*>                   1.1.1.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
-&nbsp;*m  10.5.13.0/24     3.3.3.3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
-&nbsp;*>                   1.1.1.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
-&nbsp;*m  10.5.14.0/24     3.3.3.3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
-&nbsp;*>                   1.1.1.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
-&nbsp;*m  10.5.15.0/24     3.3.3.3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
-&nbsp;*>                   1.1.1.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
-&nbsp;*m  10.6.10.0/24     3.3.3.3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
-&nbsp;*>                   1.1.1.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
-&nbsp;*m  10.6.11.0/24     3.3.3.3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
-&nbsp;*>                   1.1.1.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
-&nbsp;*m  10.6.12.0/24     3.3.3.3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
-&nbsp;*>                   1.1.1.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
-&nbsp;*m  10.6.13.0/24     3.3.3.3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
-&nbsp;*>                   1.1.1.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
-&nbsp;*m  10.6.14.0/24     3.3.3.3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
-&nbsp;*>                   1.1.1.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
-&nbsp;*m  10.6.15.0/24     3.3.3.3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
-&nbsp;*>                   1.1.1.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
-&nbsp;*   10.7.10.0/24     10.10.10.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65538 65539 65536 i <br>
-&nbsp;*m                   3.3.3.3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 65536 i       <br>
-&nbsp;*>                   1.1.1.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 65536 i       <br>
-&nbsp;*   10.8.10.0/24     3.3.3.3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 65536 65539 i <br>
-&nbsp;*                    1.1.1.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 65536 65539 i <br>
-&nbsp;*>                   10.10.10.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65538 65539 i       <br>
-&nbsp;*   10.8.11.0/24     3.3.3.3                   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 65536 65539 i <br>
-&nbsp;*                    1.1.1.1                   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 65536 65539 i <br>
-&nbsp;*>                   10.10.10.1                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65538 65539 i       <br>
-&nbsp;*>  10.9.10.0/24     0.0.0.0                  0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;32768 i                   <br>
-&nbsp;*>  10.10.9.0/24     10.10.10.1               0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65538 i             <br>
-&nbsp;r>  10.10.10.0/24    10.10.10.1               0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65538 i             <br>
-&nbsp;*>  10.10.11.0/24    10.10.10.1               0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65538 i             <br>
-&nbsp;*>  10.10.12.0/24    10.10.10.1               0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65538 i             <br>
-&nbsp;*>  10.10.13.0/24    10.10.10.1               0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65538 i             <br>
-&nbsp;*m  10.12.1.0/30     1.1.1.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i             <br>
-&nbsp;*>                   3.3.3.3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i             <br>
-&nbsp;*>  10.19.1.0/30     0.0.0.0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;32768 i                   <br>
-&nbsp;*m  10.24.1.0/30     1.1.1.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i             <br>
-&nbsp;*>                   3.3.3.3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i             <br>
-&nbsp;*>  10.39.1.0/30     0.0.0.0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;32768 i                   <br>
-&nbsp;*m  10.67.1.0/30     3.3.3.3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i             <br>
-&nbsp;*>                   1.1.1.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i             <br>
-&nbsp;*   10.78.1.0/30     10.10.10.1                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65538 65539 i       <br>
-&nbsp;*m                   3.3.3.3                   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 65536 i       <br>
-&nbsp;*>                   1.1.1.1                   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 65536 i       <br>
-&nbsp;*>  10.108.1.0/30    10.10.10.1               0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65538 i             <br>
-&nbsp;*   10.109.1.0/30    10.10.10.1               0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65538 i             <br>
- *>                   0.0.0.0                  0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;32768 i                   <br>
+&nbsp;*m&nbsp;&nbsp;10.1.0.0/16 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3.3.3.3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
+&nbsp;*>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1.1.1.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
+&nbsp;*m&nbsp;&nbsp;10.1.10.0/24&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3.3.3.3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
+&nbsp;*>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1.1.1.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
+&nbsp;*m&nbsp;&nbsp;10.1.11.0/24&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3.3.3.3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
+&nbsp;*>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1.1.1.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
+&nbsp;*m&nbsp;&nbsp;10.1.12.0/24&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3.3.3.3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
+&nbsp;*>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1.1.1.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
+&nbsp;*m&nbsp;&nbsp;10.1.13.0/24&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3.3.3.3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
+&nbsp;*>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1.1.1.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
+&nbsp;*m&nbsp;&nbsp;10.2.8.0/24 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1.1.1.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
+&nbsp;*>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3.3.3.3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
+&nbsp;*m&nbsp;&nbsp;10.2.9.0/24 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1.1.1.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
+&nbsp;*>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3.3.3.3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
+&nbsp;*m&nbsp;&nbsp;10.2.10.0/24&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1.1.1.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
+&nbsp;*>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3.3.3.3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
+&nbsp;*m&nbsp;&nbsp;10.2.11.0/24&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1.1.1.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
+&nbsp;*>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3.3.3.3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
+&nbsp;*m&nbsp;&nbsp;10.2.12.0/24&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1.1.1.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
+&nbsp;*>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3.3.3.3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
+&nbsp;*m&nbsp;&nbsp;10.2.13.0/24&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1.1.1.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
+&nbsp;*>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3.3.3.3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
+&nbsp;*m&nbsp;&nbsp;10.2.14.0/24&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1.1.1.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
+&nbsp;*>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3.3.3.3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
+&nbsp;*m&nbsp;&nbsp;10.2.15.0/24&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1.1.1.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
+&nbsp;*>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3.3.3.3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
+&nbsp;*m&nbsp;&nbsp;10.2.16.0/24&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1.1.1.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
+&nbsp;*>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3.3.3.3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
+&nbsp;*>&nbsp;&nbsp;10.3.5.0/24 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1.1.1.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
+&nbsp;*m&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3.3.3.3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
+&nbsp;*>&nbsp;&nbsp;10.3.6.0/24 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1.1.1.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
+&nbsp;*m&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3.3.3.3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
+&nbsp;*>&nbsp;&nbsp;10.3.7.0/24 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1.1.1.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
+&nbsp;*m&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3.3.3.3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
+&nbsp;*>&nbsp;&nbsp;10.3.8.0/24 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1.1.1.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
+&nbsp;*m&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3.3.3.3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
+&nbsp;*>&nbsp;&nbsp;10.3.9.0/24 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1.1.1.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
+&nbsp;*m&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3.3.3.3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
+&nbsp;*>&nbsp;&nbsp;10.3.10.0/24&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1.1.1.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
+&nbsp;*m&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3.3.3.3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
+&nbsp;*m&nbsp;&nbsp;10.4.10.0/24&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1.1.1.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
+&nbsp;*>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3.3.3.3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
+&nbsp;*m&nbsp;&nbsp;10.4.11.0/24&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1.1.1.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
+&nbsp;*>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3.3.3.3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
+&nbsp;*m&nbsp;&nbsp;10.4.12.0/24&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1.1.1.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
+&nbsp;*>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3.3.3.3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
+&nbsp;*m&nbsp;&nbsp;10.4.13.0/24&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1.1.1.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
+&nbsp;*>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3.3.3.3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
+&nbsp;*m&nbsp;&nbsp;10.5.1.0/24 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3.3.3.3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
+&nbsp;*>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1.1.1.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
+&nbsp;*m&nbsp;&nbsp;10.5.2.0/24 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3.3.3.3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
+&nbsp;*>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1.1.1.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
+&nbsp;*m&nbsp;&nbsp;10.5.10.0/24&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3.3.3.3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
+&nbsp;*>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1.1.1.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
+&nbsp;*m&nbsp;&nbsp;10.5.11.0/24&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3.3.3.3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
+&nbsp;*>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1.1.1.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
+&nbsp;*m&nbsp;&nbsp;10.5.12.0/24&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3.3.3.3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
+&nbsp;*>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1.1.1.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
+&nbsp;*m&nbsp;&nbsp;10.5.13.0/24&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3.3.3.3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
+&nbsp;*>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1.1.1.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
+&nbsp;*m&nbsp;&nbsp;10.5.14.0/24&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3.3.3.3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
+&nbsp;*>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1.1.1.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
+&nbsp;*m&nbsp;&nbsp;10.5.15.0/24&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3.3.3.3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
+&nbsp;*>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1.1.1.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
+&nbsp;*m&nbsp;&nbsp;10.6.10.0/24&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3.3.3.3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
+&nbsp;*>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1.1.1.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
+&nbsp;*m&nbsp;&nbsp;10.6.11.0/24&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3.3.3.3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
+&nbsp;*>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1.1.1.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
+&nbsp;*m&nbsp;&nbsp;10.6.12.0/24&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3.3.3.3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
+&nbsp;*>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1.1.1.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
+&nbsp;*m&nbsp;&nbsp;10.6.13.0/24&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3.3.3.3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
+&nbsp;*>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1.1.1.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
+&nbsp;*m&nbsp;&nbsp;10.6.14.0/24&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3.3.3.3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
+&nbsp;*>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1.1.1.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
+&nbsp;*m&nbsp;&nbsp;10.6.15.0/24&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3.3.3.3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
+&nbsp;*>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1.1.1.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i          <br>
+&nbsp;* &nbsp;&nbsp;10.7.10.0/24&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.10.10.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65538 65539 65536 i <br>
+&nbsp;*m&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3.3.3.3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 65536 i       <br>
+&nbsp;*>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1.1.1.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 65536 i       <br>
+&nbsp;* &nbsp;&nbsp;10.8.10.0/24&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3.3.3.3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 65536 65539 i <br>
+&nbsp;* &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1.1.1.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 65536 65539 i <br>
+&nbsp;*>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.10.10.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65538 65539 i       <br>
+&nbsp;* &nbsp;&nbsp;10.8.11.0/24&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3.3.3.3                   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 65536 65539 i <br>
+&nbsp;* &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1.1.1.1                   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 65536 65539 i <br>
+&nbsp;*>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.10.10.1                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65538 65539 i       <br>
+&nbsp;*>&nbsp;&nbsp;10.9.10.0/24&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.0.0.0                  0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;32768 i                   <br>
+&nbsp;*>&nbsp;&nbsp;10.10.9.0/24&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.10.10.1               0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65538 i             <br>
+&nbsp;r>&nbsp;&nbsp;10.10.10.0/24&nbsp;&nbsp;&nbsp;&nbsp;10.10.10.1               0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65538 i             <br>
+&nbsp;*>&nbsp;&nbsp;10.10.11.0/24&nbsp;&nbsp;&nbsp;&nbsp;10.10.10.1               0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65538 i             <br>
+&nbsp;*>&nbsp;&nbsp;10.10.12.0/24&nbsp;&nbsp;&nbsp;&nbsp;10.10.10.1               0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65538 i             <br>
+&nbsp;*>&nbsp;&nbsp;10.10.13.0/24&nbsp;&nbsp;&nbsp;&nbsp;10.10.10.1               0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65538 i             <br>
+&nbsp;*m&nbsp;&nbsp;10.12.1.0/30&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1.1.1.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i             <br>
+&nbsp;*>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3.3.3.3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i             <br>
+&nbsp;*>&nbsp;&nbsp;10.19.1.0/30&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.0.0.0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;32768 i                   <br>
+&nbsp;*m&nbsp;&nbsp;10.24.1.0/30&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1.1.1.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i             <br>
+&nbsp;*>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3.3.3.3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i             <br>
+&nbsp;*>&nbsp;&nbsp;10.39.1.0/30&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.0.0.0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;32768 i                   <br>
+&nbsp;*m&nbsp;&nbsp;10.67.1.0/30&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3.3.3.3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i             <br>
+&nbsp;*>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1.1.1.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 i             <br>
+&nbsp;* &nbsp;&nbsp;10.78.1.0/30&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.10.10.1                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65538 65539 i       <br>
+&nbsp;*m&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3.3.3.3                   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 65536 i       <br>
+&nbsp;*>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1.1.1.1                   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65000 65536 i       <br>
+&nbsp;*>&nbsp;&nbsp;10.108.1.0/30&nbsp;&nbsp;&nbsp;&nbsp;10.10.10.1               0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65538 i             <br>
+&nbsp;* &nbsp;&nbsp;10.109.1.0/30&nbsp;&nbsp;&nbsp;&nbsp;10.10.10.1               0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65538 i             <br>
+ *>     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.0.0.0                  0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;32768 i                   <br>
 R9(config-router-af)#                                                              <br>
 </code></div>
 <p>
@@ -6157,18 +6185,24 @@ R9(config-router-af)#
 
 <h2 id="REGEXP">Regular Expressions</h2>
 <p>
-Used for string marching in show command outputs, TCL/EEM scripting, BGP AS-Path 
-access lists, BGP expanded community lists.
+Regular expressions are used for the following: 
+<ul>
+  <li>String matching in <code style="font-size:120%"><b>show</b></code> command outputs</li> 
+  <li>TCL/EEM scripting</li>
+  <li>BGP AS-Path access lists</li>
+  <li>BGP expanded community lists</li>
+  </ul>
 </p>
 <p>
-#ip as-path access-list 1 permit ^$ - locally sourced prefixes.
+The following command can be used to filter locally originated prefixes 
+<code style="font-size:120%"><b>ip as-path access-list 1 permit ^$</b></code>.
 </p>
 
 <h2 id="FILTERING">Route Filtering</h2>
 <p>
 BGP update filtering occurs on a per peer basis. 
-Cisco IOS provides the following  methods of filtering routes: distribute-lists, 
-prefix-list, filter-lists, and Route Maps. Filtering is implemented at inbound 
+Cisco IOS provides the following  methods of filtering updates: distribute-lists, 
+prefix-list, filter-lists, and route-maps. Filtering is implemented at inbound 
 route policy state for incoming prefixes and outbound routing policy stage for 
 outgoing updates. It is recommended to use a route-map to avoid an order of 
 operations issue where for example a distribute-list and filter-list are applied 
@@ -6399,10 +6433,12 @@ RPKI validation codes: V valid, I invalid, N Not found                          
 &nbsp;                                                                                <br>
 Total number of prefixes 36                                                      <br>
 </code></div>
+<h4>Extended ACLs</h4>
 <p>
-<b>Note:</b> Extended ACLs in BGP behave differently; the destination section 
-maps to the prefix and the source section of the ACL maps to the subnet mask.
-Example: Given the following prefix 100.100.100.0/24; to filter a prefix that 
+Filtering using extended ACLs in BGP behave differently from the way they do in 
+OSPF or EIGRP; the destination section of the extended ACL maps to the prefix 
+and the source section of the ACL maps to the subnet mask.
+For example, given the following prefix 100.100.100.0/24; to filter a prefix that 
 begins with exactly 100.100 higher order bits, and the prefix length is 16-bits 
 or greater, we permit the entry and block everything else:
 <code style="font-size:120%"><b>#access-list 100 permit ip 100.100.0.0 0.0.255.255 255.255.0.0 0.0.255.255</b></code>.
@@ -6410,14 +6446,11 @@ or greater, we permit the entry and block everything else:
 <h3>Prefix-List</h3>
 <p>
 Prefix-lists allow the filtering of network prefixes on a neighbor-by-neighbor 
-basis for a specific direction i.e. inbound or outbound. 
-Compared to the access control lists, prefix-lists provide more fine-grained filtering.
-In address-family mode; <code style="font-size:120%"><b>neighbor &lt;ip_address&gt; prefix-list 
-&lt;prefix-list-name&gt; [in | out]</b></code>
-</p>
-<p>
-The example of the extended ACL can be easily implemented using a prefix-list as 
-follows: <code style="font-size:120%"><b>ip prefix-list MYLIST permit 100.100.0.0/16 ge 24</b></code>.
+basis for a specific direction i.e. inbound or outbound. Compared to the access 
+control lists, prefix-lists provide more fine-grained filtering. To apply filtering 
+using prefix lists, in address-family mode, enter the command;
+<code style="font-size:120%"><b>neighbor &lt;ip_address&gt; prefix-list 
+&lt;prefix-list-name&gt; [in | out]</b></code>.
 </p>
 <p>
 The following steps guide with configuration of filtering using prefix-lists. The BGP device aggregates 
@@ -6722,59 +6755,59 @@ BGP neighbor is 9.9.9.9,  remote AS 65512, external link                        
 &nbsp;&nbsp;&nbsp;&nbsp;InQ depth is 0                                                                                  <br>
 &nbsp;&nbsp;&nbsp;&nbsp;OutQ depth is 0                                                                                 <br>
 &nbsp;&nbsp;&nbsp;&nbsp;                                                                                                <br>
-&nbsp;&nbsp;&nbsp;&nbsp;                     Sent       Rcvd                                                            <br>
-&nbsp;&nbsp;&nbsp;&nbsp;Opens:                  1          1                                                            <br>
-&nbsp;&nbsp;&nbsp;&nbsp;Notifications:          0          0                                                            <br>
-&nbsp;&nbsp;&nbsp;&nbsp;Updates:               24         13                                                            <br>
-&nbsp;&nbsp;&nbsp;&nbsp;Keepalives:            34         25                                                            <br>
-&nbsp;&nbsp;&nbsp;&nbsp;Route Refresh:          0          1                                                            <br>
-&nbsp;&nbsp;&nbsp;&nbsp;Total:                 63         40                                                            <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Sent&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Rcvd                                                            <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Opens:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 1                                                            <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Notifications:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0                                                            <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Updates:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;24&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;13                                                            <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Keepalives:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;34&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;25                                                            <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Route Refresh:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 1                                                            <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Total:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;63&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;40                                                            <br>
 &nbsp;&nbsp;Default minimum time between advertisement runs is 30 seconds                                     <br>
 &nbsp;&nbsp;                                                                                                  <br>
- For address family: IPv4 Unicast                                                                   <br>
-  Session: 9.9.9.9                                                                                  <br>
-  BGP table version 61, neighbor version 61/0                                                       <br>
-  Output queue size : 0                                                                             <br>
-  Index 4, Advertise bit 1                                                                          <br>
-  4 update-group member                                                                             <br>
-  Outgoing update prefix filter list is PL_10.1.0.0/17                                              <br>
-  Slow-peer detection is disabled                                                                   <br>
-  Slow-peer split-update-group dynamic is disabled                                                  <br>
-                                 Sent       Rcvd                                                    <br>
-  Prefix activity:               ----       ----                                                    <br>
-    Prefixes Current:              45         13 (Consumes 832 bytes)                               <br>
-    Prefixes Total:                90         13                                                    <br>
-    Implicit Withdraw:             45          0                                                    <br>
-    Explicit Withdraw:             15          0                                                    <br>
-    Used as bestpath:             n/a         11                                                    <br>
-    Used as multipath:            n/a          0                                                    <br>
-                                                                                                    <br>
-                                   Outbound    Inbound                                              <br>
-  Local Policy Denied Prefixes:    --------    -------                                              <br>
-    prefix-list                           8          0                                              <br>
-    AS_PATH loop:                       n/a         53                                              <br>
-    Bestpath from this peer:             22        n/a                                              <br>
-    Total:                               30         53                                              <br>
-  Number of NLRIs in the update sent: max 40, min 0                                                 <br>
-  Last detected as dynamic slow peer: never                                                         <br>
-  Dynamic slow peer recovered: never                                                                <br>
-  Refresh Epoch: 1                                                                                  <br>
-  Last Sent Refresh Start-of-rib: 00:11:04                                                          <br>
-  Last Sent Refresh End-of-rib: 00:11:04                                                            <br>
-  Refresh-Out took 0 seconds                                                                        <br>
-  Last Received Refresh Start-of-rib: never                                                         <br>
-  Last Received Refresh End-of-rib: never                                                           <br>
-                                       Sent       Rcvd                                              <br>
-        Refresh activity:              ----       ----                                              <br>
-          Refresh Start-of-RIB          2          0                                                <br>
-          Refresh End-of-RIB            2          0                                                <br>
-                                                                                                    <br>
-  Address tracking is enabled, the RIB does have a route to 9.9.9.9                                 <br>
-  Connections established 1; dropped 0                                                              <br>
-  Last reset never                                                                                  <br>
-  External BGP neighbor may be up to 2 hops away.                                                   <br>
-  Transport(tcp) path-mtu-discovery is enabled                                                      <br>
-  Graceful-Restart is disabled                                                                      <br>
+&nbsp;For address family: IPv4 Unicast                                                                   <br>
+&nbsp;&nbsp;Session: 9.9.9.9                                                                                  <br>
+&nbsp;&nbsp;BGP table version 61, neighbor version 61/0                                                       <br>
+&nbsp;&nbsp;Output queue size : 0                                                                             <br>
+&nbsp;&nbsp;Index 4, Advertise bit 1                                                                          <br>
+&nbsp;&nbsp;4 update-group member                                                                             <br>
+&nbsp;&nbsp;Outgoing update prefix filter list is PL_10.1.0.0/17                                              <br>
+&nbsp;&nbsp;Slow-peer detection is disabled                                                                   <br>
+&nbsp;&nbsp;Slow-peer split-update-group dynamic is disabled                                                  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Sent&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Rcvd                                                    <br>
+&nbsp;&nbsp;Prefix activity:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;----&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;----                                                    <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Prefixes Current:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 45&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;13 (Consumes 832 bytes)                               <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Prefixes Total:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 90&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;13                                                    <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Implicit Withdraw:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 45&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0                                                    <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Explicit Withdraw:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 15&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0                                                    <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Used as bestpath:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;n/a&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;11                                                    <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Used as multipath:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;n/a&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0                                                    <br>
+&nbsp;&nbsp;&nbsp;&nbsp;                                                                                                <br>
+&nbsp;&nbsp;&nbsp;&nbsp;                               Outbound&nbsp;&nbsp;&nbsp;&nbsp;Inbound                                              <br>
+&nbsp;&nbsp;Local Policy Denied Prefixes:    --------&nbsp;&nbsp;&nbsp;&nbsp;-------                                              <br>
+&nbsp;&nbsp;&nbsp;&nbsp;prefix-list                           8          0                                              <br>
+&nbsp;&nbsp;&nbsp;&nbsp;AS_PATH loop:                       n/a         53                                              <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Bestpath from this peer:             22        n/a                                              <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Total:                               30         53                                              <br>
+&nbsp;&nbsp;Number of NLRIs in the update sent: max 40, min 0                                                 <br>
+&nbsp;&nbsp;Last detected as dynamic slow peer: never                                                         <br>
+&nbsp;&nbsp;Dynamic slow peer recovered: never                                                                <br>
+&nbsp;&nbsp;Refresh Epoch: 1                                                                                  <br>
+&nbsp;&nbsp;Last Sent Refresh Start-of-rib: 00:11:04                                                          <br>
+&nbsp;&nbsp;Last Sent Refresh End-of-rib: 00:11:04                                                            <br>
+&nbsp;&nbsp;Refresh-Out took 0 seconds                                                                        <br>
+&nbsp;&nbsp;Last Received Refresh Start-of-rib: never                                                         <br>
+&nbsp;&nbsp;Last Received Refresh End-of-rib: never                                                           <br>
+&nbsp;&nbsp;                                     Sent       Rcvd                                              <br>
+&nbsp;&nbsp;      Refresh activity:              ----       ----                                              <br>
+&nbsp;&nbsp;        Refresh Start-of-RIB          2          0                                                <br>
+&nbsp;&nbsp;        Refresh End-of-RIB            2          0                                                <br>
+&nbsp;&nbsp;                                                                                                  <br>
+&nbsp;&nbsp;Address tracking is enabled, the RIB does have a route to 9.9.9.9                                 <br>
+&nbsp;&nbsp;Connections established 1; dropped 0                                                              <br>
+&nbsp;&nbsp;Last reset never                                                                                  <br>
+&nbsp;&nbsp;External BGP neighbor may be up to 2 hops away.                                                   <br>
+&nbsp;&nbsp;Transport(tcp) path-mtu-discovery is enabled                                                      <br>
+&nbsp;&nbsp;Graceful-Restart is disabled                                                                      <br>
 Connection state is ESTAB, I/O status: 1, unread input bytes: 0                                     <br>
 Connection is ECN Disabled, Mininum incoming TTL 0, Outgoing TTL 2                                  <br>
 Local host: 1.1.1.1, Local port: 15723                                                              <br>
@@ -6821,31 +6854,42 @@ R1#                                                                             
 
 <h3>Outbound Route Filters (ORF)</h3>
 <p>
-In traditional filtering model, upstream provider will send full BGP table, a default only,
-default plus local routes. Normally, some complex view is not maintained. 
+In the traditional approach to connecting the enterprise network to another 
+autonomous system such as ISP, connectivity options include upstream provider 
+sending a full BGP table, a default route only, or default route and some filtered 
+routes. Normally, some complex view is not maintained. 
 Inbound route filtering on the downstream neighbor is inefficient because we 
-must receive the full view and process it via BGP before any filtering e.g. if 
-we are interested in just 100 NLRI, we will still receive all the 900K routes 
+must receive the full view of the service provider's BGP table and process it via
+BGP before any filtering e.g. if we are interested in just 100 NLRI, we will 
+still receive all the 900K routes 
 and proccess them before we can extract the desired 100 routes. The outbound 
 route filtering feature allows the downstream router to control what the upstream 
-neighbor is advertising to it. it is defined in RFC 5291 (outbound route 
-filtering capacity for BGP-4). The downstream router signals the upstream 
-provider with what view they want. They do this by advertising a prefix-list 
-upstream and the prefix-list is used in the reverse direction.
+neighbor is advertising to it. ORF is defined in RFC 5291 (outbound route 
+filtering capacity for BGP-4). The downstream router sends the upstream 
+provider a list of prefixes that it would like advertised to it. This is accomplished 
+through the enterprise BGP router advertising a prefix-list upstream to the service 
+provider's BGP router. This router then applies the prefix-list as a filter 
+in the outbound direction to the enterprise.
+The service provider BGP peer does not send BGP Update messages (filters) 
+containing prefixes that are not in the list. 
 </p>
-<p>
-On downstream router, configure prefix list and use send keyword. On upstream 
-router, configure receive.
-</p>
-<p>
-Outbound route filters are excellent for inbound filtering. ORFs are used by a 
-BGP router to send a list of prefixes to a BGP peer that it will not filter so 
-that the BGP peer does not send BGP Update messages (filters) containing 
-prefixes that are not in the list. 
-ORF seeks to answer the question: "Why send me prefixes I am going to filter 
-anyway??". 
 
-ORF is configured on both BGP routers using 
+<p>
+ORF has the following features:
+<ul>
+  <li>ORF supports IPv4 and IPv6 unicast routes</li>
+  <li>It does not support IP multicast routes.</li>
+  <li>ORF can be used only with IP prefix-lists</li>
+  <li>ORF has to be configured separately for every address family. It cannot be 
+  configured under the global BGP process.</li>
+  <li>ORF is supported only over eBGP sessions.</li>
+</ul>
+</p>
+
+<p>
+When implementing ORF, ensure that on the downstream router, configure prefix 
+list and use send keyword while on the upstream router, the <code style="font-size:120%"><b>receive</b></code> 
+keyword is configured. ORF is configured on both BGP routers using 
 the BGP command <code style="font-size:120%"><b>neighbor &lt;ip_address&gt; capability orf 
 prefix-list [both | receive | send]</b></code>. Verification can be done 
 using the command <code style="font-size:120%"><b>show ip bgp neighbor &lt;ip_address&gt; received 
@@ -6865,23 +6909,12 @@ After configuring ORF, clear the process using the command <code style="font-siz
 towards the downstream router.
 </p>
 
-<p>
-ORF has the following features:
-<ul>
-  <li>ORF supports IPv4 and IPv6 unicast routes</li>
-  <li>It does not support IP multicast routes.</li>
-  <li>ORF can be used only with IP prefix-lists</li>
-  <li>ORF has to be configured separately for every address family. It cannot be 
-  configured under the global BGP process.</li>
-  <li>ORF is supported only over eBGP sessions.</li>
-</ul>
-</p>
-
 
 <h3>AS Path Access Control Lists</h3>
 <p>
 There may be times when conditionally matching network prefixes may be too complicated,
-and identifying all routes from a specific organization is preferred. In such a 
+and identifying all routes from a specific organization using autonommous system 
+numbers (ASNs) is preferred. In such a 
 scenario, AS_Path access control lists can be used. AS_Path filtering is accomplished using an
 AS Path Access Control List, which uses regular expressions for matching.
 </p>
@@ -7282,7 +7315,7 @@ Total number of prefixes 55
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
 <code style="font-size:120%">
 R6(config)#<b>ip prefix-list PL_10.1.0.0/17 seq 10 deny 10.1.0.0/17 le 32</b><br>
-R6(config)#<b>ip prefix-list PL_10.1.0.0/17 seq 10 permit 0.0.0.0/0 le 32</b><br>
+R6(config)#<b>ip prefix-list PL_10.1.0.0/17 seq 20 permit 0.0.0.0/0 le 32</b><br>
 </code></div>
 <p>
 <b>Step 2:</b> Reference the prefix list or access control list with the route-map. In this case, we reference the 
@@ -7389,9 +7422,11 @@ Total number of prefixes 55
 <p>
 Next hop tracking involves the IGP sharing next hop information and their viability 
 so that when there is a problem, the IGP informs BGP. Next hop tracking is enabled 
-in IOS by default. It can be enabled using the command <code style="font-size:120%"><b>bgp nexthop trigger enable<br>
-bgp nexthop trigger delay 5</b></code>. The delay ensures that BGP does not react 
-to a flapping route.
+in IOS by default. It can be enabled using the command 
+<code style="font-size:120%"><b>bgp nexthop trigger enable</b></code>.
+A delay can be added to the next hop tracking process. The delay ensures that 
+BGP does not react to a flapping route: 
+<code style="font-size:120%"><b>bgp nexthop trigger delay 5</b></code>. 
 </p>
 
 <h2>Fast External Fallover</h2>
@@ -7407,19 +7442,26 @@ BGP fast external fallover can be enabled in the BGP configuration using the com
 
 <h2>Bidirectional Forwarding Detection (BFD)</h2>
 <p>
- Used to ensure the link is truly bidirectional. It operates in async mode or 
- demand mode. Bi-directional link failure occurs particularly in fibre optics if 
- a forward link functionals and the return link does not function. In Async mode, 
+ BFD is used to ensure a link between any two devices is truly bidirectional i.e., 
+ the transmit and receive links are functional. Bi-directional link failure 
+ occurs particularly in fibre optic links where two separate fibers are used with 
+ one for transmit and the second for receiving. If the forward link functions and
+ the return link does not function, this can break the connectivity between the 
+ two BGP peers. BFD operates in two modes; async mode or demand mode.  In Async mode, 
  hello packets flow between the two devices continuously. The echo feature makes 
- sure the CPU is nto involved in the BFD process.
+ sure the CPU is not involved in the BFD process.
 </p>
 <p>
-After globally enabling BFD using the command <code style="font-size:120%"><b>bfd interval &lt;milliseconds&gt; 
-min_rx &lt;milliseconds&gt; multiplier value</b></code>; BFD can be enabled in BGP 
-using the command <code style="font-size:120%"><b>neighbor &lt;ip_address&gt; fall-over bfd</b></code>
+Configuring BFD is a two stage process:
+<ol>
+  <li>Enable BFD globally using the command <code style="font-size:120%"><b>bfd interval &lt;milliseconds&gt; 
+min_rx &lt;milliseconds&gt; multiplier value</b></code>.</li>
+  <li>Enabling BFD in BGP using the command 
+  <code style="font-size:120%"><b>neighbor &lt;ip_address&gt; fall-over bfd</b></code>.</li>
+</ol>
 </p>
 
-<h2>Prefix Independent Convergence</h2>
+<h2>Prefix Independent Convergence (PIC)</h2>
 <p>
 PIC ensures that alternate paths are at the ready if the primary path fails. It 
 is similar in concept to feasible successors of EIGRP. It can be configured using 
@@ -7438,24 +7480,26 @@ the following commands:
 </ul>
 </p>
 <p>
-The backup paths are labelled with 'b' in the Loc-RIB. show ip bgp 
+The backup paths are labelled with 'b' in the Loc-RIB.
 </p>
 
 <h2>Graceful Restart</h2>
 <p>
-Graceful restart feature is agreed upon by routers during peering. Graceful restart 
-allows a BGP device to continue to forward traffic to a BGP peer whose BGP process
-is restarting. Two types of graceful restart exist: 
+Graceful restart allows a BGP device to continue to forward traffic to a BGP peer
+whose BGP process is restarting. BGP devices support two modes of graceful restart: 
 <ul>
-  <li>Graceful-restart capable: has all features of graceful restart features.</li>
-  <li>Graceful-restart aware: these devices do not do full graceful restart features 
-  but are aware that neigbors are capable.</li>
+  <li><b>Graceful-restart capable:</b> all features of graceful restart are 
+  supported.</li>
+  <li><b>Graceful-restart aware:</b> not all features of graceful restart are 
+  supported but devices are aware that neigbors are capable of graceful restart.</li>
 </ul>
 </p>
 <p>
-Can be configured per neighbor, global or in  aserssion template. The restart time 
-is the time that the BGP peer is expected to complete the restart otherwise the 
-peering will fail. By default, the graceful restart restart time is 120 sceonds. 
+Graceful restart is configured per neighbor, globally or in  a session template. 
+Graceful restart feature is agreed upon by BGP neighbors during peering. 
+The restart time is the time that the BGP peer is expected to complete restarting
+the BGP process otherwise the peering will fail. By default, the graceful restart
+restart time is 120 sceonds. 
 and a stalepath time is 360 (how long stalepaths are maintained until restart is 
 complete). To confiigure graceful restart, under the BGP configuration issue the
  command <code style="font-size:120%"><b>bgp graceful-restart</b></code>. The IOS will prompt to reset 
@@ -7464,20 +7508,22 @@ complete). To confiigure graceful restart, under the BGP configuration issue the
 
 <h2 id="MAXIMUM_PREFIX">Maximum Prefix</h2>
 <p>
-By default, a full view is allowed from all peers. A full view generally should 
-not come from downstream customers. Simple solution is to filter based on the 
-number of prefixes i.e. <code style="font-size:120%"><b>neighbor maximum-prefix</b></code>. The result 
-can be log or shutdown peer.
-</p>
-
-<p>
 The BGP maximum prefix feature restricts the number of routes that are received 
 from a BGP peer. This feature ensures that the BGP table does not overwhelm the 
 router by exceeding its memory or processing capability. Maximum prefix feature 
 works with both eBGP and iBGP peers; though in production, it is typically 
 configured for eBGP peers.
 
-Routers can place prefix restrictions on a BGP neighbor by using the BGP address family configuration command 
+A full view refers to the sharing of all prefixes in the BGP table. 
+By default, a full view is allowed from all peers. A full view generally should 
+not come from downstream customers. 
+
+Routers can place prefix restrictions on the number of prefixes that they are able 
+to receive from a BGP neighbor. If the number of prefixes received exceeds the 
+configured maximum, two actions can be taken; generation of a log message
+or shutdown of the peer relationship. If not stated, the default behaviour is to 
+shutdown the peer session with the "offending" peer.
+The maximum prefix can be configured using the BGP address family configuration command 
 <code style="font-size:120%"><b>neighbor ip-address maximum-prefix &lt;prefix-count&gt; [warning-percentage] [restart &lt;minutes&gt;] [warning-only]</b></code>.
 </p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
@@ -7489,12 +7535,11 @@ R1(config-router-af)#<b>neighbor 2.2.2.2 maximum-prefixes 45 75 warning-only</b>
 The above configuration sets the maximum number of prefixes from BGP neighbor with BGP ID 2.2.2.2 at 45 with warning 
 messages issued when the number of received prefixes from the BGP peer is at 75% the maximum prefix configured. 
 Additionally, warning messages are issued after the number of received prefixes exceeds the configured maximum.
-</p>
-<p>
 A warning is not generated before the prefix limit is reached. By adding a warning percentage, 
 you can have a warning message sent when the percentage is exceeded. The maximum prefix 
-behavior of closing the BGP session can be changed by using the optional keyword warning-only so that a warning 
-message is generated instead. When the threshold has been reached, additional prefixes are discarded.
+behavior of closing the BGP session can be changed by using the optional keyword 
+<code><b>warning-only</b></code> so that a warning message is generated instead. 
+When the threshold has been reached, additional prefixes are discarded.
 
 </p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
@@ -7506,7 +7551,7 @@ message is generated instead. When the threshold has been reached, additional pr
 If the <code style="font-size:120%"><b>warning-only</b></code> keyword is not added when configuring the maximum-prefix, 
 when a peer advertises more routes than the maximum prefix count:
 <ol>
-  <li>the peer moves the neighbor to the idle state in the finite-state machine (FSM),</li> 
+  <li>the peer moves the neighbor to the idle state in the BGP finite-state machine (FSM),</li> 
   <li>closes the BGP session, </li>
   <li>and sends out the appropriate syslog message.</li>
   <li>The BGP session is not automatically reestablished by default.</li>
@@ -7515,7 +7560,7 @@ when a peer advertises more routes than the maximum prefix count:
  </ol>
 </p>
 <p>
-Configuration of the maximum prefix takes effect immediately and does not require the reset of the BGP neighborship.
+Enabling the maximum prefix feature takes effect immediately and does not require the reset of the BGP neighborship.
 </p>
 
 <h2>Tuning CPU and Memory</h2>
@@ -7525,19 +7570,20 @@ In production environments, CPU consumption may rise to over 60%. Processes can
 be filtered for BGP as follows: <code style="font-size:120%"><b>show process | include utilization | Runtime|BGP</b></code>.
 </p>
 <p>
-To optimize BGP for efficiency with CPU utilization:
+To optimize CPU utilization by BGP, consider the following:
 <ul>
   <li>Implement update groups; these are implemented by default on Cisco devices.
   update groups are more efficient than peer groups in CPU efficiency.</li>
-  <li>Number of routes.</li>
+  <li>Number of routes: carryout aggregation as effectively as possible.</li>
   <li>Increase efficiency of TCP.</li>
 </ul>
 </p>
 <h3>Tuning Memory</h3>
 <p>
-To view memory usage by BGP, show ip bgp summary, show ip route summary. show 
-processes memory sorted | i PID|BGP.
-To tune memory consumption:
+To view memory usage by BGP, use these commands 
+<code><b>show ip bgp summary, show ip route summary. show processes memory sorted | i PID|BGP
+</b></code>.
+To tune memory consumption, consider the implementation of the following features:
 <ul>
   <li>Aggregation</li>
   <li>Filtering</li>
@@ -7547,8 +7593,10 @@ To tune memory consumption:
 </ul>
 </p>
 
-<h2>Transport Optmization</h2>
+<h3>Transport Optmization</h3>
 <p>
+TCP can be tuned to reduce the memory and CPU utilization by BGP through the 
+following configurations:
 <ul>
   <li>TCP optimization thru MSS and window size.</li>
   <li>BGP update generation is automatically implemented using update groups.</li>
@@ -7575,22 +7623,27 @@ route has a lower administrative distance (of one) than the BGP AD.
 <p>
 Route flapping occurs when a route is advertised and then withdrawn repeatedly 
 over a short period of time. The advertised route may alternatively have 
-different BGP next hops. Each time a route flap occurs, a BGP Update message 
+different BGP next hops for each advertisement. Each time a route flap occurs, a BGP Update message 
 must be sent to advertise the new route and/or withdraw previously advertised 
 routes. Processing these BGP Update messages increases the router's CPU load.
 eBGP neighbors going down/up is not considered a flap.
+Route flap dampening was introduced as a method to prevent the installation of 
+flapping routes into the BGP table and lower the CPU load.   
+BGP route flap dampening is thought to affect the stability of BGP tables.
 
+The routers today have greater processing capacity to handle many BGP updates. As 
+a result, BGP route flap dampening is not commonly used today.
 Route dampening aims to reduce the scope of route flap propagation. Prefixes with 
-a history of flapping have the letter 'h' in the output of the Loc-RIB table.
+a history of flapping have the label 'h' in the output of the Loc-RIB table.
 </p>
 
 <p>
 Route flap dampening operation involves the following:
 <ul>
-   <li>Add a penalty for each flap.</li>
+   <li>Add a penalty for each flap that occurs.</li>
    <li>Exponentially decay penalty; half life determines the decay rate.</li>
    <li>Penalty above the suppress-limit; do not advertise the route to BGP peers.</li>
-   <li>Penalty decayed below reuse-limite; re-advertise route to BGP peers.</li>
+   <li>Penalty decayed below reuse-limit; re-advertise route to BGP peers.</li>
 </ul>
 
 Route flap dampening is only applied to inbound announcements from eBGP peers; 
@@ -7611,7 +7664,6 @@ When a route flap occurs for a prefix:
   prefix is or is not in the BGP table.</li>
   <li>Once penalty reaches reuse-limit, prefix is reannounced.</li>
   <li>Once penalty is less than half reuse-limit, penalty is reset to zero.</li>
-  <li></li>
   <li>If the router receives an update about a route with a penalty, the half-life 
   timer starts. The default half-life value is 15 minutes. When the half-life is 
   reached, the penalty is reduced by 50%.</li>
@@ -7637,19 +7689,35 @@ BGP flap dampening can be configured using the following command:
 bgp dampening &lt;half-life&gt; &lt;reuse&gt; &lt;suppress&gt; &lt;max-suppress&gt;
 </b></code>
 </p>
-<h4>Selective and variable dampening</h4>
+
 <p>
-Selective dampening can be based on AS-PATH, Communities and Prefixes.
+Example configurations using IOS defaults: <code style="font-size:120%"><b>bgp dampening 15 750 2000 60</b></code>
+<ul>
+  <li>half-life of 15 minutes</li>
+  <li>reuse-limit of 750 and suppress time of 60 minutes means maximum possible 
+  penalty of 12000</li>
+  <li>once prefix stops flapping, penalty is decayed from a maximum possible 
+  value of 12000 to 750 - this will take 60 minutes.</li>
+  <li>Once penalty reaches 375, it is reset to zero.</li>
+</ul>
 </p>
 <p>
-<code style="font-size:120%"><b>
-bgp dampening [route-map &lt;name&gt;] <br>
-  route-map &lt;name&gt; permit 10 <br>
-  match ip address prefix-list FLAP-LIST
-  set dampening &lt;half-life&gt; &lt;reuse-value&gt; &lt;suppress-penalty&gt; 
-   &lt;maximum suppress time&gt;
-</b></code>
+<b>CAUTION:</b> Care is required when setting the parameters:
+<ul>
+  <li>Penalty must be less than reuse-limit at the maximum suppress time.</li>
+  <li>Maximum suppress time and half life must allow penalty to be larger than 
+  suppress limit.</li>
+  <li>Decay rate is pre-calculated when flap dampening is configured. Numbers must 
+  be feasible, IOS does not check.</li>
+  <li>Always ensure that suppress-limit is less than max-penalty otherwise there 
+  will be no route dampening.</li>
+</ul>
 </p>
+<p>
+The following are examples of configuration of route flap dampening with correct 
+configuration and wrong configuration.
+</p>
+
 <p>
 Examples (Wrong) <br>
 bgp dampening 30 750 3000 60<br>
@@ -7673,28 +7741,20 @@ reuse-limit of 750 means maximum possible
 penalty is 6000 - suppress limit is easily reached
 </p>
 
-<H4>Examples</H4>
+<h4>Selective and variable dampening</h4>
 <p>
-Example configurations using IOS defaults: <code style="font-size:120%"><b>bgp dampening 15 750 2000 60</b></code>
+Selective dampening can be based on AS-PATH, Communities and Prefixes.
+A route-map is referenced by the <code><b>bgp dampening</b></code> command. 
 <ul>
-  <li>half-life of 15 minutes</li>
-  <li>reuse-limiit of 750 and suppress time of 60 minutes means maximum possible 
-  penalty of 12000</li>
-  <li>once prefix stops flapping, penalty is decayed from a maximum possible 
-  value of 12000 to 750 - this will take 60 minutes.</li>
-  <li>Once penalty reaches 375, it is reset to zero.</li>
-</ul>
-</p>
-<p>
-<b>CAUTION:</b> Care is required when setting the parameters:
-<ul>
-  <li>Penalty must be less than reuse-limit at the maximum suppress time.</li>
-  <li>Maximum suppress time and half life must allow penalty to be larger than 
-  suppress limit.</li>
-  <li>Devay rate pre-calculated when flap dampening configured. Numbers must 
-  be feasible, IOS does not check.</li>
-  <li>Always ensure that suppress-limit is less than max-penalty otherwise there 
-  will be no route dampening.</li>
+  <li><b>Define the route-map and set the values for the route dampening:</b> 
+    <ul>
+      <li><code style="font-size:120%"><b>route-map &lt;name&gt; permit 10 </b></code></li>
+      <li><code style="font-size:120%"><b>match ip address prefix-list FLAP-LIST</b></code></li>
+      <li><code style="font-size:120%"><b>
+      set dampening &lt;half-life&gt; &lt;reuse-value&gt; &lt;suppress-penalty&gt; &lt;maximum suppress time&gt;</b></code></li>
+      </ul>
+  <li>Reference the route-map in the command <code><b>bgp dampening</b></code>: 
+		bgp dampening [route-map &lt;name&gt;]   
 </ul>
 </p>
 
@@ -7710,33 +7770,35 @@ Some verification commands include the following:
 </p>
 
 <p>
-BGP route flap dampening is thought to affect the stability of BGP tables.
-</p>
 
-<p>
-Route flap dampening was introduced as a method to prevent the installation of 
-flapping routes into the BGP table and lower the CPU load.   
-The routers today have greater processing capacity to handle many BGP updates. As 
-a result, BGP route flap dampening is not commonly used today.
 </p>
 
 <h2>Peering Using Loopback Addresses</h2>
 <p>
-BGP sessions are sourced by the primary IP address of the outbound interface toward the BGP peer by default. BGP 
-uses an explicit configuration of IP address and if the IP addresses do not match, the relationship will not form or 
-be maintained. If a link failure occurs on the outbound interface, then the session is dropped. To maintain the session 
-despite the failure of the outbound links, configure an IGP on the router's transit links, advertise the loopback 
-interfaces into the IGP and then configure the BGP neighbors to establish a session to the remote router's loopback address.
-The loopback interface is virtual and always stays up. In the event of link failure, the session stays up and the IGP finds
-another path to the loopback address. In essence, turning a single hop iBGP session into a multi-hop iBGP session.
+BGP sessions are sourced by the primary IP address of the outbound interface 
+toward the BGP peer by default. When configuring a BGP neighbor, the IP address 
+of one of the neighbor's interfaces is entered in the configuration. If the IP 
+address of the BGP open message does not match with the neighbor's configured IP 
+address, the relationship will not form. If a link failure occurs on the outbound
+interface, then the peering session is dropped. To maintain the peering session
+despite the failure of the outbound links, configure an IGP on the router's 
+transit links, advertise the loopback interfaces into the IGP and then configure 
+the BGP neighbors to establish a session to the remote router's loopback address.
+The loopback interface is virtual and always stays up. In the event of link failure, 
+the peering session stays up and the IGP finds another path to the loopback address; 
+in essence, turning a single hop iBGP session into a multi-hop iBGP session.
 </p>
 <p>
-If the BGP packet source does not match an entry in the neighbor table, the BGP packet cannot be associated to a neighbor 
-and it is discarded. The source IP address of the BGP packets still reflects the IP address of the outbound interface.
-The source of BGP packets needs to be set with each neighbor with the command:
-<code style="font-size:120%"><b>neighbor &lt;ip_addr&gt; update-source&lt; interface_id &gt; </b></code>
-Links with loopback interfaces is recommended best practice. Verification of neighborship:
-<code style="font-size:120%"><b>show bgp ipv4 unicast neighbors 192.168.3.3</b></code>
+BGP processes BGP messages from devices that it has a peer session with.
+If a BGP message source does not match an entry in the neighbor table, the BGP 
+message cannot be associated to a neighbor and it is therefore discarded. The 
+source IP address of the BGP message still reflects the IP address of the outbound 
+interface. The source IP address of BGP messages needs to be explicitly configured
+for each neighbor with the command:
+<code style="font-size:120%"><b>neighbor &lt;ip_address&gt; update-source 
+&lt;interface_id&gt; </b></code>. Verification of peer's IP address can be confirmed 
+using the command:
+<code style="font-size:120%"><b>show bgp ipv4 unicast neighbors &lt;ip_address&gt;</b></code>
 </p>
 <h2>Miscellaneous Neighbor Options</h2>
 <h3><code style="font-size:120%;">log-neighbor-changes</code></h3>
@@ -7748,27 +7810,21 @@ command is enabled by default.
 
 <h1>BGP Synchronization</h1>
 <p>
-BGP configuration in more recent IOS versions includes an automatic inclusion of 
- of the command <code style="font-size:120%;"><b>no bgp synchronization</b></code>. BGP synchronization 
- was an attempt to eliminate traffic blackholes in an iBGP multihop topology where 
+BGP configuration in more recent IOS versions, by default, includes the command
+<code style="font-size:120%;"><b>no bgp synchronization</b></code>.
+  BGP Synchronization is a legacy black-hole prevention technique.
+ BGP synchronization was an attempt to eliminate traffic blackholes in an iBGP multihop topology where 
  intermediate routers are not running BGP. The essence of BGP synchronization was 
  that prefixes would only be advertised to iBGP peers only if they are available 
  in the IGP as well. This would ensure that any intermediate non-BGP routers would 
  be able to forward the traffic to/from prefixes that are advertised in BGP.
-</p>
-TODO: include topology of multihop iBGP.
-<p>
+
 BGP synchronization is not used because redistributing the large number of prefixes 
 in the BGP table may overwhelm the IGP. Additionally, BGP synchronization is not 
-used today because of the use of BGP scalability techniques such as full mesh, 
+used today because of the use of iBGP scalability techniques such as full mesh, 
 route reflection, and BGP confederations.
+</p>
 
-</p>
-<h4>BGP Synchronization</h4>
-<p>
-Synchronization rule must be met or disabled. BGP Synchronization is a legacy 
-black-hole prevention technique.
-</p>
 
 
 <h1>Troubleshooting BGP</h1>
@@ -7781,7 +7837,9 @@ The following are some of the reasons a BGP neighbor relationship might not form
   verify the interface status.</li>
   <li><b>Layer 3 connectivity is broken:</b> 
   You need to be able to reach the source IP address of the remote BGP peer. 
-  Use the <code style="font-size:120%"><b>ping</b></code> command to verify connectivity.</li>
+  Use the <code style="font-size:120%"><b>ping</b></code> command to verify 
+  end-to-end connectivity. Keep in mind the source IP address used for ICMP packets 
+  when verifying connectivity.</li>
   <li><b>Path to the neighbor is through the default route:</b> You must be able to reach the neighbor using a route other than 
   the default route. BGP considers the most specific route in the routing table and disregards reachability through the 
   default route.</li>
