@@ -5518,7 +5518,12 @@ To implement this feature, configure a community list:
 
 <h2 id="PEER_GROUPS">Peer Groups</h2>
 <p>
-Peer groups simplify BGP configuration and reduce system resource use (CPU and memory) by grouping BGP peers together 
+Peer groups are defined to efficiently apply the same policies to multiple peers.
+They are useful when many neighbors have the same outbound policies. Updates are 
+generated once per peer group.
+
+Peer groups simplify BGP configuration and reduce system resource use (CPU and memory)
+by grouping BGP peers together 
 into BGP update groups. Configuration of multiple neighbors can be done in one place.
 BGP update groups enable a BGP device to perform outbound routing policy processing one time and then replicate the 
 update to all members. All members in the peer group are in the same update group and therefore must be of the same 
@@ -5658,6 +5663,26 @@ Locally configured session commands:           <br>
 Inherited session commands:                    <br>
                                                <br>
 R6#
+</code></div>
+
+<h4>Verification of Peer Sessions</h4>
+<p>
+Configured peer sessions can be viewed using the command <code><b>show bgp ipv4 
+unicast template peer-session</b></code>. The following output shows an example of a the 
+details of a configured peer session template.
+</p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+<code style="font-size:120%">
+R11#show bgp ipv4 unicast template peer-session
+Template:PEER_SESS_1000, index:1
+Local policies:0x2000B1, Inherited polices:0x0
+Locally configured session commands:
+ remote-as 1000.1000
+ password is configured
+ update-source Loopback255
+ timers 70 210 140
+ ha-mode graceful-restart
+Inherited session commands:
 </code></div>
 
 <h3>Peer policy</h3>

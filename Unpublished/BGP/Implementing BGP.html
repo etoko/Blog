@@ -1169,7 +1169,8 @@ If the <code style="font-size:120%"><b>update-source</b></code> command is issue
 then, for eBGP sessions, the TTL must be increased from one (1) to 
 a higher value (two in this case).
 
-eBGP sessions use a TTL of one for BGP packets as a security measure. This default 
+eBGP sessions use a TTL of one for BGP packets to ensure that the peers are directly 
+connected and do not use a different path to form their peering. This default 
 behaviour prevents multihop eBGP sessions that could be necessary when providers 
 would like to peer via loopback addresses. This requires changing the TTL on 
 BGP packets between eBGP peers. To change the TTL for multihop eBGP 
@@ -1667,6 +1668,15 @@ R8(config-router)#<b>no neighbor 7.7.7.7 ebgp-multihop 2  </b> <br>
 R8(config-router)#<b>neighbor 7.7.7.7 ttl-security hops 2 </b> <br>
 </code></div>
 
+<p>
+To further leverage the security features of TTL-security, the value of the 
+<code><b>ttl-security hops</b></code> can be set to the maximum i.e. 255. This 
+value should be the same on both eBGP peers. The packets sent to each of the eBGP 
+peers will have a value of 254. No unauthorised external device will be able to 
+send BGP messages with such TTL values. A TTL of 255 ensures that both eBGP 
+neighbors are directly connected.
+</p>
+
 <h2>First ASN in path must be neighbor's ASN</h2>
 <p>
 The BGP command <code style="font-size:120%"><b>bgp enforce-first-as</b></code> 
@@ -1674,6 +1684,7 @@ The BGP command <code style="font-size:120%"><b>bgp enforce-first-as</b></code>
 added layer of security to BGP. For additional BGP security, see security 
 section.
 </p>
+
 
 <h1 id="BGP_VERIFICATION">Verification of BGP</h1>
 <p>
@@ -5518,7 +5529,12 @@ To implement this feature, configure a community list:
 
 <h2 id="PEER_GROUPS">Peer Groups</h2>
 <p>
-Peer groups simplify BGP configuration and reduce system resource use (CPU and memory) by grouping BGP peers together 
+Peer groups are defined to efficiently apply the same policies to multiple peers.
+They are useful when many neighbors have the same outbound policies. Updates are 
+generated once per peer group.
+
+Peer groups simplify BGP configuration and reduce system resource use (CPU and memory)
+by grouping BGP peers together 
 into BGP update groups. Configuration of multiple neighbors can be done in one place.
 BGP update groups enable a BGP device to perform outbound routing policy processing one time and then replicate the 
 update to all members. All members in the peer group are in the same update group and therefore must be of the same 
@@ -5576,6 +5592,7 @@ the peer-group's individual members:
   <li><b>Route-filtering using route-maps, distribute-lists and filter-lists.</b>
 </ol>
 Peer groups can be verified using the command <code style="font-size:120%"><b>show ip bgp update-group</b></code>.
+If BGP peers share the same policy, then they are put in the same update-group. 
 </p>
 <h3>Troubleshooting Peer Groups</h3>
 <p>
@@ -5591,7 +5608,19 @@ When troubleshooting peer group issues, you need to take note of the following:
 
 <h2 id="PEER_TEMPLATES">Peer Templates</h2>
 <p>
-BGP peer templates are BGP configurations that can be applied to one or more BGP peers. 
+BGP peer templates are BGP configurations that can be applied to one or more BGP peers.
+BGP configurations can be categorized as session commands and policy commands.
+<ul>
+   <li><b>Session commands:</b> 
+   <ul>
+     <li>Affect the TCP session between BGP peers.</li>
+     <li>Can be global or per address family.</li>
+   </ul>
+   <li><b>Policy commands:</b>
+     <ul>
+       <li>Are per address family.</li>
+     </ul>
+</ul>
 BGP peer templates can inherit configurations from other peer templates.
 If a conflict exists between an inherited configuration and the invoking
 peer template, the invoking template preempts the inherited value.
@@ -5602,9 +5631,9 @@ templates.
 
 <h3>Peer session</h3> 
 <p>
-This type of template involves configuration settings specifically for the BGP session.
+Peer sessions can be used to implement BGP session configurations on a BGP session.
 Peer session templates are used to group and apply the configuration of general 
-BGP session commands to groups of neighbors that share session configuration. 
+BGP session commands to peers that should have same session configuration. 
 Peer session templates can be applied regardless of address families of the neighbors.
 </p>
 <p>
@@ -5863,6 +5892,10 @@ TCP Semaphore      0x6B259A44  FREE                                             
 R6#                                                                                               <br>                             
 </code></div>
 
+<p>
+All BGP peers that inherit the same peer policy template are placed in the same 
+update-group.
+</p>
 
 
 <h2 id="SUMMARIZATION">Route Summarization</h2>
@@ -7820,6 +7853,20 @@ for each neighbor with the command:
 using the command:
 <code style="font-size:120%"><b>show bgp ipv4 unicast neighbors &lt;ip_address&gt;</b></code>
 </p>
+<p>
+For peering using a loopback interface, the IP address or network of the loopback 
+interface should be in the routing table of the eBGP peer. In production networks, 
+usually a static route is configured. Scenarious exist where an IGP is configured 
+between eBGP peers. Here, the IP address of the loopback interface is advertised 
+into the IGP. This will result in the peer session between the two prefixes to 
+flap as the eBGP route (with AD of 20) is installed into the routing table. 
+This results in the IGP route (with its higher AD) not being installed into the 
+RIB. However, as the IGP route is not in the RIB, the eBGP route is again 
+removed because it is not in the RIB. One solution to this is to advertise the 
+IP address loopback of the loopback with the added keyword <code><b>backdoor</b></code>.
+For example <code><b>network 192.168.0.1 mask 255.255.255.255 backdoor.
+</p>
+
 <h2>Miscellaneous Neighbor Options</h2>
 <h3><code style="font-size:120%;">log-neighbor-changes</code></h3>
 <p>
