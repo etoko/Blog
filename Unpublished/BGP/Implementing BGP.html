@@ -2418,7 +2418,11 @@ and Adj-RIB-out tables.
 Loc-RIB is used by BGP to present routes to the IP routing table. It contains 
 NLRI for prefixes locally originated or received from other peers. After the 
 NLRI passes validity and next-hop reachability checks, the BGP best path algorithm 
-selects the best NLRI for a specific prefix.
+selects the best NLRI for a specific prefix. Prefixes received from iBGP peers 
+have the label of "i" (the first "i" appearing immediately before the prefix.).
+Prefixes received from eBGP peers do not have the label "i". It is important to 
+note that a prefix originated in another AS but received from an iBGP peer 
+receives the label "i" as it was received from an iBGP peer.
 </p>
 
 <p>
