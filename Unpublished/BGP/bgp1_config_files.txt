@@ -1,0 +1,1388 @@
+R1
+------------------------------------------------------------
+configure terminal
+  hostname R1
+  no ip domain-lookup
+  
+  line console 0
+    logging synchronous
+  exit
+  
+  interface g2/0
+    no shutdown
+    ip address 99.255.255.10 255.255.255.252
+    exit
+  interface g1/0
+    no shutdown
+    ip address 30.255.13.1 255.255.255.252
+	ip ospf 1 area 0
+	exit
+  interface g0/0
+    ip address 30.255.12.1 255.255.255.252
+    ip ospf 1 area 0
+    no shutdown
+    exit
+  interface loopback 1
+    no shutdown 
+    ip address 30.1.1.1 255.255.255.0
+	ip ospf 1 area 1
+    exit
+  interface loopback 2
+    no shutdown 
+    ip address 30.1.2.1 255.255.255.0
+	ip ospf 1 area 1
+    exit
+  interface loopback 3
+    no shutdown 
+    ip address 30.1.3.1 255.255.255.0
+	ip ospf 1 area 1
+    exit
+  interface loopback 4
+    no shutdown 
+    ip address 30.1.4.1 255.255.255.0
+	ip ospf 1 area 1
+    exit
+  interface loopback 5
+    no shutdown 
+    ip address 30.1.5.1 255.255.255.0
+	ip ospf 1 area 1
+    exit
+  interface loopback 6
+    no shutdown 
+    ip address 30.1.6.1 255.255.255.0
+	ip ospf 1 area 1
+    exit
+  interface loopback 7
+    no shutdown 
+    ip address 30.1.7.1 255.255.255.0
+	ip ospf 1 area 1
+    exit
+  interface loopback 8
+    no shutdown 
+    ip address 30.1.8.1 255.255.255.0
+	ip ospf 1 area 1
+    exit
+  interface loopback 9
+    no shutdown 
+    ip address 30.1.9.1 255.255.255.0
+	ip ospf 1 area 1
+    exit
+  interface loopback 10
+    no shutdown 
+    ip address 30.1.10.1 255.255.255.0
+	ip ospf 1 area 1
+    exit	
+  interface loopback 255
+    no shutdown
+    ip address 30.255.1.1 255.255.255.255
+	ip ospf 1 area 0
+    exit
+    
+  ip route 99.255.9.9 255.255.255.255 99.255.255.9
+    
+  route-map RM_EBGP permit 10
+    set community no-export
+  exit
+
+  router bgp 1000.1000
+    bgp router-id 30.255.1.1
+    no bgp default ipv4-unicast
+	
+    template peer-session TPS_IBGP
+	  remote-as 1000.1000
+	  update-source lo255
+	exit-peer-session
+	template peer-policy TPP_IBGP
+      next-hop-self
+      send-community both
+    exit-peer-policy
+	
+    template peer-session TPS_eBGP
+      remote-as 9
+      update-source lo255
+      ttl-security hops 254
+      password cisco
+    exit-peer-session
+    
+    template peer-policy TPP_eBGP
+      send-community both
+      route-map RM_EBGP in
+    exit-peer-policy
+    
+    neighbor 30.255.2.2 inherit peer-session TPS_IBGP
+	neighbor 30.255.3.3 inherit peer-session TPS_IBGP
+    neighbor 99.255.9.9 inherit peer-session TPS_eBGP
+	
+	
+	address-family ipv4 unicast
+      neighbor 30.255.2.2 activate
+	  neighbor 30.255.3.3 activate
+      neighbor 99.255.9.9 activate
+       
+	  neighbor 30.255.2.2 inherit peer-policy TPP_IBGP
+      neighbor 30.255.3.3 inherit peer-policy TPP_IBGP
+      neighbor 99.255.9.9 inherit peer-policy TPP_eBGP
+	  
+	  
+	  network 30.1.1.0 mask 255.255.255.0
+	  network 30.1.2.0 mask 255.255.255.0
+	  network 30.1.3.0 mask 255.255.255.0
+	  network 30.1.4.0 mask 255.255.255.0
+	  network 30.1.5.0 mask 255.255.255.0
+	  network 30.1.6.0 mask 255.255.255.0
+	  network 30.1.7.0 mask 255.255.255.0
+	  network 30.1.8.0 mask 255.255.255.0
+	  network 30.1.9.0 mask 255.255.255.0
+	  network 30.1.10.0 mask 255.255.255.0
+	  
+      
+   
+
+      
+******************************************************************	  
+R2
+------------------------------------------------------------
+configure terminal
+  hostname R2
+  no ip domain-lookup
+  
+  line console 0
+    logging synchronous
+  exit    
+
+  interface g1/0
+    no shutdown
+    ip address 30.255.24.1 255.255.255.252
+	ip ospf 2 area 0
+	exit
+  interface g0/0
+    ip address 30.255.12.2 255.255.255.252
+    ip ospf 2 area 0
+    no shutdown
+    exit
+  interface loopback 1
+    no shutdown 
+    ip address 30.2.1.1 255.255.255.0
+	ip ospf 2 area 2
+    exit
+  interface loopback 2
+    no shutdown 
+    ip address 30.2.2.1 255.255.255.0
+	ip ospf 2 area 2
+    exit
+  interface loopback 3
+    no shutdown 
+    ip address 30.2.3.1 255.255.255.0
+	ip ospf 2 area 2
+    exit
+  interface loopback 4
+    no shutdown 
+    ip address 30.2.4.1 255.255.255.0
+	ip ospf 2 area 2
+    exit
+  interface loopback 5
+    no shutdown 
+    ip address 30.2.5.1 255.255.255.0
+	ip ospf 2 area 2
+    exit
+  interface loopback 6
+    no shutdown 
+    ip address 30.2.6.1 255.255.255.0
+	ip ospf 2 area 2
+    exit
+  interface loopback 7
+    no shutdown 
+    ip address 30.2.7.1 255.255.255.0
+	ip ospf 2 area 2
+    exit
+  interface loopback 8
+    no shutdown 
+    ip address 30.2.8.1 255.255.255.0
+	ip ospf 2 area 2
+    exit
+  interface loopback 9
+    no shutdown 
+    ip address 30.2.9.1 255.255.255.0
+	ip ospf 2 area 2
+    exit
+  interface loopback 10
+    no shutdown 
+    ip address 30.2.10.1 255.255.255.0
+	ip ospf 2 area 2
+    exit	
+  interface loopback 255
+    no shutdown
+    ip address 30.255.2.2 255.255.255.255
+    ip ospf 2 area 2	
+
+  router bgp 1000.1000
+    bgp router-id 30.255.2.2
+    no bgp default ipv4-unicast
+	template peer-session TPS_IBGP
+	  remote-as 1000.1000
+	  update-source lo255
+	exit-peer-session
+    
+	template peer-policy TPP_IBGP
+	  next-hop-self
+      route-reflector-client
+      send-community both  
+    exit-peer-policy
+	
+    
+    neighbor 30.255.1.1 inherit peer-session TPS_IBGP
+	neighbor 30.255.4.4 inherit peer-session TPS_IBGP
+    neighbor 30.255.11.11 inherit peer-session TPS_IBGP
+	
+	address-family ipv4 unicast
+      neighbor 30.255.1.1 activate
+	  neighbor 30.255.4.4 activate
+      neighbor 30.255.11.11 activate
+       
+	  neighbor 30.255.1.1 inherit peer-policy TPP_IBGP
+      neighbor 30.255.4.4 inherit peer-policy TPP_IBGP
+      neighbor 30.255.11.11 inherit peer-policy TPP_IBGP
+      
+      
+	  network 30.2.1.0 mask 255.255.255.0
+	  network 30.2.2.0 mask 255.255.255.0
+	  network 30.2.3.0 mask 255.255.255.0
+	  network 30.2.4.0 mask 255.255.255.0
+	  network 30.2.5.0 mask 255.255.255.0
+	  network 30.2.6.0 mask 255.255.255.0
+	  network 30.2.7.0 mask 255.255.255.0
+	  network 30.2.8.0 mask 255.255.255.0
+	  network 30.2.9.0 mask 255.255.255.0
+	  network 30.2.10.0 mask 255.255.255.0
+	  network 30.255.12.0 mask 255.255.255.252
+	  network 30.255.24.0 mask 255.255.255.252
+      
+      
+	  
+******************************************************************	  
+R3
+------------------------------------------------------------
+configure terminal
+  hostname R3
+  no ip domain-lookup
+  
+  line console 0
+    logging synchronous
+  exit
+  
+  router ospf 3
+    router-id 30.255.3.3
+  exit
+  
+  interface g3/0
+    no shutdown
+    ip address 99.255.255.14 255.255.255.252
+	exit
+  interface g1/0
+    no shutdown
+    ip address 30.255.13.2 255.255.255.252
+	ip ospf 3 area 0
+	exit
+  interface g0/0
+    no shutdown
+    ip address 30.255.35.1 255.255.255.252
+	ip ospf 3 area 0
+	exit
+  interface g2/0
+    ip address 30.255.113.1 255.255.255.252
+    ip ospf 3 area 0
+    no shutdown
+    exit
+  interface loopback 1
+    no shutdown 
+    ip address 30.3.1.1 255.255.255.0
+	ip ospf 3 area 3
+    exit
+  interface loopback 2
+    no shutdown 
+    ip address 30.3.2.1 255.255.255.0
+	ip ospf 3 area 3
+    exit
+  interface loopback 3
+    no shutdown 
+    ip address 30.3.3.1 255.255.255.0
+	ip ospf 3 area 3
+    exit
+  interface loopback 4
+    no shutdown 
+    ip address 30.3.4.1 255.255.255.0
+	ip ospf 3 area 3
+    exit
+  interface loopback 5
+    no shutdown 
+    ip address 30.3.5.1 255.255.255.0
+	ip ospf 3 area 3
+    exit
+  interface loopback 6
+    no shutdown 
+    ip address 30.3.6.1 255.255.255.0
+	ip ospf 3 area 3
+    exit
+  interface loopback 7
+    no shutdown 
+    ip address 30.3.7.1 255.255.255.0
+	ip ospf 3 area 3
+    exit
+  interface loopback 8
+    no shutdown 
+    ip address 30.3.8.1 255.255.255.0
+	ip ospf 3 area 3
+    exit
+  interface loopback 9
+    no shutdown 
+    ip address 30.3.9.1 255.255.255.0
+	ip ospf 3 area 3
+    exit
+  interface loopback 10
+    no shutdown 
+    ip address 30.3.10.1 255.255.255.0
+	ip ospf 3 area 3
+    exit	
+  interface loopback 255
+    no shutdown
+    ip address 30.255.3.3 255.255.255.255	
+    ip ospf 3 area 3
+    exit
+  
+  route-map RM_NO_EXPORT permit 10
+    set community no-export
+  exit
+    
+  ip route 99.255.9.9 255.255.255.255 99.255.255.13
+  
+  router bgp 1000.1000
+    bgp router-id 30.255.3.3
+    no bgp default ipv4-unicast
+	
+    template peer-session TPS_IBGP
+      remote-as 1000.1000
+      update-source lo255
+    exit-peer-session
+    
+    template peer-session TPS_EBGP
+      remote-as 9
+      update-source lo255
+      ttl-security hops 254
+      password cisco
+    exit-peer-session
+    
+    template peer-policy TPP_EBGP
+      route-map RM_NO_EXPORT in
+      send-community both
+	exit-peer-policy
+	
+	template peer-policy TPP_IBGP
+	  send-community both
+	exit-peer-policy
+    
+	neighbor 30.255.1.1 inherit peer-session TPS_IBGP
+	neighbor 30.255.5.5 inherit peer-session TPS_IBGP
+	neighbor 30.255.11.11 inherit peer-session TPS_IBGP
+	
+	neighbor 99.255.9.9 inherit peer-session TPS_EBGP
+      
+	address-family ipv4 unicast
+	  neighbor 30.255.1.1 activate
+	  neighbor 30.255.5.5 activate
+	  neighbor 30.255.11.11 activate
+	  
+	  neighbor 30.255.1.1 inherit peer-policy TPP_IBGP
+	  neighbor 30.255.5.5 inherit peer-policy TPP_IBGP
+	  neighbor 30.255.11.11 inherit peer-policy TPP_IBGP
+	  
+	  neighbor 99.255.9.9 activate
+	  neighbor 99.255.9.9 inherit peer-policy TPP_EBGP
+	  
+	  network 30.3.1.0 mask 255.255.255.0
+	  network 30.3.2.0 mask 255.255.255.0
+	  network 30.3.3.0 mask 255.255.255.0
+	  network 30.3.4.0 mask 255.255.255.0
+	  network 30.3.5.0 mask 255.255.255.0
+	  network 30.3.6.0 mask 255.255.255.0
+	  network 30.3.7.0 mask 255.255.255.0
+	  network 30.3.8.0 mask 255.255.255.0
+	  network 30.3.9.0 mask 255.255.255.0
+	  network 30.3.10.0 mask 255.255.255.0
+	  network 30.255.13.0 mask 255.255.255.252
+	  network 30.255.35.0 mask 255.255.255.252
+	  
+******************************************************************	  
+R4
+------------------------------------------------------------
+configure terminal
+  hostname R4
+  no ip domain-lookup
+  
+  line console 0
+    logging synchronous
+    exit
+
+  interface g1/0
+    no shutdown
+    ip address 30.255.24.2 255.255.255.252
+	ip ospf 4 area 0
+	exit
+  interface g0/0
+    ip address 30.255.46.1 255.255.255.252
+    ip ospf 4 area 0
+    no shutdown
+    exit
+  interface g2/0
+    ip address 30.255.114.1 255.255.255.252
+    ip ospf 4 area 0
+    no shutdown
+    exit
+  
+  interface loopback 1
+    no shutdown 
+    ip address 30.4.1.1 255.255.255.0
+	ip ospf 4 area 4
+    exit
+  interface loopback 2
+    no shutdown 
+    ip address 30.4.2.1 255.255.255.0
+	ip ospf 4 area 4
+    exit
+  interface loopback 3
+    no shutdown 
+    ip address 30.4.3.1 255.255.255.0
+	ip ospf 4 area 4
+    exit
+  interface loopback 4
+    no shutdown 
+    ip address 30.4.4.1 255.255.255.0
+	ip ospf 4 area 4
+    exit
+  interface loopback 5
+    no shutdown 
+    ip address 30.4.5.1 255.255.255.0
+	ip ospf 4 area 4
+    exit
+  interface loopback 6
+    no shutdown 
+    ip address 30.4.6.1 255.255.255.0
+	ip ospf 4 area 4
+    exit
+  interface loopback 7
+    no shutdown 
+    ip address 30.4.7.1 255.255.255.0
+	ip ospf 4 area 4
+    exit
+  interface loopback 8
+    no shutdown 
+    ip address 30.4.8.1 255.255.255.0
+	ip ospf 4 area 4
+    exit
+  interface loopback 9
+    no shutdown 
+    ip address 30.4.9.1 255.255.255.0
+	ip ospf 4 area 4
+    exit
+  interface loopback 10
+    no shutdown 
+    ip address 30.4.10.1 255.255.255.0
+	ip ospf 4 area 4
+    exit	
+  interface loopback 255
+    no shutdown
+    ip address 30.255.4.4 255.255.255.255	
+    ip ospf 4 area 0
+    exit
+    
+  router bgp 1000.1000
+    bgp router-id 30.255.4.4
+    no bgp default ipv4-unicast
+    
+    template peer-session TPS_IBGP
+	  remote-as 1000.1000
+	  update-source lo255
+	exit-peer-session
+    
+	template peer-policy TPP_IBGP
+      route-reflector-client
+      send-community both  
+    exit-peer-policy
+	
+    
+    neighbor 30.255.2.2 inherit peer-session TPS_IBGP
+	neighbor 30.255.6.6 inherit peer-session TPS_IBGP
+    neighbor 30.255.11.11 inherit peer-session TPS_IBGP
+	
+	address-family ipv4 unicast
+      neighbor 30.255.2.2 activate
+	  neighbor 30.255.6.6 activate
+      neighbor 30.255.11.11 activate
+       
+	  neighbor 30.255.2.2 inherit peer-policy TPP_IBGP
+      neighbor 30.255.6.6 inherit peer-policy TPP_IBGP
+      neighbor 30.255.11.11 inherit peer-policy TPP_IBGP
+	  
+	  network 30.4.1.0 mask 255.255.255.0
+	  network 30.4.2.0 mask 255.255.255.0
+	  network 30.4.3.0 mask 255.255.255.0
+	  network 30.4.4.0 mask 255.255.255.0
+	  network 30.4.5.0 mask 255.255.255.0
+	  network 30.4.6.0 mask 255.255.255.0
+	  network 30.4.7.0 mask 255.255.255.0
+	  network 30.4.8.0 mask 255.255.255.0
+	  network 30.4.9.0 mask 255.255.255.0
+	  network 30.4.10.0 mask 255.255.255.0
+	  
+******************************************************************	  
+R5
+------------------------------------------------------------
+configure terminal
+  hostname R5
+  no ip domain-lookup
+  
+  line console 0
+    logging synchronous
+    exit
+  
+  router ospf 5
+    router-id 30.255.5.5
+    exit
+    
+  interface g1/0
+    no shutdown
+    ip address 30.255.56.1 255.255.255.252
+	ip ospf 5 area 0
+	exit
+  interface g0/0
+    ip address 30.255.35.2 255.255.255.252
+    ip ospf 5 area 0
+    no shutdown
+    exit
+  interface g2/0
+  no shutdown
+  ip address 30.255.115.1 255.255.255.252
+  ip ospf 5 area 0
+  exit
+  
+  interface loopback 1
+    no shutdown 
+    ip address 30.5.1.1 255.255.255.0
+	ip ospf 5 area 5
+    exit
+  interface loopback 2
+    no shutdown 
+    ip address 30.5.2.1 255.255.255.0
+	ip ospf 5 area 5
+    exit
+  interface loopback 3
+    no shutdown 
+    ip address 30.5.3.1 255.255.255.0
+	ip ospf 5 area 5
+    exit
+  interface loopback 4
+    no shutdown 
+    ip address 30.5.4.1 255.255.255.0
+	ip ospf 5 area 5
+    exit
+  interface loopback 5
+    no shutdown 
+    ip address 30.5.5.1 255.255.255.0
+	ip ospf 5 area 5
+    exit
+  interface loopback 6
+    no shutdown 
+    ip address 30.5.6.1 255.255.255.0
+	ip ospf 5 area 5
+    exit
+  interface loopback 7
+    no shutdown 
+    ip address 30.5.7.1 255.255.255.0
+	ip ospf 5 area 5
+    exit
+  interface loopback 8
+    no shutdown 
+    ip address 30.5.8.1 255.255.255.0
+	ip ospf 5 area 5
+    exit
+  interface loopback 9
+    no shutdown 
+    ip address 30.5.9.1 255.255.255.0
+	ip ospf 5 area 5
+    exit
+  interface loopback 10
+    no shutdown 
+    ip address 30.5.10.1 255.255.255.0
+	ip ospf 5 area 5
+    exit	
+  interface loopback 255
+    no shutdown
+    ip address 30.255.5.5 255.255.255.255	
+    ip ospf 5 area 0
+    exit
+
+  router bgp 1000.1000
+    bgp router-id 30.255.5.5
+    no bgp default ipv4-unicast
+    
+    
+    template peer-session TPS_IBGP
+	  remote-as 1000.1000
+	  update-source lo255
+	exit-peer-session
+    
+	template peer-policy TPP_IBGP
+	  next-hop-self
+      route-reflector-client
+      send-community both  
+    exit-peer-policy
+	
+    
+    neighbor 30.255.3.3 inherit peer-session TPS_IBGP
+	neighbor 30.255.6.6 inherit peer-session TPS_IBGP
+    neighbor 30.255.11.11 inherit peer-session TPS_IBGP
+	
+	address-family ipv4 unicast
+      neighbor 30.255.3.3 activate
+	  neighbor 30.255.6.6 activate
+      neighbor 30.255.11.11 activate
+       
+	  neighbor 30.255.3.3 inherit peer-policy TPP_IBGP
+      neighbor 30.255.6.6 inherit peer-policy TPP_IBGP
+      neighbor 30.255.11.11 inherit peer-policy TPP_IBGP
+      
+	
+	
+	  network 30.5.1.0 mask 255.255.255.0
+	  network 30.5.2.0 mask 255.255.255.0
+	  network 30.5.3.0 mask 255.255.255.0
+	  network 30.5.4.0 mask 255.255.255.0
+	  network 30.5.5.0 mask 255.255.255.0
+	  network 30.5.6.0 mask 255.255.255.0
+	  network 30.5.7.0 mask 255.255.255.0
+	  network 30.5.8.0 mask 255.255.255.0
+	  network 30.5.9.0 mask 255.255.255.0
+	  network 30.5.10.0 mask 255.255.255.0
+	  
+******************************************************************	  
+R6
+------------------------------------------------------------
+configure terminal
+  hostname R6
+  no ip domain-lookup
+  
+  line console 0
+    logging synchronous
+    exit
+  
+  interface g2/0
+    no shutdown
+    ip address 77.255.255.2 255.255.255.252
+    exit
+  interface g1/0
+    no shutdown
+    ip address 30.255.56.2 255.255.255.252
+	ip ospf 6 area 0
+	exit
+  interface g0/0
+    ip address 30.255.46.2 255.255.255.252
+    ip ospf 6 area 0
+    no shutdown
+    exit
+  interface loopback 1
+    no shutdown 
+    ip address 30.6.1.1 255.255.255.0
+	ip ospf 6 area 6
+    exit
+  interface loopback 2
+    no shutdown 
+    ip address 30.6.2.1 255.255.255.0
+	ip ospf 6 area 6
+    exit
+  interface loopback 3
+    no shutdown 
+    ip address 30.6.3.1 255.255.255.0
+	ip ospf 6 area 6
+    exit
+  interface loopback 4
+    no shutdown 
+    ip address 30.6.4.1 255.255.255.0
+	ip ospf 6 area 6
+    exit
+  interface loopback 5
+    no shutdown 
+    ip address 30.6.5.1 255.255.255.0
+	ip ospf 6 area 6
+    exit
+  interface loopback 6
+    no shutdown 
+    ip address 30.6.6.1 255.255.255.0
+	ip ospf 6 area 6
+    exit
+  interface loopback 7
+    no shutdown 
+    ip address 30.6.7.1 255.255.255.0
+	ip ospf 6 area 6
+    exit
+  interface loopback 8
+    no shutdown 
+    ip address 30.6.8.1 255.255.255.0
+	ip ospf 6 area 6
+    exit
+  interface loopback 9
+    no shutdown 
+    ip address 30.6.9.1 255.255.255.0
+	ip ospf 6 area 6
+    exit
+  interface loopback 10
+    no shutdown 
+    ip address 30.6.10.1 255.255.255.0
+	ip ospf 6 area 6
+    exit	
+  interface loopback 255
+    no shutdown
+    ip address 30.255.6.6 255.255.255.255
+	ip ospf 6 area 0
+	exit
+  
+  ip route 77.255.7.7 255.255.255.255 77.255.255.1
+   
+  route-map RM_EBGP permit 10
+    set community no-export
+  exit
+
+  router bgp 1000.1000
+    bgp router-id 30.255.6.6
+    no bgp default ipv4-unicast
+    
+ 
+      template peer-session TPS_IBGP
+	  remote-as 1000.1000
+	  update-source lo255
+	exit-peer-session
+	template peer-policy TPP_IBGP
+      next-hop-self
+      send-community both
+    exit-peer-policy
+	
+    template peer-session TPS_eBGP
+      remote-as 7
+      update-source lo255
+      ttl-security hops 254
+      password cisco
+    exit-peer-session
+    
+    template peer-policy TPP_eBGP
+      send-community both
+      route-map RM_EBGP in
+    exit-peer-policy
+    
+    neighbor 30.255.5.5 inherit peer-session TPS_IBGP
+	neighbor 30.255.4.4 inherit peer-session TPS_IBGP
+    neighbor 77.255.7.7 inherit peer-session TPS_eBGP
+	
+	address-family ipv4 unicast
+      neighbor 30.255.5.5 activate
+      neighbor 30.255.4.4 activate
+      neighbor 77.255.7.7 activate
+      
+       neighbor 30.255.5.5 inherit peer-policy TPP_IBGP 
+       neighbor 30.255.4.4 inherit peer-policy TPP_IBGP
+       neighbor 77.255.7.7 inherit peer-policy TPP_eBGP
+	  
+	  network 30.6.1.0 mask 255.255.255.0
+	  network 30.6.2.0 mask 255.255.255.0
+	  network 30.6.3.0 mask 255.255.255.0
+	  network 30.6.4.0 mask 255.255.255.0
+	  network 30.6.5.0 mask 255.255.255.0
+	  network 30.6.6.0 mask 255.255.255.0
+	  network 30.6.7.0 mask 255.255.255.0
+	  network 30.6.8.0 mask 255.255.255.0
+	  network 30.6.9.0 mask 255.255.255.0
+	  network 30.6.10.0 mask 255.255.255.0
+	  end
+wr	  
+	  
+******************************************************************	  
+R7
+------------------------------------------------------------
+configure terminal
+  hostname R7
+  no ip domain-lookup
+  ip route 88.255.8.8 255.255.255.255 88.255.255.1
+  ip route 30.255.6.6 255.255.255.255 77.255.255.2
+  
+  interface g1/0
+    no shutdown
+    ip address 88.255.255.2 255.255.255.252
+	
+	exit
+  interface g0/0
+    ip address 77.255.255.1 255.255.255.252
+    
+    no shutdown
+    exit
+  interface loopback 1
+    no shutdown 
+    ip address 77.1.1.1 255.255.255.0
+	
+    exit
+  interface loopback 2
+    no shutdown 
+    ip address 77.1.2.1 255.255.255.0
+	
+    exit
+  interface loopback 3
+    no shutdown 
+    ip address 77.1.3.1 255.255.255.0
+	
+    exit
+  interface loopback 4
+    no shutdown 
+    ip address 77.1.4.1 255.255.255.0
+	
+    exit
+  interface loopback 5
+    no shutdown 
+    ip address 77.1.5.1 255.255.255.0
+	
+    exit
+  interface loopback 6
+    no shutdown 
+    ip address 77.1.6.1 255.255.255.0
+	
+    exit
+  interface loopback 7
+    no shutdown 
+    ip address 77.1.7.1 255.255.255.0
+	
+    exit
+  interface loopback 8
+    no shutdown 
+    ip address 77.1.8.1 255.255.255.0
+	
+    exit
+  interface loopback 9
+    no shutdown 
+    ip address 77.1.9.1 255.255.255.0
+	
+    exit
+  interface loopback 10
+    no shutdown 
+    ip address 77.1.10.1 255.255.255.0
+	
+    exit	
+  interface loopback 255
+    no shutdown
+    ip address 77.255.7.7 255.255.255.255
+	exit
+	
+  ip prefix-list PL_88.1.0.0/22 seq 10 permit 88.1.0.0/22 le 24
+
+  router bgp 7
+    bgp router-id 77.255.7.7
+    no bgp default ipv4-unicast
+    neighbor 88.255.8.8 remote-as 8
+	neighbor 88.255.8.8 update-source lo255
+	neighbor 88.255.8.8 ebgp-multihop 2
+	neighbor 30.255.6.6 remote-as 1000.1000
+	neighbor 30.255.6.6 update-source lo255
+	neighbor 30.255.6.6 ttl-security hops 254
+	neighbor 30.255.6.6 password cisco
+	
+	
+	address-family ipv4 unicast
+	  neighbor 88.255.8.8 activate
+	  neighbor 30.255.6.6 activate
+	  
+	  neighbor 77.255.7.7 capability orf prefix-list send
+	  neighbor 77.255.7.7 prefix-list PL_88.1.0.0/22 in
+	  
+	  network 77.1.1.0 mask 255.255.255.0
+	  network 77.1.2.0 mask 255.255.255.0
+	  network 77.1.3.0 mask 255.255.255.0
+	  network 77.1.4.0 mask 255.255.255.0
+	  network 77.1.5.0 mask 255.255.255.0
+	  network 77.1.6.0 mask 255.255.255.0
+	  network 77.1.7.0 mask 255.255.255.0
+	  network 77.1.8.0 mask 255.255.255.0
+	  network 77.1.9.0 mask 255.255.255.0
+	  network 77.1.10.0 mask 255.255.255.0
+	  network 77.255.255.0 mask 255.255.255.252
+	  network 88.255.255.0 mask 255.255.255.252
+end
+
+******************************************************************	  
+R8
+------------------------------------------------------------
+configure terminal
+  hostname R8
+  no ip domain-lookup
+  
+  line console 0
+    logging synchronous
+  exit
+  
+  ip route 77.255.7.7 255.255.255.255 88.255.255.2
+  ip route 100.255.10.10 255.255.255.255 100.255.255.1
+  
+  interface g1/0
+    no shutdown
+    ip address 88.255.255.1 255.255.255.252
+	
+	exit
+  interface g0/0
+    ip address 100.255.255.2 255.255.255.252
+    
+    no shutdown
+    exit
+  interface loopback 1
+    no shutdown 
+    ip address 88.1.1.1 255.255.255.0
+	
+    exit
+  interface loopback 2
+    no shutdown 
+    ip address 88.1.2.1 255.255.255.0
+	
+    exit
+  interface loopback 3
+    no shutdown 
+    ip address 88.1.3.1 255.255.255.0
+	
+    exit
+  interface loopback 4
+    no shutdown 
+    ip address 88.1.4.1 255.255.255.0
+	
+    exit
+  interface loopback 5
+    no shutdown 
+    ip address 88.1.5.1 255.255.255.0
+	
+    exit
+  interface loopback 6
+    no shutdown 
+    ip address 88.1.6.1 255.255.255.0
+	
+    exit
+  interface loopback 7
+    no shutdown 
+    ip address 88.1.7.1 255.255.255.0
+	
+    exit
+  interface loopback 8
+    no shutdown 
+    ip address 88.1.8.1 255.255.255.0
+	
+    exit
+  interface loopback 9
+    no shutdown 
+    ip address 88.1.9.1 255.255.255.0
+	
+    exit
+  interface loopback 10
+    no shutdown 
+    ip address 88.1.10.1 255.255.255.0
+	
+    exit	
+  interface loopback 255
+    no shutdown
+    ip address 88.255.8.8 255.255.255.255	
+    exit
+
+  router bgp 8
+    bgp router-id 88.255.8.8
+    no bgp default ipv4-unicast
+    neighbor 77.255.7.7 remote-as 7
+	neighbor 77.255.7.7 update-source lo255
+	neighbor 77.255.7.7 ebgp-multihop 2
+	neighbor 100.255.10.10 remote-as 10
+	neighbor 100.255.10.10 update-source lo255
+	neighbor 100.255.10.10 ebgp-multihop 2
+	
+	address-family ipv4 unicast
+	  neighbor 77.255.7.7 activate
+	  neighbor 100.255.10.10 activate
+	 
+	  network 88.1.1.0 mask 255.255.255.0
+	  network 88.1.2.0 mask 255.255.255.0
+	  network 88.1.3.0 mask 255.255.255.0
+	  network 88.1.4.0 mask 255.255.255.0
+	  network 88.1.5.0 mask 255.255.255.0
+	  network 88.1.6.0 mask 255.255.255.0
+	  network 88.1.7.0 mask 255.255.255.0
+	  network 88.1.8.0 mask 255.255.255.0
+	  network 88.1.9.0 mask 255.255.255.0
+	  network 88.1.10.0 mask 255.255.255.0
+	  network 77.255.255.0 mask 255.255.255.252
+	  network 100.255.255.0 mask 255.255.255.252
+exit
+
+******************************************************************	  
+R9
+------------------------------------------------------------
+configure terminal
+  hostname R9
+  no ip domain-lookup
+  
+  line console 0
+    logging synchronous
+    exit
+  
+  interface g3/0
+    no shutdown
+    ip address 99.255.255.13 255.255.255.252
+    exit
+  interface g1/0
+    no shutdown
+    ip address 99.255.255.9 255.255.255.252
+	exit
+  interface g0/0
+    ip address 99.255.255.1 255.255.255.252
+    no shutdown
+    exit
+  interface loopback 1
+    no shutdown 
+    ip address 99.9.1.1 255.255.255.0
+	
+    exit
+  interface loopback 2
+    no shutdown 
+    ip address 99.9.2.1 255.255.255.0
+	
+    exit
+  interface loopback 3
+    no shutdown 
+    ip address 99.9.3.1 255.255.255.0
+	
+    exit
+  interface loopback 4
+    no shutdown 
+    ip address 99.9.4.1 255.255.255.0
+	
+    exit
+  interface loopback 5
+    no shutdown 
+    ip address 99.9.5.1 255.255.255.0
+	
+    exit
+  interface loopback 6
+    no shutdown 
+    ip address 99.9.6.1 255.255.255.0
+	
+    exit
+  interface loopback 7
+    no shutdown 
+    ip address 99.9.7.1 255.255.255.0
+	
+    exit
+  interface loopback 8
+    no shutdown 
+    ip address 99.9.8.1 255.255.255.0
+	
+    exit
+  interface loopback 9
+    no shutdown 
+    ip address 99.9.9.1 255.255.255.0
+	
+    exit
+  interface loopback 10
+    no shutdown 
+    ip address 99.9.10.1 255.255.255.0
+	
+    exit	
+  interface loopback 255
+    no shutdown
+    ip address 99.255.9.9 255.255.255.255	
+exit
+
+ip route 30.255.1.1 255.255.255.255 99.255.255.10
+ip route 30.255.3.3 255.255.255.255 99.255.255.14
+ip route 100.255.10.10 255.255.255.255 99.255.255.2
+
+  router bgp 9
+    bgp router-id 99.255.9.9
+    no bgp default ipv4-unicast
+    neighbor 30.255.1.1 remote-as 1000.1000
+	neighbor 30.255.1.1 update-source lo255
+	neighbor 30.255.1.1 ttl-security hops 254
+	neighbor 30.255.1.1 password cisco
+	neighbor 30.255.3.3 remote-as 1000.1000
+	neighbor 30.255.3.3 update-source lo255
+	neighbor 30.255.3.3 ttl-security hops 254
+	neighbor 30.255.3.3 password cisco
+	neighbor 100.255.10.10 remote-as 10
+	neighbor 100.255.10.10 update-source lo255
+	neighbor 100.255.10.10 ebgp-multihop 2
+	
+	
+	address-family ipv4 unicast
+	  neighbor 30.255.1.1 activate
+	  neighbor 30.255.3.3 activate
+	  neighbor 100.255.10.10 activate
+	  
+	  network 99.9.1.0 mask 255.255.255.0
+	  network 99.9.2.0 mask 255.255.255.0
+	  network 99.9.3.0 mask 255.255.255.0
+	  network 99.9.4.0 mask 255.255.255.0
+	  network 99.9.5.0 mask 255.255.255.0
+	  network 99.9.6.0 mask 255.255.255.0
+	  network 99.9.7.0 mask 255.255.255.0
+	  network 99.9.8.0 mask 255.255.255.0
+	  network 99.9.9.0 mask 255.255.255.0
+	  network 99.9.10.0 mask 255.255.255.0
+	  network 99.255.255.12 mask 255.255.255.252
+	  network 99.255.255.8 mask 255.255.255.252
+	  network 99.255.250.0 mask 255.255.255.252
+	  
+******************************************************************	  
+R10
+------------------------------------------------------------
+configure terminal
+  hostname R10
+  no ip domain-lookup
+  ip route 99.255.9.9 255.255.255.255 99.255.255.1
+  ip route 88.255.8.8 255.255.255.255 100.255.255.2
+  
+  line console 0
+    logging synchronous
+    exit
+  
+  interface g1/0
+    no shutdown
+    ip address 99.255.255.2 255.255.255.252
+	
+	exit
+  interface g0/0
+    ip address 100.255.255.1 255.255.255.252
+    no shutdown
+    exit
+  interface loopback 1
+    no shutdown 
+    ip address 100.1.1.1 255.255.255.0
+	
+    exit
+  interface loopback 2
+    no shutdown 
+    ip address 100.1.2.1 255.255.255.0
+	
+    exit
+  interface loopback 3
+    no shutdown 
+    ip address 100.1.3.1 255.255.255.0
+	
+    exit
+  interface loopback 4
+    no shutdown 
+    ip address 100.1.4.1 255.255.255.0
+	
+    exit
+  interface loopback 5
+    no shutdown 
+    ip address 100.1.5.1 255.255.255.0
+	
+    exit
+  interface loopback 6
+    no shutdown 
+    ip address 100.1.6.1 255.255.255.0
+	
+    exit
+  interface loopback 7
+    no shutdown 
+    ip address 100.1.7.1 255.255.255.0
+	
+    exit
+  interface loopback 8
+    no shutdown 
+    ip address 100.1.8.1 255.255.255.0
+	
+    exit
+  interface loopback 9
+    no shutdown 
+    ip address 100.1.9.1 255.255.255.0
+	
+    exit
+  interface loopback 10
+    no shutdown 
+    ip address 100.1.10.1 255.255.255.0
+	
+    exit	
+  interface loopback 255
+    no shutdown
+    ip address 100.255.10.10 255.255.255.255
+    exit
+
+  router bgp 10
+    bgp router-id 100.255.10.10
+    no bgp default ipv4-unicast
+    
+    template peer-session TPS_EBGP
+      update-source lo255
+      ebgp-multihop 2
+    exit-peer-session
+    
+    template peer-session TPS_EBGP_AS9
+      inherit peer-session TPS_EBGP
+      remote-as 9
+    exit-peer-session
+    
+    template peer-session TPS_EBGP_AS8
+      inherit peer-session TPS_EBGP
+      remote-as 8
+    exit-peer-session
+    
+    template peer-policy TPP_EBGP
+      send-community both
+    exit-peer-policy
+    
+    neighbor 88.255.8.8 inherit peer-session TPS_EBGP_AS8
+    neighbor 99.255.9.9 inherit peer-session TPS_EBGP_AS9
+	
+	address-family ipv4 unicast
+	  neighbor 99.255.9.9 activate
+	  neighbor 88.255.8.8 activate
+	  
+	  neighbor 99.255.9.9 inherit peer-policy TPP_EBGP
+	  neighbor 88.255.8.8 inherit peer-policy TPP_EBGP
+	  
+	  network 100.1.1.0 mask 255.255.255.0
+	  network 100.1.2.0 mask 255.255.255.0
+	  network 100.1.3.0 mask 255.255.255.0
+	  network 100.1.4.0 mask 255.255.255.0
+	  network 100.1.5.0 mask 255.255.255.0
+	  network 100.1.6.0 mask 255.255.255.0
+	  network 100.1.7.0 mask 255.255.255.0
+	  network 100.1.8.0 mask 255.255.255.0
+	  network 100.1.9.0 mask 255.255.255.0
+	  network 100.1.10.0 mask 255.255.255.0
+end
+
+******************************************************************	  
+R11
+------------------------------------------------------------
+configure terminal
+  hostname R11
+  no ip domain-lookup
+  
+  line console 0
+    logging synchronous
+    exit
+  
+  interface g2/0
+    no shutdown
+    ip address 30.255.113.2 255.255.255.252
+    ip ospf 11 area 0
+    exit
+  interface g1/0
+    no shutdown
+    ip address 30.255.114.2 255.255.255.252
+	ip ospf 11 area 0
+	exit
+  interface g0/0
+    ip address 30.255.112.2 255.255.255.252
+    ip ospf 11 area 0
+    no shutdown
+    exit
+  interface g3/0
+    ip address 30.255.115.2 255.255.255.252
+    ip ospf 11 area 0
+    no shutdown
+    exit
+  interface loopback 1
+    no shutdown 
+    ip address 30.11.1.1 255.255.255.0
+	ip ospf 11 area 11
+    exit
+  interface loopback 2
+    no shutdown 
+    ip address 30.11.2.1 255.255.255.0
+	ip ospf 11 area 11
+    exit
+  interface loopback 3
+    no shutdown 
+    ip address 30.11.3.1 255.255.255.0
+	ip ospf 11 area 11
+    exit
+  interface loopback 4
+    no shutdown 
+    ip address 30.11.4.1 255.255.255.0
+	ip ospf 11 area 11
+    exit
+  interface loopback 5
+    no shutdown 
+    ip address 30.11.5.1 255.255.255.0
+	ip ospf 11 area 11
+    exit
+  interface loopback 6
+    no shutdown 
+    ip address 30.11.6.1 255.255.255.0
+	ip ospf 11 area 11
+    exit
+  interface loopback 7
+    no shutdown 
+    ip address 30.11.7.1 255.255.255.0
+	ip ospf 11 area 11
+    exit
+  interface loopback 8
+    no shutdown 
+    ip address 30.11.8.1 255.255.255.0
+	ip ospf 11 area 11
+    exit
+  interface loopback 9
+    no shutdown 
+    ip address 30.11.9.1 255.255.255.0
+	ip ospf 11 area 11
+    exit
+  interface loopback 10
+    no shutdown 
+    ip address 30.11.10.1 255.255.255.0
+	ip ospf 11 area 11
+    exit	
+  interface loopback 255
+    no shutdown
+    ip address 30.255.11.11 255.255.255.255	
+    ip ospf 11 area 0
+    exit
+    
+    
+    
+  router bgp 1000.1000
+    bgp router-id 30.255.11.11
+    no bgp default ipv4-unicast
+    
+    template peer-session TPS_IBGP
+      remote-as 1000.1000
+      update-source lo255
+    exit-peer-session
+    template peer-policy TPP_IBGP
+      send-community both
+    exit-peer-policy
+	
+   neighbor 30.255.3.3 inherit peer-session TPS_IBGP
+   neighbor 30.255.4.4 inherit peer-session TPS_IBGP
+   neighbor 30.255.5.5 inherit peer-session TPS_IBGP
+   neighbor 30.255.2.2 inherit peer-session TPS_IBGP
+      
+	address-family ipv4 unicast
+	 neighbor 30.255.2.2 activate
+	 neighbor 30.255.3.3 activate
+	 neighbor 30.255.5.5 activate
+	 neighbor 30.255.4.4 activate
+	 
+	 neighbor 30.255.3.3 inherit peer-policy TPP_IBGP
+     neighbor 30.255.4.4 inherit peer-policy TPP_IBGP
+     neighbor 30.255.5.5 inherit peer-policy TPP_IBGP
+     neighbor 30.255.2.2 inherit peer-policy TPP_IBGP
+	
+	  network 30.11.1.0 mask 255.255.255.0
+	  network 30.11.2.0 mask 255.255.255.0
+	  network 30.11.3.0 mask 255.255.255.0
+	  network 30.11.4.0 mask 255.255.255.0
+	  network 30.11.5.0 mask 255.255.255.0
+	  network 30.11.6.0 mask 255.255.255.0
+	  network 30.11.7.0 mask 255.255.255.0
+	  network 30.11.8.0 mask 255.255.255.0
+	  network 30.11.9.0 mask 255.255.255.0
+	  network 30.11.10.0 mask 255.255.255.0
+	  
+******************************************************************	  

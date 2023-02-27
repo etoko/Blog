@@ -45,6 +45,7 @@
         <li><a href="#MAXIMUM_PREFIX">Maximum Prefix</a></li>
           <li><a href="#DEFAULT_ROUTE">Default Route Propagation</a></li>
       </ol>
+    <li><a href="#TROUBLESHOOTING">Troubleshooting BGP</a></li>  
   </ol>
   
 <h1 id="INTRODUCTION">Introduction</h1>
@@ -1169,7 +1170,8 @@ If the <code style="font-size:120%"><b>update-source</b></code> command is issue
 then, for eBGP sessions, the TTL must be increased from one (1) to 
 a higher value (two in this case).
 
-eBGP sessions use a TTL of one for BGP packets as a security measure. This default 
+eBGP sessions use a TTL of one for BGP packets to ensure that the peers are directly 
+connected and do not use a different path to form their peering. This default 
 behaviour prevents multihop eBGP sessions that could be necessary when providers 
 would like to peer via loopback addresses. This requires changing the TTL on 
 BGP packets between eBGP peers. To change the TTL for multihop eBGP 
@@ -1567,6 +1569,10 @@ match the TTL count from a trusted peer is impossible unless the trusted peer
 has been compromised.
 </p>
 <p>
+When the command <code style="font-size:120%"><b>ttl-security hops</b></code> is configured, BGP messages 
+have their TTL values set to 255.
+</p>
+<p>
 TTL security check supports both directly connected neighbor sessions and multihop eBGP
 neighbor sessions. The BGP neighbor session is not affected by incoming packets that contain invalid TTL
 values. The BGP neighbor session will remain open, and the router will silently discard the invalid packet.
@@ -1667,6 +1673,15 @@ R8(config-router)#<b>no neighbor 7.7.7.7 ebgp-multihop 2  </b> <br>
 R8(config-router)#<b>neighbor 7.7.7.7 ttl-security hops 2 </b> <br>
 </code></div>
 
+<p>
+To further leverage the security features of TTL-security, the value of the 
+<code style="font-size:120%"><b>ttl-security hops</b></code> can be set to the maximum i.e. 255. This 
+value should be the same on both eBGP peers. The packets sent to each of the eBGP 
+peers will have a value of 254. No unauthorised external device will be able to 
+send BGP messages with such TTL values. A TTL of 255 ensures that both eBGP 
+neighbors are directly connected.
+</p>
+
 <h2>First ASN in path must be neighbor's ASN</h2>
 <p>
 The BGP command <code style="font-size:120%"><b>bgp enforce-first-as</b></code> 
@@ -1674,6 +1689,7 @@ The BGP command <code style="font-size:120%"><b>bgp enforce-first-as</b></code>
 added layer of security to BGP. For additional BGP security, see security 
 section.
 </p>
+
 
 <h1 id="BGP_VERIFICATION">Verification of BGP</h1>
 <p>
@@ -2407,7 +2423,11 @@ and Adj-RIB-out tables.
 Loc-RIB is used by BGP to present routes to the IP routing table. It contains 
 NLRI for prefixes locally originated or received from other peers. After the 
 NLRI passes validity and next-hop reachability checks, the BGP best path algorithm 
-selects the best NLRI for a specific prefix.
+selects the best NLRI for a specific prefix. Prefixes received from iBGP peers 
+have the label of "i" (the first "i" appearing immediately before the prefix.).
+Prefixes received from eBGP peers do not have the label "i". It is important to 
+note that a prefix originated in another AS but received from an iBGP peer 
+receives the label "i" as it was received from an iBGP peer.
 </p>
 
 <p>
@@ -4269,6 +4289,7 @@ to route reflector clients. The RR does not modify other attributes when reflect
 routes.
 The BGP device that is receiving reflected prefixes is referred to as a <b>route reflector client(RRC)</b>. 
 A route reflector will not modify the next-hop ip address for the routes that are advertised from iBGP peers.
+In more recent BGP designs, the RR is not included in the data path.
 Route reflectors are guided by three rules:
 <ol>
   <li><b>Rule 1: </b>If route reflector receives a prefix from a BGP peer that 
@@ -4282,9 +4303,11 @@ Route reflectors are guided by three rules:
  clients. <i>Note:</i> this update will also be sent to eBGP peers.</li> 
 </ol>
 The placement of the RR in the topology should be guided by these rules.
-
 </p>
+
 <p>
+The operation of route reflectors (RR) in effect ignore the iBGP split horizon 
+rule.
 BGP Route reflection is a BGP policy command and so it is configured under the 
 address-family and is configured only on route reflector devices with the 
 address-family command <code style="font-size:120%"><b>neighbor &lt;ip-address | peer-group-name&gt; 
@@ -4599,6 +4622,13 @@ RR is not in the data path. The selective RIB download feature can be considered
   <li>It is implemented using the BGP command <code style="font-size:120%"><b>table-map [route-map] filter</b></code>.
   <li>Scales to 20m+ VPNv4 routes.</li>
 </ul>
+</p>
+
+<h3>Route Reflector Use Cases</h3>
+<p>
+The scaling of BGP topologies using RR can be carried out always. This is the 
+recommended method of scaling iBGP. In hub and spoke topologies, the hub is a 
+suitable candidate for configuration as a route reflectorbgp.
 </p>
 
 <h2 id="CONFEDERATIONS">Confederations</h2>
@@ -5011,6 +5041,20 @@ Paths: (2 available, best #1, table default)                               <br>
 R3(config-router)#                                                                                     
 </code></div>
 
+<h3>BGP Confederation Use Cases</h3>
+<p>
+Implementation of BGP confederations should be considered under extra-ordinary 
+circumstances as its configuration results in the dropping of existing peer 
+sessions. The potential scenarios under which confederations could be 
+implemented include the following:
+<ul>
+  <li>Company aquisitions or mergers.</li>
+  <li>Distributed autonomous control i.e., where the single AS is sub-divided into 
+  based on department, geography and each sub-AS has its own administrative 
+  unit.</li>
+</ul>
+</p>
+
 <h2 id="COMMUNITIES">BGP Communities</h2>
 <p>
 BGP communities are an optional transitive BGP attribute that can traverse from 
@@ -5087,7 +5131,7 @@ To set communities in a route-map, use the command <code style="font-size:120%">
 Setting of BGP communities values is not additive by default. BGP community values 
 can be deleted by setting to value to <code style="font-size:120%"><b>none</b></code> in a route-map.
 </p>
-<h3>Matching communities</h3>
+<h3>Matching communities using Community Lists</h3>
 <p>
 BGP community values can be matched through the use of a community list. A community 
 list can be configured through the following steps:
@@ -5109,6 +5153,25 @@ list can be configured through the following steps:
 </ol>
 </p>
 
+<p>
+Matching using community lists adds to the extensive flexibility of BGP. For example 
+if a prefix has several communities, and the requirement is to delete the "no-export"  
+community from the list of communities in the path attribute;
+<ol>
+  <li>Configure a community list: <code style="font-size:120%"><b>ip community list 1 permit no-export</b></code></li>
+  <li>Match the community in a route-map: <code style="font-size:120%"><b>match ip address prefix-list PL_XYZ<br>
+  set comm-list 1 delete</b></code></li>
+</ol>
+</p>
+<p>
+If you use the <code style="font-size:120%"><b>set community &lt;value&gt;</b></code>, all community 
+values are removed. To maintain existing communities and then add new communities, 
+use the additive keyword to append the new community values while maintaining 
+any existing values. If no previous community values exist, the new community 
+values are still added.
+</p>
+
+<h3>Sending BGP Communities</h3>
 <p>
 BGP communities can be appended, removed, or modified selectively on each 
 attribute as a prefix is advertised from device to device. Additionally, one 
@@ -5581,6 +5644,7 @@ the peer-group's individual members:
   <li><b>Route-filtering using route-maps, distribute-lists and filter-lists.</b>
 </ol>
 Peer groups can be verified using the command <code style="font-size:120%"><b>show ip bgp update-group</b></code>.
+If BGP peers share the same policy, then they are put in the same update-group. 
 </p>
 <h3>Troubleshooting Peer Groups</h3>
 <p>
@@ -5596,7 +5660,19 @@ When troubleshooting peer group issues, you need to take note of the following:
 
 <h2 id="PEER_TEMPLATES">Peer Templates</h2>
 <p>
-BGP peer templates are BGP configurations that can be applied to one or more BGP peers. 
+BGP peer templates are BGP configurations that can be applied to one or more BGP peers.
+BGP configurations can be categorized as session commands and policy commands.
+<ul>
+   <li><b>Session commands:</b> 
+   <ul>
+     <li>Affect the TCP session between BGP peers.</li>
+     <li>Can be global or per address family.</li>
+   </ul>
+   <li><b>Policy commands:</b>
+     <ul>
+       <li>Are per address family.</li>
+     </ul>
+</ul>
 BGP peer templates can inherit configurations from other peer templates.
 If a conflict exists between an inherited configuration and the invoking
 peer template, the invoking template preempts the inherited value.
@@ -5607,9 +5683,9 @@ templates.
 
 <h3>Peer session</h3> 
 <p>
-This type of template involves configuration settings specifically for the BGP session.
+Peer sessions can be used to implement BGP session configurations on a BGP session.
 Peer session templates are used to group and apply the configuration of general 
-BGP session commands to groups of neighbors that share session configuration. 
+BGP session commands to peers that should have same session configuration. 
 Peer session templates can be applied regardless of address families of the neighbors.
 </p>
 <p>
@@ -5667,7 +5743,7 @@ R6#
 
 <h4>Verification of Peer Sessions</h4>
 <p>
-Configured peer sessions can be viewed using the command <code><b>show bgp ipv4 
+Configured peer sessions can be viewed using the command <code style="font-size:120%"><b>show bgp ipv4 
 unicast template peer-session</b></code>. The following output shows an example of a the 
 details of a configured peer session template.
 </p>
@@ -5868,6 +5944,10 @@ TCP Semaphore      0x6B259A44  FREE                                             
 R6#                                                                                               <br>                             
 </code></div>
 
+<p>
+All BGP peers that inherit the same peer policy template are placed in the same 
+update-group.
+</p>
 
 
 <h2 id="SUMMARIZATION">Route Summarization</h2>
@@ -6458,16 +6538,74 @@ RPKI validation codes: V valid, I invalid, N Not found                          
 &nbsp;                                                                                <br>
 Total number of prefixes 36                                                      <br>
 </code></div>
-<h4>Extended ACLs</h4>
+<h4>Extended Access Control Lists (ACLs)</h4>
 <p>
-Filtering using extended ACLs in BGP behave differently from the way they do in 
+Extended ACLs provide extensive filtering capability that is comparable to 
+prefix-lists. Filtering using extended ACLs in BGP behave differently from the way they do in 
 OSPF or EIGRP; the destination section of the extended ACL maps to the prefix 
 and the source section of the ACL maps to the subnet mask.
+The general structure of an extended ACL is: <code style="font-size:120%"><b>&lt;sequence&gt; &lt;permit|deny&gt; 
+&lt;protocol&gt; &lt;source-ip&gt; &lt;source-mask&gt; &lt;destination-ip&gt; 
+&lt;destination-mask&gt; </b></code>. 
+When applying an extended ACL to BGP, it can be interpreted as follows:
+<code style="font-size:120%"><b>&lt;sequence&gt; &lt;permit|deny&gt; 
+&lt;protocol&gt; &lt;prefix&gt; &lt;mask-to-desired-section-of-prefix&gt; 
+&lt;prefix-length&gt; &lt;mask-to-desired-section-of-prefix&gt; </b></code>. 
+The source mask can be used to match specific 
+section of the IP address. The destination mask can be used to match a specific 
+section of the subnet mask.
+
 For example, given the following prefix 100.100.100.0/24; to filter a prefix that 
 begins with exactly 100.100 higher order bits, and the prefix length is 16-bits 
 or greater, we permit the entry and block everything else:
 <code style="font-size:120%"><b>#access-list 100 permit ip 100.100.0.0 0.0.255.255 255.255.0.0 0.0.255.255</b></code>.
 </p>
+<p>
+When matching using standard acls, we match only the source address and source mask. 
+The destination part of the extended ACL matches against the netmask.
+When used for BGP filtering, whatever is the source part of the address is matched 
+against the prefix and the destination is matched against the netmask.
+</p>
+<p>
+Given the following prefixes; 
+<ul>
+  <li>30.1.1.0/24, 30.1.2.0/24, ...,30.1.10.0/24,...</li>
+  <li>30.2.1.0/24, 30.2.2.0/24, ...,30.2.10.0/24,...</li>
+  <li>30.3.1.0/24, 30.3.2.0/24, ...,30.3.10.0/24,...</li>
+  <li>30.4.1.0/24, 30.4.2.0/24, ...,30.4.10.0/24,...</li>
+  <li>30.5.1.0/24, 30.5.2.0/24, ...,30.5.10.0/24,...</li>
+  <li>30.6.1.0/24, 30.6.2.0/24, ...,30.6.10.0/24,...</li>
+</ul>
+Aggregate prefixes can be configured with a subnet mask of 16 and advertised 
+externally (out of the autonomous system) but the component prefixes are advertised
+internally. The extended access-list that can be configured to accomplish this 
+goal is: <code><b>10 permit 0.0.0.0 255.255.0.0 host 255.255.0.0</b></code>.
+The first two octets of the prefix and subnet mask are matched. This extended 
+ACL can then be applied using a distribute-list.
+</p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+<code style="font-size:120%">
+R7><b>show bgp ipv4 unicast neighbor 30.255.6.6 routes</b>                             <br>
+BGP table version is 513, local router ID is 77.255.7.7                         <br>
+Status codes: s suppressed, d damped, h history, * valid, > best, i - internal, <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;r RIB-failure, S Stale, m multipath, b backup-path, f RT-Filter,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;x best-external, a additional-path, c RIB-compressed, <br>
+Origin codes: i - IGP, e - EGP, ? - incomplete                            <br>
+RPKI validation codes: V valid, I invalid, N Not found                    <br>
+                                                                           <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Network&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Next Hop&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Metric LocPrf Weight Path        <br>
+&nbsp;*>&nbsp;&nbsp;30.1.0.0/16&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;30.255.6.6&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65537000 i  <br>
+&nbsp;*>&nbsp;&nbsp;30.2.0.0/16&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;30.255.6.6&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65537000 i  <br>
+&nbsp;*>&nbsp;&nbsp;30.3.0.0/16&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;30.255.6.6&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65537000 i  <br>
+&nbsp;*>&nbsp;&nbsp;30.4.0.0/16&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;30.255.6.6&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65537000 i  <br>
+&nbsp;*>&nbsp;&nbsp;30.5.0.0/16&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;30.255.6.6&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65537000 i  <br>
+&nbsp;*>&nbsp;&nbsp;30.6.0.0/16&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;30.255.6.6&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65537000 i  <br>
+&nbsp;*>&nbsp;&nbsp;30.255.0.0/16&nbsp;&nbsp;&nbsp;&nbsp;30.255.6.6&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 65537000 i  <br>
+                                                                           <br>
+Total number of prefixes 7                                                 <br>
+R7>
+</code></div>
+
 <h3>Prefix-List</h3>
 <p>
 Prefix-lists allow the filtering of network prefixes on a neighbor-by-neighbor 
@@ -7563,7 +7701,7 @@ Additionally, warning messages are issued after the number of received prefixes 
 A warning is not generated before the prefix limit is reached. By adding a warning percentage, 
 you can have a warning message sent when the percentage is exceeded. The maximum prefix 
 behavior of closing the BGP session can be changed by using the optional keyword 
-<code><b>warning-only</b></code> so that a warning message is generated instead. 
+<code style="font-size:120%"><b>warning-only</b></code> so that a warning message is generated instead. 
 When the threshold has been reached, additional prefixes are discarded.
 
 </p>
@@ -7606,7 +7744,7 @@ To optimize CPU utilization by BGP, consider the following:
 <h3>Tuning Memory</h3>
 <p>
 To view memory usage by BGP, use these commands 
-<code><b>show ip bgp summary, show ip route summary. show processes memory sorted | i PID|BGP
+<code style="font-size:120%"><b>show ip bgp summary, show ip route summary. show processes memory sorted | i PID|BGP
 </b></code>.
 To tune memory consumption, consider the implementation of the following features:
 <ul>
@@ -7637,11 +7775,14 @@ A default route can be propagated to a BGP peer using the <code style="font-size
 keyword of the BGP <code style="font-size:120%;"><b>neighbor</b></code> command. An optional route-map 
 can be added to the command. This route-map can be used to configure the conditions
 that must exist before the default route can be propagated to the neighbor.
+This default route has an administrative distance of 200 if configured for an
+iBGP peer and 20 for an eBGP peer.
 </p>
 <p>
 If a local static default route has been configured, it will be inserted into 
 the BGP table in preference to the BGP propagated default route because a static 
-route has a lower administrative distance (of one) than the BGP AD.
+route has a lower administrative distance (of one) than the iBGP administrative 
+distance of 200.
 </p>
 
 <h2>Route Flap Dampening</h2>
@@ -7769,7 +7910,7 @@ penalty is 6000 - suppress limit is easily reached
 <h4>Selective and variable dampening</h4>
 <p>
 Selective dampening can be based on AS-PATH, Communities and Prefixes.
-A route-map is referenced by the <code><b>bgp dampening</b></code> command. 
+A route-map is referenced by the <code style="font-size:120%"><b>bgp dampening</b></code> command. 
 <ul>
   <li><b>Define the route-map and set the values for the route dampening:</b> 
     <ul>
@@ -7778,7 +7919,7 @@ A route-map is referenced by the <code><b>bgp dampening</b></code> command.
       <li><code style="font-size:120%"><b>
       set dampening &lt;half-life&gt; &lt;reuse-value&gt; &lt;suppress-penalty&gt; &lt;maximum suppress time&gt;</b></code></li>
       </ul>
-  <li>Reference the route-map in the command <code><b>bgp dampening</b></code>: 
+  <li>Reference the route-map in the command <code style="font-size:120%"><b>bgp dampening</b></code>: 
 		bgp dampening [route-map &lt;name&gt;]   
 </ul>
 </p>
@@ -7825,6 +7966,20 @@ for each neighbor with the command:
 using the command:
 <code style="font-size:120%"><b>show bgp ipv4 unicast neighbors &lt;ip_address&gt;</b></code>
 </p>
+<p>
+For peering using a loopback interface, the IP address or network of the loopback 
+interface should be in the routing table of the eBGP peer. In production networks, 
+usually a static route is configured. Scenarious exist where an IGP is configured 
+between eBGP peers. Here, the IP address of the loopback interface is advertised 
+into the IGP. This will result in the peer session between the two prefixes to 
+flap as the eBGP route (with AD of 20) is installed into the routing table. 
+This results in the IGP route (with its higher AD) not being installed into the 
+RIB. However, as the IGP route is not in the RIB, the eBGP route is again 
+removed because it is not in the RIB. One solution to this is to advertise the 
+IP address loopback of the loopback with the added keyword <code style="font-size:120%"><b>backdoor</b></code>.
+For example <code style="font-size:120%"><b>network 192.168.0.1 mask 255.255.255.255 backdoor</b></code>.
+</p>
+
 <h2>Miscellaneous Neighbor Options</h2>
 <h3><code style="font-size:120%;">log-neighbor-changes</code></h3>
 <p>
@@ -7852,9 +8007,24 @@ route reflection, and BGP confederations.
 
 
 
-<h1>Troubleshooting BGP</h1>
-<h2>Troubleshooting BGP Neighborship Failure</h2>
+<h1 id="TROUBLESHOOTING">Troubleshooting BGP</h1>
+<h2 id="TROUBLESHOOTING_PEERINGS">BGP Peerings</h2>
 <p>
+Some commands that can be used to verify the state of BGP peerings include:
+<ul>
+  <li><code style="font-size:120%"><b>show bgp ipv4 unicast summary</b></code>: view the state of the 
+  neighborship</li>
+  <li><code style="font-size:120%"><b>ping</b></code>: test end to end connectivity using the correct 
+  source interface.</li>
+  <li><code style="font-size:120%"><b>debug ip bgp</b></code>
+  <li><code style="font-size:120%"><b>debug ip packet detail &lt;acl&gt;</b></code>
+</ul>
+
+</p>
+
+<h2>BGP Neighborship Failure</h2>
+<p>
+
 The following are some of the reasons a BGP neighbor relationship might not form:
 <ul>
   <li><b>Interface is down: </b> The interface through-which the connection to the remote peer is made must be physically 
