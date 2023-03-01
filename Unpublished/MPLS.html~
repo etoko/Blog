@@ -1,24 +1,76 @@
-<h1>MPLS</h1>
+<h1>Configuring MPLS in Cisco IOS</h1>
+
+<h1>Introduction</h1>
 <p>
-Is a service provider technology but is also used by enterprises. It is also 
-used to replace dedicated serial lines to interconnect separate offices.
+Multiprotocol Label Switching (MPLS) is a service provider packet forwarding technique for
+routing customer traffic between different customer sites such as between the head quarters and
+branches or traffic between the various branches.
+
+MPLS is a service provider technology but is also used by enterprises. It is also 
+used to replace legacy connectivity technologies of branch offices such as ATM 
+circuits, frame relay circuits, dedicated serial lines to interconnect separate 
+offices. Can also be used inside enterprises to separate traffic between different 
+business units using MPLS VPNs.
+ MPLS supports many layer 3 protocols including
+IP multicasts,unicasts and VPN.
+All routers in an MPLS-domain are known as Label Switched Routers (LSRs) with ingress
+edge LSRs at the entry point where customer traffic enters the MPLS domain through the provide
+edge (PE)and egress edge LSR at the exit-end of the MPLS domain where customer traffic leaves
+the MPLS provider network and enters the other end of the customer network. An MPLS-enabled
+router can act as both an ingress and egress LSR to the same customer traffic or different customer
+traffic. Intermediate LSRs are in the middle of the MPLS domain.
+
+Label Switched Path (LSP) is the complete path that the labelled packet will take through the
+MPLS domain (unidirectional). LSP uses the path built by the interior routing protocol.
+
+By default, MPLS traffic will follow the same path as regular IP traffic would. This is because MPLS
+uses the routing table to create paths through which to switch the labels. By default, all routes in
+the routing table (RIB) i.e. static, connected, and routing protocol learned routes will have a label
+assigned.
+
+The MPLS data plane is concerned with how MPLS traffic is forwarded in, out and through the
+MPLS network. The control-plane deals with how labels are assigned and exchanged. Label
+Distribution Protocol (LDP) which is used for label exchange between LSRs operates at the control
+plane of MPLS. Other label exchange protocols include TDP, BGP, RSVP, STATIC.
+
+When a packet arrives at an ingress LSR, the Label Forwarding Information Base (LFIB) is
+consulted and the exit interface and label number is determined.
+
+When operating MPLS, it should never be run on client / customer-end of a connection unless the
+client is another ISP.
 </p>
+
 <p>
 MPLS is globally enabled. MPLS is supported on almost all Cisco routers.
 By default, MPLS traffic follows the same path as regular IP traffic would.
-By default, all IGP routes will have a label assigned.
+By default, all IGP routes (connected, static, IGP) will have a label assigned.
+
+MPLS forwarding reduces the lookup process by all routers in the path of a packet.
 </p>
 <p>
-MPLS consists of: 
+MPLS consists of the MPLS data plane and the control plane: 
 <ul>
-<li><b>MPLS data plane:</b> how MPLS traffic is forwarded in, out and throughout the MPLS 
-network</li>
-<li><b>Control plane:</b> deals with how the labels are assigned and exchanged in the MPLS 
-network.</li>
+<li><b>MPLS data plane:</b> how MPLS traffic is forwarded in, out and throughout
+the MPLS network.</li>
+<li><b>Control plane:</b> deals with how the labels are assigned and exchanged 
+in the MPLS network.</li>
 </ul>
 </p>
 
-<h2>MPLS Data Plane</h2>
+<h2>Need for MPLS</h2>
+<p>
+  <ul>
+    <li>Without MPLS, customer sites would have to run BGP and interconnect with the 
+    BGP in the service provider network.</li>
+    <li>
+  </ul>
+</p>
+<p>
+MPLS is like an overlay that exchanges packets. Labels are assigned to specific 
+networks. These labels are advertised into the MPLS network. 
+</p>
+
+<h1>MPLS Data Plane</h1>
 <h3>Terms used in MPLS</h3>
 <p>
 Assumption is that the MPLS control-plane is fully functional.
@@ -32,6 +84,809 @@ Assumption is that the MPLS control-plane is fully functional.
 </p>
 <p>
 When an incoming IP packet enters the ingress LSR, a lookup is done in the 
-Label Forwarding Information Base(LFIB). The LFIB contains  
+Label Forwarding Information Base(LFIB). The LFIB contains information on how 
+the label gets switched. In the LFIB table, labels have an exit router and interface.
+For example, given a label B, the destination is R2 and exit interface is g1/0 
+with the label 53. The packet is then forwarded out the appropriate interface to
+R2. In R2, the LFIB contains 53, destination R3 and exit interface G2/0 with 
+label 71. When transmitting this packet, R2 will strip label 53 and replace it 
+with label 71.
 
+<ol>
+  <li>At the ingress edge LSR, R1, a push operation takes place where the label i
+  s pushed onto the stack; a label is added to an IP packet without a label.</li>
+  <li>Swap: top most label is swapped</li>
+  <li><b>Pop:</b> top most label is removed from the stack.</li>
+  <li><b>Delete:</b> entire label stack is destroyed on the packet.</li>
+  <li><b>Penultimate Hop Popping (PHP):</b> the egress LSR, communicates with the 
+  penultimate LSR using an implicit null label. This results in the penultimate 
+  LSR removing the label and sending an IP packet to the egress LSR.</li>
+  
+</ol>
+</p>
+
+
+
+
+<h2>MPLS Labels</h2>
+<p>
+A label is a shim header inserted between the layer 2 and layer 3 headers of an IP packet. It is 4
+bytes (32 bits) in size with 20 bits used for the Label number or ID, 3 bits – EXP for QoS
+operations, 1 bit – S bit to indicate if a label is the last in a stack, 8 bits for TTL. The label in the
+label stack that is nearest to the Layer 3 header has a S-bit set to one (1). When inserting a new
+label, a push operation takes place. MPLS Label operations include the following;
+<ul>
+<li><b>Push:</b> a label is pushed onto the label stack.</li>
+<li><b>Swap:</b> The top-most label is swapped</li>
+<li><b>Pop:</b> The top-most label is removed from the stack.</li>
+<li><b>Delete:</b> The entire label stack is destroyed on the packet (resulting in a need for the packet to be
+routed using IP).</li>
+</ul>
+
+MPLS labels are assigned with a Label ID in the range 16 – 65,536. MPLS labels IDs 1-15 are
+reserved. In MPLS Layer 3 VPN (L3VPN), for a directly connected network, the symbol [V] is
+assigned next to the locally generated label to indicate that the label is a VPN label and not a
+transport label. This label is advertised to the PE LSR at the other end of the L3VPN using BGP
+(the BGP neighbor).
+
+Labels are dynamically generated and assigned for every known network by each LSR
+independently of the other LSRs. The source of the known networks is the RIB (Routing
+Information Base). This information is converted into a Layer 2 data structure by Cisco Express
+Forwarding (CEF). You can view this data structure by running the command #show ip cef. A
+directly connected network is assigned the label ID 3 which is also known as an implicit null (impl-
+null).
+
+Two or more routers can use the same label number for the same network or different networks
+without problems to the operation of MPLS.
+</p>
+
+
+<h2>How Labels are Assigned</h2>
+<p>
+Data structures utilised by MPLS include; RIB, FIB(CEF), LIB, and LFIB (label 
+forwarding information base).
+The LIB can be viewed using the command <code><b>show mpls ldp bindings</b></code>.
+If using BGP, <code><b>show ip bgp labels</b></code>. To view the LFIB, issue the 
+command <code><b>show mpls forwarding-table</b></code>. To view the entire database, 
+show ip cef. FIB and LFIB are subsets of the same CEF table. To view the FIB table,
+use the command <code><b>show ip cef</b></code>.
+</p>
+<p>
+Information from the RIB is fed into the FIB. This contains additionally, layer 2
+to layer 3 mappings such as ARP tables, frame relay maps etc. The LIB contains 
+data from the RIB and label exchange protocols such as LDP, TDP, BGP, RSVP or 
+static labels. The data from the LFIB is sourced from the LIB, RIB and FIB.
+The FIB and LFIB are sourced from CEF.
+</p>
+<p>
+For MPLS to function, the IP network must be operational. MPLS will operate with 
+any routing protocol(including static routes) in the network. MPLS can operate 
+with RIP, OSPF, EIGRP etc. If running MPLS with BGP, an IGP needs to be 
+configured in the network. A router assigns a locally significant label for all 
+connected prefixes and those learned from another routing protocol. The router 
+will learn the downstream router's local label and store that label as a remote 
+label. The local router contains a table 
+</p> 
+
+
+
+
+<h1>Label Exchange Protocols</h1>
+<p>
+LDP and TDP are label exchange protocols. LDP is label distribution protocol and 
+TDP is tag distribution protocol. Tag is the old name used by Cisco for labels.
+Tag is Cisco properietary. The operation of TDP and LDP is identical. They 
+share the same databases. 
+IETF adapted LDP based on TDP. The LDP port numbers are 646/UDp and 646 TCP. 
+For TDP, the ports are 711 UDP and 711 TCP. 
+LDP supports authentication whiile TDP does not support authentication.
+</p>
+<p>
+To enable LDP, 
+
+under the interface, configure <code><b>mpls ip</b></code>.
+
+A Hello is sent with the source being the exit interface IP address. The destination 
+is 224.0.0.2 (all router's multicast address). The other LSR sends the same Hello.
+Whena router R1 receives a neighbor R2's Hello message, R1 sends a Hello messsage to  
+R2 containing R2's ID. Unlike OSPF, the LDP ID is an actual routable IP address.
+This address must be reachable. A deterministic TCP session is initiated between 
+the two LSRs. The TCP session is initiated by the LSR with the higher ID.
+
+The port number used by the two LSRs, is UDP 646.
+
+For TCP connections, the source IP address is the LDP ID and the port number is 
+random. The destination is the LDP ID and the port number is 646. The reason for 
+having the TCP session is that the two LSRs may have multiple interconnecting links 
+through which hello messages are sent. This helps with preventing multiple sessions.
+
+
+</p>
+
+
+<h2>Label Distribution Protocol (LDP)</h2>
+<p>
+Label Distribution Protocol (LDP) is used to exchange labels with connected/neighboring Label
+Switched Routers (LSRs). Label information is used to populate the Label Information Base (LIB).
+
+An LSR that is connected to an egress LSR is known as a penultimate hop. When a penultimate
+hop receives a packet with a Label ID of 3 (implicit-null) from the egress LSR, it is a signal that the
+penultimate hop should remove the MPLS label before forwarding the packet to that egress LSR
+(ultimate) using IP routing. This process, known commonly as Penultimate Hop Popping
+(PHP), avoids two lookups; the MPLS label lookup in the Label Information Base (LIB) and the
+route look-up from the routing table.
+
+Another protocol used for label exchange is Tag Distribution Protocol (TDP). TDP and LDP are
+nearly identical utilising the same tables. Though they use different transport protocol port
+numbers with LDP using TCP and UDP port 646. TDP uses TCP and UDP port 711. Another
+difference between the two label distribution protocols is that LDP supports authentication and
+TDP does not.
+
+To change protocol from using LDP to TDP;
+
+LSR(config)#mpls ip
+LSR(config)#interface gigabitethernet1/1
+LSR(config-if)#mpls label protocol tdp
+
+It is technically possible to have both TDP and LDP operating in different sections of an MPLS
+domain and label switching will still take place.
+</p>
+<h3>LDP Sessions</h3>
+<p>
+When MPLS is enabled on an LSR and on an interface, LSR Hello messages start being sent out
+this interface. LDP hellos are sent to the all-routers multicast address 224.0.0.2 using UDP port
+646. The source IP address is the IP address of the exit interface and the destination port of this
+message is UDP 646.
+
+After the exchange of LDP hellos, LSRs form TCP sessions with each other using port 646. LDP
+Hello packets contain the LDP ID. The router with a higher LDP ID becomes the active router and
+initiates the TCP connection.
+
+When forming LDP neighborships, it is recommended to configure IP addresses on loopback
+interfaces because they are always up. MPLS, by default, uses the highest IP address of a loopback
+interface as the LSR ID. It is important to note that when an IP address of a loopback interface is
+used as an ID, this IP addresses should be reachable from a neighboring LSR or else no
+neighborship can be formed. An IGP should, therefore, advertise the IP addresses on the loopback
+interfaces for MPLS to fully function.
+
+The LDP ID can also be explicitly selected using the global config command;
+
+mpls ldp router-id interface force
+
+The LDP Hello packet header contains the LDP version, LSR ID, common hello parameters such as
+hold time; which is usually 15 seconds. The LSR ID must be reachable as it will be used in the
+establishment of the TCP session between neighboring LSRs. The LSR with the higher LSR ID
+becomes the Active LSR i.e. it initiates the TCP session. To form the TCP session, the source IP
+address (of the active/initiating LSR) is the LSR ID and TCP port is ephemeral (1025 – 65,535), the
+destination IP address is the neighboring LSR’s LSR ID and port is 646. Only one TCP session is
+formed between two LSRs regardless of the number of connections between them. IOS uses
+unsolicited exchange of labels with liberal retention. Neighbor LSRs exchange the contents of their
+locally-assigned labels, Liberal retention implies that an LSR keeps label information that it does
+not use/need for example, a downstream LSR receiving a label for a further downstream route
+from an upstream LSR.
+
+The LFIB table is built from Routing Information Base (RIB), Forwarding Information Base (FIB)
+and Label Information Base (LIB) tables. On egress edge LSR, a connected network has no LFIB
+entry. It uses IP for normal routing. LSRs that have formed a TCP session periodically send
+keepalive messages to maintain the session. By default, these keepalive messages are sent every 60
+seconds on Gigabit-Ethernet interfaces.
+</p>
+
+<h3>Building the MPLS Domain</h3>
+<p>
+MPLS runs with any routing protocol, though, Interior Gateway Protocols (IGPs) specifically link-
+state routing protocols such as OSPF and IS-IS are recommended for optimum operation. MPLS is
+as fast as the convergence of routing protocols.
+
+A layer 2 data structure i.e. CEF FIB is a representation of the routing table. When MPLS is
+enabled, entries are made to the CEF table. Disabling CEF on a router breaks MPLS because labels
+are assigned to every entry in the CEF table.
+
+From a client Cisco IOS device, to show the use of MPLS for packet switching, run the traceroute
+command to a destination on the other end of an MPLS network.
+
+During label switching, local labels are not used to make switching decisions. They are used by
+downstream LSR.
+</p>
+
+<h3>Configuration</h3>
+<p>
+
+
+MPLS has the following prerequisites;
+
+Fully operational IP routing
+
+IP CEF
+
+Label exchange on interfaces using a protocol such as LDP or TDP.
+
+The following configuration makes the safe assumption that IP routing has been enabled in the
+network and that the IGP has fully converged. In the following examples, OSPF has been enabled
+on all the routers with the exception of routers R1 and R8 which as assumed to be customer-edge
+(CE) routers.
+
+Steps for configuring MPLS;
+
+Step 1: Enable IP CEF. The distributed keyword is optional
+
+LSR(config)#ip cef distributed
+
+Step Enable MPLS globally
+2:
+
+LSR(config)#mpls ip
+
+Step Enable LDP
+3:
+
+LSR(config-intf)#mpls label protocol ldp
+
+Step (Optional) Configure the LSR ID.
+4:
+
+By default, it is the ip address of the highest loopback interface address
+
+#mpls ldp router-id interface force
+
+Step 5: (Optional)Define a label range.
+
+Tip: Try to configure the label range so that the source LSR is instantly recognisable
+for example, on LSR R1 the range can be 100 -199, R2 &rarr; 200 – 299 etc
+
+#mpls label range low – high
+
+Step Enable MPLS on given interfaces:
+6:
+
+#mpls ip
+
+The configuration snippets are based on the following network;
+
+Configuration edge LSR R7, the following configuration activates MPLS on interfaces
+GigabitEthernet 2/0, GigabitEthernet 3/0 and FastEthernet6/0.
+
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+      	<code style="font-size:120%">
+R7(config)#ip cef                               <br>
+R7(config)#mpls ip                              <br>
+R7(config)#mpls label protocol ldp              <br>
+R7(config)#mpls label range 7000 7999           <br>
+R7(config)#mpls ldp router-id Loopback10 force  <br>
+R7(config)#interface gigabitethernet 3/0        <br>
+R7(config-if)#mpls ip                           <br>
+R7(config-if)#interface gigabitethernet 2/0     <br>
+R7(config-if)#mpls ip                           <br>
+R7(config-if)#interface fastethernet 6/0        <br>
+R7(config-if)#mpls ip
+</code></div>
+
+OSPF and IS-IS (link-state protocols) support the activation of MPLS from within the routing
+protocol configuration. In OSPF router configuration mode, this is accomplished using the
+command;
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+      	<code style="font-size:120%">
+#mpls ldp autoconfig
+</code></div>
+
+Note that setting the label range on an LSR that has an active TCP session with another LSR will
+not take effect. To change the label range; first disable LDP on the interface , change the label
+range , then enable MPLS on the interface. However, if MPLS was enabled through the routing
+protocol, then disabling ldp in the interface with the interface sub-mode command #no mpls ip
+will return the following message;
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+      	<code style="font-size:120%">
+R7(config)#interface g2/0                                               <br>
+R7(config-if)#no mpls ip                                                <br>
+%LDP remains enabled on interface Gi2/0 by autoconfig.                  <br>
+Autoconfig can be removed from Gi2/0 with 'no mpls ldp igp autoconfig.' <br>
+R7(config-if)#
+</code></div>
+
+As indicated in the message, to completely disable LDP on such interfaces, issue the following
+command in interface sub-mode;
+
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+      	<code style="font-size:120%">
+R7(config-if)#interface g2/0                        <br>
+R7(config-if)#no mpls ldp igp autoconfig            <br>
+R7(config-if)#exit                                  <br>
+R7(config)#                                         <br>
+R7(config)#mpls ip                                  <br>
+R7(config)#mpls label protocol ldp                  <br>
+R7(config)#mpls label range 7000 7999               <br>
+R7(config)#mpls ldp router-id loopaback10 force     <br>
+R7(config)#interface g2/0                           <br>
+R7(config-if)#mpls ip
+</code></div>
+</p>
+
+<h3>Authentication</h3>
+<p>
+LDP supports authentication and by default, MD5 is used to hash the password. To configure
+authentication;
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+      	<code style="font-size:120%">
+R7(config)#mpls ip                                          <br>
+R7(config)#mpls ldp neighbor 4.4.4.4 password simplesimple  <br>
+%4.4.4.4 is the LDP ID for R4 neighboring R7                <br>
+</code></div>
+To force password requirement;
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+      	<code style="font-size:120%">
+R7(config)#mpls ip <br>
+R7(config)#mpls ldp pass required
+</code></div>
+
+Configuration of authentication on one end of an active LDP session may not take down the TCP
+session between the neighbors on some versions of IOS. To reset the LDP session and force the
+authentication reequirement, run the following command;
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+      	<code style="font-size:120%">
+R7#clear mpls ldp neighbor *
+</code></div>
+LDP neighbors that do not have authentication configured will result in the following log
+messages.
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+      	<code style="font-size:120%">
+R7#                                                                                      <br>
+*Feb  8 01:32:46.594: %TCP-6-BADAUTH: No MD5 digest from 4.4.4.4(646) to 7.7.7.7(53621)  <br>
+tableid - 0                                                                              <br>
+R7#configure te                                                                          <br>
+*Feb  8 01:32:48.466: %TCP-6-BADAUTH: No MD5 digest from 4.4.4.4(646) to 7.7.7.7(53621)  <br>
+tableid - 0                                                                              <br>
+*Feb  8 01:32:48.466: %TCP-6-BADAUTH: No MD5 digest from 4.4.4.4(646) to 7.7.7.7(53621)  <br>
+tableid - 0
+R7#
+</code></div>
+
+</p>
+
+<h3>Verification</h3>
+<p>
+To view CEF entries, use the command; #show ip cef 192.168.1.0
+
+To view the MPLS control plane (Label #show mpls ldp bindings
+Information Base table)
+
+To view MPLS interfaces #show mpls interfaces
+
+To view neighboring LSRs. The optional #show mpls ldp neighbor detail
+‘detail’ shows authentication information.
+
+
+To show the Label Forwarding Information #show mpls forwarding-table
+Base. Command can also be used to view the
+number of packets switched by MPLS. (Label
+Forwarding Information Base – LFIB). This
+table displays the LDP, TDP receive labels. ‘No
+Label’ indicates removal of all labels.
+
+Show RIB Show ip route
+
+To display the CEF table #show ip cef
+
+To view LDP Hellos and troubleshoot LDP #show mpls ldp discovery
+operation. If interface shows xmit, then the
+LSR neighbor relationship has a problem. It
+should be xmit/recv
+
+To confirm MPLS is used in label switching. Traceroute destination_ipaddr
+Labels used, EXP configured and PHP action source_ipaddr / interface
+is displayed.
+</p>
+
+<h3>To Display LDP configuration parameters</h3>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+      	<code style="font-size:120%">
+R2#show mpls ldp parameters                                       <br>
+LDP Feature Set Manager: State Initialized                        <br>
+  LDP features:                                                   <br>
+    Basic                                                         <br>
+    IP-over-MPLS                                                  <br>
+    TDP                                                           <br>
+    IGP-Sync                                                      <br>
+    Auto-Configuration                                            <br>
+    TCP-MD5-Rollover                                              <br>
+Protocol version: 1                                               <br>
+Session hold time: 180 sec; keep alive interval: 60 sec           <br>
+Discovery hello: holdtime: 15 sec; interval: 5 sec                <br>
+Discovery targeted hello: holdtime: 90 sec; interval: 10 sec      <br>
+Downstream on Demand max hop count: 255                           <br>
+LDP for targeted sessions                                         <br>
+LDP initial/maximum backoff: 15/120 sec                           <br>
+LDP loop detection: off                                           <br>
+R2#
+</code></div>
+
+<h4>Interfaces: Per-interface MPLS forwarding information</h4>
+<p>
+R7#
+R7#show mpls interface
+Interface              IP            Tunnel   BGP Static Operational
+
+
+
+GigabitEthernet2/0     Yes (ldp)     No       No  No     Yes
+GigabitEthernet3/0     Yes (ldp)     No       No  No     Yes
+FastEthernet6/0        Yes (ldp)     No       No  No     Yes
+R7#
+R7#
+
+</p>
+
+<h2>To view the FIB</h2>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+      	<code style="font-size:120%">
+R2#show ip cef
+Prefix               Next Hop             Interface
+0.0.0.0/0            no route
+0.0.0.0/8            drop
+0.0.0.0/32           receive
+2.2.2.2/32           receive              Loopback10
+3.3.3.3/32           10.10.23.2           GigabitEthernet0/0
+4.4.4.4/32           10.10.23.2           GigabitEthernet0/0
+5.5.5.5/32           10.10.23.2           GigabitEthernet0/0
+6.6.6.6/32           10.10.23.2           GigabitEthernet0/0
+7.7.7.7/32           10.10.23.2           GigabitEthernet0/0
+10.10.12.0/30        attached             GigabitEthernet3/0
+10.10.12.0/32        receive              GigabitEthernet3/0
+10.10.12.1/32        attached             GigabitEthernet3/0
+10.10.12.2/32        receive              GigabitEthernet3/0
+10.10.12.3/32        receive              GigabitEthernet3/0
+10.10.23.0/30        attached             GigabitEthernet0/0
+10.10.23.0/32        receive              GigabitEthernet0/0
+10.10.23.1/32        receive              GigabitEthernet0/0
+10.10.23.2/32        attached             GigabitEthernet0/0
+10.10.23.3/32        receive              GigabitEthernet0/0
+10.10.25.0/30        attached             Serial5/0
+10.10.25.0/32        receive              Serial5/0
+10.10.25.1/32        receive              Serial5/0
+10.10.25.3/32        receive              Serial5/0
+10.10.26.0/30        attached             GigabitEthernet2/0
+10.10.26.0/32        receive              GigabitEthernet2/0
+10.10.26.1/32        receive              GigabitEthernet2/0
+10.10.26.2/32        attached             GigabitEthernet2/0
+10.10.26.3/32        receive              GigabitEthernet2/0
+10.10.34.0/30        10.10.23.2           GigabitEthernet0/0
+10.10.36.0/30        10.10.23.2           GigabitEthernet0/0
+10.10.47.0/30        10.10.23.2           GigabitEthernet0/0
+10.10.57.0/30        10.10.23.2           GigabitEthernet0/0
+10.10.67.0/30        10.10.23.2           GigabitEthernet0/0
+10.10.78.0/30        10.10.23.2           GigabitEthernet0/0
+127.0.0.0/8          drop
+224.0.0.0/4          drop
+224.0.0.0/24         receive
+240.0.0.0/4          drop
+255.255.255.255/32   receive
+R2#
+R2#show ip cef 10.10.78.0 detail
+10.10.78.0/30, epoch 0
+  local label info: global/2010
+  nexthop 10.10.23.2 GigabitEthernet0/0 label 3011
+</code></div>
+
+<h2>To show the Label Forwarding Table</h2>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+      	<code style="font-size:120%">
+R2#
+R2#show mpls forwarding-table                                               <br>
+Local      Outgoing   Prefix           Bytes Label   Outgoing   Next Hop    <br>
+Label      Label      or Tunnel Id     Switched      interface              <br>
+2000       Pop Label  10.10.34.0/30    0             Gi0/0      10.10.23.2  <br>
+2001       Pop Label  10.10.36.0/30    0             Gi0/0      10.10.23.2  <br>
+2002       3004       10.10.47.0/30    0             Gi0/0      10.10.23.2  <br>
+2003       3005       10.10.57.0/30    0             Gi0/0      10.10.23.2  <br>
+2004       3006       10.10.67.0/30    0             Gi0/0      10.10.23.2  <br>
+2005       3001       7.7.7.7/32       0             Gi0/0      10.10.23.2  <br>
+2006       Pop Label  3.3.3.3/32       0             Gi0/0      10.10.23.2  <br>
+2007       3007       4.4.4.4/32       0             Gi0/0      10.10.23.2  <br>
+2008       3008       6.6.6.6/32       0             Gi0/0      10.10.23.2  <br>
+2009       3009       5.5.5.5/32       0             Gi0/0      10.10.23.2  <br>
+2010       3011       10.10.78.0/30    0             Gi0/0      10.10.23.2  <br>
+R2#
+R2#
+</code></div>
+
+<h2>Traceroute</h2>
+<p>
+To verify operation of MPLS, issue a traceroute from R1 to R8
+</p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+      	<code style="font-size:120%">
+R1#traceroute 10.10.78.2                                              <br>
+Type escape sequence to abort.                                        <br>
+Tracing the route to 10.10.78.2                                       <br>
+VRF info: (vrf in name/id, vrf out name/id)                           <br>
+  1 10.10.12.2 456 msec 708 msec 200 msec                             <br>
+  2 10.10.23.2 [MPLS: Label 3011 Exp 0] 324 msec 108 msec 1380 msec   <br>
+  3 10.10.34.2 [MPLS: Label 4012 Exp 0] 612 msec 1008 msec 508 msec   <br>
+  4 10.10.47.2 816 msec 708 msec 152 msec                             <br>
+  5 10.10.78.2 712 msec 624 msec 632 msec
+</code></div>
+<p>
+To hide MPLS details from display in a traceroute command,
+</p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+      	<code style="font-size:120%">
+R2(config)#no mpls ip propagate-ttl local
+</code></div>
+<p>
+The result;
+</p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+      	<code style="font-size:120%">
+R1#traceroute 10.10.78.2                        <br>
+Type escape sequence to abort.                  <br>
+Tracing the route to 10.10.78.2                 <br>
+VRF info: (vrf in name/id, vrf out name/id)     <br>
+  1 10.10.12.2 20 msec 320 msec 420 msec        <br>
+  2 10.10.47.2 1224 msec 992 msec 584 msec      <br>
+  3 10.10.78.2 808 msec 684 msec 788 msec       <br>
+R1#
+</code></div>
+<p>
+The command: R2(config)#no mpls ip propagate-ttl local|forwarded|cir The local
+keyword implies locally generated traffic. The forwarded keyword applies to transit traffic. CIR
+applies to both. The forwarded option is mostly configured in service provider networks.
+
+At the penultimate LSR, CEF does not show a label. #show mpls ldp binding shows ‘impl-
+null’ label and mpls forwarding-table displays ‘Pop label’
+
+By default, the Layer 3 TTL value of a packet is copied to the MPLS header TTL section.
+</p>
+
+<h2>LDP Binding</h2>
+<p>
+ Show the LDP Label Information Base (LIB)
+</p>
+
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+      	<code style="font-size:120%">
+R2#show mpls ldp binding                                                     <br>
+  lib entry: 2.2.2.2/32, rev 2                                               <br>
+        local binding:  label: imp-null                                      <br>
+        remote binding: lsr: 3.3.3.3:0, label: 3000                          <br>
+        remote binding: lsr: 6.6.6.6:0, label: 6000                          <br>
+        remote binding: lsr: 5.5.5.5:0, label: 5000                          <br>
+  lib entry: 3.3.3.3/32, rev 22                                              <br>
+        local binding:  label: 2006                                          <br>
+        remote binding: lsr: 3.3.3.3:0, label: imp-null                      <br>
+        remote binding: lsr: 6.6.6.6:0, label: 6001                          <br>
+        remote binding: lsr: 5.5.5.5:0, label: 5001                          <br>
+  lib entry: 4.4.4.4/32, rev 24                                              <br>
+        local binding:  label: 2007                                          <br>
+        remote binding: lsr: 3.3.3.3:0, label: 3007                          <br>
+        remote binding: lsr: 6.6.6.6:0, label: 6002                          <br>
+        remote binding: lsr: 5.5.5.5:0, label: 5002                          <br>
+  lib entry: 5.5.5.5/32, rev 28                                              <br>
+        local binding:  label: 2009                                          <br>
+        remote binding: lsr: 3.3.3.3:0, label: 3009                          <br>
+        remote binding: lsr: 6.6.6.6:0, label: 6009                          <br>
+        remote binding: lsr: 5.5.5.5:0, label: imp-null                      <br>
+  lib entry: 6.6.6.6/32, rev 26                                              <br>
+        local binding:  label: 2008                                          <br>
+        remote binding: lsr: 3.3.3.3:0, label: 3008                          <br>
+        remote binding: lsr: 6.6.6.6:0, label: imp-null                      <br>
+        remote binding: lsr: 5.5.5.5:0, label: 5003                          <br>
+  lib entry: 7.7.7.7/32, rev 20                                              <br>
+        local binding:  label: 2005                                          <br>
+        remote binding: lsr: 3.3.3.3:0, label: 3001                          <br>
+        remote binding: lsr: 6.6.6.6:0, label: 6003                          <br>
+        remote binding: lsr: 5.5.5.5:0, label: 5004                          <br>
+  lib entry: 10.10.12.0/30, rev 34                                           <br>
+        local binding:  label: imp-null                                      <br>
+        remote binding: lsr: 3.3.3.3:0, label: 3010                          <br>
+        remote binding: lsr: 6.6.6.6:0, label: 6010                          <br>
+        remote binding: lsr: 5.5.5.5:0, label: 5011                          <br>
+  lib entry: 10.10.23.0/30, rev 4                                            <br>
+        local binding:  label: imp-null                                      <br>
+        remote binding: lsr: 3.3.3.3:0, label: imp-null                      <br>
+        remote binding: lsr: 6.6.6.6:0, label: 6004                          <br>
+        remote binding: lsr: 5.5.5.5:0, label: 5005                          <br>
+  lib entry: 10.10.25.0/30, rev 32                                           <br>
+        local binding:  label: imp-null                                      <br>
+        remote binding: lsr: 3.3.3.3:0, label: 3002                          <br>
+        remote binding: lsr: 6.6.6.6:0, label: 6005                          <br>
+        remote binding: lsr: 5.5.5.5:0, label: imp-null                      <br>
+  lib entry: 10.10.26.0/30, rev 8                                            <br>
+        local binding:  label: imp-null                                      <br>
+        remote binding: lsr: 3.3.3.3:0, label: 3003                          <br>
+        remote binding: lsr: 6.6.6.6:0, label: imp-null                      <br>
+        remote binding: lsr: 5.5.5.5:0, label: 5006                          <br>
+  lib entry: 10.10.34.0/30, rev 10                                           <br>
+        local binding:  label: 2000                                          <br>
+        remote binding: lsr: 3.3.3.3:0, label: imp-null                      <br>
+        remote binding: lsr: 6.6.6.6:0, label: 6006                          <br>
+        remote binding: lsr: 5.5.5.5:0, label: 5007                          <br>
+  lib entry: 10.10.36.0/30, rev 12                                           <br>
+        local binding:  label: 2001                                          <br>
+        remote binding: lsr: 3.3.3.3:0, label: imp-null                      <br>
+        remote binding: lsr: 6.6.6.6:0, label: imp-null                      <br>
+        remote binding: lsr: 5.5.5.5:0, label: 5008                          <br>
+  lib entry: 10.10.47.0/30, rev 14                                           <br>
+        local binding:  label: 2002                                          <br>
+        remote binding: lsr: 3.3.3.3:0, label: 3004                          <br>
+        remote binding: lsr: 6.6.6.6:0, label: 6007                          <br>
+        remote binding: lsr: 5.5.5.5:0, label: 5009                          <br>
+  lib entry: 10.10.57.0/30, rev 16                                           <br>
+        local binding:  label: 2003                                          <br>
+        remote binding: lsr: 3.3.3.3:0, label: 3005                          <br>
+        remote binding: lsr: 6.6.6.6:0, label: 6008                          <br>
+        remote binding: lsr: 5.5.5.5:0, label: imp-null                      <br>
+  lib entry: 10.10.67.0/30, rev 18                                           <br>
+        local binding:  label: 2004                                          <br>
+        remote binding: lsr: 3.3.3.3:0, label: 3006                          <br>
+        remote binding: lsr: 6.6.6.6:0, label: imp-null                      <br>
+        remote binding: lsr: 5.5.5.5:0, label: 5010                          <br>
+  lib entry: 10.10.78.0/30, rev 36                                           <br>
+        local binding:  label: 2010                                          <br>
+        remote binding: lsr: 3.3.3.3:0, label: 3011                          <br>
+        remote binding: lsr: 6.6.6.6:0, label: 6011                          <br>
+        remote binding: lsr: 5.5.5.5:0, label: 5012                          <br>
+R2#                                                                          <br>
+</code></div>
+
+<h2>LDP Discovery</h2>
+<p>
+ Display sources for locally generated LDP Discovery Hello
+</p>
+
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+      	<code style="font-size:120%">
+R2#
+R2#show mpls ldp discovery
+ Local LDP Identifier:
+    2.2.2.2:0
+    Discovery Sources:
+    Interfaces:
+        GigabitEthernet0/0 (ldp): xmit/recv
+            LDP Id: 3.3.3.3:0
+        GigabitEthernet2/0 (ldp): xmit/recv
+            LDP Id: 6.6.6.6:0
+        Serial5/0 (ldp): xmit/recv
+            LDP Id: 5.5.5.5:0
+R2#
+</code></div>
+
+<h2>LDP Neighbors</h2>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+      	<code style="font-size:120%">
+R2#show mpls ldp neighbor                                                        <br>
+    Peer LDP Ident: 3.3.3.3:0                                                    <br>                                                                       
+        No TCP connection; Downstream                                            <br>                                                                       
+        Up time: 00:17:48                                                        <br>                                                                       
+        Addresses bound to peer LDP Ident:                                       <br>                                                                       
+          10.10.23.2      10.10.34.1      10.10.36.1      3.3.3.3                <br>                                                                       
+    Peer LDP Ident: 6.6.6.6:0                                                    <br>                                                                       
+        No TCP connection; Downstream                                            <br>                                                                       
+        Up time: 00:17:38                                                        <br>                                                                       
+        Addresses bound to peer LDP Ident:                                       <br>                                                                       
+          10.10.26.2      10.10.36.2      10.10.67.1      6.6.6.6                <br>                                                                       
+    Peer LDP Ident: 5.5.5.5:0                                                    <br>                                                                       
+        No TCP connection; Downstream                                            <br>                                                                       
+        Up time: 00:17:21                                                        <br>                                                                       
+        Addresses bound to peer LDP Ident:                                       <br>                                                                       
+          10.10.57.1      5.5.5.5         10.10.25.2                             <br>                                                                       
+R2#                                                                              <br>                                                                       
+R2#show mpls ldp neighbor                                                        <br>
+*Feb  8 02:30:24.990: %LDP-5-NBRCHG: LDP Neighbor 3.3.3.3:0 (3) is UP            <br>                                                                      
+R2#show mpls ldp neighbor detail                                                 <br>                                                                       
+    Peer LDP Ident: 3.3.3.3:0                                                    <br>                                                                       
+        No TCP connection; Downstream; Last TIB rev sent -1                      <br>                                                                       
+        Up time: 00:17:50; UID: 38; Peer Id 3;                                   <br>                                                                       
+        Peer state: destroyed                                                    <br>                                                                       
+        Peer holdtime: 180000 ms; KA interval: 60000 ms; Peer state: destroyed   <br>                                                                       
+    Peer LDP Ident: 6.6.6.6:0                                                    <br>                                                                       
+        No TCP connection; Downstream; Last TIB rev sent -1                      <br>                                                                       
+        Up time: 00:17:41; UID: 39; Peer Id 0;                                   <br>                                                                       
+        Addresses bound to peer LDP Ident:                                       <br>                                                                       
+          10.10.26.2      10.10.36.2      10.10.67.1      6.6.6.6                <br>                                                                       
+        Peer state: destroyed                                                    <br>                                                                       
+        Peer holdtime: 180000 ms; KA interval: 60000 ms; Peer state: destroyed   <br>                                                                       
+    Peer LDP Ident: 5.5.5.5:0                                                    <br>                                                                       
+        No TCP connection; Downstream; Last TIB rev sent -1                      <br>                                                                       
+        Up time: 00:17:24; UID: 40; Peer Id 1;                                   <br>                                                                       
+        Addresses bound to peer LDP Ident:                                       <br>                                                                       
+          10.10.57.1      5.5.5.5         10.10.25.2                             <br>                                                                       
+        Peer state: destroyed                                                    <br>                                                                       
+        Peer holdtime: 180000 ms; KA interval: 60000 ms; Peer state: destroyed   <br>                                                                       
+    Peer LDP Ident: 3.3.3.3:0; Local LDP Ident 2.2.2.2:0                         <br>                                                                       
+        TCP connection: 3.3.3.3.12343 - 2.2.2.2.646                              <br>                                                                       
+        Password: not required, none, in use                                     <br>                                                                       
+        State: Oper; Msgs sent/rcvd: 19/19; Downstream; Last TIB rev sent 36     <br>                                                                       
+        Up time: 00:00:02; UID: 41; Peer Id 2;                                   <br>                                                                       
+        LDP discovery sources:                                                   <br>                                                                       
+          GigabitEthernet0/0; Src IP addr: 10.10.23.2                            <br>                                                                       
+            holdtime: 15000 ms, hello interval: 5000 ms                          <br>                                                                       
+        Addresses bound to peer LDP Ident:                                       <br>                                                                       
+          10.10.23.2      10.10.34.1      10.10.36.1      3.3.3.3                <br>                                                                       
+        Peer holdtime: 180000 ms; KA interval: 60000 ms; Peer state: estab       <br>                                                                       
+        Capabilities Sent:                                                       <br>                                                                       
+          [Dynamic Announcement (0x0506)]                                        <br>                                                                       
+          [Typed Wildcard (0x050B)]                                              <br>                                                                       
+        Capabilities Received:                                                   <br>                                                                       
+          [Dynamic Announcement (0x0506)]                                        <br>                                                                       
+          [Typed Wildcard (0x050B)]                                              <br>                                                                       
+R2#                                                                                                                                                      
+</code></div>
+
+<h1>Troubleshooting</h1>
+<p>
+When troubleshooting MPLS data plan traffic, follow the labels when running the traceroute
+command. If run from a customer to customer site, the first label is the transport label, the second
+label is the Layer 3 VPN (L3VPN) .
+
+A fast way of identifying where LDP is broken at the PE LSR is to run the command;
+#ping mpls ipv4 &lt;remote PE loopback&gt; source &lt;local loopback&gt; verbose
+</p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+      	<code style="font-size:120%">
+R2#ping mpls ipv4 7.7.7.7/32 source 2.2.2.2 verbose                                                      <br>
+Sending 5, 100-byte MPLS Echos to 7.7.7.7/32,                                                            <br>
+     timeout is 2 seconds, send interval is 0 msec:                                                      <br>
+                                                                                                         <br>
+Codes: '!' - success, 'Q' - request not sent, '.' - timeout,                                             <br>
+  'L' - labeled output interface, 'B' - unlabeled output interface,                                      <br>
+  'D' - DS Map mismatch, 'F' - no FEC mapping, 'f' - FEC mismatch,                                       <br>
+  'M' - malformed request, 'm' - unsupported tlvs, 'N' - no label entry,                                 <br>
+  'P' - no rx intf label prot, 'p' - premature termination of LSP,                                       <br>
+  'R' - transit router, 'I' - unknown upstream index,                                                    <br>
+  'X' - unknown return code, 'x' - return code 0                                                         <br>
+                                                                                                         <br>
+Type escape sequence to abort.                                                                           <br>
+!    size 100, reply addr 10.10.67.2, return code 3                                                      <br>
+                                                                                                         <br>
+*Feb  8 02:45:39.994: %LDP-5-NBRCHG: LDP Neighbor 3.3.3.3:0 (6) is DOWN (Received error                  <br>
+notification from peer: Holddown time expired)                                                           <br>
+*Feb  8 02:45:39.998: %LDP-5-NBRCHG: LDP Neighbor 5.5.5.5:0 (1) is DOWN (Received error                  <br>
+notification from peer: Holddown time expired)                                                           <br>
+*Feb  8 02:45:40.002: %LDP-5-NBRCHG: LDP Neighbor 6.6.6.6:0 (5) is DOWN (Received error                  <br>
+notification from peer: Holddown time expired)!    size 100, reply addr 10.10.67.2, return code 3        <br>
+Q    size 100                                                                                            <br>
+Q    size 100                                                                                            <br>
+Q    size 100                                                                                            <br>
+                                                                                                         <br>
+Success rate is 40 percent (2/5), round-trip min/avg/max = 744/1052/1360 ms                              <br>
+R2#                                                                                                      <br>
+*Feb  8 02:45:42.138: %LDP-5-NBRCHG: LDP Neighbor 5.5.5.5:0 (1) is UP                                    <br>
+*Feb  8 02:45:42.826: %LDP-5-NBRCHG: LDP Neighbor 3.3.3.3:0 (2) is UP                                    <br>
+R2#                                                                                                      <br>
+*Feb  8 02:45:44.166: %LDP-5-NBRCHG: LDP Neighbor 6.6.6.6:0 (3) is UP                                    <br>
+R2#                                                                                                      <br>
+R2#                                                                                                      <br>
+R2#                                                                                                      <br>
+R2#ping mpls ipv4 7.7.7.7/32 source 2.2.2.2 verbose                                                      <br>
+Sending 5, 100-byte MPLS Echos to 7.7.7.7/32,                                                            <br>
+     timeout is 2 seconds, send interval is 0 msec:                                                      <br>
+                                                                                                         <br>
+Codes: '!' - success, 'Q' - request not sent, '.' - timeout,                                             <br>
+  'L' - labeled output interface, 'B' - unlabeled output interface,                                      <br>
+  'D' - DS Map mismatch, 'F' - no FEC mapping, 'f' - FEC mismatch,                                       <br>
+  'M' - malformed request, 'm' - unsupported tlvs, 'N' - no label entry,                                 <br>
+  'P' - no rx intf label prot, 'p' - premature termination of LSP,                                       <br>
+  'R' - transit router, 'I' - unknown upstream index,                                                    <br>
+  'X' - unknown return code, 'x' - return code 0                                                         <br>
+                                                                                                         <br>
+Type escape sequence to abort.                                                                           <br>
+!    size 100, reply addr 10.10.67.2, return code 3                                                      <br>
+!    size 100, reply addr 10.10.67.2, return code 3                                                      <br>
+!    size 100, reply addr 10.10.67.2, return code 3                                                      <br>
+!    size 100, reply addr 10.10.67.2, return code 3                                                      <br>
+!    size 100, reply addr 10.10.67.2, return code 3                                                      <br>
+                                                                                                         <br>
+Success rate is 100 percent (5/5), round-trip min/avg/max = 148/463/1528 ms                              <br>
+R2#                                                                                                      <br>
+</code></div>
+
+A code ‘B’ indicates unlabelled output interface.
+
+To cause LDP to use a physical interface ip address instead of LDP ID, in interface mode) issue the
+following command;
+
+#mpls ldp discovery transport-address interface
+
+With the above command, the router ID (LDP ID) is the loopback but the TCP session uses the
+interface IP
 </p>
