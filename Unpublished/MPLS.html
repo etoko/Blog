@@ -1,21 +1,29 @@
-<h1>Configuring MPLS in Cisco IOS</h1>
-
-<h1>Introduction</h1>
+<h1>Configuring Basic MPLS in Cisco IOS</h1>
+<h1>Contents</h1>
 <p>
-Multiprotocol Label Switching (MPLS) is a service provider packet forwarding technique for
+  <ol>
+    <li><a href="#INTRODUCTION">Introduction</a></li>
+    <li>Label Exchange Protocols</li>
+  </ol>
+</p>
+
+
+<h1 id="INTRODUCTION">Introduction</h1>
+<p>
+Multiprotocol Label Switching (MPLS) is a service provider packet forwarding technology for
 routing customer traffic between different customer sites such as between the 
-headquarters and branches or traffic between the various branches. MPLS may also 
+enterprise headquarters and branches or between the various enterprise branches. MPLS may also 
 be used by enterprises to separate traffic between different business units using MPLS VPNs.
-MPLS was developed to replace legacy connectivity technologies to remote sites 
+MPLS was developed to replace legacy remote-site-connectivity technologies  
 such as ATM circuits, frame relay circuits, dedicated serial lines. 
  MPLS supports many layer 3 protocols including IP multicasts,unicasts and VPN.
 
 By default, MPLS traffic will follow the same path as regular IP traffic would. This is because MPLS
 uses the routing table to create paths through which to switch the labels. By default, all routes in
 the routing table (RIB) i.e. static, connected, and learned routes will have a label
-assigned.
-MPLS is like an overlay that exchanges packets. Labels are assigned to specific 
-networks. These labels are advertised into the MPLS network. 
+assigned. Labels are assigned to specific networks. These labels are advertised 
+into the MPLS network. MPLS operates like an overlay that attaches labels to 
+known networks.
 When operating MPLS, it should never be run on client / customer-end of a connection unless the
 client is another ISP.
 </p>
@@ -23,93 +31,131 @@ client is another ISP.
 <p>
 MPLS consists of the MPLS data plane and the control plane: 
 <ul>
-<li><b>MPLS data plane:</b> coordinates how MPLS traffic is forwarded in, out 
-and throughout the MPLS network.
-By default, MPLS traffic follows the same path as regular IP traffic would.
+<li><b>Data plane</b> coordinates how MPLS traffic is forwarded in, out 
+and throughout the MPLS network. By default, MPLS traffic follows the same path 
+as regular IP traffic.
 </li>
-<li><b>Control plane:</b> deals with how the labels are assigned and exchanged 
-in the MPLS network. Label Distribution Protocol (LDP) which is used for label 
-exchange between LSRs operates at the control plane of MPLS.</li>
+<li><b>Control plane</b> deals with how the labels are assigned and exchanged 
+in the MPLS network. Label Distribution Protocol (LDP) is the main open standard 
+protocol used for label exchange between LSRs and it operates at the control 
+plane of MPLS.</li>
 </ul>
 </p>
-
-<p>
-MPLS forwarding reduces the lookup process by all routers in the path of a packet.
- Other label exchange protocols include TDP, BGP, RSVP, STATIC.
-
-When a packet arrives at an ingress LSR, the Label Forwarding Information Base (LFIB) is
-consulted and the exit interface and label number is determined.
-</p>
-
-
 
 <h2>Need for MPLS</h2>
 <p>
   <ul>
-    <li>Without MPLS, customer sites would have to run BGP and interconnect with the 
-    BGP in the service provider network.</li>
+    <li>Without MPLS, customer sites would have to run eBGP sessions with the 
+    service provider network.</li>
     <li>MPLS is more cost effective than legacy remote site connectivty options 
     such as dedicated serial links, Frame relay etc.
   </ul>
 </p>
 
-<h1>MPLS Data Plane</h1>
+<h1 id="DATA_PLANE">Data Plane</h1>
 <p>
 All routers in an MPLS-domain are referred to as <b>Label Switched Routers (LSRs)</b>.
-<b>Ingress edge LSRs</b> are at the entry point where customer traffic enters 
-the MPLS domain through the <b>provider edge (PE) LSR</b>. The <b>egress edge LSR</b>
-is the LSR at the remote site of the customer; the exit-end of the MPLS domain 
-where customer traffic leaves the MPLS provider network towards the customer network. 
-An MPLS-enabled router can act as both an ingress and egress LSR to the same 
-customer traffic or different customer traffic. <b>Intermediate LSRs</b> are in the 
-middle of the MPLS domain.
-A <b>Label Switched Path (LSP)</b> is the complete path that the labeled packet
-will take through the MPLS domain (unidirectional). LSP uses the path built by 
-the interior routing protocol.
+<b>Ingress edge LSRs</b> are at the entry point of the MPLS domain where enterprise traffic enters 
+the MPLS domain through the <b>provider edge (PE) LSR</b>. The ingress LSR receives 
+an IP packet from the CE(customer-edge device) then adds an MPLS label to the 
+packet based on its destination. The ingress LSR then switches the packet to 
+the intermediate LSR in the data path using a label. The <b>egress edge LSR</b>
+is the LSR of the service provider at the opposite end of the MPLS domain connecting 
+to the CE at remote site of the customer. The egress 
+LSR is at exit-end of the MPLS domain where customer traffic leaves the MPLS 
+provider network towards the customer network. The MPLS label stack is deleted 
+at the egress LSR and customer traffic is routed using IP. 
+An MPLS-enabled router can act as both an ingress and egress LSR of the same 
+customer traffic. <b>Intermediate LSRs</b> are in the 
+middle of the MPLS domain. Intermediate LSRs interconnect the edge LSRs and 
+forward network traffic primarily using labels.
+A <b>Label Switched Path (LSP)</b> is the complete end-to-end path that the labeled packet
+will take through the MPLS domain (unidirectional). The LSP for receive traffic is 
+usually the same as the transmit LSP. If asynchronous routing is implemented in 
+the network, this return traffic LSP <b>may be different</b> for the original LSP.
+</p>
+<p>
+MPLS forwarding reduces the lookup process by all routers in the path of a packet.
+
+When a packet arrives at an ingress LSR, the Label Forwarding Information Base (LFIB) is
+consulted and the exit interface and label number is determined.
 </p>
 
+<h1 id="CONTROL_PLANE">Control Plane</h1>
+<p>
+The control plane is responsible for exchanging MPLS labels with neighboring 
+MPLS enabled devices(LSRs). This is accomplished using the label distribution protocol(LDP).
+To operate effectively, MPLS requires the following; 
+<ul>
+  <li>Routing table(RIB)</li>
+  <li>Label Information Base(LIB)</li>
+  <li>Label Distribution Protocol(LDP)</li>
+</ul>
+</p>
 <h2>MPLS Labels</h2>
 <p>
-A label is a shim header inserted between the layer 2 and layer 3 headers of an IP packet. It is 4
-bytes (32 bits) in size with 20 bits used for the Label number or ID, 3 bits – EXP for QoS
-operations, 1 bit – S bit to indicate if a label is the last in a stack, 8 bits for TTL. The label in the
-label stack that is nearest to the Layer 3 header has a S-bit set to one (1). When inserting a new
-label, a push operation takes place. MPLS Label operations include the following;
+A label is a shim header inserted between the layer 2 and layer 3 headers of an 
+IP packet. It is 4 bytes (32 bits) in size with;
 <ul>
-<li><b>Push:</b> a label is pushed onto the label stack.</li>
-<li><b>Swap:</b> The top-most label is swapped</li>
+  <li>20 bits used for the Label number or ID</li>
+  <li>3 bits – EXP for QoS operations</li>
+  <li>1 bit – S bit to indicate if a label is the last in a stack</li>
+  <li>8 bits for TTL. The label in the label stack that is nearest to the Layer 
+  3 header has a S-bit set to one (1) to indicate that it is the last label in 
+  the stack.</li>
+  </ul>
+  
+  MPLS Label operations include the following;
+<ul>
+<li><b>Push:</b> a label is pushed onto the label stack. When inserting a new 
+label, a push operation takes place.</li>
+<li><b>Swap:</b> The top-most label is swapped. When switching packets, from 
+one LSR to another towards the destination, swap operations take place.</li>
 <li><b>Pop:</b> The top-most label is removed from the stack.</li>
 <li><b>Delete:</b> The entire label stack is destroyed on the packet (resulting in a need for the packet to be
 routed using IP).</li>
 </ul>
 
-MPLS labels are assigned with a Label ID in the range 16 – 65,536. MPLS labels IDs 1-15 are
-reserved. In MPLS Layer 3 VPN (L3VPN), for a directly connected network, the symbol [V] is
-assigned next to the locally generated label to indicate that the label is a VPN label and not a
-transport label. This label is advertised to the PE LSR at the other end of the L3VPN using BGP
-(the BGP neighbor).
-
-Labels are dynamically generated and assigned for every known network by each LSR
-independently of the other LSRs. The source of the known networks is the RIB (Routing
+All known networks are assigned a label that is identified with a Label ID in the
+range 16 – 65,536. Labels IDs 1-15 are reserved. These labels are usually referred 
+to as transport labels. This is in contract to VPN labels used in MPLS Layer 3 VPNs 
+(L3VPN), where a directly connected network has the symbol [V] assigned next to 
+the locally generated label to indicate that the label is a VPN label and not a
+transport label. This VPN label is advertised to the PE LSR (iBGP peer) at the 
+other end of the L3VPN using BGP.
+</p>
+<p>
+Labels are dynamically generated and uniquely assigned for every known network by each LSR
+independent of the other LSRs. 
+Different LSRs may assign a network the same label number. However, this does not 
+cause any conflict during packet forwarding as the labels are unique to each LSR. 
+However, it is recommended 
+to ensure that each LSR assigns a network with a label ID from a specific range 
+that is specific only to that LSR. This practice helps during troubleshooting 
+when trying to identify the LSR that a packet with a specific label originated 
+from.
+</p>
+<p>
+The source of the known networks in an LSR is the RIB (Routing
 Information Base). This information is converted into a Layer 2 data structure 
 by Cisco Express Forwarding (CEF). You can view this data structure by running 
-the command <code><b>show ip cef</b></code>.
+the command <code style="font-size:120%;"><b>show ip cef</b></code>.
 A directly connected network is assigned the label ID 3 which is also known as 
-an <b>implicit null (impl-null)</b>. Two or more routers can use the same label 
-number for the same network or different networks without problems to the 
-operation of MPLS.
+an <b>implicit null (impl-null)</b>. Two or more LSRs can use the same label 
+ID for the same network or different networks without experiencing problems at 
+the data plane or control plane.
 </p>
 
 
 <h2>How Labels are Assigned</h2>
 <p>
-Data structures utilised by MPLS include; RIB, FIB(CEF), LIB, and LFIB (label 
-forwarding information base).
-The LIB can be viewed using the command <code><b>show mpls ldp bindings</b></code>.
-If using BGP, <code><b>show ip bgp labels</b></code>. To view the LFIB, issue the 
-command <code><b>show mpls forwarding-table</b></code>. To view the entire database, 
-show ip cef. FIB and LFIB are subsets of the same CEF table. To view the FIB table,
-use the command <code><b>show ip cef</b></code>.
+Data structures utilised by MPLS include; 
+<ul> 
+  <li>Routing Information Base(RIB)</li>
+  <li>Forwarding Information Base(FIB) or CEF</li>
+  <li>Label Information Base(LIB)</li>
+  <li>Label Forwarding Information Base(LFIB)</li> 
+</ul>
 </p>
 <p>
 Information from the RIB is fed into the FIB. This contains additionally, layer 2
@@ -120,77 +166,65 @@ The FIB and LFIB are sourced from CEF.
 </p>
 <p>
 For MPLS to function, the IP network must be operational. MPLS will operate with 
-any routing protocol(including static routes) in the network. MPLS can operate 
-with RIP, OSPF, EIGRP etc. If running MPLS with BGP, an IGP needs to be 
-configured in the network. A router assigns a locally significant label for all 
+any routing protocol(including static routes) in the network such as RIP, OSPF, 
+EIGRP etc. If running MPLS with BGP, an IGP needs to be 
+configured in the network. An LSR assigns a locally significant label for all 
 connected prefixes and those learned from another routing protocol. The router 
-will learn the downstream router's local label and store that label as a remote 
-label.
+will learn the downstream LSR's labels and store that label information as remote 
+labels.
 </p> 
-
 
 <p>
 When an IP packet enters the ingress LSR, a lookup of the  
 Label Forwarding Information Base(LFIB) takes place. The LFIB contains information on how 
 the label gets switched. In the LFIB table, labels have an exit router and interface.
-For example, given a packet B, the destination is R2 and exit interface is g1/0 
+For example, given a packet B, the next hop is R2 and exit interface is g1/0 
 with the label 53. The packet is then forwarded out the appropriate interface to
 R2. In R2, the LFIB contains 53, destination R3 and exit interface G2/0 with 
 label 71. When transmitting this packet, R2 will strip label 53 and replace it 
 with label 71.
 
-<ol>
-  <li>At the ingress edge LSR, R1, a push operation takes place where the label 
-  is pushed onto the stack; a label is added to an IP packet without a label.</li>
-  <li></li>
-  
-</ol>
 </p>
 
 <h1>Label Exchange Protocols</h1>
 <p>
-The two main label exchange protocols used for MPLS are LDP and TDP. LDP is 
-the label distribution protocol and TDP is tag distribution protocol. Tag is the 
-old name used by Cisco for labels. TDP is Cisco properietary. The operation of 
+The two main label exchange protocols used for MPLS are label distribution 
+protocol(LDP) and tag distribution protocol(TDP). Tag is the 
+old name used by Cisco for labels. TDP is Cisco properietary while LDP is an 
+open standard and supported by many vendors. The operation of 
 TDP and LDP is identical. They share the same databases. 
-IETF developed LDP based on TDP. The LDP port numbers are 646/UDP and 646 TCP. 
-For TDP, the ports are 711 UDP and 711 TCP. 
-LDP supports authentication while TDP does not support authentication.
+IETF developed LDP based on TDP. 
+Other label exchange protocols include BGP, RSVP, STATIC.
 </p>
-<p>
-The configuration command to enable LDP in interface mode is <code><b>mpls ip</b></code>.
-
-A Hello message is sent with the source IP address of the exit interface IP address.
-The destination IP address is 224.0.0.2 (all router's multicast address). The 
-other LSR sends the same Hello message.
-When an LSR, R1, receives a neighbor R2's Hello message, R1 sends a Hello messsage to  
-R2 containing R2's ID. Unlike OSPF, the LDP ID is an actual routable IP address.
-This address must be reachable. A deterministic TCP session is initiated between 
-the two LSRs. The TCP session is initiated by the LSR with the higher ID.
-The port number used by the two LSRs during this exchange is UDP 646.
-
-For TCP connections, the source IP address is the LDP ID and the port number is 
-random. The destination is the LDP ID and the port number is 646. The reason for 
-having the TCP session is that the two LSRs may have multiple interconnecting links 
-through which hello messages are sent. This helps with preventing multiple sessions.
-</p>
-
 
 <h2>Label Distribution Protocol (LDP)</h2>
 <p>
-Label Distribution Protocol (LDP) is used to exchange labels with connected/neighboring Label
-Switched Routers (LSRs). Label information is used to populate the Label Information Base (LIB).
-
+Label Distribution Protocol (LDP) is used to exchange labels with neighboring Label
+Switched Routers(LSRs). Label information is used to populate the Label Information
+Base (LIB) that MPLS uses to switch packets from source to destination in the 
+MPLS domain.
+LDP and TDP use TCP and UDP as their transport protocols. The LDP port numbers 
+are <b>646 for UDP and TCP</b>. For TDP, the ports are <b>711 for UDP and TCP</b>.
+One of the main differences between LDP and TDP is  
+LDP supports authentication while TDP does not support authentication.
+</p>
+<p>
 An LSR in the MPLS domain that is connected to an egress LSR is known as a 
-<b>penultimate hop</b>. The egress LSR, communicates with the penultimate hop 
-using an implicit null label. This causes the penultimate LSR to remove the label 
-from a packet and sending an IP packet to the egress LSR.
+<b>penultimate hop</b>. The egress LSR gives directly connected networks a label 
+with Label ID 3 this implicit null label is sent to the penultimate hop LSR.
 When a penultimate hop receives a packet with a Label ID of 3 (implicit-null) 
-from the egress LSR, it is a signal that the penultimate hop should remove the 
-MPLS label before forwarding the packet to that egress LSR (ultimate) using IP 
-routing. This process, known commonly as <b>Penultimate Hop Popping(PHP)</b>, 
-avoids two lookups taking place on the egress LSR; the MPLS label lookup in the 
+from the egress LSR, it is a signal from the egress LSR that the penultimate hop
+should remove the MPLS label before forwarding the packet to that egress LSR 
+(ultimate) using IP routing.
+This causes the penultimate LSR to remove the label from the packet and sending 
+an IP packet to the egress LSR. This process, known commonly as <b>Penultimate Hop Popping(PHP)</b>, 
+avoids two lookups taking place on the egress LSR i.e., the MPLS label lookup in the 
 Label Information Base (LIB) and the route look-up from the routing table.
+</p>
+<p>
+MPLS can be enabled on an interface using the command  
+<code style="font-size:120%;"><b>mpls ip</b></code>.
+
 </p>
 <p>
 TDP and LDP are nearly identical in their operation utilising the same tables. It 
@@ -211,36 +245,83 @@ domain and label switching will still take place.
 </p>
 <h3>LDP Sessions</h3>
 <p>
-When MPLS is enabled, LSR Hello messages start being sent out configured interfaces.
-LDP hellos are sent to the all-routers multicast address 224.0.0.2 using UDP port
-646. The source IP address is the IP address of the exit interface and the destination port of this
-message is UDP 646.
+The label exchange protocol can then be enabled on the interface using the command 
+<code style="font-size:120%;"><b>mpls label protocol ldp</b></code>.
 
-After the exchange of LDP hellos, LSRs form TCP sessions with each other using port 646. LDP
-Hello packets contain the LDP ID. The router with a higher LDP ID becomes the active router and
-initiates the TCP connection.
+When MPLS is enabled, LSR Hello messages start being sent out configured interfaces
+using UDP.
+The LDP hello messages are sent with the following information:
+<ul>
+   <li><b>destination IP address:</b> all-routers multicast address <b>224.0.0.2</b>.</li>
+   <li><b>destination port:</b> UDP port 646.</li>
+   <li><b>source IP address:</b> the IP address of the exit interface.</li>
+   <li><b>source port:</b> UDP 646.</li>
+</ul>
+The Hello message contains the;
+<ul>
+  <li>LSR ID</li>
+  <li>Hold time</li>
+  <li>IP transport address(usually the LSR ID)</li>
+</ul>
+After the exchange of LDP hellos, the LSRs attempt to form a TCP session.
+The LSR with a higher LDP ID becomes the active router and initiates the TCP 
+three-way handshake.
+LSRs form TCP sessions with each other using port 646.
+Communication between any two LSRs to form an adjacency is done using the LDP ID.
+
 
 When forming LDP neighborships, it is recommended to configure IP addresses on loopback
 interfaces because they are always up. MPLS, by default, uses the highest IP address of a loopback
-interface as the LSR ID. It is important to note that when an IP address of a loopback interface is
-used as an ID, this IP addresses should be reachable from a neighboring LSR or else no
-neighborship can be formed. An IGP should, therefore, advertise the IP addresses on the loopback
-interfaces for MPLS to fully function.
+interface as the LSR ID. It is important to note that IP address used as an LSR ID 
+should be reachable from a neighboring LSR or else no neighborship can be formed.
+The LSR ID must be reachable as it will be used in the establishment of the TCP 
+session between neighboring LSRs. The LSR with the higher LSR ID
+becomes the Active LSR i.e. it initiates the TCP session.
+Therefore, unlike routing protocols such as OSPF, EIGRP, the LSR ID is a routable
+IP address. 
+An IGP should, therefore, advertise the IP addresses on the loopback interfaces 
+for MPLS to fully function.
 
+A deterministic TCP session is initiated between the two LSRs.
+Once the TCP session has been created, LDP messages such as Initialization, 
+Keepalive, Address Message, exchanged using TCP.
+
+Once the TCP session is established, LDP messages use the following parameters: 
+<ul>
+  <li><b>source IP address:</b> is the LDP ID</li>
+  <li><b>source port number:</b> ephemeral</li>
+  <li><b>destination IP address:</b> LDP ID</li> 
+  <li><b>destination port number:</b> 646</li> 
+</ul>
+Only one TCP session is formed between two LSRs regardless of the number of 
+connections between them. The reason for having the TCP session is that the two 
+LSRs may have multiple interconnecting links through which hello messages are sent. 
+This helps with preventing multiple sessions between the same LSRs.
+The TCP session between the LDP peers can be verified using the command: 
+<code><b>show tcp brief</b></code>
+</p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+      	<code style="font-size:120%">
+R2#<b>show tcp brief</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  <br>
+TCB&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Local Address&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Foreign Address&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (state) <br>
+680091F8&nbsp;30.255.2.2.646&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 30.255.11.11.63502&nbsp;&nbsp;&nbsp;&nbsp;ESTAB&nbsp;  <br>
+6B1FF110&nbsp;30.255.2.2.11911&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;30.255.1.1.646&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ESTAB&nbsp;  <br>
+6B256424&nbsp;30.255.2.2.646&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 30.255.4.4.26358&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ESTAB
+      	</code></div>
+      	<p>
+      	From the above output, it can be confirmed that the LSR with the higher 
+      	LSR ID initiated the TCP connection (as a client with the ephemeral port number).
+      	</p>
+<p>
 The LDP ID can also be explicitly selected using the global config command;
 </p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
       	<code style="font-size:120%">
-<b>mpls ldp router-id interface force</b>
+<b>mpls ldp router-id &lt;interface&gt; force</b>
 </code></div>
 <p>
 The LDP Hello packet header contains the LDP version, LSR ID, common hello parameters such as
-hold time; which is usually 15 seconds. The LSR ID must be reachable as it will be used in the
-establishment of the TCP session between neighboring LSRs. The LSR with the higher LSR ID
-becomes the Active LSR i.e. it initiates the TCP session. To form the TCP session, the source IP
-address (of the active/initiating LSR) is the LSR ID and TCP port is ephemeral (1025 – 65,535), the
-destination IP address is the neighboring LSR’s LSR ID and port is 646. Only one TCP session is
-formed between two LSRs regardless of the number of connections between them. IOS uses
+hold time; which is usually 15 seconds. IOS uses
 unsolicited exchange of labels with liberal retention. Neighbor LSRs exchange the contents of their
 locally-assigned labels, Liberal retention implies that an LSR keeps label information that it does
 not use/need for example, a downstream LSR receiving a label for a further downstream route
@@ -270,9 +351,8 @@ During label switching, local labels are not used to make switching decisions. T
 downstream LSR.
 </p>
 
-<h3>Configuration</h3>
+<h1>Configuration</h1>
 <p>
-
 
 MPLS has the following prerequisites;
 <ul>
@@ -287,48 +367,53 @@ on all the routers with the exception of routers R1 and R8 which as assumed to b
 (CE) routers.
 
 Steps for configuring MPLS;
-<table width="100%">
-<tbody>
-<tr>
-<td>
-Step 1:</td><td> Enable IP CEF. The distributed keyword is optional.
-
+<h2>Step 1</h2>
+<p>Enable IP CEF. The distributed keyword is optional.
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+      	<code style="font-size:120%">
 LSR(config)#ip cef distributed
-</td>
-</tr>
-<tr>
-<td>Step 2</td><td> Enable MPLS globally
-LSR(config)#mpls ip
-</td>
-</tr>
-<tr>
-<td>Step 3:</td><td>Enable LDP
-LSR(config-intf)#mpls label protocol ldp
-</td>
-</tr>
-<tr>
-<td>Step 4 (Optional):</td><td> Configure the LSR ID.<br>
+</code></div>
+</p>
+<h2>Step 4 (Optional) Configure the LSR ID</h2>
+<p>
 By default, it is the ip address of the highest loopback interface address
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+      	<code style="font-size:120%">
+#mpls ldp router-id &lt;interface&gt; force
+</code></div>
+</p>
 
-#mpls ldp router-id interface force
-</td>
-</tr>
-<tr>
-<td>Step 5:</td><td>(Optional)Define a label range.<br>
+<h2>Step 5: (Optional) Define a label range</h2>
+<p>
 Tip: Try to configure the label range so that the source LSR is instantly recognisable
 for example, on LSR R1 the range can be 100 -199, R2 &rarr; 200 – 299 etc
-
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+      	<code style="font-size:120%">
 #mpls label range low – high
-</td>
-</tr>
-<tr>
-<td>Step 6:</td><td> Enable MPLS on given interfaces:
+</code></div>
+If MPLS is already operational and you would like to define MPLS label ranges 
+for LSRs, MPLS will have to be turned off and turned on to have effect.
+</p>
+<h2>Step 6: Enable MPLS on given interfaces</h2>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+      	<code style="font-size:120%">
 #mpls ip
-</td>
-</tr>
+</code></div>
+
+<h2>Step 2: Enable MPLS globally</h2>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+      	<code style="font-size:120%">
+LSR(config)#mpls ip
+</code></div>
+<h2>Step 3: Enable LDP on the appropriate interface</h2>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+      	<code style="font-size:120%">
+      	LSR(config)#<b>interface gigabitethernet0/0</b> <br>
+      	LSR(config-if)#<b>mpls label protocol ldp</b>
+</code></div>
+
 The configuration snippets are based on the following network;
-</tbody>
-</table>
+
 Configuration edge LSR R7, the following configuration activates MPLS on interfaces
 GigabitEthernet 2/0, GigabitEthernet 3/0 and FastEthernet6/0.
 
@@ -390,14 +475,20 @@ R7(config-if)#mpls ip
 <h3>Authentication</h3>
 <p>
 LDP supports authentication and by default, MD5 is used to hash the password. To configure
-authentication;
+authentication, the global configuration command <code><b>mpls ldp neighbor 
+&lt;ip-address&gt; password &lt;password&gt;</b></code>;
+</p>
+
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
       	<code style="font-size:120%">
 R7(config)#mpls ip                                          <br>
 R7(config)#mpls ldp neighbor 4.4.4.4 password simplesimple  <br>
 %4.4.4.4 is the LDP ID for R4 neighboring R7                <br>
 </code></div>
-To force password requirement;
+<p>
+Authentication of LDP neighbors is optional. However, to enforce the password 
+requirement for a neighbor, the command is;
+</p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
       	<code style="font-size:120%">
 R7(config)#mpls ip <br>
@@ -409,7 +500,7 @@ session between the neighbors on some versions of IOS. To reset the LDP session 
 authentication reequirement, run the following command;
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
       	<code style="font-size:120%">
-R7#clear mpls ldp neighbor *
+R7#clear mpls ldp neighbor &lt;ip-address | * &gt;
 </code></div>
 LDP neighbors that do not have authentication configured will result in the following log
 messages.
@@ -425,41 +516,169 @@ tableid - 0                                                                     
 tableid - 0
 R7#
 </code></div>
-
+</p>
+<h4>Verification</h4>
+<p>
+The configuration of a password can be verified using the command 
+<code><b>show mpls ldp neighbor detail</b></code>. From the output of this 
+command, the stale state indicates that the configuration of the password has 
+not been enforced. Applying the configuration using the 
+command <code><b>R7#clear mpls ldp neighbor &lt;ip-address | * &gt;</b></code> 
+results in the output showing the  status of <code><b>in-use</b></code>.
 </p>
 
 <h3>Verification</h3>
 <p>
-To view CEF entries, use the command; #show ip cef 192.168.1.0
-
-To view the MPLS control plane (Label #show mpls ldp bindings
-Information Base table)
-
-To view MPLS interfaces #show mpls interfaces
-
-To view neighboring LSRs. The optional #show mpls ldp neighbor detail
-‘detail’ shows authentication information.
-
-
-To show the Label Forwarding Information #show mpls forwarding-table
+<table width="100%">
+<thead>
+ <tr>
+ <td width="20%">Command</td><td>Description</td>
+ </tr>
+</thead>
+<tbody>
+  <tr>
+  <td>
+  #show ip cef 192.168.1.0
+  </td>
+  <td>
+  To view CEF entries, use the command;
+  </td>
+  </tr>
+  <tr>
+  <td>
+  #show mpls ldp bindings
+  </td>
+  <td>
+To view the MPLS control plane (Label Information Base table)  
+  </td>
+  </tr>
+  <tr>
+  <td>
+  #show mpls interfaces
+  </td>
+  <td>
+    To view MPLS interfaces
+  </td>
+  </tr>
+  <tr>
+  <td>
+  #show mpls ldp neighbor detail
+  </td>
+  <td>
+    To view neighboring LSRs. The optional ‘detail’ shows authentication information.
+    This command also verifies the operational state of the TCP session between
+    the LDP neighbors.
+  </td>
+  </tr>
+  <tr>
+  <td>
+  #show mpls forwarding-table
+  </td>
+  <td>
+To show the Label Forwarding Information 
 Base. Command can also be used to view the
 number of packets switched by MPLS. (Label
 Forwarding Information Base – LFIB). This
 table displays the LDP, TDP receive labels. ‘No
-Label’ indicates removal of all labels.
-
-Show RIB Show ip route
-
-To display the CEF table #show ip cef
-
-To view LDP Hellos and troubleshoot LDP #show mpls ldp discovery
+Label’ indicates removal of all labels.  
+  </td>
+  </tr>
+  <tr>
+  <td>
+  #show mpls ldp discovery
+  </td>
+  <td>
+  <p>
+At the end of the LDP ID is the value zero (0). 
+This value will always be zero unless running MPLS in cell mode which require 
+specially configured ATM interfaces. This command also verifies the exchange of 
+Hello messages using UDP.
+</p>
+<p>
+To view LDP Hellos and troubleshoot LDP 
 operation. If interface shows xmit, then the
-LSR neighbor relationship has a problem. It
-should be xmit/recv
+LSR neighbor relationship has a problem. Hello messages are not being received 
+on the interface. It should be xmit/recv. It displays the LDP ID.
+</p>
+<p>
+  This command can also be used to verify the exchange of Hello messages using 
+  UDP with neighbors.
+  </p>
+  </td>
+  </tr>
+  <tr>
+  <td>
+  Show ip route
+  </td>
+  <td>
+Show RIB   
+  </td>
+  </tr>
 
-To confirm MPLS is used in label switching. Traceroute destination_ipaddr
+    <tr>
+  <td>
+  #show ip cef
+  
+  </td>
+  <td>
+To display the CEF table  
+  </td>
+  </tr>
+  <tr>
+  <td>
+  Traceroute destination_ipaddr
+  </td>
+  <td>
+  
+To confirm MPLS is used in label switching. 
 Labels used, EXP configured and PHP action source_ipaddr / interface
 is displayed.
+
+In IOS,when a traceroute packet is sent, when a TTL packet expires at a hop (LSR), 
+the value of the labels iss placed on the ICMP packets. This is displayed in the 
+traceroute ICMP expired packet.
+  </td>
+  </tr>
+  </tbody>
+ </table>
+
+</p>
+
+<p>
+
+
+The following table shows the commands that can be used 
+to display the contents of these data structures:
+
+<table cellspacing="0">
+<thead style="background-color:#dcdcdc; font-weight:bold;">
+<tr>
+<td style="border-bottom: 1px solid; border-top:1px solid">Data Structure</td>
+<td style="border-bottom: 1px solid; border-top:1px solid">Command</td>
+<td style="border-bottom: 1px solid; border-top:1px solid">Data Source</td>
+</tr>
+</thead>
+<tbody>
+  <tr>
+  <td style="border-bottom: 1px solid;">RIB</td>
+  <td style="border-bottom: 1px solid;"><code style="font-size:120%;"><b>show ip route</b></code></td>
+  <td style="border-bottom: 1px solid;">Routing sources</td>
+  </tr>
+  <td style="border-bottom: 1px solid;">FIB</td>
+  <td style="border-bottom: 1px solid;"><code style="font-size:120%;"><b>show ip cef</b></code></td>
+  <td style="border-bottom: 1px solid;">RIB, ARP tables</td>
+  </tr>
+  <td style="border-bottom: 1px solid;">LIB</td>
+  <td style="border-bottom: 1px solid;"><code style="font-size:120%;"><b>show mpls ldp bindings</b></code>. 
+  If BGP is used for label exchange, then the command is <code style="font-size:120%;"><b>show ip bgp labels</b></code></td>
+  <td style="border-bottom: 1px solid;">RIB, Label exchange protocols such as LDP, TDP, BGP, RSVP, Static labels</td>
+  </tr>
+  <td style="border-bottom: 1px solid;">LFIB</td>
+  <td style="border-bottom: 1px solid;"><code style="font-size:120%;"><b>show mpls forwarding-table</b></code></td>
+  <td style="border-bottom: 1px solid;">LIB, RIB, FIB</td>
+  </tr>
+</tbody>
+</table>
 </p>
 
 <h3>To Display LDP configuration parameters</h3>
@@ -554,6 +773,10 @@ R2#show ip cef 10.10.78.0 detail
 </code></div>
 
 <h2>To show the Label Forwarding Table</h2>
+<p>
+The "Pop Label" valaue implies that a delete operation is to take place (entire)
+on label stack.
+</p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
       	<code style="font-size:120%">
 R2#
@@ -613,9 +836,14 @@ VRF info: (vrf in name/id, vrf out name/id)     <br>
 R1#
 </code></div>
 <p>
-The command: R2(config)#no mpls ip propagate-ttl local|forwarded|cir The local
-keyword implies locally generated traffic. The forwarded keyword applies to transit traffic. CIR
-applies to both. The forwarded option is mostly configured in service provider networks.
+The command: <code><b>R2(config)#no mpls ip propagate-ttl local|forwarded|cir</b></code>
+<ul>
+  <li>The local keyword implies locally generated traffic.</li>
+  <li>The forwarded keyword applies to transit traffic; this option is usually 
+  configured in service provider networks to hide the MPLS details from the clients.</li>
+  <li>CIR applies to both.</li> 
+</ul>
+The forwarded option is mostly configured in service provider networks.
 
 At the penultimate LSR, CEF does not show a label. #show mpls ldp binding shows ‘impl-
 null’ label and mpls forwarding-table displays ‘Pop label’
@@ -799,6 +1027,37 @@ R2#
 </code></div>
 
 <h1>Troubleshooting</h1>
+<h2>LDP Neighbors not forming</h2>
+<p>
+  <ul>
+    <li><code><b>show mpls ldp neighbor </b></code>
+    to identify neighbors.</li> 
+    <li><code><b>show mpls interface</b></code>: to identify if MPLS is running</li>
+    <li>traceroute</li>
+    <li>Ensure that the LDP ID is reachable; of the local LSR or remote LSR.
+    To easily identify where MPLS is broken, go the one PE and <code><b>
+    ping mpls ipv4 </b></code> to the remote PE device. Status code of B indicates that the packet was sent 
+    using unlabeled output.
+    On affected LSR, use <code><b>show mpls interfaces</b></code>.
+    </li>
+    </li>
+  </ul>
+</p>
+
+<p>
+IP troubleshooting tools may not necessarily resolve MPLS issues. such ping, 
+traceroute, show ip route. When troubleshootnig MPLS use MPLS troubleshooting tools;
+troubleshoot MPLS dataplane and control plane separately. 
+
+Control plane: do you have neighbors, routing plane operationa?, MPLS enabled, 
+correct info in databases.
+
+Dataplane: follow the labels, are the correct labels
+
+MPLS tools include MPLS databases, ping, does the intermediate node have a route 
+back to the source to send ICMP packets.
+</p>
+
 <p>
 When troubleshooting MPLS data plan traffic, follow the labels when running the traceroute
 command. If run from a customer to customer site, the first label is the transport label, the second
