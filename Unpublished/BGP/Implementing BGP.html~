@@ -7027,7 +7027,7 @@ BGP before any filtering e.g. if we are interested in just 100 NLRI, we will
 still receive all the 900K routes 
 and proccess them before we can extract the desired 100 routes. The outbound 
 route filtering feature allows the downstream router to control what the upstream 
-neighbor is advertising to it. ORF is defined in RFC 5291 (outbound route 
+BGP peer is advertising to it. ORF is defined in RFC 5291 (outbound route 
 filtering capacity for BGP-4). The downstream router sends the upstream 
 provider a list of prefixes that it would like advertised to it. This is accomplished 
 through the enterprise BGP router advertising a prefix-list upstream to the service 
@@ -7041,7 +7041,7 @@ containing prefixes that are not in the list.
 ORF has the following features:
 <ul>
   <li>ORF supports IPv4 and IPv6 unicast routes</li>
-  <li>It does not support IP multicast routes.</li>
+  <li>ORF does not support IP multicast routes.</li>
   <li>ORF can be used only with IP prefix-lists</li>
   <li>ORF has to be configured separately for every address family. It cannot be 
   configured under the global BGP process.</li>
@@ -7050,28 +7050,88 @@ ORF has the following features:
 </p>
 
 <p>
-When implementing ORF, ensure that on the downstream router, configure prefix 
-list and use send keyword while on the upstream router, the <code style="font-size:120%"><b>receive</b></code> 
-keyword is configured. ORF is configured on both BGP routers using 
-the BGP command <code style="font-size:120%"><b>neighbor &lt;ip_address&gt; capability orf 
-prefix-list [both | receive | send]</b></code>. Verification can be done 
-using the command <code style="font-size:120%"><b>show ip bgp neighbor &lt;ip_address&gt; received 
-prefix-filter</b></code>.
-</p>
-<p>
-On the device that does not want certain prefixes sent to it:
-<div><code style="font-size:120%"><b>
-#neighbor 10.0.0.9 capability orf prefix-list send<br>
-#neighbor 10.0.0.9 prefix-list MYLIST in
-</b></code></div>
-</p>
+When implementing ORF;
+<ul>
 
-<p>
-After configuring ORF, clear the process using the command <code style="font-size:120%"><b>clear ip bgp 
-* in prefix-filter</b></code>. Also show advertised routes on upstream router 
-towards the downstream router.
-</p>
+  <li>On the upstream router;
+      <ul>
+        <li>Enable ORF capability for the downstream peer:
+        <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+      	  <code style="font-size:120%">
+        R7(config)#<b>router bgp 7</b><br>
+        R7(config-router)#<b>address-family ipv4 unicast</b><br>
+        R7(config-router-af)#<b>neighbor 30.255.6.6 capability orf prefix-list receive</b><br>
+        </code></div>
+        Note that the keyword <code style="font-size:120%"><b>receive</b></code> is 
+        configured for the upstream peer.</li> 
+      </ul>
+      </li>
 
+  <li>On the downstream BGP peer:
+    <ol>
+      <li>Enable ORF for the BGP peer: 
+      <code><b>neighbor &lt;ip-address&gt; capability orf prefix-list &lt;both|receive|send&gt;</b></code>.
+      <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+      	<code style="font-size:120%">
+      	  R6(config)#<b>router bgp 1000.1000</b><br>
+      	  R6(config-router)#<b>address-family ipv4 unicast</b><br>
+      	  R6(config-router-af)#<b>neighbor 77.255.7.7 capability orf prefix-list send</b><br>
+      	</code>
+      </div>
+      </li>
+      <li>Configure a prefix list:
+      <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+      	<code style="font-size:120%">
+      	R6(config)#<b>ip prefix-list PL_88.1.0.0/22 seq 10 permit 88.1.0.0/22 le 24</b>
+      	</code></div>
+      </li>
+      <li>Apply the prefix-list to the upstream peer in the inbound direction:
+      <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+      	<code style="font-size:120%">
+      	R6(config-router-af)#<b>neighbor 77.255.7.7 prefix-list PL_88.1.0.0/22 in</b>
+      	</code></div>	
+      </li> 
+      <li>Clear the process using the command 
+      <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+      	<code style="font-size:120%">
+      	R6#<b>clear ip bgp 77.255.7.7 soft in prefix-filter</b></code>.
+      	</li>
+    </ol>
+    </li> 
+      </ul>
+      </p>
+      
+      <h4>Verification of ORF</h4>
+      <p>
+      On the upstream BGP peer, ORF configuration can be confirmed using the 
+      command: <code style="font-size:120%">
+      <b>show ip bgp neighbor &lt;ip_address&gt; received prefix-filter</b></code>.
+      <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+      	<code style="font-size:120%">
+      		R7&gt;<b>show bgp ipv4 unicast neighbor 30.255.6.6 received prefix-filter</b><br>
+Address family: IPv4 Unicast  <br>
+ip prefix-list 30.255.6.6: 1 entries <br>
+&nbsp;&nbsp;&nbsp;seq 10 permit 88.1.0.0/22 le 24  <br>
+        </code></div>
+      </p>
+      <p>
+      On the downstream BGP peer, ORF can be confirmed by viewing configured 
+      policies:
+      <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+      	<code style="font-size:120%">
+      R6&gt;<b>show bgp ipv4 unicast neighbor 77.255.7.7 policy</b><br>
+&nbsp;Neighbor: 77.255.7.7, Address-Family: IPv4 Unicast       <br>
+&nbsp;Locally configured policies:                             <br>
+&nbsp;&nbsp;prefix-list PL_88.1.0.0/22 in                           <br>
+&nbsp;&nbsp;<span style="background:#D3D3D3;">capability orf prefix-list send</span> <br>
+&nbsp;Inherited polices:                                       <br>
+&nbsp;&nbsp;route-map RM_EBGP in                                    <br>
+&nbsp;&nbsp;distribute-list ACL_AGGREGATES out                      <br>
+&nbsp;&nbsp;send-community both<br>                                     
+R6&gt;
+</code></div>
+
+      </p>
 
 <h3>AS Path Access Control Lists</h3>
 <p>
