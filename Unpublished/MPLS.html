@@ -462,9 +462,8 @@ During label switching, local labels are not used to make switching decisions. T
 downstream LSR.
 </p>
 
-<h1>Configuration</h1>
+<h1 id="CONFIGURATION">Configuration</h1>
 <p>
-
 MPLS has the following prerequisites;
 <ul>
 <li>Fully operational IP routing.</li>
@@ -476,28 +475,38 @@ The following configuration makes the safe assumption that IP routing has been e
 network and that the IGP has fully converged. In the following examples, OSPF has been enabled
 on all the routers with the exception of routers R1 and R8 which as assumed to be customer-edge
 (CE) routers.
-
-Steps for configuring MPLS;
-<h2>Step 1</h2>
-<p>Enable IP CEF. The distributed keyword is optional.
+<h2>Step 1: Enable IP CEF</h2>
+<p>Without the CEF database, the LIB will not be created making MPLS operation not possible.
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
       	<code style="font-size:120%">
 LSR(config)#ip cef distributed
 </code></div>
+The <code><b>distributed</b></code> keyword is optional.
 </p>
-<h2>Step 4 (Optional) Configure the LSR ID</h2>
+<h2>Step 2: Configure the LSR ID</h2>
 <p>
-By default, it is the ip address of the highest loopback interface address
+By default, LDP selects the IP address of the highest loopback interface 
+as the LSR ID. However, the LSR ID can be explicitly configured using the global 
+configuration command: <code><b>mpls ldp router-id &lt;interface&gt; force</b></code>.
+<code><b>interface</b></code> is the interface whose IP address is to be used 
+as LSR ID.
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
       	<code style="font-size:120%">
-#mpls ldp router-id &lt;interface&gt; force
+#
 </code></div>
 </p>
 
-<h2>Step 5: (Optional) Define a label range</h2>
+<h2>Step 3 (Optional): Define a label range</h2>
 <p>
+A label range refers to the range of label ID values that the LSR can use to 
+generate IDs for known networks. To help with troubleshooting efforts or ease of 
+network traffic monitoring, the label ranges for each LSR needs to be unique. 
+Additionally, the label range should be large enough to be used to generate label
+IDs for the more than the maximum number of networks known to an LSR. This 
+ensures that the LSR does not run out of Label ID values to use for new networks.
+  
 Tip: Try to configure the label range so that the source LSR is instantly recognisable
-for example, on LSR R1 the range can be 100 -199, R2 &rarr; 200 – 299 etc
+for example, on LSR R1 the range can be 1000-1999, R2 &rarr; 2000–2999 etc.
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
       	<code style="font-size:120%">
 #mpls label range low – high
@@ -505,24 +514,41 @@ for example, on LSR R1 the range can be 100 -199, R2 &rarr; 200 – 299 etc
 If MPLS is already operational and you would like to define MPLS label ranges 
 for LSRs, MPLS will have to be turned off and turned on to have effect.
 </p>
-<h2>Step 6: Enable MPLS on given interfaces</h2>
-<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-      	<code style="font-size:120%">
-#mpls ip
-</code></div>
 
-<h2>Step 2: Enable MPLS globally</h2>
-<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-      	<code style="font-size:120%">
-LSR(config)#mpls ip
-</code></div>
-<h2>Step 3: Enable LDP on the appropriate interface</h2>
+<h2>Step 4: Configure the label exchange protocol</h2>
+<p>
+Enable LDP on the appropriate interface using the interface command <code><b>mpls label 
+protocol ldp</b></code>.
+</p>
+<p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
       	<code style="font-size:120%">
       	LSR(config)#<b>interface gigabitethernet0/0</b> <br>
       	LSR(config-if)#<b>mpls label protocol ldp</b>
 </code></div>
-
+</p>
+<h2>Step 5: Enable MPLS</h2>
+<p>
+MPLS can be enabled globally or on specific interfaces using the command 
+<code><b>mpls ip</b></code>.
+</p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+      	<code style="font-size:120%">
+#mpls ip
+</code></div>
+<p>
+OSPF and IS-IS (link-state protocols) support the activation of MPLS from within the routing
+protocol configuration. In OSPF router configuration mode, this is accomplished using the
+command;
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+      	<code style="font-size:120%">
+#mpls ldp autoconfig &lt;area <i>area-id</i>&gt;
+</code></div>
+The optional <code><b>area <i>area-id</i></i></b></code> adds the flexibility of 
+enabling LDP on interfaces in the configured OSPF area.
+</p>
+<h2>Configuration Example</h2>
+<p>
 The configuration snippets are based on the following network;
 
 Configuration edge LSR R7, the following configuration activates MPLS on interfaces
@@ -542,20 +568,15 @@ R7(config-if)#mpls ip                           <br>
 R7(config-if)#interface fastethernet 6/0        <br>
 R7(config-if)#mpls ip
 </code></div>
-
-OSPF and IS-IS (link-state protocols) support the activation of MPLS from within the routing
-protocol configuration. In OSPF router configuration mode, this is accomplished using the
-command;
-<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-      	<code style="font-size:120%">
-#mpls ldp autoconfig
-</code></div>
-
+</p>
+<p>
 Note that setting the label range on an LSR that has an active TCP session with another LSR will
 not take effect. To change the label range; first disable LDP on the interface , change the label
 range , then enable MPLS on the interface. However, if MPLS was enabled through the routing
 protocol, then disabling ldp in the interface with the interface sub-mode command #no mpls ip
 will return the following message;
+</p>
+<p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
       	<code style="font-size:120%">
 R7(config)#interface g2/0                                               <br>
@@ -564,10 +585,12 @@ R7(config-if)#no mpls ip                                                <br>
 Autoconfig can be removed from Gi2/0 with 'no mpls ldp igp autoconfig.' <br>
 R7(config-if)#
 </code></div>
-
+</p>
+<p>
 As indicated in the message, to completely disable LDP on such interfaces, issue the following
 command in interface sub-mode;
-
+</p>
+<p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
       	<code style="font-size:120%">
 R7(config-if)#interface g2/0                        <br>
@@ -583,38 +606,47 @@ R7(config-if)#mpls ip
 </code></div>
 </p>
 
-<h3>Authentication</h3>
+<h1 id="AUTHENTICATION">Authentication</h1>
 <p>
 LDP supports authentication and by default, MD5 is used to hash the password. To configure
 authentication, the global configuration command <code><b>mpls ldp neighbor 
 &lt;ip-address&gt; password &lt;password&gt;</b></code>;
 </p>
-
+<p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
       	<code style="font-size:120%">
 R7(config)#mpls ip                                          <br>
 R7(config)#mpls ldp neighbor 4.4.4.4 password simplesimple  <br>
 %4.4.4.4 is the LDP ID for R4 neighboring R7                <br>
 </code></div>
-<p>
-Authentication of LDP neighbors is optional. However, to enforce the password 
-requirement for a neighbor, the command is;
 </p>
+<p>
+Authentication of LDP messages between peers is optional. However, to enforce 
+authentication requirement, the command is;
+</p>
+<p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
       	<code style="font-size:120%">
 R7(config)#mpls ip <br>
 R7(config)#mpls ldp pass required
 </code></div>
-
+</p>
+<p>
 Configuration of authentication on one end of an active LDP session may not take down the TCP
 session between the neighbors on some versions of IOS. To reset the LDP session and force the
 authentication reequirement, run the following command;
+</p>
+<p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
       	<code style="font-size:120%">
 R7#clear mpls ldp neighbor &lt;ip-address | * &gt;
 </code></div>
-LDP neighbors that do not have authentication configured will result in the following log
-messages.
+</p>
+<p>
+LDP neighbors that do not have authentication configured will result in the 
+generation the following log messages:
+</p>
+<p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
       	<code style="font-size:120%">
 R7#                                                                                      <br>
@@ -628,7 +660,7 @@ tableid - 0
 R7#
 </code></div>
 </p>
-<h4>Verification</h4>
+<h2>Authentication Verification</h2>
 <p>
 The configuration of a password can be verified using the command 
 <code><b>show mpls ldp neighbor detail</b></code>. From the output of this 
@@ -638,7 +670,7 @@ command <code><b>R7#clear mpls ldp neighbor &lt;ip-address | * &gt;</b></code>
 results in the output showing the  status of <code><b>in-use</b></code>.
 </p>
 
-<h3>Verification</h3>
+<h1 id="VERIFICATION">MPLS Verification</h1>
 <p>
 <table width="100%">
 <thead>
