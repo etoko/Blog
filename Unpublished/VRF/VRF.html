@@ -1,0 +1,56 @@
+<h1>Virtual Routing and Forwarding Instances (VRFs)</h1>
+<p>
+VRFs are used to create a virtual router inside IOS. 
+Interfaces assigned to that VRF belong to that routing table. Interfaces not in 
+a VRF are in the "global" or default VRF. Implementing VRFs results in separate 
+control plane instances, separate data plane based on routing. Addressing overlap 
+is possible in different VRFs.
+</p>
+<p>
+Routing inside a VRF can be through VRF-aware static routes, VRF aware dynamic 
+routing: RIP, EIGRP, OSPF, IS-IS, MP-BGP, policy routing.
+</p>
+<p>
+Two commands to create VRFs:
+<ul>
+  <li><code><b>ip vrf &lt;name&gt;</b></code>: supports only IPv4</li>
+  <li><code><b>vrf definition</b></code> supports IPv4 and IPv6.</li> 
+</ul>
+</p>
+<p>
+Specify the "route distinguisher" <code><b>rd &lt;ASN:nn|IP-address:nn&gt;<b></code>.
+</p>
+<p>
+To apply the VRF to the interface:
+<ul>
+  <li>ip vrf forwarding &lt;name&gt;</li>
+  <li><code><b>vrf forwarding &lt;name&gt;</li>
+</ul>
+Take note that the configuration removes the IP address from an interface. It 
+is therefore important to run the <code><b>show ip interface brief</b></code> 
+command before applying a VRF to an interface.
+</p>
+<p>
+This minimum configuration is called "VRF Lite" i.e., VRFs without any MPLS 
+configuration. 
+</p>
+<h1>Verification</h1>
+<p>
+<code><b>show ip route vrf &gt;vrf&lt;, ping vrf &lt;vrf&gt;, traceroute vrf 
+&lt;vrf&gt;</b></code>.
+Other features that must become VRF aware include NAT, IPSec.
+</p>
+<h1>VRF-lite vs MPLS VPNs</h1>
+<p>
+In VRF lite, all devices in transit path must carry all routes in all VRF tables.
+In MPLS VPNs only PE routers need customer routes. This is accomplished through:
+<ul>
+  <li>VPNv4 BGP hwere the RD+prefix makes VPN routes globally unique.</li>
+  <li>MPLS VPN tag/label:
+    <ul>
+      <li>P routers only need to know how to reach BGP next-hop.</li>
+      <li>Uses "BGP free core"  logic.</li>
+      </ul>
+      </li>
+  </ul>
+</p>
