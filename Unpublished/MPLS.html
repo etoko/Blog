@@ -17,7 +17,23 @@ be used by enterprises to separate traffic between different business units usin
 MPLS was developed to replace legacy remote-site-connectivity technologies  
 such as ATM circuits, frame relay circuits, dedicated serial lines. 
  MPLS supports many layer 3 protocols including IP multicasts,unicasts and VPN.
-
+Originally Cisco proprietary and was referred to as tag switching, MPLS is 
+defined by RFC 3031.
+</p>
+<p>
+MPLS provides support for the transportation of multiple payloads:
+<ul>
+  <li><b>Layer 2 payloads:</b> Ethernet (Ethernet over MPLS), Frame Relay, ATM, PPP, HDLC, etc.</li>
+  <li><b>Layer 3 payloads:</b> IPv4, IPv6, etc.</li>
+  <li>Extensible to support future payloads.</li>
+</ul>
+</p>
+<p>
+Label switching feature of MPLS switches traffic between interfaces based on 
+locally significant label values. This is similar to legacy virtual circuit 
+switching in Frame Relay with input/output DLCI or ATM with input/output VPI/VCI.
+</p>
+<p>
 By default, MPLS traffic will follow the same path as regular IP traffic would. This is because MPLS
 uses the routing table to create paths through which to switch the labels. By default, all routes in
 the routing table (RIB) i.e. static, connected, and learned routes will have a label
@@ -47,8 +63,20 @@ plane of MPLS.</li>
 <ul>
 <li>Without MPLS, customer sites would have to run eBGP sessions with the 
     service provider network.</li>
+    <li>Tunneling over the BGP free core. This saves routing table space on 
+    the provider routers.</li>
+    <li>Transparent tunneling over the service provider network.</li>
+    <li>Offer layer 2/3 VPN service to customers.</li>
 <li>MPLS is more cost effective than legacy remote site connectivty options 
-    such as dedicated serial links, Frame relay etc.
+    such as dedicated serial links, Frame relay etc.</li>
+    <li>Traffic engineering: 
+      <ul>
+        <li>Distibute load over underutilized links.</li>
+        <li>Give bandwidth guarantees.</li>
+        <li>Route based on service type.</li>
+        <li>Detect and repair failures quickly i.e., fast reroute(FRR).</li>
+        </ul>
+    </li>
 </ul>
 </p>
 
@@ -80,6 +108,41 @@ MPLS forwarding reduces the lookup process by all routers in the path of a packe
 When a packet arrives at an ingress LSR, the Label Forwarding Information Base (LFIB) is
 consulted and the exit interface and label number is determined.
 </p>
+<h2>MPLS Devices</h2>
+<p>
+MPLS domains consist of three types of devices:
+<ul>
+  <li><b>Customer Edge(CE):</b> 
+  <ul>
+    <li>Usually the last hop device in the customer's network and connects to 
+    the provider's network.</li>
+    <li>MPLS is usually not configured on this device.</li>
+    <li>It is configured for layer 2 or layer 3 connectivity services from MPLS
+    i.e., device can be a switch or router.</li>
+    </ul>
+    
+    </li>
+  <li><b>Provider Edge(PE):</b>
+    <ul>
+      <li>Last hop router in the provider's network connecting the CE to the 
+      P devices.</li>
+      <li>PE performs both IP routing and MPLS lookups.</li>
+      <li>PE devices share routes with the CE devices i.e., they have knowledge 
+      of the customer's prefixes.</li>
+    </ul>
+  </li>
+  <li><b>Provider(P):</b>
+    <ul>
+     <li>Also referred to as Label Switch Routers(LSR)</li>
+     <li>Core devices in the provider's network connecting the PEs.</li>
+     <li>Switch traffic based on the labels.</li>
+    </ul>
+  </li>
+</ul>
+</p>
+<p>
+
+</p>
 
 <h1 id="CONTROL_PLANE">Control Plane</h1>
 <p>
@@ -94,24 +157,33 @@ To operate effectively, MPLS requires the following;
 </p>
 <h2>MPLS Labels</h2>
 <p>
-A label is a shim header inserted between the layer 2 and layer 3 headers of an 
-IP packet. It is 4 bytes (32 bits) in size with;
+An MPLS label is a 4 byte shim header inserted between the layer 2 and layer 3 
+headers of an IP packet. It is used to switch packets in the MPLS domain. It 
+is defined by RFC 3032. It contains the following fields:
 <ul>
-<li>20 bits used for the Label number or ID</li>
-<li>3 bits – EXP for QoS operations</li>
+<li>20 bits used for the Label number or ID and its value is locally significant.</li>
+<li>3 bits – EXP for QoS operations (Class of Service)</li>
 <li>1 bit – S bit to indicate if a label is the last in a stack</li>
-<li>8 bits for TTL. The label in the label stack that is nearest to the Layer 
+<li>8 bits for Time To Live (TTL). The label in the label stack that is nearest to the Layer 
   3 header has a S-bit set to one (1) to indicate that it is the last label in 
   the stack.</li>
 </ul>
-  
-  MPLS Label operations include the following;
+</p>
+<p>
+MPLS labels are bound to forwarding equivalancy class(FEC). The FEC is the 
+binding between the IPv4 prefix and the MPLS label. Routers in the MPLS domain 
+use the LFIB to switch traffic instead of the routing table.
+</p>
+<p>
+PE and P devices perform the following operations:
 <ul>
 <li><b>Push:</b> a label is pushed onto the label stack. When inserting a new 
-label, a push operation takes place.</li>
+label, a push operation takes place. This may alternatively be known as label 
+imposition.</li>
 <li><b>Swap:</b> The top-most label is swapped. When switching packets, from 
 one LSR to another towards the destination, swap operations take place.</li>
-<li><b>Pop:</b> The top-most label is removed from the stack.</li>
+<li><b>Pop:</b> The top-most label is removed from the stack. Also known as label 
+disposition.</li>
 <li><b>Delete:</b> The entire label stack is destroyed on the packet (resulting in a need for the packet to be
 routed using IP).</li>
 </ul>
@@ -186,7 +258,7 @@ with label 71.
 
 </p>
 
-<h1>Label Exchange Protocols</h1>
+<h1>Label Exchange</h1>
 <p>
 The two main label exchange protocols used for MPLS are label distribution 
 protocol(LDP) and tag distribution protocol(TDP). Tag is the 
@@ -194,12 +266,39 @@ old name used by Cisco for labels. TDP is Cisco properietary while LDP is an
 open standard and supported by many vendors. The operation of 
 TDP and LDP is identical. They share the same databases. 
 IETF developed LDP based on TDP. 
-Other label exchange protocols include BGP, RSVP, STATIC.
+Other label exchange protocols include: 
+<uL>
+  <li><b>MP-BGP:</b> advertises labels for BGP learned routes. defined by RFC 
+  3107.</li>
+  <li><b>RSVP:</b> Used for MPLS traffic engineering (MPLS TE). Defined by 
+  RFC 3209.</li>
+  <li>STATIC</li>
+</uL>
 </p>
 
 <h2>Label Distribution Protocol (LDP)</h2>
 <p>
 Label Distribution Protocol (LDP) is used to exchange labels with neighboring LSRs.
+LDP advertises labels for IGP learned routes. It is defined by RFC 5036.
+Like IGPs, LDP automatically discovers neighbors with a Hello protocol. Hello 
+messages use multicast UDP. Hello messages include "IPv4 transport address". This 
+defines the address to use for the TCP session. This address usually defaults to 
+the LDP Router-ID which also defaults to the highest IP address of the loopback interface.
+The LDP sessions are unicast between transport addresses. These transport 
+addresses could be modified, but this is usually not necessary.
+</p>
+<p>
+Once the LDP session is established, the label is advertised for FEC i.e., 
+label to IPv4 prefix mapping. Label distribution can be implicit or explicit;
+ <ul>
+   <li>Unsolicited downstream vs downstream on demand.</li>
+   <li>Depends on implementation and config options.</li>
+ </ul>
+ The ultimate result is that one label is assigned to learned prefixes. Labels 
+ could be advertised for some or all routes. On Cisco devices, the default is 
+ for all IGP learned routes to have labels assigned. 
+</p>
+<p>
 Label information is used to populate the Label Information
 Base (LIB) that MPLS uses to switch packets from source to destination in the 
 MPLS domain.
@@ -320,6 +419,9 @@ from an upstream LSR.
 The LFIB table is built from Routing Information Base (RIB), Forwarding Information Base (FIB)
 and Label Information Base (LIB) tables. On egress edge LSR, a connected network has no LFIB
 entry. It uses IP for normal routing.
+</p>
+<p>
+LDP sessions can be verified using the command <code><b>show mpls ldp neighbor</b></code>.
 </p>
 
 <h3>LDP Message Types</h3>
@@ -671,171 +773,19 @@ results in the output showing the  status of <code><b>in-use</b></code>.
 </p>
 
 <h1 id="VERIFICATION">MPLS Verification</h1>
-<p>
-<table width="100%">
-<thead>
- <tr>
- <td width="20%">Command</td><td>Description</td>
- </tr>
-</thead>
-<tbody>
-  <tr>
-  <td>
-  #show ip cef 192.168.1.0
-  </td>
-  <td>
-  To view CEF entries, use the command;
-  </td>
-  </tr>
-  <tr>
-  <td>
-  #show mpls ldp bindings
-  </td>
-  <td>
-To view the MPLS control plane (Label Information Base table)  
-  </td>
-  </tr>
-  <tr>
-  <td>
-  #show mpls interfaces
-  </td>
-  <td>
-    To view MPLS interfaces
-  </td>
-  </tr>
-  <tr>
-  <td>
-  #show mpls ldp neighbor detail
-  </td>
-  <td>
-    To view neighboring LSRs. The optional ‘detail’ shows authentication information.
-    This command also verifies the operational state of the TCP session between
-    the LDP neighbors.
-  </td>
-  </tr>
-  <tr>
-  <td>
-  #show mpls forwarding-table
-  </td>
-  <td>
-To show the Label Forwarding Information 
-Base. Command can also be used to view the
-number of packets switched by MPLS. (Label
-Forwarding Information Base – LFIB). This
-table displays the LDP, TDP receive labels. ‘No
-Label’ indicates removal of all labels.  
-  </td>
-  </tr>
-  <tr>
-  <td>
-  #show mpls ldp discovery
-  </td>
-  <td>
-  <p>
-At the end of the LDP ID is the value zero (0). 
-This value will always be zero unless running MPLS in cell mode which require 
-specially configured ATM interfaces. This command also verifies the exchange of 
-Hello messages using UDP.
-</p>
-<p>
-To view LDP Hellos and troubleshoot LDP 
-operation. If interface shows xmit, then the
-LSR neighbor relationship has a problem. Hello messages are not being received 
-on the interface. It should be xmit/recv. It displays the LDP ID.
-</p>
-<p>
-  This command can also be used to verify the exchange of Hello messages using 
-  UDP with neighbors.
-  </p>
-  </td>
-  </tr>
-  <tr>
-  <td>
-  Show ip route
-  </td>
-  <td>
-Show RIB   
-  </td>
-  </tr>
 
-    <tr>
-  <td>
-  #show ip cef
-  
-  </td>
-  <td>
-To display the CEF table  
-  </td>
-  </tr>
-  <tr>
-  <td>
-  Traceroute destination_ipaddr
-  </td>
-  <td>
-  
-To confirm MPLS is used in label switching. 
-Labels used, EXP configured and PHP action source_ipaddr / interface
-is displayed.
-
-In IOS,when a traceroute packet is sent, when a TTL packet expires at a hop (LSR), 
-the value of the labels iss placed on the ICMP packets. This is displayed in the 
-traceroute ICMP expired packet.
-  </td>
-  </tr>
-  </tbody>
- </table>
-
-</p>
-
-<p>
-
-
-The following table shows the commands that can be used 
-to display the contents of these data structures:
-
-<table cellspacing="0">
-<thead style="background-color:#dcdcdc; font-weight:bold;">
-<tr>
-<td style="border-bottom: 1px solid; border-top:1px solid">Data Structure</td>
-<td style="border-bottom: 1px solid; border-top:1px solid">Command</td>
-<td style="border-bottom: 1px solid; border-top:1px solid">Data Source</td>
-</tr>
-</thead>
-<tbody>
-  <tr>
-  <td style="border-bottom: 1px solid;">RIB</td>
-  <td style="border-bottom: 1px solid;"><code style="font-size:120%;"><b>show ip route</b></code></td>
-  <td style="border-bottom: 1px solid;">Routing sources</td>
-  </tr>
-  <td style="border-bottom: 1px solid;">FIB</td>
-  <td style="border-bottom: 1px solid;"><code style="font-size:120%;"><b>show ip cef</b></code></td>
-  <td style="border-bottom: 1px solid;">RIB, ARP tables</td>
-  </tr>
-  <td style="border-bottom: 1px solid;">LIB</td>
-  <td style="border-bottom: 1px solid;"><code style="font-size:120%;"><b>show mpls ldp bindings</b></code>. 
-  If BGP is used for label exchange, then the command is <code style="font-size:120%;"><b>show ip bgp labels</b></code></td>
-  <td style="border-bottom: 1px solid;">RIB, Label exchange protocols such as LDP, TDP, BGP, RSVP, Static labels</td>
-  </tr>
-  <td style="border-bottom: 1px solid;">LFIB</td>
-  <td style="border-bottom: 1px solid;"><code style="font-size:120%;"><b>show mpls forwarding-table</b></code></td>
-  <td style="border-bottom: 1px solid;">LIB, RIB, FIB</td>
-  </tr>
-</tbody>
-</table>
-</p>
-
-<h3>To Display LDP configuration parameters</h3>
+<h2>LDP Operational State</h2>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
       	<code style="font-size:120%">
-R2#show mpls ldp parameters                                       <br>
+R2#<b>show mpls ldp parameters</b>                                       <br>
 LDP Feature Set Manager: State Initialized                        <br>
-  LDP features:                                                   <br>
-    Basic                                                         <br>
-    IP-over-MPLS                                                  <br>
-    TDP                                                           <br>
-    IGP-Sync                                                      <br>
-    Auto-Configuration                                            <br>
-    TCP-MD5-Rollover                                              <br>
+&nbsp;&nbsp;LDP features:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                             <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Basic&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                             <br>
+&nbsp;&nbsp;&nbsp;&nbsp;IP-over-MPLS&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                            <br>
+&nbsp;&nbsp;&nbsp;&nbsp;TDP&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                             <br>
+&nbsp;&nbsp;&nbsp;&nbsp;IGP-Sync&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                            <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Auto-Configuration                                            <br>
+&nbsp;&nbsp;&nbsp;&nbsp;TCP-MD5-Rollover&nbsp;&nbsp;                                            <br>
 Protocol version: 1                                               <br>
 Session hold time: 180 sec; keep alive interval: 60 sec           <br>
 Discovery hello: holdtime: 15 sec; interval: 5 sec                <br>
@@ -847,102 +797,122 @@ LDP loop detection: off                                           <br>
 R2#
 </code></div>
 
-<h4>Interfaces: Per-interface MPLS forwarding information</h4>
-<p>
-R7#
-R7#show mpls interface
-Interface              IP            Tunnel   BGP Static Operational
-
-
-
-GigabitEthernet2/0     Yes (ldp)     No       No  No     Yes
-GigabitEthernet3/0     Yes (ldp)     No       No  No     Yes
-FastEthernet6/0        Yes (ldp)     No       No  No     Yes
-R7#
-R7#
-
-</p>
-
-<h2>To view the FIB</h2>
+<h2>MPLS Interfaces</h2>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
       	<code style="font-size:120%">
-R2#show ip cef
-Prefix               Next Hop             Interface
-0.0.0.0/0            no route
-0.0.0.0/8            drop
-0.0.0.0/32           receive
-2.2.2.2/32           receive              Loopback10
-3.3.3.3/32           10.10.23.2           GigabitEthernet0/0
-4.4.4.4/32           10.10.23.2           GigabitEthernet0/0
-5.5.5.5/32           10.10.23.2           GigabitEthernet0/0
-6.6.6.6/32           10.10.23.2           GigabitEthernet0/0
-7.7.7.7/32           10.10.23.2           GigabitEthernet0/0
-10.10.12.0/30        attached             GigabitEthernet3/0
-10.10.12.0/32        receive              GigabitEthernet3/0
-10.10.12.1/32        attached             GigabitEthernet3/0
-10.10.12.2/32        receive              GigabitEthernet3/0
-10.10.12.3/32        receive              GigabitEthernet3/0
-10.10.23.0/30        attached             GigabitEthernet0/0
-10.10.23.0/32        receive              GigabitEthernet0/0
-10.10.23.1/32        receive              GigabitEthernet0/0
-10.10.23.2/32        attached             GigabitEthernet0/0
-10.10.23.3/32        receive              GigabitEthernet0/0
-10.10.25.0/30        attached             Serial5/0
-10.10.25.0/32        receive              Serial5/0
-10.10.25.1/32        receive              Serial5/0
-10.10.25.3/32        receive              Serial5/0
-10.10.26.0/30        attached             GigabitEthernet2/0
-10.10.26.0/32        receive              GigabitEthernet2/0
-10.10.26.1/32        receive              GigabitEthernet2/0
-10.10.26.2/32        attached             GigabitEthernet2/0
-10.10.26.3/32        receive              GigabitEthernet2/0
-10.10.34.0/30        10.10.23.2           GigabitEthernet0/0
-10.10.36.0/30        10.10.23.2           GigabitEthernet0/0
-10.10.47.0/30        10.10.23.2           GigabitEthernet0/0
-10.10.57.0/30        10.10.23.2           GigabitEthernet0/0
-10.10.67.0/30        10.10.23.2           GigabitEthernet0/0
-10.10.78.0/30        10.10.23.2           GigabitEthernet0/0
-127.0.0.0/8          drop
-224.0.0.0/4          drop
-224.0.0.0/24         receive
-240.0.0.0/4          drop
-255.255.255.255/32   receive
-R2#
-R2#show ip cef 10.10.78.0 detail
-10.10.78.0/30, epoch 0
-  local label info: global/2010
-  nexthop 10.10.23.2 GigabitEthernet0/0 label 3011
+R7#<b>show mpls interface</b>                                                <br>
+Interface&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;IP&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Tunnel&nbsp;&nbsp; BGP Static Operational  <br>
+GigabitEthernet2/0&nbsp;&nbsp;&nbsp;&nbsp; Yes (ldp)&nbsp;&nbsp;&nbsp;&nbsp; No&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; No&nbsp;&nbsp;No&nbsp;&nbsp;&nbsp;&nbsp; Yes          <br>
+GigabitEthernet3/0&nbsp;&nbsp;&nbsp;&nbsp; Yes (ldp)&nbsp;&nbsp;&nbsp;&nbsp; No&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; No&nbsp;&nbsp;No&nbsp;&nbsp;&nbsp;&nbsp; Yes          <br>
+FastEthernet6/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Yes (ldp)&nbsp;&nbsp;&nbsp;&nbsp; No&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; No&nbsp;&nbsp;No&nbsp;&nbsp;&nbsp;&nbsp; Yes          <br>
 </code></div>
 
-<h2>To show the Label Forwarding Table</h2>
+</p>
+
+<h2>Forwarding Information Base (FIB)</h2>
+<p>
+The FIB is created using data from the RIB and layer 2 sources such as the ARP 
+table. Its contents can be viewed using the command <code><b>show ip cef</b></code>.
+</p>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+      	<code style="font-size:120%">
+R2#<b>show ip cef</b><br>
+Prefix&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Next Hop&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Interface&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+0.0.0.0/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;no route&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+0.0.0.0/8&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;drop&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+0.0.0.0/32&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; receive&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <br>
+2.2.2.2/32&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; receive&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Loopback10&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <br>
+3.3.3.3/32&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 10.10.23.2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; GigabitEthernet0/0 <br>
+4.4.4.4/32&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 10.10.23.2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; GigabitEthernet0/0 <br>
+5.5.5.5/32&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 10.10.23.2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; GigabitEthernet0/0 <br>
+6.6.6.6/32&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 10.10.23.2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; GigabitEthernet0/0 <br>
+7.7.7.7/32&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 10.10.23.2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; GigabitEthernet0/0 <br>
+10.10.12.0/30&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;attached&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; GigabitEthernet3/0 <br>
+10.10.12.0/32&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;receive&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;GigabitEthernet3/0 <br>
+10.10.12.1/32&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;attached&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; GigabitEthernet3/0 <br>
+10.10.12.2/32&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;receive&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;GigabitEthernet3/0 <br>
+10.10.12.3/32&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;receive&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;GigabitEthernet3/0 <br>
+10.10.23.0/30&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;attached&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; GigabitEthernet0/0 <br>
+10.10.23.0/32&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;receive&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;GigabitEthernet0/0 <br>
+10.10.23.1/32&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;receive&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;GigabitEthernet0/0 <br>
+10.10.23.2/32&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;attached&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; GigabitEthernet0/0 <br>
+10.10.23.3/32&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;receive&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;GigabitEthernet0/0 <br>
+10.10.25.0/30&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;attached&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Serial5/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+10.10.25.0/32&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;receive&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Serial5/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+10.10.25.1/32&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;receive&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Serial5/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+10.10.25.3/32&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;receive&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Serial5/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+10.10.26.0/30&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;attached&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; GigabitEthernet2/0 <br>
+10.10.26.0/32&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;receive&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;GigabitEthernet2/0 <br>
+10.10.26.1/32&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;receive&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;GigabitEthernet2/0 <br>
+10.10.26.2/32&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;attached&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; GigabitEthernet2/0 <br>
+10.10.26.3/32&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;receive&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;GigabitEthernet2/0 <br>
+10.10.34.0/30&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.10.23.2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; GigabitEthernet0/0 <br>
+10.10.36.0/30&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.10.23.2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; GigabitEthernet0/0 <br>
+10.10.47.0/30&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.10.23.2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; GigabitEthernet0/0 <br>
+10.10.57.0/30&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.10.23.2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; GigabitEthernet0/0 <br>
+10.10.67.0/30&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.10.23.2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; GigabitEthernet0/0 <br>
+10.10.78.0/30&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.10.23.2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; GigabitEthernet0/0 <br>
+127.0.0.0/8&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;drop&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+224.0.0.0/4&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;drop&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+224.0.0.0/24&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; receive&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <br>
+240.0.0.0/4&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;drop&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+255.255.255.255/32&nbsp;&nbsp; receive&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <br>
+R2#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+R2#<b>show ip cef 10.10.78.0 detail</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <br>
+10.10.78.0/30, epoch 0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <br>
+&nbsp;&nbsp;local label info: global/2010&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;nexthop 10.10.23.2 GigabitEthernet0/0 label 3011&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+</code></div>
+
+<h2>Label Forwarding Information Base (LFIB)</h2>
+<p>
+The LFIB is created using information from the LIB, RIB and FIB.
+It operates at the data plane of MPLS.
+
+To show the Label Forwarding Information 
+Base. Command can also be used to view the
+number of packets switched by MPLS. (Label
+Forwarding Information Base – LFIB). This
+table displays the LDP, TDP receive labels. ‘No
+Label’ indicates removal of all labels.  
+
+</p>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+      	<code style="font-size:120%">
+R2#<b>show mpls forwarding-table</b>                                               <br>
+Local&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Outgoing&nbsp;&nbsp; Prefix&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Bytes Label&nbsp;&nbsp; Outgoing&nbsp;&nbsp; Next Hop&nbsp;&nbsp;  <br>
+Label&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Label&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;or Tunnel Id&nbsp;&nbsp;&nbsp;&nbsp; Switched&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;interface&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  <br>
+2000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Pop Label&nbsp;&nbsp;10.10.34.0/30&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Gi0/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.10.23.2  <br>
+2001&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Pop Label&nbsp;&nbsp;10.10.36.0/30&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Gi0/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.10.23.2  <br>
+2002&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 3004&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 10.10.47.0/30&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Gi0/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.10.23.2  <br>
+2003&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 3005&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 10.10.57.0/30&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Gi0/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.10.23.2  <br>
+2004&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 3006&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 10.10.67.0/30&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Gi0/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.10.23.2  <br>
+2005&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 3001&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 7.7.7.7/32&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Gi0/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.10.23.2  <br>
+2006&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Pop Label&nbsp;&nbsp;3.3.3.3/32&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Gi0/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.10.23.2  <br>
+2007&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 3007&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 4.4.4.4/32&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Gi0/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.10.23.2  <br>
+2008&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 3008&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 6.6.6.6/32&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Gi0/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.10.23.2  <br>
+2009&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 3009&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 5.5.5.5/32&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Gi0/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.10.23.2  <br>
+2010&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 3011&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 10.10.78.0/30&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Gi0/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.10.23.2  <br>
+</code></div>
+</p>
 <p>
 The "Pop Label" valaue implies that a delete operation is to take place (entire)
 on label stack.
 </p>
-<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-      	<code style="font-size:120%">
-R2#
-R2#show mpls forwarding-table                                               <br>
-Local      Outgoing   Prefix           Bytes Label   Outgoing   Next Hop    <br>
-Label      Label      or Tunnel Id     Switched      interface              <br>
-2000       Pop Label  10.10.34.0/30    0             Gi0/0      10.10.23.2  <br>
-2001       Pop Label  10.10.36.0/30    0             Gi0/0      10.10.23.2  <br>
-2002       3004       10.10.47.0/30    0             Gi0/0      10.10.23.2  <br>
-2003       3005       10.10.57.0/30    0             Gi0/0      10.10.23.2  <br>
-2004       3006       10.10.67.0/30    0             Gi0/0      10.10.23.2  <br>
-2005       3001       7.7.7.7/32       0             Gi0/0      10.10.23.2  <br>
-2006       Pop Label  3.3.3.3/32       0             Gi0/0      10.10.23.2  <br>
-2007       3007       4.4.4.4/32       0             Gi0/0      10.10.23.2  <br>
-2008       3008       6.6.6.6/32       0             Gi0/0      10.10.23.2  <br>
-2009       3009       5.5.5.5/32       0             Gi0/0      10.10.23.2  <br>
-2010       3011       10.10.78.0/30    0             Gi0/0      10.10.23.2  <br>
-R2#
-R2#
-</code></div>
 
-<h2>Traceroute</h2>
+<h2>Trace the LSP</h2>
 <p>
+To confirm MPLS is used in label switching. 
+Labels used, EXP configured and PHP action source_ipaddr / interface
+is displayed.
+
+In IOS,when a traceroute packet is sent, when a TTL packet expires at a hop (LSR), 
+the value of the labels iss placed on the ICMP packets. This is displayed in the 
+traceroute ICMP expired packet.
+
 To verify operation of MPLS, issue a traceroute from R1 to R8
 </p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
@@ -994,178 +964,195 @@ null’ label and mpls forwarding-table displays ‘Pop label’
 By default, the Layer 3 TTL value of a packet is copied to the MPLS header TTL section.
 </p>
 
-<h2>LDP Binding</h2>
+<h2>Label Information Base (LIB)</h2>
 <p>
- Show the LDP Label Information Base (LIB)
+The LIB operates at the MPLS control plane. If BGP is used for label exchange, 
+then the command is <code style="font-size:120%;">
+<b>show ip bgp labels</b></code>
 </p>
 
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
       	<code style="font-size:120%">
-R2#show mpls ldp binding                                                     <br>
-  lib entry: 2.2.2.2/32, rev 2                                               <br>
-        local binding:  label: imp-null                                      <br>
-        remote binding: lsr: 3.3.3.3:0, label: 3000                          <br>
-        remote binding: lsr: 6.6.6.6:0, label: 6000                          <br>
-        remote binding: lsr: 5.5.5.5:0, label: 5000                          <br>
-  lib entry: 3.3.3.3/32, rev 22                                              <br>
-        local binding:  label: 2006                                          <br>
-        remote binding: lsr: 3.3.3.3:0, label: imp-null                      <br>
-        remote binding: lsr: 6.6.6.6:0, label: 6001                          <br>
-        remote binding: lsr: 5.5.5.5:0, label: 5001                          <br>
-  lib entry: 4.4.4.4/32, rev 24                                              <br>
-        local binding:  label: 2007                                          <br>
-        remote binding: lsr: 3.3.3.3:0, label: 3007                          <br>
-        remote binding: lsr: 6.6.6.6:0, label: 6002                          <br>
-        remote binding: lsr: 5.5.5.5:0, label: 5002                          <br>
-  lib entry: 5.5.5.5/32, rev 28                                              <br>
-        local binding:  label: 2009                                          <br>
-        remote binding: lsr: 3.3.3.3:0, label: 3009                          <br>
-        remote binding: lsr: 6.6.6.6:0, label: 6009                          <br>
-        remote binding: lsr: 5.5.5.5:0, label: imp-null                      <br>
-  lib entry: 6.6.6.6/32, rev 26                                              <br>
-        local binding:  label: 2008                                          <br>
-        remote binding: lsr: 3.3.3.3:0, label: 3008                          <br>
-        remote binding: lsr: 6.6.6.6:0, label: imp-null                      <br>
-        remote binding: lsr: 5.5.5.5:0, label: 5003                          <br>
-  lib entry: 7.7.7.7/32, rev 20                                              <br>
-        local binding:  label: 2005                                          <br>
-        remote binding: lsr: 3.3.3.3:0, label: 3001                          <br>
-        remote binding: lsr: 6.6.6.6:0, label: 6003                          <br>
-        remote binding: lsr: 5.5.5.5:0, label: 5004                          <br>
-  lib entry: 10.10.12.0/30, rev 34                                           <br>
-        local binding:  label: imp-null                                      <br>
-        remote binding: lsr: 3.3.3.3:0, label: 3010                          <br>
-        remote binding: lsr: 6.6.6.6:0, label: 6010                          <br>
-        remote binding: lsr: 5.5.5.5:0, label: 5011                          <br>
-  lib entry: 10.10.23.0/30, rev 4                                            <br>
-        local binding:  label: imp-null                                      <br>
-        remote binding: lsr: 3.3.3.3:0, label: imp-null                      <br>
-        remote binding: lsr: 6.6.6.6:0, label: 6004                          <br>
-        remote binding: lsr: 5.5.5.5:0, label: 5005                          <br>
-  lib entry: 10.10.25.0/30, rev 32                                           <br>
-        local binding:  label: imp-null                                      <br>
-        remote binding: lsr: 3.3.3.3:0, label: 3002                          <br>
-        remote binding: lsr: 6.6.6.6:0, label: 6005                          <br>
-        remote binding: lsr: 5.5.5.5:0, label: imp-null                      <br>
-  lib entry: 10.10.26.0/30, rev 8                                            <br>
-        local binding:  label: imp-null                                      <br>
-        remote binding: lsr: 3.3.3.3:0, label: 3003                          <br>
-        remote binding: lsr: 6.6.6.6:0, label: imp-null                      <br>
-        remote binding: lsr: 5.5.5.5:0, label: 5006                          <br>
-  lib entry: 10.10.34.0/30, rev 10                                           <br>
-        local binding:  label: 2000                                          <br>
-        remote binding: lsr: 3.3.3.3:0, label: imp-null                      <br>
-        remote binding: lsr: 6.6.6.6:0, label: 6006                          <br>
-        remote binding: lsr: 5.5.5.5:0, label: 5007                          <br>
-  lib entry: 10.10.36.0/30, rev 12                                           <br>
-        local binding:  label: 2001                                          <br>
-        remote binding: lsr: 3.3.3.3:0, label: imp-null                      <br>
-        remote binding: lsr: 6.6.6.6:0, label: imp-null                      <br>
-        remote binding: lsr: 5.5.5.5:0, label: 5008                          <br>
-  lib entry: 10.10.47.0/30, rev 14                                           <br>
-        local binding:  label: 2002                                          <br>
-        remote binding: lsr: 3.3.3.3:0, label: 3004                          <br>
-        remote binding: lsr: 6.6.6.6:0, label: 6007                          <br>
-        remote binding: lsr: 5.5.5.5:0, label: 5009                          <br>
-  lib entry: 10.10.57.0/30, rev 16                                           <br>
-        local binding:  label: 2003                                          <br>
-        remote binding: lsr: 3.3.3.3:0, label: 3005                          <br>
-        remote binding: lsr: 6.6.6.6:0, label: 6008                          <br>
-        remote binding: lsr: 5.5.5.5:0, label: imp-null                      <br>
-  lib entry: 10.10.67.0/30, rev 18                                           <br>
-        local binding:  label: 2004                                          <br>
-        remote binding: lsr: 3.3.3.3:0, label: 3006                          <br>
-        remote binding: lsr: 6.6.6.6:0, label: imp-null                      <br>
-        remote binding: lsr: 5.5.5.5:0, label: 5010                          <br>
-  lib entry: 10.10.78.0/30, rev 36                                           <br>
-        local binding:  label: 2010                                          <br>
-        remote binding: lsr: 3.3.3.3:0, label: 3011                          <br>
-        remote binding: lsr: 6.6.6.6:0, label: 6011                          <br>
-        remote binding: lsr: 5.5.5.5:0, label: 5012                          <br>
-R2#                                                                          <br>
+R2#<b>show mpls ldp binding</b>                                                     <br>
+&nbsp;&nbsp;lib entry: 2.2.2.2/32, rev 2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                     <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;local binding:&nbsp;&nbsp;label: imp-null&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                    <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;remote binding: lsr: 3.3.3.3:0, label: 3000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                    <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;remote binding: lsr: 6.6.6.6:0, label: 6000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                    <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;remote binding: lsr: 5.5.5.5:0, label: 5000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                    <br>
+&nbsp;&nbsp;lib entry: 3.3.3.3/32, rev 22&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                    <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;local binding:&nbsp;&nbsp;label: 2006&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                    <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;remote binding: lsr: 3.3.3.3:0, label: imp-null&nbsp;&nbsp;                    <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;remote binding: lsr: 6.6.6.6:0, label: 6001&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                    <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;remote binding: lsr: 5.5.5.5:0, label: 5001&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                    <br>
+&nbsp;&nbsp;lib entry: 4.4.4.4/32, rev 24&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                    <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;local binding:&nbsp;&nbsp;label: 2007&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                    <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;remote binding: lsr: 3.3.3.3:0, label: 3007&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                    <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;remote binding: lsr: 6.6.6.6:0, label: 6002&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                    <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;remote binding: lsr: 5.5.5.5:0, label: 5002&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                    <br>
+&nbsp;&nbsp;lib entry: 5.5.5.5/32, rev 28&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                    <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;local binding:&nbsp;&nbsp;label: 2009&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                    <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;remote binding: lsr: 3.3.3.3:0, label: 3009&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                    <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;remote binding: lsr: 6.6.6.6:0, label: 6009&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                    <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;remote binding: lsr: 5.5.5.5:0, label: imp-null&nbsp;&nbsp;                    <br>
+&nbsp;&nbsp;lib entry: 6.6.6.6/32, rev 26&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                    <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;local binding:&nbsp;&nbsp;label: 2008&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                    <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;remote binding: lsr: 3.3.3.3:0, label: 3008&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                    <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;remote binding: lsr: 6.6.6.6:0, label: imp-null&nbsp;&nbsp;                    <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;remote binding: lsr: 5.5.5.5:0, label: 5003&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                    <br>
+&nbsp;&nbsp;lib entry: 7.7.7.7/32, rev 20&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                    <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;local binding:&nbsp;&nbsp;label: 2005&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                    <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;remote binding: lsr: 3.3.3.3:0, label: 3001&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                    <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;remote binding: lsr: 6.6.6.6:0, label: 6003&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                    <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;remote binding: lsr: 5.5.5.5:0, label: 5004&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                    <br>
+&nbsp;&nbsp;lib entry: 10.10.12.0/30, rev 34&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                     <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;local binding:&nbsp;&nbsp;label: imp-null&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                    <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;remote binding: lsr: 3.3.3.3:0, label: 3010&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                    <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;remote binding: lsr: 6.6.6.6:0, label: 6010&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                    <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;remote binding: lsr: 5.5.5.5:0, label: 5011&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                    <br>
+&nbsp;&nbsp;lib entry: 10.10.23.0/30, rev 4&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                    <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;local binding:&nbsp;&nbsp;label: imp-null&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                    <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;remote binding: lsr: 3.3.3.3:0, label: imp-null&nbsp;&nbsp;                    <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;remote binding: lsr: 6.6.6.6:0, label: 6004&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                    <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;remote binding: lsr: 5.5.5.5:0, label: 5005&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                    <br>
+&nbsp;&nbsp;lib entry: 10.10.25.0/30, rev 32&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                     <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;local binding:&nbsp;&nbsp;label: imp-null&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                    <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;remote binding: lsr: 3.3.3.3:0, label: 3002&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                    <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;remote binding: lsr: 6.6.6.6:0, label: 6005&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                    <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;remote binding: lsr: 5.5.5.5:0, label: imp-null&nbsp;&nbsp;                    <br>
+&nbsp;&nbsp;lib entry: 10.10.26.0/30, rev 8&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                    <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;local binding:&nbsp;&nbsp;label: imp-null&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                    <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;remote binding: lsr: 3.3.3.3:0, label: 3003&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                    <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;remote binding: lsr: 6.6.6.6:0, label: imp-null&nbsp;&nbsp;                    <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;remote binding: lsr: 5.5.5.5:0, label: 5006&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                    <br>
+&nbsp;&nbsp;lib entry: 10.10.34.0/30, rev 10&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                     <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;local binding:&nbsp;&nbsp;label: 2000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                    <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;remote binding: lsr: 3.3.3.3:0, label: imp-null&nbsp;&nbsp;                    <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;remote binding: lsr: 6.6.6.6:0, label: 6006&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                    <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;remote binding: lsr: 5.5.5.5:0, label: 5007&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                    <br>
+&nbsp;&nbsp;lib entry: 10.10.36.0/30, rev 12&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                     <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;local binding:&nbsp;&nbsp;label: 2001&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                    <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;remote binding: lsr: 3.3.3.3:0, label: imp-null&nbsp;&nbsp;                    <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;remote binding: lsr: 6.6.6.6:0, label: imp-null&nbsp;&nbsp;                    <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;remote binding: lsr: 5.5.5.5:0, label: 5008&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                    <br>
+&nbsp;&nbsp;lib entry: 10.10.47.0/30, rev 14&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                     <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;local binding:&nbsp;&nbsp;label: 2002&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                    <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;remote binding: lsr: 3.3.3.3:0, label: 3004&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                    <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;remote binding: lsr: 6.6.6.6:0, label: 6007&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                    <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;remote binding: lsr: 5.5.5.5:0, label: 5009&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                    <br>
+&nbsp;&nbsp;lib entry: 10.10.57.0/30, rev 16&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                     <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;local binding:&nbsp;&nbsp;label: 2003&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                    <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;remote binding: lsr: 3.3.3.3:0, label: 3005&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                    <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;remote binding: lsr: 6.6.6.6:0, label: 6008&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                    <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;remote binding: lsr: 5.5.5.5:0, label: imp-null&nbsp;&nbsp;                    <br>
+&nbsp;&nbsp;lib entry: 10.10.67.0/30, rev 18&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                     <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;local binding:&nbsp;&nbsp;label: 2004&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                    <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;remote binding: lsr: 3.3.3.3:0, label: 3006&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                    <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;remote binding: lsr: 6.6.6.6:0, label: imp-null&nbsp;&nbsp;                    <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;remote binding: lsr: 5.5.5.5:0, label: 5010&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                    <br>
+&nbsp;&nbsp;lib entry: 10.10.78.0/30, rev 36&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                     <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;local binding:&nbsp;&nbsp;label: 2010&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                    <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;remote binding: lsr: 3.3.3.3:0, label: 3011&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                    <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;remote binding: lsr: 6.6.6.6:0, label: 6011&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                    <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;remote binding: lsr: 5.5.5.5:0, label: 5012&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                    <br>
+R2#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                    <br>
 </code></div>
 
 <h2>LDP Discovery</h2>
 <p>
+To view LDP Hellos and troubleshoot LDP operation. If interface shows xmit, then 
+the LSR neighbor relationship has a problem. Hello messages are not being received
+on the interface. It should be xmit/recv. It displays the LDP ID. 
  Display sources for locally generated LDP Discovery Hello
 </p>
-
+<p>
+At the end of the LDP ID is the value zero (0). 
+This value will always be zero unless running MPLS in cell mode which require 
+specially configured ATM interfaces. This command also verifies the exchange of 
+Hello messages using UDP.
+</p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
       	<code style="font-size:120%">
-R2#
-R2#show mpls ldp discovery
- Local LDP Identifier:
-    2.2.2.2:0
-    Discovery Sources:
-    Interfaces:
-        GigabitEthernet0/0 (ldp): xmit/recv
-            LDP Id: 3.3.3.3:0
-        GigabitEthernet2/0 (ldp): xmit/recv
-            LDP Id: 6.6.6.6:0
-        Serial5/0 (ldp): xmit/recv
-            LDP Id: 5.5.5.5:0
+R2#<b>show mpls ldp discovery</b><br>
+ Local LDP Identifier:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   <br>
+&nbsp;&nbsp;&nbsp;&nbsp;2.2.2.2:0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Discovery Sources:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Interfaces:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;GigabitEthernet0/0 (ldp): xmit/recv  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;LDP Id: 3.3.3.3:0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;GigabitEthernet2/0 (ldp): xmit/recv  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;LDP Id: 6.6.6.6:0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Serial5/0 (ldp): xmit/recv&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;LDP Id: 5.5.5.5:0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  <br>
 R2#
 </code></div>
 
 <h2>LDP Neighbors</h2>
+<p>
+LDP peers can be viewed using the command <code><b>show mpls ldp neighbor</b></code>.
+
+
+ To view neighboring LSRs. The optional ‘detail’ shows authentication information.
+    This command also verifies the operational state of the TCP session between
+    the LDP neighbors.
+</p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
       	<code style="font-size:120%">
-R2#show mpls ldp neighbor                                                        <br>
-    Peer LDP Ident: 3.3.3.3:0                                                    <br>                                                                       
-        No TCP connection; Downstream                                            <br>                                                                       
-        Up time: 00:17:48                                                        <br>                                                                       
-        Addresses bound to peer LDP Ident:                                       <br>                                                                       
-          10.10.23.2      10.10.34.1      10.10.36.1      3.3.3.3                <br>                                                                       
-    Peer LDP Ident: 6.6.6.6:0                                                    <br>                                                                       
-        No TCP connection; Downstream                                            <br>                                                                       
-        Up time: 00:17:38                                                        <br>                                                                       
-        Addresses bound to peer LDP Ident:                                       <br>                                                                       
-          10.10.26.2      10.10.36.2      10.10.67.1      6.6.6.6                <br>                                                                       
-    Peer LDP Ident: 5.5.5.5:0                                                    <br>                                                                       
-        No TCP connection; Downstream                                            <br>                                                                       
-        Up time: 00:17:21                                                        <br>                                                                       
-        Addresses bound to peer LDP Ident:                                       <br>                                                                       
-          10.10.57.1      5.5.5.5         10.10.25.2                             <br>                                                                       
-R2#                                                                              <br>                                                                       
-R2#show mpls ldp neighbor                                                        <br>
-*Feb  8 02:30:24.990: %LDP-5-NBRCHG: LDP Neighbor 3.3.3.3:0 (3) is UP            <br>                                                                      
-R2#show mpls ldp neighbor detail                                                 <br>                                                                       
-    Peer LDP Ident: 3.3.3.3:0                                                    <br>                                                                       
-        No TCP connection; Downstream; Last TIB rev sent -1                      <br>                                                                       
-        Up time: 00:17:50; UID: 38; Peer Id 3;                                   <br>                                                                       
-        Peer state: destroyed                                                    <br>                                                                       
-        Peer holdtime: 180000 ms; KA interval: 60000 ms; Peer state: destroyed   <br>                                                                       
-    Peer LDP Ident: 6.6.6.6:0                                                    <br>                                                                       
-        No TCP connection; Downstream; Last TIB rev sent -1                      <br>                                                                       
-        Up time: 00:17:41; UID: 39; Peer Id 0;                                   <br>                                                                       
-        Addresses bound to peer LDP Ident:                                       <br>                                                                       
-          10.10.26.2      10.10.36.2      10.10.67.1      6.6.6.6                <br>                                                                       
-        Peer state: destroyed                                                    <br>                                                                       
-        Peer holdtime: 180000 ms; KA interval: 60000 ms; Peer state: destroyed   <br>                                                                       
-    Peer LDP Ident: 5.5.5.5:0                                                    <br>                                                                       
-        No TCP connection; Downstream; Last TIB rev sent -1                      <br>                                                                       
-        Up time: 00:17:24; UID: 40; Peer Id 1;                                   <br>                                                                       
-        Addresses bound to peer LDP Ident:                                       <br>                                                                       
-          10.10.57.1      5.5.5.5         10.10.25.2                             <br>                                                                       
-        Peer state: destroyed                                                    <br>                                                                       
-        Peer holdtime: 180000 ms; KA interval: 60000 ms; Peer state: destroyed   <br>                                                                       
-    Peer LDP Ident: 3.3.3.3:0; Local LDP Ident 2.2.2.2:0                         <br>                                                                       
-        TCP connection: 3.3.3.3.12343 - 2.2.2.2.646                              <br>                                                                       
-        Password: not required, none, in use                                     <br>                                                                       
-        State: Oper; Msgs sent/rcvd: 19/19; Downstream; Last TIB rev sent 36     <br>                                                                       
-        Up time: 00:00:02; UID: 41; Peer Id 2;                                   <br>                                                                       
-        LDP discovery sources:                                                   <br>                                                                       
-          GigabitEthernet0/0; Src IP addr: 10.10.23.2                            <br>                                                                       
-            holdtime: 15000 ms, hello interval: 5000 ms                          <br>                                                                       
-        Addresses bound to peer LDP Ident:                                       <br>                                                                       
-          10.10.23.2      10.10.34.1      10.10.36.1      3.3.3.3                <br>                                                                       
-        Peer holdtime: 180000 ms; KA interval: 60000 ms; Peer state: estab       <br>                                                                       
-        Capabilities Sent:                                                       <br>                                                                       
-          [Dynamic Announcement (0x0506)]                                        <br>                                                                       
-          [Typed Wildcard (0x050B)]                                              <br>                                                                       
-        Capabilities Received:                                                   <br>                                                                       
-          [Dynamic Announcement (0x0506)]                                        <br>                                                                       
-          [Typed Wildcard (0x050B)]                                              <br>                                                                       
+R2#<b>show mpls ldp neighbor</b>                                                        <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Peer LDP Ident: 3.3.3.3:0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    <br>                                                                       
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;No TCP connection; Downstream&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    <br>                                                                       
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Up time: 00:17:48&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    <br>                                                                       
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Addresses bound to peer LDP Ident:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;     <br>                                                                       
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.10.23.2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.10.34.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.10.36.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3.3.3.3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    <br>                                                                       
+&nbsp;&nbsp;&nbsp;&nbsp;Peer LDP Ident: 6.6.6.6:0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    <br>                                                                       
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;No TCP connection; Downstream&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    <br>                                                                       
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Up time: 00:17:38&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    <br>                                                                       
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Addresses bound to peer LDP Ident:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;     <br>                                                                       
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.10.26.2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.10.36.2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.10.67.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;6.6.6.6&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    <br>                                                                       
+&nbsp;&nbsp;&nbsp;&nbsp;Peer LDP Ident: 5.5.5.5:0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    <br>                                                                       
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;No TCP connection; Downstream&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    <br>                                                                       
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Up time: 00:17:21&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    <br>                                                                       
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Addresses bound to peer LDP Ident:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;     <br>                                                                       
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.10.57.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;5.5.5.5&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 10.10.25.2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;     <br>                                                                       
+R2#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    <br>                                                                       
+R2#show mpls ldp neighbor&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    <br>
+*Feb&nbsp;&nbsp;8 02:30:24.990: %LDP-5-NBRCHG: LDP Neighbor 3.3.3.3:0 (3) is UP&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    <br>                                                                      
+R2#show mpls ldp neighbor detail&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;     <br>                                                                       
+&nbsp;&nbsp;&nbsp;&nbsp;Peer LDP Ident: 3.3.3.3:0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    <br>                                                                       
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;No TCP connection; Downstream; Last TIB rev sent -1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    <br>                                                                       
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Up time: 00:17:50; UID: 38; Peer Id 3;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;     <br>                                                                       
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Peer state: destroyed&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    <br>                                                                       
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Peer holdtime: 180000 ms; KA interval: 60000 ms; Peer state: destroyed   <br>                                                                       
+&nbsp;&nbsp;&nbsp;&nbsp;Peer LDP Ident: 6.6.6.6:0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    <br>                                                                       
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;No TCP connection; Downstream; Last TIB rev sent -1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    <br>                                                                       
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Up time: 00:17:41; UID: 39; Peer Id 0;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;     <br>                                                                       
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Addresses bound to peer LDP Ident:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;     <br>                                                                       
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.10.26.2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.10.36.2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.10.67.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;6.6.6.6&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    <br>                                                                       
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Peer state: destroyed&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    <br>                                                                       
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Peer holdtime: 180000 ms; KA interval: 60000 ms; Peer state: destroyed   <br>                                                                       
+&nbsp;&nbsp;&nbsp;&nbsp;Peer LDP Ident: 5.5.5.5:0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    <br>                                                                       
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;No TCP connection; Downstream; Last TIB rev sent -1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    <br>                                                                       
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Up time: 00:17:24; UID: 40; Peer Id 1;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;     <br>                                                                       
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Addresses bound to peer LDP Ident:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;     <br>                                                                       
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.10.57.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;5.5.5.5&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 10.10.25.2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;     <br>                                                                       
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Peer state: destroyed&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    <br>                                                                       
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Peer holdtime: 180000 ms; KA interval: 60000 ms; Peer state: destroyed   <br>                                                                       
+&nbsp;&nbsp;&nbsp;&nbsp;Peer LDP Ident: 3.3.3.3:0; Local LDP Ident 2.2.2.2:0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;     <br>                                                                       
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;TCP connection: 3.3.3.3.12343 - 2.2.2.2.646&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    <br>                                                                       
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Password: not required, none, in use&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;     <br>                                                                       
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;State: Oper; Msgs sent/rcvd: 19/19; Downstream; Last TIB rev sent 36     <br>                                                                       
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Up time: 00:00:02; UID: 41; Peer Id 2;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;     <br>                                                                       
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;LDP discovery sources:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;     <br>                                                                       
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;GigabitEthernet0/0; Src IP addr: 10.10.23.2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    <br>                                                                       
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;holdtime: 15000 ms, hello interval: 5000 ms&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    <br>                                                                       
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Addresses bound to peer LDP Ident:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;     <br>                                                                       
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.10.23.2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.10.34.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.10.36.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3.3.3.3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    <br>                                                                       
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Peer holdtime: 180000 ms; KA interval: 60000 ms; Peer state: estab&nbsp;&nbsp;     <br>                                                                       
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Capabilities Sent:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;     <br>                                                                       
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[Dynamic Announcement (0x0506)]&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    <br>                                                                       
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[Typed Wildcard (0x050B)]&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    <br>                                                                       
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Capabilities Received:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;     <br>                                                                       
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[Dynamic Announcement (0x0506)]&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    <br>                                                                       
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[Typed Wildcard (0x050B)]&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    <br>                                                                       
 R2#                                                                                                                                                      
 </code></div>
 
