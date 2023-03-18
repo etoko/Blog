@@ -48,6 +48,70 @@ LSRs do not run BGP. They only run MPLS. The PE routers form an iBGP neighborshi
 PE routers will receive enterprise routes shared from the CE routes usually through 
 an IGP neighborship. However, there may be cases where eBGP is run between PE and CE routers.
 </p>
+
+<p>
+MPLS L3VPNs have two basic components:
+  <ol>
+    <li>Separation of customer routing information.
+      <ul>
+        <li>This is implemented through configuration of VRF instances where 
+        different customers have different "virtual" routing tables.</li>
+        <li>IGP/BGP run inside the VRF between the customer and SP.</li>
+      </ul>
+      </li>
+    <li>Exchange of customer's routing info inside the SP.
+    <ul>
+      <li>MP-BGP operates through the SP network.</li>
+      <li>Traffic is label switched towards BGP next-hops.</li>
+    </ul>
+    </li>
+  </ol>
+</p>
+
+<p>
+MPLS L3VPN components:
+<ul>
+  <li>CE devices</li>
+  <li>PE-CE routing:
+    <ul>
+      <li>No MPLS required</li>
+      <li>Normal IPv4 and IPv6 routing</li>
+      <li>All IPv4 protocols supported.</li>
+      <li>Some IPv6 protocols supported/</li>
+    </ul>
+  </li>
+</ul>
+</p>
+<p>
+At the core:
+<ul>
+  <li>MPLS core (P & PE) devices</li>
+  <li>IGP + LDP:
+    <ul>
+      <li>Goal is to establish LSP between PE /32 loopbacks.</li>
+      <li>Traceroute between loopbacks for verification.</li>
+    </ul>
+  </li>
+  <li>Other labeling methods supported such as BGP+labelm RSVP-TE, etc.
+</ul>
+</p>
+<p>
+Redistribution:
+<ul>
+  <li>MPSL Edge(PE) devices:
+  <li>VRF</li>
+  <li>VPNv4 BGP
+  <ul>
+    <li>iBGP peering to remove PE /32 loopbacks</li>
+    <li>Separates customer control and data plane over MPLS core.</li>
+    <li>Other designs supported outside this scope such as VPNv4 RR, multihop 
+    eBGP VPNv4, etc..</li> 
+  </ul>
+  </li>
+  <li>Redistribution: VRF to BGP import and export policy.</li>
+</ul>
+</p>
+
 <h1>Steps to Create L3VPNs (MPLS)</h1>
 <p>
 To create L3VPNs, the following steps should be taken.
@@ -55,7 +119,7 @@ To create L3VPNs, the following steps should be taken.
 <li>Step 1: Ensure MPLS infrastructure is in place. i.e. IP routing, MPLS.</li>
 <li>Step 2: Create the VRFs and associate interfaces with the created VRFs on PE or edge LSRs</li>
 <li>Step 3: Configure MP-BGP peerings between the PE routers using VPNv4 address-family.</li>
-<li>Step 4: Configure a routing protocol between the PE and CE devices.</li>
+<li>Step 4: Route Exchange Between the PE and CE devices.</li>
 <li>Step 5: Redistribute routes between MP-BGP VRF address-family and PE-CE 
 routing protoocol (this is not needed if PE-CE routing uses eBGP).</li>
 <li>Step 6: Test connectivity.</li>
@@ -127,10 +191,13 @@ need to match as they are locally significant.
 
 <h3>Route Distinguisher (RD)</h3>
 <p>
-The Route Distinguisher (RD) is a 64-bit value usually of the format ASN:nn or 
+The Route Distinguisher (RD) is a 64-bit(8byte) value usually of the format ASN:nn or 
 IP address:nn where ASN is the Autonomous system number and nn is any random 
-number. RD is used by the PE to distinguish the different VRFs. It is locally 
-significant and does not need to match on the remote PE.
+number. RD is used by the PE to distinguish the different VRFs; to make different 
+multiple routes coming from different customers.
+The RD is used solely to make routes unique. This allows for overlapping IPv4 
+addresses between customers.
+It is locally significant and does not need to match on the remote PE.
 </p>
 
 <h3>VPNv4</h3>
@@ -140,8 +207,59 @@ of the RD (64bit) and the IP address/network address (32-bit). It is usually in
 the format RD:IP address. An example can be 65000:10000:10.10.20.1. VPNv4 
 addresses make addresses from the different enterprises unique. This results in the 
 ability of an MPLS SP to route traffic for different enterprises who happen to use
-the same network addresses.
+the same network addresses. The VPNv4 addres includes the MPLS VPN label.
 </p>
+<p>
+VPNv4 NLRI main attributes include:
+<ul>
+  <li>8 byte route distinguisher(RD)</li>
+  <li>IPv4 prefix and length</li>
+  <li>Next hop</li>
+  <li>MPLS VPN lable</li>
+</ul>
+</p>
+<p>
+VPNv4 routes can have more than one RT. This allows for complex VPN topologies:
+<ul>
+  <li>Full mesh</li>
+  <li>Hub and Spoke</li>
+  <li>Central services such as hosted email</li>
+</ul>
+</p>
+
+<h4>Controlling VPNv4 Routes</h4>
+<p>
+Route Distingiusher(RD) is used solely to make routes unique. It allows for 
+overlapping IPv4 addresses between customers. The new BGP extended community 
+attribute "route-target" is used to control what enters/exits the VRF table.
+<ul>
+  <li><b>export</b> route target: what routes will go from VRF into BGP.</li>
+  <li><b>"import"</b> route target: what routes will go from BGP into VRF.</li>
+</ul>
+It allows for granular control over what sites have what routes; the use of 
+route-map "import map" and "export map" allow control on a per prefix basis as an 
+alternative to the use of RD.
+</p>
+
+<h4>Transport Label vs VPN Label</h4>
+<p>
+L3VPN needs at least 2 labels to deliver traffic. Can be more with applications 
+like MPLS TE, FRR, etc. 
+</p>
+<p>
+Transport label: is the top most label.
+<ul>
+  <li>Tells the SP core routers which PE traffic is destined to, i.e., who is the exit 
+  point.</li>
+  <li>Typically derived drom LDP. Sometimes called the IGP label. 
+</ul>
+</p>
+<p>
+VPN Label:
+<li>Tells the PE router which CE traffic is destined to.</li>
+<li>Derived from VPNv4 advertisements of PE.</li>
+</p>
+
 <h3>Route Target (RT)</h3>
 <p>
 A route-target (RT) is a 64-bit value similar in format to the RD i.e. ASN:nn or 
@@ -168,6 +286,20 @@ from CUST-1 in R2 to VRF CUST-2_BRANCH. Note that the RT used to export the rout
 in the VRF one PE router should be the same RT used to import these routes in the
 remote PE into the appropriate VRF.
 </p>
+<p>
+It is important to note that one RD is required per VPNv4 route, multiple RTs 
+can be used for VPNv4 route.
+</p>
+<p>
+RT is defined by RFC 4360 (BGP extended communities attribute). Its format is 
+similar to route distinguisher. VPNv4 speakers only accept VPNv4 routes with a 
+route-target marching a local VRF; some exceptions include route reflectors.
+</p>
+<p>
+VPNv4 routes can have more than one RT. RT allows for complex VPN topologies such as 
+full mesh, hub and spoke and central services.
+</p>
+
 <h3><code style="font-size:120%;">vrf upgrade-cli</code></h3>
 <p>
 The global configuration command <code style="font-size:120%;"><b>vrf upgrade-cli</b></code> 
@@ -339,7 +471,28 @@ was run on PE R7 and routes have already been shared as indicated by the PfxRcd
 column with value 6.
 </p>
 
-<h2>Step 4: Configure a Routing Protocol Between the PE And CE Devices</h2>
+<p>
+To confirm if extended BGP communities are being sent: 
+<code><b>debug bgp vpnv4 unicast updates</b></code> 
+</p>
+<p>
+Are VPNv4 routes being sent/received: 
+<ul>
+  <li><code><b>show bgp vpnv4 unicast all  </b></code></li>
+  <li><code><b>show bgp vpnv4 unicast all &lt;prefix&gt; </b></code>:
+  The in() and out MPLS labels of a prefix can be viewed.
+  </li>
+  <li><code><b>show bgp vpnv4 unicast all neighbor advertised-routes  </b></code></li>
+  <li><code><b> debug bgp vpnv4 unicast updates </b></code></li>
+  <li><code><b> clear bgp vpnv4 unicast * &lt;in|out&gt;</b></code></li>
+</ul>
+</p>
+
+<h2>Step 4: Route Exchange Between the PE And CE Devices</h2>
+<p>
+This can be implemented through configuration of an IGP between the PE-CE routers 
+or BGP with an eBGP relationship.
+</p>
 <p>
 A routing protocol needs to be configured between the PE and CE routers. Usually 
 this is an Interior Gateway Protocol (IGP) such as EIGRP, IS-IS or OSPF. Some 
@@ -582,6 +735,168 @@ D EX&nbsp;&nbsp;&nbsp;&nbsp; 172.31.2.1 [170/568320] via 10.10.12.2, 00:00:52, G
 R1#
 </code></div>
 </p>
+<p>
+show bgp vpnv4 unicast all.
+
+</p>
+<p>
+show bgp vpnv4 unicast all 150.1.9.9. 
+
+From this output, the details of EIGRP composite metrics are encoded in the BGP extended
+community under the na,e <code><b>cost</b></code>.
+</p>
+<h3>EIGRP</h3>
+<p>
+Ensure to give a metric.
+</p>
+<p>
+Verification: <code><b>show ip eigrp vrf &lt;vrf-name&gt; topology</b></code>. 
+Some prefixes will have VPNv4 as the route source.
+</p>
+
+<h3>OSPF</h3>
+<p>
+Enabling OSPF on an interface that is already part of a VRF makes the OSPF 
+process VRF-aware. Remember the subnets keyword when redistributing prefixes.
+</p>
+<p>
+The OSPF behaviour when redistributing BGP routes into OSPF is for the routes to
+be external routes E1 or E2. However, with VPNv4, these routes are treated as 
+internal(inter-area if the OSPF on the CE devices are configured to be in 
+different areas). OSPF and BGP VPNv4 behave differently from normal redistribution.
+These routes are considered internal routes for the purpose of loop prevention 
+and traffic engineering. 
+
+The output of <code><b>show ip ospf &lt;process-ID&gt;</b></code> on the PE 
+router displays the output "Domain ID type.. value ..." The value is inherited 
+from the OSPF process ID. 
+
+The logic is that if the domain ID matches between the two sides, any prefixes 
+that were originally an intra-area route is encoded as inter-area route when 
+redistributed from BGP to OSPF e.g., OSPF with process ID 100 on both ends of 
+the link, since the OSPF process ID is matching, then the routes can be encoded 
+as inter-area routes. 
+
+The domain-ID value can be changed in OSPF using the OSPF 
+command <code><b>domain-id &lt;ip-address&gt;</b></code> the domain-ID is in the form of 
+an IPv4 address. Changing the OSPF domain ID on one end of the PE results in the 
+OSPF route type being encoded as external routes(Type 2) as opposed to internal routes.
+
+The domain-ID is encoded(in HEX) in the BGP path attributes as an extended community 
+value.
+
+The domain-ID value takes precedence over the OSPF process ID value; i.e., if the 
+process IDs are different but the domain-IDs are the same, then the routes will 
+be advertised as inter-area routes.
+</p>
+<p>
+<code><b>show ip cef</b></code> displays both the transport label and VPN label.
+</p>
+
+<p>
+On the PE router of the provider, In the OSPF output of the command <code><b>
+show ip ospf &lt;process-ID&gt;</b></code>, the message, Connected to the MPLS 
+VPN superbackbone. The superbackbone is a hierarchy above area 0. With a superbackbone 
+topology, permitted hierarchies include:
+<ul>
+  <li>Super-backbone (MPLS)&rarr; Area 0 &rarr; R1 &rarr; Area 1</li>
+  <li>Super-backbone (MPLS)&rarr; Area 1 &rarr; R1 &rarr; Area 1</li>
+</ul>
+Not permitted is: <li>Super-backbone (MPLS)&rarr; Area 1&rarr; R1 &rarr; Area 0</li>. 
+Here, a virtual link would be required to be configured to connect the Area 0 to 
+the superbackbone as it would be considered a discontiguous area.
+</p>
+
+<h4>Traffic Enginneering: Primary and Backup Paths</h4>
+<p>
+Load-balancing across multiple paths can be accomplished by modifying the OSPF
+ process ID or OSPF domain number. This results in some paths becoming external 
+ routes. OSPF always chooses internal routes over external routes.
+</p>
+
+<h4>OSPF Sham-links</h4>
+<p>
+OSPF sham-links are similar to virtual links going over the SP network. It does 
+not have to be in area 0.
+</p>
+<p>
+Steps:
+<ol>
+  <li><b>Advertise a new prefix (/32) of a loopback into the VRF and advertise this into BGP:</b>
+  Remember, the netmask must be /32 for this feature to work. This is done on 
+  both PE devices.
+  </li>
+  <li>Verify IP connectivity between the two /32 prefixes.</li>
+  <li>Under the OSPF process, configure the sham-link
+  <code><b>area 1 sham-link 8.8.8.8 3.3.3.3</b></code>. where 8.8.8.8 is the 
+  source(/32 of local device)and 3.3.3.3 is remote OSPF device. Do the same 
+  but in the reverse direction on the remote device.
+  
+  </li>
+  <li>Verify with the command <code><b>show ip ospf 100 neighbor</b></code>. It 
+  shows neighborship over the sham-link.
+  routes that were previously learned thru BGP are now learned thru OSPF (because 
+  of lower AD); verify this on PE router using command: <code><b>show ip route</b></code>.
+</ol>
+</p>
+<p>
+Practical use cause is that if you had a point2point VPN and you are migrating to 
+MPLS L3VPN from legacy frame relay service, the backdoor link will be prefered 
+from an OSPF point of view because intra-area is preferred to inter-area preferred 
+to external routes.
+</p>
+<p>
+Traffic engineering can be implemented based on the cost. 
+</p>
+<h4>Load-balancing</h4>
+<p>
+If a SP network employs the use of BGP route reflector, and the will only 
+advertise what it considers as the best path of the available paths and not 
+use the available paths simultaneously. The RR groups these updates based on the 
+RD and performs path selection between the two of them.
+</p>
+<p>
+To enable the RR to use both paths, we need to configure different RDs so that the 
+RR can advertise both paths to the remote PE. The RR will receive these as two 
+separate and independent best paths and they can be advertised to the remote neighbor.
+
+</p>
+<p>
+Turn on maximum paths to enable multipaths.
+</p>
+
+<h3>BGP as PE-CE</h3>
+<p>
+eBGP peering between the PE and CE devices. on the PE device, the peering should 
+be implemented in the vrf address-family.
+</p>
+<p>
+At the CE devices, the ASN for BGP should be the same. However, because BGP will 
+detect the same ASN, it will reject the advertised route to prevent loop formation.
+There are two fixes for this:
+<ul>
+<li>On the CE, the command can be <code><b>allow-as-in</b></code></li>
+<li>Or on the PE, <code><b>as-override</b></code> to the CE iBGP peer on both 
+ends of the LSP.</li>
+</ul>
+</p>
+<p>
+Loops can be introduced by the above configuration. One solution is the BGP site-of-origin.
+Under BGP SOO, prefixes from one site are tagged with SOO code (say 1000:1)as they move to the PE.
+This gets advertised as a BGP extended community. The PE devices will filter out 
+any other prefixes that have that SOO code set. This is configured on the PE device 
+for the CE eBGP peer. This is configured under the VRF address-family.
+<code><b>neighbor 155.1.67.7 soo 1000:1</b></code>.
+
+SOO can be verified with command <code><b>show bgp vpnv4 unicast all &lt;prefix&gt;</b></code>.
+
+Lookout for SoO.
+</p>
+<h4>Verification</h4>
+<p>
+On the RR to confirm sharing of prefixes with PE: 
+<code><b>show bgp vpnv4 unicast all neighbors &lt;neighbor-ip-address&gt; advertised-routes</b></code>.
+</p>
 
 <h2>Step 6: Test Connectivity</h2>
 <p>
@@ -603,6 +918,7 @@ VRF info: (vrf in name/id, vrf out name/id)                                 <br>
 R8#
 </code></div>
 </p>
+
 <p>
 In the output of the traceroute command, at the third hop with IP 10.10.34.1, two 
 (2) MPLS labels are displayed; one label is the transport (MPLS) label and the 
@@ -613,6 +929,7 @@ VPN label travels with the packet from the nearby PE router to the remote PE
 where it finally gets popped and the packet is then redistributed into the IGP 
 at the PE-CE link and routed using IP.
 </p>
+
 <h3><code style="font-size:120%;">ping</code></h3>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
@@ -696,4 +1013,77 @@ R2#<b>show ip cef vrf CUST-2 172.30.1.0</b>                     <br>
 &nbsp;&nbsp;nexthop 10.10.23.2 GigabitEthernet0/0 label 3003 7019  <br>
 R2#
 </code></div>
+</p>
+
+<h1 id="TROUBLESHOOTING">Troubleshooting</h1>
+<h2>LDP Adjacency</h2>
+<p>
+<ul>
+  <li>Is LDP actually enabled: <code><b>show mpls interfaces</b></code></li>
+  <li>Is LDP transport working: <code><b>dbug mpls ldp transport events</b></code></li>
+  <li>Is LDP session authenticated: LDP(like BGP) uses TCP auth (option 19)</li>
+</ul>
+</p>
+<h2>LDP Advertisements</h2>
+<p>
+Advertise labels for all IGP learned routes.
+<ul>
+<li>Are labels actually bound:
+<ul>
+  <li><code><b>show mpls ldp binding</b></code></li>
+  <li><code><b>show mpls forwarding-table</b></code></li>
+  <li><code><b>debug mpls ldp binding</b></code></li>
+</ul>
+</li>
+<li>Is allocation being filtered?:
+<ul>
+  <li>Advertise filter vs. allocate filter: labels can be advertised for prefixes 
+  that are in a specified access-list. It is important to advertise labels for 
+  all IGP learned routes.</li>
+  <li>Typically only /32 needs an allocation.</li>
+ </ul>
+ </li>
+</ul>
+</p>
+
+<h2>PE-CE Routing</h2>
+<p>
+<ul>
+<li>Is loop prevention being violated?:
+  <ul>
+    <li>OSPF don-bit and domain-tag</li>
+    <li>BGP AS-Path and Site-of-Origin(SoO)</li>
+    <li>EIGRP Site-of-Origin</li>
+  </ul>
+</li>
+<li>Is the VRF just hung?
+  <ul>
+  <li><code><b>clear ip route vrf *</b></code></li>
+  <li>Forces re-import/export</li>
+  </ul>
+</li>
+</ul>
+</p>
+<h2>VPNv4 BGP</h2>
+<p>
+Is the route-target being filtered:
+<ul>
+  <li>Wrong import/export policy</li>
+  <li>Default route-target filter</li>
+  <li>VPNv4 Route reflection</li>
+</ul>
+<code><b>debug bgp vpnv4 unicast updates</b></code> to view debugging messages 
+associated with VPNv4 failures. Critical error message is "DENIED due to: extended 
+community not supported". <code><b>show vrf detail</b></code>.
+</p>
+<h2>MPLS Data Plane</h2>
+<p>
+<li>Is the VPNv4 peering to a /32? The loopback needs to be a /32 netmask for the 
+VPN data plane to work. 
+  <ul>  
+    <li>PHP may happen one hop too soon if peering to the wrong address. This will result 
+in a traffic blackhole.</li>
+<li>Problems in route summarization.</li>
+</ul>
+<li>Are LDP and IGP synced? LFIB can only install label for RIB.LRIB intersection</li>
 </p>
