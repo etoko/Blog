@@ -397,11 +397,10 @@ Continuing the earlier configuration of mGRE on the spoke;
 
 <h3>Step 9: Enable NHRP on the tunnel interface</h3>
 <p>
-#ip nhrp network-id 1 – 4294967295
-
-It identifies the DMVPN cloud on a router. #ip nhrp network-id is locally 
+NHRP is enabled using the command <code><b>ip nhrp network-id &lt;1 – 4294967295&gt;</b></code>.
+The Network ID identifies the DMVPN cloud on a router. It is locally 
 significant and does not have to be the same between spoke an hub but is recommended 
-to match on all routers..
+to match on all routers participant in the same DMVPN cloud.
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
@@ -413,10 +412,11 @@ HUB(config-if)#<b>ip nhrp network-id 200</b>
 
 <h3>Step 10: (Optional) Define the tunnel key</h3>
 <p>
-This adds 4-bytes to the DMVPN header. #tunnel key 0 – 4294967295. The tunnel 
+The command <code><b>tunnel key &lt;0 – 4294967295&gt;</b></code> is used to configure the tunnel 
+key. The tunnel 
 key identifies the interface in the DMVPN cloud. It provides some limited control 
-over the registration of NHCs with NHSs. If configured on an NHSs the tunnel key
-must match on all the NHCs. This provides some control over misconfigurations of
+over the registration of NHCs with NHSs. If configured on the NHS, the tunnel key
+must match on all the connecting NHCs. This provides some control over misconfigurations of
 NHCs registering with the wrong NHS.
 </p>
 <p>
@@ -429,7 +429,8 @@ HUB(config-if)#<b>tunnel key 200</b>
 
 <h3>Step 11: Specify the NHS NBMA address and multicast mapping</h3>
 <p>
-#ip nhrp nhs nhs_tunne_address nbma nbma_address multicast
+The NHS NBMA address and multicast mapping is accomplished using the command 
+<code><b>ip nhrp nhs &lt;nhs_tunnel_address&gt; nbma &lt;nbma_address&gt; multicast</b></code>.
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
@@ -445,9 +446,9 @@ multicast map is needed for a node (NHC).
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
  <code style="font-size:110%">
-#ip nhrp nhs nhs_tunnel_address<br>
-#ip nhrp map nhs_tunnel_address nhs_nbma_addr<br>
-#ip nhrp map multicast nhs_nbma_addr | dynamic<br>
+#ip nhrp nhs &lt;nhs_tunnel_address&gt;<br>
+#ip nhrp map &lt;nhs_tunnel_address&gt; &lt;nhs_nbma_addr&gt;<br>
+#ip nhrp map multicast &lt;nhs_nbma_addr | dynamic&gt;<br>
 </code>
 </div>
 </p>
@@ -461,16 +462,16 @@ SPOKE7(config-if)#<b>ip nhrp map multicast 10.10.10.10</b>
 </div>
 </p>
 <p>
-When configuring tunnel on the NHS, the value of the NBMA address of the NHS 
-must be the same as the IP address configured tunnel source IP address or tunnel 
+The value of the NBMA address of the NHS must be the same as the IP address 
+configured as tunnel source IP address or specifying the tunnel 
 source interface during configuring of the tunnel interface on the NHS. 
 Configuring any other IP address on the NHS even if the NHC has a route to that 
-interface will not active the tunnel.
+interface will not activate the tunnel.
 </p>
 
 <h1 id="VERIFICATION">Verification</h1>
 <p>
-The NHS (HUB) should always be one hop away through the VPN tunne. This can 
+The NHS (HUB) should always be one hop away from the NHC through the VPN tunnel. This can 
 confirmed through a traceroute to the NHS from any of the NHCs.
 </p>
 <p>
@@ -503,7 +504,7 @@ SPOKE7(config-if)#
 
 <h2>Spoke Configuration (DMVPN Phase 2)</h2>
 <p>
-All spoke to spoke communication happens directly without transiting the hub. 
+In DMVPN phase 2 operation, all spoke to spoke communication happens directly without transiting the hub. 
 All routers i.e. NHCs and NHS implement multi-point GRE. A dynamic NHRP mapping 
 entry appears in the NHRP table for communication with a remote spoke.
 
