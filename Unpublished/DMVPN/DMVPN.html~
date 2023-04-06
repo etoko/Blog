@@ -1,6 +1,21 @@
-<h1>Configuring Dynamic Multipoint Virtual Private Network (DMVPN)</h1>
+<h1>Dynamic Multipoint Virtual Private Network (DMVPN)</h1>
+<h1>Contents</h1>
+<p>
+  <ol>
+    <li><a href="#INTRODUCTION">Introduction </a></li>
+    <li><a href="#GRE">Multipoint Generic Routing Encapsulation (mGRE)</a></li>
+    <li><a href="#NHRP">Next Hop Resolution Protocol(NHRP)</a>
+    <ol>
+    <li><a href="#Phase1">Phase 1 </a></li>
+    <li><a href="#Phase2">Phase 2</a></li>
+    <li><a href="#Phase3">Phase 3</a></li>
+    </ol></li>
+    <li><a href="#VERIFICATION">Verification</a></li>
+    <li><a href=""> </a></li>
+  </ol>
+</p>
 
-<h1>Introduction</h1>
+<h1 id="INTRODUCTION">Introduction</h1>
 <p>
 DMVPN is a Cisco developed technology used in enterprise networks to create 
 Virtual Private Networks (VPNs) to interconnect an enterprise’s various 
@@ -9,6 +24,15 @@ The cost of implementing
 DMVPN is so much lower than the cost of installing and operating a private or 
 leased Wide Area Network (WAN).
 </p>
+<p>
+DMVPN is a point-to-multipoint layer 3 overlay VPN providing full-meshed connectivity 
+with simple configuration of hub and spoke. It uses a logical hub and 
+spoke topology. Direct spoke-to-spoke traffic is supported. DMVPN's only requirement 
+is for IP connectivity between the local and remote site. The routing policy is 
+not dictated by the service provider; as such, it does not have 
+restrictions such as MPLS L3VPNs. DMVPN is highly scalable when properly designed.
+</p>
+<h2>How DMVPN Works</h2>
 <p>
 DMVPN relies on two technologies i.e. Multipoint Generic Routing Encapsulation 
 (mGRE) and Next Hop Resolution Protocol (NHRP). To create DMVPNs, the following 
@@ -20,15 +44,80 @@ steps should be followed;
 </ul>
 </p>
 <p>
-DMVPN operates in three phases; Phase 1, Phase 2, and Phase 3. Each phase 
+DMVPN operates through one of three phases; Phase 1, Phase 2, and Phase 3. Each phase 
 incrementally adds features that improve and secure the operation of DMVPN.
-
-The following topology will be used for the configuration of DMVPN;
+DMVPN reduces the need for N8(n-1)/2 static tunnel configuration. This happens 
+through the use of one mGRE interface for all connections. Tunnels are created 
+on-demand between nodes. Encryption is optional but recommend to be configured.
+</p>
+<p>
+DMVPN creates on-demand tunnels between nodes: the initial tunnel-mesh is hub-and-spoke(always on).
+traffic patterns trigger spoke-to-spoke tunnels. This solves management scalability 
+problems. DMVPN maintains tunnels based on traffic patterns. Spoke-to-spoke tunnel 
+is on-demand and this tunnel's lifetime is based on traffic.
+</p>
+<p>
+DMVPN requires two IGPs; one operating for the underlay and the other for the overlay 
+network. IPv4 and IPv6 is supported for both passenger and transport.
 </p>
 
-<h1>Step 1: Configuration of Multipoint Generic Routing Encapsulation Tunnels (mGRE)</h1>
+<h3>DMVPN Features</h3>
 <p>
-mGRE creates the Virtual Private Network (VPN) tunnels between the routers. A hub
+Provides full meshed connectivity with simple configuration of hub and spoke.
+Supports dynamically addressed spokes.
+Facilitates zero-touch configuration for addition new spokes.
+Features automatic IPsec triggering for building IPsec tunnel.
+Supports IP Unicast, IP Multicast, and dynamic routing protocols.
+Supports spoke routers behind dynamic NAT and hub routers behind static NAT.
+Usable with or without IPsec encryption
+Improves network performance reducing latency and jitter
+Optimizes head office bandwidth utilization
+One mGRE interface on each spoke which supports all destinations
+Dynamic tunnel destination simplifies support for dynamically addressed spokes. 
+NHRP registration and dynamic routing protocols.
+Smaller hub configuration. with one interface for all spokes.
+
+Spoke-to-spoke data-plane traffic is through the hub (phase 1) or direct (phase 2 and 3). 
+However, control-plane and multicast traffic is only exchanged with the hub regardless of phase. This results 
+in the spokes forming layer 3 adjacencies only with the hub. There are no spoke-to-spoke 
+layer 3 adjacencies. So routing protocol updates come only from the hub.
+</p>
+
+<h3>Hub to Spokes</h3>
+<p>
+Two main components:
+<ol>
+  <li>DMVPN hub/NHRP server (NHS).</li>
+  <li>DMVPN spokes / NHCs:
+    <ul>
+      <li>Spokes register with the hub/server.</li>
+      <li>Spokes manually specify the hub's address.</li>
+      <li>Registration message is sent via NHRP Registration Request message type.</li>
+      <li>Hub dynamically learns Spoke's VPN address and NBMA address.</li>
+      <li>Spokes establish tunnels to the hub through which exchange of IGP routing 
+      information takes place.</li>
+    </ul>
+  </li>
+</ol>
+</p>
+
+<h3>Spoke to Spoke</h3>
+<p>
+Spoke 1 knows Spoke2's routes via IGP. These are learned via the tunnel to the hub.
+The next-hop is spoke2's VPN IP for DMVPN phase 2. The next-hop is the hub's VPN IP for DMVPN 
+phase 3. When forming the tunnel, Spoke1 asks for Spoke2's real address. This request 
+is sent using the NHRP Resolution Request. it maps next-hop(VPN) IP to tunnel 
+source(NBMA) IP.
+</p>
+<p>
+With the spoke-to-spoke tunnel formed, the hub is only used for control-plane 
+information exchange. The spoke-to-spoke tunnel data-plane may flow through 
+the hub initially but subsequent traffic does directly.
+</p>
+
+<h1>Multipoint Generic Routing Encapsulation Tunnels (mGRE)</h1>
+<p>
+mGRE creates Virtual Private Network (VPN) tunnels between routers. A hub
 router is the central connection point of what is a star topology. DMVPN provides
 for the capablity to create topologies that contain more than one hub. For purposes
 of understanding DMVPN, we will implement a single-hub DMVPN topology.
@@ -66,8 +155,10 @@ All spoke to spoke communication transits the hub because hub sets itself as the
 next-hop in control-plane traffic. All data plane traffic transits via the hub 
 as a result.
 </p>
-
-<h3>Hub Configuration</h3>
+<p>
+mGRE requires the configuration of the hub and spokes. Usually the hub takes 
+many more commands than those of the spokes. 
+</p>
 
 <h4>Step 1: Create the tunnel interface</h4>
 <p>
@@ -81,14 +172,16 @@ HUB(config)#<b>interface tunnel 10</b>
 </code></div>
 </p>
 
-<h4>Step 2: Identify the tunnel source:</h4> 
+<h4>Step 2: Identify the tunnel source</h4> 
 <p>
-#tunnel source ip_address or interface. It 
-is usually a good idea to specify a logical interface such as a loopback interface.
+A tunnel source is the interface whose IP address will be used as the source IP 
+in the IP packets sent through the underlay network.
+It is usually a good idea to specify a logical interface such as a loopback interface.
 A loopback interface is always up and if a router has more than one Internet 
 connection through different router interfaces, then any of the Interfaces can 
 be used to route the tunnel traffic if any one interface goes down. If a loopback
 interface is used, remember to advertise the configured network on this interface.
+The configuration command is <code><b>#tunnel source &lt;ip_address | interface&gt;</b></code>.
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
@@ -96,6 +189,10 @@ interface is used, remember to advertise the configured network on this interfac
 HUB(config-if)#<b>tunnel source loopback 0</b>
 </code></div>
 
+<h3>Hub Configuration</h3>
+<p>
+The following set of commands are implemented on the hub router.
+</p>
 <h4>Step 3: Configure the mode of the tunnel to multipoint GRE</h4>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
@@ -106,10 +203,11 @@ HUB(config-if)#<b>tunnel mode gre multipoint</b>
 
 <h4>Step 4: Allocate an IP address to the tunnel interface</h4>
 <p>
-Note that the selected subnet should be able to accommodate the planned number 
-of spokes and hubs in the network. Proper planning during the design of the 
-network should cater for this. For this example, we will accommodate a maximum 
-of 510 hubs and clients so a subnet mask of 255.255.254.0 (/23) is used.
+The subnet should have a sufficient number of IP addresses to be able 
+to accommodate the planned number of spokes and hubs in the network. Proper 
+planning during the design of the network should cater for this. For this 
+example, we will accommodate a maximum of 510 hubs and clients so a subnet mask 
+of 255.255.254.0 (/23) is used.
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
@@ -120,8 +218,10 @@ HUB(config-if)#<b>ip address 10.100.100.1 255.255.254.0</b>
 
 <h4>Step 5: (Optional) Define the tunnel bandwidth</h4>
 <p>
-IOS gives a default of 100Kbps. However, for routing protocol purposes, an implied 
-value can be provided in Kbps in the range 1 – 10000000.
+The tunnel bandwidth is usually configured for routing purposes. In the tunnel 
+interface configuration mode, the command is <code><b>bandwidth &lt;1 – 10000000&gt;</b></code>
+The value is in kbps. The default bandwidth is 100Kbps. If the bandwidth value 
+is not configured, then the tunnel priority will be low.
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
@@ -134,8 +234,8 @@ HUB(config-if)#<b>bandwidth 100000</b>
 <h4> Step 6: (Optional) Specify the GRE tunnel keepalive</h4>
 <p>
 Keepalives ensure that bi-directional communication between tunnel end-points 
-remain active. #keepalive seconds retries. The default keepalive time is 10 
-seconds and 3 retries.
+remain active. In tunnel interface mode, the command is <code><b>keepalive &lt;seconds&gt; &lt;retries&gt;</b></code>.
+The default keepalive time is 10 seconds and 3 retries.
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
@@ -145,13 +245,14 @@ HUB(config-if)#<b>keepalive 10 5</b>
 </div>
 </p>
 
-<h4> Step 7: (Optional) Define the MTU #ip mtu value</h4>
+<h4> Step 7: (Optional) Define the MTU</h4>
 <p>
 By default, the MTU for tunnel interfaces is 1476. The rationale behind setting 
 the MTU value to 1476 is that the GRE header with a minimum size of 24 bytes is 
 added to the IP packet. Together, the new MTU size of the IP packet should total 
 1500. This size is supported by many network device interfaces use as the maximum 
-MTU. It is recommended to specify an MTU value of 1400.
+MTU. It is recommended to specify an MTU value of 1400. In tunnel configuration 
+mode, the command is <code><b>ip mtu &lt;value&gt;</b></code>.
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
@@ -166,8 +267,9 @@ HUB(config-if)#<b>ip mtu 1400</b>
 This ensures that the router modifies the payload of a three-way handshake if 
 the MSS exceeds the configured value. With DMVPN, this value is typically 1360.
 
-During tunnel configuration, configure MTU to 1400, MSS to 1360 to avoid 
-fragmentation by hosts.
+During tunnel configuration, configure MTU to 1400, MSS to 1360 to ensure 
+fragmentation is implemented by hosts. The general idea is to ensure that fragmentation is 
+implemented by the hosts and not the routers as it is memory intensive.
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
@@ -210,7 +312,7 @@ SPOKE7(config-if)#<b>ip address 10.100.100.7 255.255.254.0</b>
 </p>
 
 
-<h2>Step 2: Configuration of Next Hop Resolution Protocol (NHRP)</h2>
+<h2>Next Hop Resolution Protocol (NHRP)</h2>
 <p>
 NHRP is used for mapping tunnel addresses to transport (overlay) addresses. It 
 is defined in RFC 2332. NHRP operates using the client-server model with a hub 
@@ -232,14 +334,27 @@ destination protocol address and NHRP message type.
 These are the various types of messages NHCs and NHSs exchange with each other;
 <ul>
   <li><b>Registration:</b> is sent from NHCs to NHS to all hubs to know the spoke’s NBMA 
-      information along with the amount of time the registration should be maintained.</li>
+      information along with the amount of time the registration should be maintained.
+      Spokes dynamically register the mapping of their NBMA and VPN IP address to the NHS. This is required 
+      to build the spoke-to-spoke tunnels.
+      NHRP Registration supports spokes with dynamic NBMA addresses or NAT.
+      </li>
   <li><b>Resolution:</b> messages to locate and provide address resolution information 
       of the egress router toward a destination. Resolution Reply provides the 
-      tunnel IP address and the NBMA of the remote spoke.</li>
+      tunnel IP address and the NBMA of the remote spoke.
+      Spokes talking to each other; spoke queries the hub for NBMA-to-VPN mappings of 
+      other spokes which is required to build spoke-to-spoke tunnels.
+      </li>
   <li><b>Redirect:</b> allow an intermediate router to notify the router 
   originating traffic that a specific network can be reached by a more optimal 
-  path (NHC to NHC) (Phase 3). Redirect suppression messages can be sent by an 
-  NHC to indicate that the redirected path is not feasible.</li>
+  path (NHC to NHC) (Phase 3). 
+  Supports building dynamic spoke-to-spoke tunnels.  
+  Redirect suppression messages can be sent by an 
+  NHC to indicate that the redirected path is not feasible.
+  NHS answer to a spoke-to-spoke data-plane packet through it. This is simlar to 
+  IP redirects, when packet in/out interface is the same. This is used only in 
+  DMVPN phase 3.
+  </li>
   <li><b>Purge:</b> Sent to remove a cached NHRP entry for example after the 
   loss of a route by NHS. They are sent by NHSs to NHCs which previously requested 
   for NBMA-overlay address mapping.</li>
@@ -251,7 +366,7 @@ These are the various types of messages NHCs and NHSs exchange with each other;
 <p>
 These messages are included as an extension to an NHRP packet as shown in the image below;
 <ul>
-  <li><b>Responder Address:</b> To determine the address of the responding node for replies</li>
+  <li><b>Responder Address:</b> To determine the address of the responding node for replies.</li>
   <li><b>Forward-Transit NHS Record and Reverse-Transit NHS Record:</b> List of 
   NHSs that an NHRP request and reply may have traversed respectively.</li>
   <li><b>Authentication:</b> conveys authentication information between a pair 
@@ -263,17 +378,51 @@ These messages are included as an extension to an NHRP packet as shown in the im
   Spoke sites initiate a persistent VPN connection to the hub. DMVPN dynamically
   builds a VPN tunnel between spoke sites on an as-needed basis.
 </p>
+<h3>NHRP Table</h3>
+<p>
+All spokes statically define the hub in their configuration.
 
-<h1>Configuration of NHRP</h1>
+The NHS creates a mapping to NBMA to tunnel IP address for all NHCs that register 
+with it. This mapping is known as the NHRP table. This table is shared by the 
+NHS to NHC so that when a spoke wishes to communicate to a remote NHC, when it 
+sends a resolution request to the NHS, the NHS shares the NHRP table with the NHC.
+</p>
+<h3>Dynamic Peers</h3>
+<p>
+The mapping of tunnel to NBMA addresses is dynamic on the NHS. Each NHC can register 
+with the NHC without any prior preconfigurations on the NHS. This results in the 
+NHCs being dynamic peers. The number of spokes may grow exponentially. Dynamic 
+peering makes the registration of this increasing number of NHCs scalable.
+</p>
+<p>
+Peering is automatic under the following conditions:
+<ul>
+  <li>Correct authentication</li>
+  <li>Proper phase 1, phase 2 matching.</li>
+</ul>
+</p>
+<p>
+The hub has open configuration accepting NHCs with the correct configuration. 
+The NHCs are configured with the IP address of the hub.
+</p>
+<p>
+The spoke to spoke tunnel information is temporary. The address of the hub is 
+permanent. However, for spoke information, it is dynamically 
+The tunnel is torn down after the communication is completed and the exipry of 
+the tunnel session timer.
+</p>
+
+<h2>Configuration of NHRP</h2>
 
 <h2>Hub Configuration</h2>
 <p>
+NHRP configuration takes place under the tunnel interface. 
 Continuing from the previous stages on the configuration of a hub using mGRE;
 </p>
 <h3>Step 9: Enable NHRP on the tunnel interface</h3>
 <p>
-#ip nhrp network-id 1 – 4294967295
-
+NHRP is enabled on the tunnel using the tunnel mode command 
+<code><b>ip nhrp network-id &lt;1 – 4294967295&gt;</b></code>.
 Network-ID is locally significant but is recommended to match on all routers. 
 It identifies the DMVPN cloud on a router. One router can participate in many 
 DMVPN clouds. This ID uniquely identifies each of these clouds.
@@ -288,11 +437,12 @@ HUB(config-if)#<b>ip nhrp network-id 200</b>
 
 <h3>Step 10: (Optional) Define the tunnel key</h3>
 <p>
-This adds 4-bytes to the DMVPN header. #tunnel key 0 – 4294967295. The tunnel key 
+The tunnel key is defined using the tunnel interface configuration command 
+<code><b>tunnel key &lt;0 – 4294967295&gt;</b></code>. The tunnel key 
 identifies the interface in the DMVPN cloud. It provides some limited control 
-over the registration of NHCs with NHSs. If configured on an NHSs the tunnel key 
-must match on all the NHCs. This provides some control over misconfigurations of
-NHCs registering with the wrong NHS.
+over the registration of NHCs with NHSs. If configured on the NHS, the tunnel key 
+must match on all the connecting NHCs. This provides some control over 
+misconfigurations of NHCs registering with the wrong NHS.
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
@@ -301,13 +451,10 @@ HUB(config-if)#<b>tunnel key 200</b>
 </code>
 </div>
 </p>
-
-<h3>Step 11: (Optional) Enable multicast support for NHRP</h3>
 <p>
-This is important if Interior Gateway Protocols such as OSPF and EIGRP are to be
-used for routing. These IGPs use multicast for sending and receiving some packet
-types such as Hello packets to dynamically-learned spokes.
+Configuration of the tunnel key adds an additional 4-bytes to the DMVPN header.
 </p>
+<h3>Step 11: (Optional) Enable multicast support for NHRP</h3>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
  <code style="font-size:110%">
@@ -315,20 +462,23 @@ HUB(config-if)#<b>ip nhrp map multicast dynamic</b>
 </code>
 </div>
 </p>
-
-<h3>Step 12: (Phase 3): Enable NHRP Redirect</h3>
 <p>
-<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
- <code style="font-size:110%">
-HUB(config-if)#<b>ip nhrp redirect</b>
-</code>
-</div>
+This enables the hub to accept dynamic registrations from spokes.
+</p>
+<p>
+This is particularly important if Interior Gateway Protocols such as OSPF and EIGRP are to be
+used for routing. IGPs use multicast for sending and receiving some packet
+types such as Hello packets to dynamically-learned spokes.
 </p>
 
-<h3>Step 13: (Optional)</h3>
+<!--
+<h3>Step 13: (Optional) Static NHRP Mapping</h3>
 <p>
-Perform static NHRP mapping on the hub that specifies that the VPN address 
-10.100.100.1 maps to the physical address of 10.1.110.10 in the underlay network.
+Perform static NHRP mapping on the hub that specifies that the VPN address maps 
+to the physical interface address using the tunnel mode command 
+<code><b>ip nhrp map &lt;tunnel-ip-address&gt; &lt;interface-ip-address&gt;</b></code>.
+In the following configuration, the VPN address 10.100.100.1 maps to the physical 
+address of 10.1.110.10 in the underlay network.
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
@@ -337,10 +487,11 @@ HUB(config-if)#<b>ip nhrp map 10.100.100.1 10.1.110.1</b>
 </code>
 </div>
 
-<h3>Step 14: (Optional)</h3>
+<h3>Step 14: (Optional) Specify the VPN Address of the NHS</h3>
 <p>
+Configure the VPN address of the NHS using the command <code><b>ip nhrp nhs &lt;ip-address&gt;</b></code>.
 This command explicitly specifies the NHS on the network. This command is 
-required specifically if step 13 is configured. It configures the VPN address of the NHS.
+required specifically if step 13 is configured. 
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
@@ -349,8 +500,8 @@ HUB(config-if)#<b>ip nhrp hs 10.100.100.1</b>
 </code>
 </div>
 </p>
-
-<h3>Step 15: (Optional)</h3>
+-->
+<h3>Step 12: (Optional) Authentication</h3>
 <p>
 To require spokes to authenticate with the NHS before registration or resolution 
 requests can be made. The password used with NHRP authentication is stored in plain text.
@@ -365,58 +516,81 @@ HUB(config-if)#<b>ip nhrp authentication simplesimple123</b>
 <p>
 This command helps prevent misconfiguration such as one NHC registering with 
 the wrong NHS. If authentication is configured on the NHS, it must be configured 
-on all NHCs with the same password.
+on all NHCs with the same password. For security of DMVPN tunnels, IPSec is 
+used instead.
 </p>
 
-<h2>Spoke Configuration (DMVPN Phase 1: Point to Point)</h2>
+<h2>DMVPN Phase 1: Point to Point</h2>
 <p>
 DMVPN Phase 1 creates point to point tunnels between the hub and each of the 
 spokes resulting in a more traditional hub and spoke topology. For each NHC to 
 communicate with any other NHC, all traffic must be sent through the hub.
-
+</p>
+<p>
+In DMVPN phase 1, all traffic is sent through the hub regardless of whether the 
+spokes are in the same broadcast domain. The hub places itself as the next-hop in 
+all routes passed to spokes.
+</p>
+<p>
+In Phase 1, no NHRP requests are sent. Additionally, route summarization at the 
+hub is possible in phase 1 and 3 but not in DMVPN phase 2.
+</p>
+<p>
+The default behaviour of EIGRP is DMVPN phase 1 a router makes itself as the 
+next-hop by default.
+</p>
+<p>
+If using OSPF, DMPVN phase 1 is implemented if the network type is point-to-multipoint.
+This is because the hub automatically sets itself as the next-hop in routing 
+updates. If the interface is broadcast, then phase 2 or 3 is implemented because OSPF 
+does not modify the next-hop. It keeps it unchanged.
+</p>
+<h3>Spoke Configuration</h3>
+<p>
 Continuing the earlier configuration of mGRE on the spoke;
 </p>
 
-<h3>Step 9: Enable NHRP on the tunnel interface</h3>
+<h3>Step 5: Enable NHRP on the tunnel interface</h3>
 <p>
-#ip nhrp network-id 1 – 4294967295
-
-It identifies the DMVPN cloud on a router. #ip nhrp network-id is locally 
+NHRP is enabled using the command <code><b>ip nhrp network-id &lt;1 – 4294967295&gt;</b></code>.
+The Network ID identifies the DMVPN cloud on a router. It is locally 
 significant and does not have to be the same between spoke an hub but is recommended 
-to match on all routers..
+to match on all routers participant in the same DMVPN cloud.
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
  <code style="font-size:110%">
-HUB(config-if)#<b>ip nhrp network-id 200</b>
+SPOKE7(config-if)#<b>ip nhrp network-id 200</b>
 </code>
 </div>
 </p>
 
-<h3>Step 10: (Optional) Define the tunnel key</h3>
+<h3>Step 6: (Optional) Define the tunnel key</h3>
 <p>
-This adds 4-bytes to the DMVPN header. #tunnel key 0 – 4294967295. The tunnel 
+The command <code><b>tunnel key &lt;0 – 4294967295&gt;</b></code> is used to configure the tunnel 
+key. The tunnel 
 key identifies the interface in the DMVPN cloud. It provides some limited control 
-over the registration of NHCs with NHSs. If configured on an NHSs the tunnel key
-must match on all the NHCs. This provides some control over misconfigurations of
+over the registration of NHCs with NHSs. If configured on the NHS, the tunnel key
+must match on all the connecting NHCs. This provides some control over misconfigurations of
 NHCs registering with the wrong NHS.
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
  <code style="font-size:110%">
-HUB(config-if)#<b>tunnel key 200</b>
+SPOKE7(config-if)#<b>tunnel key 200</b>
 </code>
 </div>
 </p>
 
-<h3>Step 11: Specify the NHS NBMA address and multicast mapping</h3>
+<h3>Step 7: Specify the NHS NBMA address and multicast mapping</h3>
 <p>
-#ip nhrp nhs nhs_tunne_address nbma nbma_address multicast
+The NHS NBMA address and multicast mapping is accomplished using the command 
+<code><b>ip nhrp nhs &lt;nhs_tunnel_address&gt; nbma &lt;nbma_address&gt; multicast</b></code>.
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
  <code style="font-size:110%">
-SPOKE8(config-if)#<b>ip nhrp nhs 10.100.100.1 nbma 10.10.10.10 multicast</b>
+SPOKE7(config-if)#<b>ip nhrp nhs 10.100.100.1 nbma 10.10.10.10 multicast</b>
 </code>
 </div>
 </p>
@@ -427,9 +601,9 @@ multicast map is needed for a node (NHC).
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
  <code style="font-size:110%">
-#ip nhrp nhs nhs_tunnel_address<br>
-#ip nhrp map nhs_tunnel_address nhs_nbma_addr<br>
-#ip nhrp map multicast nhs_nbma_addr | dynamic<br>
+#ip nhrp nhs &lt;nhs_tunnel_address&gt;<br>
+#ip nhrp map &lt;nhs_tunnel_address&gt; &lt;nhs_nbma_addr&gt;<br>
+#ip nhrp map multicast &lt;nhs_nbma_addr | dynamic&gt;<br>
 </code>
 </div>
 </p>
@@ -443,28 +617,30 @@ SPOKE7(config-if)#<b>ip nhrp map multicast 10.10.10.10</b>
 </div>
 </p>
 <p>
-When configuring tunnel on the NHS, the value of the NBMA address of the NHS 
-must be the same as the IP address configured tunnel source IP address or tunnel 
+The value of the NBMA address of the NHS must be the same as the IP address 
+configured as tunnel source IP address or specifying the tunnel 
 source interface during configuring of the tunnel interface on the NHS. 
 Configuring any other IP address on the NHS even if the NHC has a route to that 
-interface will not active the tunnel.
+interface will not activate the tunnel.
 </p>
 
-<h1 id="VERIFICATION">Verification</h1>
+<h3 id="VERIFICATION_PHASE1">Verification</h3>
+<h4><code>traceroute</code></h4>
 <p>
-The NHS (HUB) should always be one hop away through the VPN tunne. This can 
+The NHS (HUB) should always be one hop away from the NHC through the VPN tunnel. This can 
 confirmed through a traceroute to the NHS from any of the NHCs.
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
  <code style="font-size:110%">
-SPOKE7(config-if)#<b>do traceroute 10.100.100.1</b><br>
-Type escape sequence to abort.                  <br>
-Tracing the route to 10.100.100.1               <br>
-VRF info: (vrf in name/id, vrf out name/id)     <br>
-&nbsp;&nbsp;1 10.100.100.1 564 msec *  8 msec
-</code>
-</div>
+SPOKE2#<b>traceroute 172.30.1.7</b>                  <br>
+Type escape sequence to abort.                       <br>
+Tracing the route to 172.30.1.7                      <br>
+VRF info: (vrf in name/id, vrf out name/id)          <br>
+&nbsp;&nbsp;1 172.30.1.1 24 msec 56 msec 52 msec     <br>
+&nbsp;&nbsp;2 172.30.1.7 176 msec 144 msec 140 msec  <br>
+SPOKE2#
+</code></div>
 </p>
 <p>
 The NHCs should be two hops away from each other with the first hop being the NHS.
@@ -472,20 +648,60 @@ The NHCs should be two hops away from each other with the first hop being the NH
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
  <code style="font-size:110%">
-SPOKE7(config-if)#<b>do traceroute 10.100.100.8</b>    <br>
-Type escape sequence to abort.                  <br>
-Tracing the route to 10.100.100.8               <br>
-VRF info: (vrf in name/id, vrf out name/id)     <br>
-&nbsp;&nbsp;1 10.100.100.1 180 msec 16 msec 56 msec       <br>
-&nbsp;&nbsp;2 10.100.100.8 904 msec *  2312 msec          <br>
-SPOKE7(config-if)#
+SPOKE7#<b>traceroute 172.30.1.2</b><br>
+Type escape sequence to abort.                <br>
+Tracing the route to 172.30.1.2               <br>
+VRF info: (vrf in name/id, vrf out name/id)   <br>
+&nbsp;&nbsp;1 172.30.1.1 76 msec 76 msec 24 msec        <br>
+&nbsp;&nbsp;2 172.30.1.2 132 msec 84 msec 84 msec       <br>
+SPOKE7#
 </code>
 </div>
 </p>
 
-<h2>Spoke Configuration (DMVPN Phase 2)</h2>
+<h4><code>show dmvpn detail</code></h4>
 <p>
-All spoke to spoke communication happens directly without transiting the hub. 
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+ <code style="font-size:110%">
+HUB#<b>show dmvpn detail</b>                                                     <br>
+Legend: Attrb --> S - Static, D - Dynamic, I - Incomplete&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;N - NATed, L - Local, X - No Socket&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Ent --> Number of NHRP entries with same NBMA peer&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;NHS Status: E --> Expecting Replies, R --> Responding, W --> Waiting&nbsp;&nbsp;&nbsp;&nbsp; <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;UpDn Time --> Up or Down Time for a Tunnel&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <br>
+==========================================================================&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <br>
+Interface Tunnel0 is up/up, Addr. is 172.30.1.1, VRF ""&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  <br>
+&nbsp;&nbsp; Tunnel Src./Dest. addr: 99.255.10.2/MGRE, Tunnel VRF ""&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <br>
+&nbsp;&nbsp; Protocol/Transport: "multi-GRE/IP", Protect ""&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  <br>
+&nbsp;&nbsp; Interface State Control: Disabled&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <br>
+&nbsp;&nbsp; nhrp event-publisher : Disabled&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <br>
+Type:Hub, Total NBMA Peers (v4/v6): 2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <br>
+# Ent&nbsp;&nbsp;Peer NBMA Addr Peer Tunnel Add State&nbsp;&nbsp;UpDn Tm Attrb&nbsp;&nbsp;&nbsp;&nbsp;Target Network&nbsp;&nbsp;&nbsp;&nbsp; <br>
+----- --------------- --------------- ----- -------- ----- -----------------&nbsp;&nbsp;&nbsp;&nbsp; <br>
+&nbsp;&nbsp;&nbsp;&nbsp;1 99.255.30.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;172.30.1.2&nbsp;&nbsp;&nbsp;&nbsp;UP 01:18:17&nbsp;&nbsp;&nbsp;&nbsp;D&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;172.30.1.2/32&nbsp;&nbsp;&nbsp;&nbsp; <br>
+&nbsp;&nbsp;&nbsp;&nbsp;1 99.255.60.6&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;172.30.1.7&nbsp;&nbsp;&nbsp;&nbsp;UP 00:49:31&nbsp;&nbsp;&nbsp;&nbsp;D&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;172.30.1.7/32&nbsp;&nbsp;&nbsp;&nbsp; <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <br>
+Crypto Session Details:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  <br>
+-------------------------------------------------------------------------------- <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <br>
+Pending DMVPN Sessions:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  <br>
+</code></div>
+</p>
+
+
+<h4><code>show ip nhrp</code></h4>
+<p>
+View the NHRP table on the hub and the spoke. The records in the NHRP table 
+expire after 5 minutes if not used. On spokes, before communicating with any 
+other remote spoke, only the hub information is contained in the NHRP table.
+</p>
+
+<h2>DMVPN Phase 2</h2>
+<p>
+In DMVPN phase 2 operation, all spoke to spoke communication happens directly without transiting the hub. 
 All routers i.e. NHCs and NHS implement multi-point GRE. A dynamic NHRP mapping 
 entry appears in the NHRP table for communication with a remote spoke.
 
@@ -497,11 +713,26 @@ destination spoke then sends the source spoke an NHRP reply (unicast) with its
 NBMA and tunnel addresses.
 </p>
 <p>
-Phase 2 doesn’t support summarisation (at the hub). When summarisation occurs 
-DMVPN reverts to phase 1.
+Spokes are statically configured with the hub. The hub does not modify the next-hop 
+in routing updates. If a spoke X receives a routing update from the hub and this 
+update has an unchanged next-hop, the NHRP table is consulted for the next-hop NBMA address.
+If the next-hop NBMA address is not in the NHRP table, an NHRP request is sent to
+the hub requesting for the underlay-overlay IP address mapping of the next-hop. 
+The hub will forward with request to the spoke that is the next-hop. This forwarded 
+NHRP request contains the NBMA address of the 
 
-In configuration of a phase 2 DMVPN tunnel, replace tunnel destination command 
-with tunnel mode gre multipoint.
+</p>
+<p>
+Phase 2 doesn’t support summarisation (at the hub). This is the primary difference 
+between phase 2 and phase 3. If the hub summarizes the routes, then spoke-to-spoke 
+communication will not happen directly and DMVPN reverts to phase 1 where all 
+data-plane traffic will transit the hub.
+</p>
+
+<h3>Spoke Configuration</h3>
+<p>
+In configuration of a phase 2 DMVPN tunnel, replace <code><b>tunnel destination </b></code> command 
+with <code><b>tunnel mode gre multipoint</b></code>.
 </p>
 <p>
 Replace:
@@ -526,14 +757,20 @@ SPOKE7(config-if)#<b>tunnel mode gre multipoint</b>
 
 <h3>Next-Hop</h3>
 <p>
-If EIGRP is configured as the overlay IGP, the hub does not modify the next hop. 
-So the next-hop-self feature of EIGRP can be disabled at the NHS;
+If EIGRP is configured as the overlay IGP, the hub does not modify the next hop 
+attribute of remote prefixes that it advertises. 
+So the <code><b>next-hop-self</b></code> feature of EIGRP on the tunnel interface 
+can be disabled on the NHS. Additionally, as the hub is connected to the spokes 
+through the same interface, split-horizon for EIGRP should also be disabled on 
+the tunnel interface otherwise EIGRP will not advertise routes that are learned 
+via the mGRE interface back out that interface;
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
  <code style="font-size:110%">
 HUB(config)#<b>interface tunnel0</b><br>
-HUB(config-if)#<b>no ip next-hop-self eigrp 100</b>
+HUB(config-if)#<b>no ip next-hop-self eigrp 100</b><br>
+HUB(config-if)#<b>no ip split-horizon eigrp 100</b>
 </code>
 </div>
 </p>
@@ -550,16 +787,21 @@ HUB(config-if)#<b>ip ospf network broadcast</b>
 </p>
 <p>
 Like OSPF, the tunnel interface in IS-IS should be configured as a BROADCAST. 
-However, database synchronisation and convergence need to be complete first. 
+However, database synchronisation and convergence need to be completed first. 
 With eBGP, third party next-hops can be used. IBGP does not modify the next-hop by default.
 </p>
 
-<h2>Spoke Configuration (DMVPN Phase 3)</h2>
+<h2>DMVPN Phase 3</h2>
+<p>
+
+</p>
+
+<h3>Spoke Configuration</h3>
 <p>
 In DMVPN Phase 3 configuration;
 </p>
 
-<h3>NHS</h3>
+<p>NHS</p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
  <code style="font-size:110%">
@@ -567,9 +809,9 @@ HUB(config)#<b>interface tunnel0</b><br>
 HUB(config-if)#<b>ip nhrp redirect</b></br>
 </code>
 </div>
-</p?
+</p>
 
-<h3>NHC;</h3>
+<p>NHC;</p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
  <code style="font-size:110%">
@@ -579,317 +821,853 @@ SPOKE7(config-if)#<b>ip nhrp shortcut </b><br>
 </div>
 </p>
 <p>
-The command ip nhrp redirect on the NHS checks the flow of packets on the 
+The command <code><b>ip nhrp redirect</b></code> on the NHS checks the flow of packets on the 
 physical interface and sends a redirect message to the source spoke router when 
-it detects packets hairpinning out of the DMVPN cloud. Hairpinning is when 
-traffic is received and sent out of an interface in the same cloud (identified 
-by the NHRP network ID). Hairpinning of traffic triggers redirect messages.
-
-When NHC X wants to communicate with NHC Y, it sends traffic to the NHS. NHS 
-sends NHRP messages to NHC Y informing NHC Y that NHC X would like to communicate 
-with it. NHC Y replies with its particulars to NHS. NHS detects that it received
-the reply from NHC Y through the same interface that it received the resolution 
-request from NHC X (hairpining). It sends a traffic indication (redirect) message 
+it detects packets hairpinning out of the DMVPN cloud. <b>Hairpinning is when 
+traffic is received and sent out of an interface in the same DMVPN cloud (identified 
+by the NHRP network ID). Hairpinning of traffic triggers redirect messages.</b>
+</p>
+<p>
+When NHC X wants to communicate with NHC Y:
+<ul>
+  <li>NHC X sends traffic to the NHS.</li>
+  <li>NHS sends NHRP messages to NHC Y informing NHC Y that NHC X would like to communicate 
+with it.</li>
+  <li>NHC Y replies with its particulars to NHS.</li>
+  <li>NHS detects that the reply from NHC Y was received through the same interface
+  that it received the resolution request from NHC X (hairpining). It sends a traffic indication (redirect) message 
 to NHC Y informing NHC Y that NHC X can be reached through a direct route than 
-the route through NHS. NHS also sends a redirect message to NHC X indicating 
+the route through the NHS.</li>
+<li>NHS also sends a redirect message to NHC X indicating 
 that NHC Y can be reached through a better direct route than the route through 
-NHS. The redirect from the NHS is known as traffic indication.
-
-For NHC X and NHC Y to utilise these redirect messages from NHS, they need to 
-have the command ip nhrp shortcut configured on their tunnel interface.
+NHS.</li>
+<li>The redirect from the NHS is known as traffic indication.</li>
+<li>For NHC X and NHC Y to utilise these redirect messages from NHS, they need to 
+have the command <code><b>ip nhrp shortcut</b></code> configured on their tunnel interface.</li>
+</ul>
 
 It is important to note that in DMVPN phase 3, initial data traffic is through 
 the hub only if the tunnel – NBMA address mapping is not yet in the NHRP table 
-of the spokes. Subsequent traffic is direct to remote spoke.
+of the spokes. This is because an NHRP Resolution Request is sent to the hub.
+Subsequent traffic is direct to remote spoke.
+</p>
 
-SPOKE7(config-if)#do trace 10.100.100.8
-Type escape sequence to abort.
-Tracing the route to 10.100.100.8
-VRF info: (vrf in name/id, vrf out name/id)
-  1 10.100.100.1 36 msec 28 msec
-    10.100.100.8 92 msec
-SPOKE7(config-if)#do trace 10.100.100.8
-Type escape sequence to abort.
-Tracing the route to 10.100.100.8
-VRF info: (vrf in name/id, vrf out name/id)
-  1 10.100.100.8 92 msec *  92 msec
-In DMVPN phase 3, if EIGRP is configured as the routing protocol over the overlay network, EIGRP, by default, changes the next-hop to the router it is running on.
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+ <code style="font-size:110%">
+SPOKE7(config-if)#<b>do trace 10.100.100.8</b> <br>
+Type escape sequence to abort.                <br>
+Tracing the route to 10.100.100.8             <br>
+VRF info: (vrf in name/id, vrf out name/id)   <br>
+&nbsp;&nbsp;1 10.100.100.1 36 msec 28 msec              <br>
+&nbsp;&nbsp;&nbsp;&nbsp;10.100.100.8 92 msec                      <br>
+&nbsp;&nbsp;&nbsp;&nbsp;                                          <br>
+SPOKE7(config-if)#<b>do trace 10.100.100.8</b> <br>
+Type escape sequence to abort.                <br>
+Tracing the route to 10.100.100.8             <br>
+VRF info: (vrf in name/id, vrf out name/id)   <br>
+&nbsp;&nbsp;1 10.100.100.8 92 msec *  92 msec           <br>
+  
+</code></div>
 
-In phase 3, a next-hop-self feature is usually ignored as the redirect on the NHS and shortcut on NHC will take care of spoke to spoke communication. Its presence or absence in NHS configuration is of no effect.
 
-In phase 3, when summarisation is implemented at the hub, a more specific NHRP route (code ‘H’) is installed in the RIB to the remote spoke. The shortcut command on the spoke is required for this to be accepted. This NHRP route as an AD of 250.
-
-It is important to note that control-plane and IP multicast traffic still go through the hub regardless of DMVPN phase. This means that if an IGP such as OSPF is configured, the NHS should be configured as the Designated Router (DR) to distribute updates to the NHCs. With EIGRP, the next-hop-self feature should be disabled in order for the Phase 3 redirects to be successful.
-
-All neighborships of IGPs are with the NHS. NHCs cannot form IGP neighborships as they do not send multicast traffic to each other.
-
-Verification of traffic indication;
-
-SPOKE7#debug dmvpn all all
-SPOKE7#ping 10.100.100.8
+<h4>Verification of traffic indication</h4>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+ <code style="font-size:110%">
+SPOKE7#<b>debug dmvpn all all</b>                                                         <br>
+SPOKE7#ping 10.100.100.8                                                                  <br>
+...                                                                                       <br>
+*Feb 14 21:44:08.387: NHRP: Receive Traffic Indication via Tunnel0 vrf 0, packet size: 84 <br>
+*Feb 14 21:44:08.391:&nbsp;nbsp;(F) afn: AF_IP(1), type: IP(800), hop: 255, ver: 1                 <br>
+*Feb 14 21:44:08.391:&nbsp;nbsp;&nbsp;nbsp;&nbsp;nbsp;shtl: 4(NSAP), sstl: 0(NSAP)                                   <br>
+*Feb 14 21:44:08.395:&nbsp;nbsp;&nbsp;nbsp;&nbsp;nbsp;pktsz: 84 extoff: 68                                           <br>
+*Feb 14 21:44:08.395:&nbsp;nbsp;(M) traffic code: redirect(0)                                      <br>
+*Feb 14 21:44:08.395:&nbsp;nbsp;&nbsp;nbsp;&nbsp;nbsp;src NBMA: 10.10.10.10                                          <br>
+*Feb 14 21:44:08.399:&nbsp;nbsp;&nbsp;nbsp;&nbsp;nbsp;src protocol: 10.100.100.1, .dst protocol: 10.100.100.7        <br>
+*Feb 14 21:44:08.403:&nbsp;nbsp;&nbsp;nbsp;&nbsp;nbsp;Contents of nhrp traffic indication packet:                     <br>
+*Feb 14 21:44:08.403:&nbsp;nbsp;&nbsp;nbsp;&nbsp;nbsp;&nbsp;nbsp; 45 00 00 64 00 50 00 00 FE 01 DF 71 0A 64 64 07
 ...
-*Feb 14 21:44:08.387: NHRP: Receive Traffic Indication via Tunnel0 vrf 0, packet size: 84
-*Feb 14 21:44:08.391:  (F) afn: AF_IP(1), type: IP(800), hop: 255, ver: 1
-*Feb 14 21:44:08.391:      shtl: 4(NSAP), sstl: 0(NSAP)
-*Feb 14 21:44:08.395:      pktsz: 84 extoff: 68
-*Feb 14 21:44:08.395:  (M) traffic code: redirect(0)
-*Feb 14 21:44:08.395:      src NBMA: 10.10.10.10
-*Feb 14 21:44:08.399:      src protocol: 10.100.100.1, .dst protocol: 10.100.100.7
-*Feb 14 21:44:08.403:      Contents of nhrp traffic indication packet:
-*Feb 14 21:44:08.403:         45 00 00 64 00 50 00 00 FE 01 DF 71 0A 64 64 07
-...
+</code></div>
+</p>
+<p>
 On the NHS:
+</p>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+ <code style="font-size:110%">
+HUB#<b>debug dmvpn all all</b>                                                                    <br>
+...                                                                                               <br>
+*Feb 14 21:30:56.151: NHRP RIB_RWATCH: Debugging is ON                                            <br>
+HUB#                                                                                              <br>
+*Feb 14 21:31:07.663: NHRP: Tunnels gave us remote_nbma: 7.7.7.7 for Redirect                     <br>
+*Feb 14 21:31:07.663: NHRP: Attempting to Redirect, remote_nbma: 7.7.7.7                          <br>
+*Feb 14 21:31:07.663: NHRP: inserting (7.7.7.7/10.100.100.8) in redirect table                    <br>
+*Feb 14 21:31:07.667: NHRP-ATTR:  Requester Ext Len: Total ext_len  with NHRP attribute VPE 16    <br>
+... <br>
+</code></div>
+</p>
 
-HUB#debug dmvpn all all
-...
-*Feb 14 21:30:56.151: NHRP RIB_RWATCH: Debugging is ON
-HUB#
-*Feb 14 21:31:07.663: NHRP: Tunnels gave us remote_nbma: 7.7.7.7 for Redirect
-*Feb 14 21:31:07.663: NHRP: Attempting to Redirect, remote_nbma: 7.7.7.7
-*Feb 14 21:31:07.663: NHRP: inserting (7.7.7.7/10.100.100.8) in redirect table
-*Feb 14 21:31:07.667: NHRP-ATTR:  Requester Ext Len: Total ext_len  with NHRP attribute VPE 16
-...
-Routing in DMVPN
-DMVPN was developed by Cisco Systems with EIGRP in mind, as a routing protocol. To fully utilise the features of DMVPN, EIGRP is recommended as the routing protocol of the overlay network. However, other routing protocols such as OSPF, RIP, IS-IS can be used as routing protocols as well in DMVPN configurations.
+<h4>Routing Protocols</h4>
+<p>
+In DMVPN phase 3, if EIGRP is configured as the routing protocol over the overlay 
+network, EIGRP, by default, changes the next-hop to the router it is running on.
+In phase 3, the configuration of <code><b>next-hop-self</b></code> feature is 
+usually ignored as the redirect on the NHS and shortcut on NHC will take care of 
+spoke to spoke communication. Its presence or absence in NHS configuration is of no effect.
+</p>
 
-If using EIGRP for the internal networks, split horizon needs to be disabled on the tunnel interface.
+<p>
+It is important to note that control-plane and IP multicast traffic still go 
+through the hub regardless of DMVPN phase. This means that if an IGP such as 
+OSPF is configured, the NHS should be configured as the Designated Router (DR) 
+to distribute updates to the NHCs. With EIGRP, the next-hop-self feature should
+be disabled in order for the Phase 3 redirects to be successful.
 
-As EIGRP always maintain loop-free routes using the feasibility condition, disabling split-horizon does not introduce loops. However, it might be preferrable to disable it entirely.
+All neighborships of IGPs are with the NHS. NHCs cannot form IGP neighborships 
+as they do not send multicast traffic to each other.
+</p>
 
-HUB#configure terminal
-HUB(config)#interface tunnel 10
-HUB(config-if)#no ip split-horizon eigrp 100
-HUB(config-if)#no ip next-hop-self eigrp 100
-When configuring a routing protocol over the overlay network, never advertise the underlay network in routing protocol over the overlay network.
+<h4>Summarization</h4>
+<p>
+In phase 3, when summarisation is implemented at the hub, this gets advertised to 
+the spokes with the hub as the next-hop. 
+</p>
 
-Verification of DMVPN
-Viewing DMVPN Tunnel States
-The Tunnel interface experiences varying states based on the stage of tunnel creation or if the tunnel experienced problems during establishment or operation. Addition of encryption to the tunnel also affects the state of the DMVPN tunnels. The commands to display the tunnel state are;
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+ <code style="font-size:110%">
+HUB(config)#<b>router eigrp EIGRP_HUB</b> <br>
+HUB(config-router)#<b>address-family ipv4 unicast auto 1</b><br>
+HUB(config-router-af)#<b>af-interface tunnel0</b><br>
+HUB(config-router-af-interface)#<b>summary-address 10.7.0.0/16</b><br>
+ </code></div>
+</p>
 
-HUB#show dmvpn interface [detail] 
-and
-HUB#show dmvpn [detail]
+<p>
+The spokes will receive this summary route from the hub: 
+</p>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+ <code style="font-size:110%">
+SPOKE2#<b>show ip route eigrp</b>                                               <br>
+Codes: L - local, C - connected, S - static, R - RIP, M - mobile, B - BGP       <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; D - EIGRP, EX - EIGRP external, O - OSPF, IA - OSPF inter area           <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; N1 - OSPF NSSA external type 1, N2 - OSPF NSSA external type 2           <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; E1 - OSPF external type 1, E2 - OSPF external type 2                     <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; i - IS-IS, su - IS-IS summary, L1 - IS-IS level-1, L2 - IS-IS level-2    <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ia - IS-IS inter area, * - candidate default, U - per-user static route  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; o - ODR, P - periodic downloaded static route, H - NHRP, l - LISP        <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; + - replicated route, % - next hop override                              <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                        <br>
+Gateway of last resort is not set&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                       <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                        <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.0.0.0/8 is variably subnetted, 21 subnets, 3 masks                     <br>
+D&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.1.10.0/24 [90/76800640] via 172.30.1.1, 04:23:39, Tunnel0           <br>
+D&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.1.11.0/24 [90/76800640] via 172.30.1.1, 04:23:39, Tunnel0           <br>
+D&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.1.12.0/24 [90/76800640] via 172.30.1.1, 04:23:39, Tunnel0           <br>
+<span style="background:gray;">D&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.7.0.0/16 [90/104960000] via 172.30.1.1, 00:00:14, Tunnel0</span><br>
+D&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.8.10.0/24 [90/104960000] via 172.30.1.8, 03:24:09, Tunnel0 <br>
+D&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.8.11.0/24 [90/104960000] via 172.30.1.8, 03:24:09, Tunnel0 <br>
+D&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.8.12.0/24 [90/104960000] via 172.30.1.8, 03:24:09, Tunnel0 <br>
+</code></div>
+</p>
+
+<p>
+If the spokes send or receive traffic from a host in a component network of the 
+summary address, NHRP installs a more specific route in the routing table 
+that is identified with the code ‘H’.
+</p>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+ <code style="font-size:110%">
+SPOKE2#<b>ping 10.7.10.1</b><br>
+Type escape sequence to abort.<br>
+Sending 5, 100-byte ICMP Echos to 10.7.10.1, timeout is 2 seconds:<br>
+!!!!!<br>
+Success rate is 100 percent (5/5), round-trip min/avg/max = 40/85/152 ms<br>
+SPOKE2#<b>show ip route</b>                                                    <br>
+Codes: L - local, C - connected, S - static, R - RIP, M - mobile, B - BGP      <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; D - EIGRP, EX - EIGRP external, O - OSPF, IA - OSPF inter area          <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; N1 - OSPF NSSA external type 1, N2 - OSPF NSSA external type 2          <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; E1 - OSPF external type 1, E2 - OSPF external type 2                    <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; i - IS-IS, su - IS-IS summary, L1 - IS-IS level-1, L2 - IS-IS level-2   <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ia - IS-IS inter area, * - candidate default, U - per-user static route <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; o - ODR, P - periodic downloaded static route, H - NHRP, l - LISP       <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; + - replicated route, % - next hop override                             <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                         <br>
+Gateway of last resort is not set&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                        <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                         <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.0.0.0/8 is variably subnetted, 22 subnets, 3 masks                    <br>
+D&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.1.10.0/24 [90/76800640] via 172.30.1.1, 04:24:14, Tunnel0          <br>
+D&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.1.11.0/24 [90/76800640] via 172.30.1.1, 04:24:14, Tunnel0          <br>
+D&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.1.12.0/24 [90/76800640] via 172.30.1.1, 04:24:14, Tunnel0          <br>
+C&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.2.10.0/24 is directly connected, Loopback10                        <br>
+L&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.2.10.1/32 is directly connected, Loopback10                        <br>
+C&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.2.11.0/24 is directly connected, Loopback11                        <br>
+L&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.2.11.1/32 is directly connected, Loopback11                        <br>
+C&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.2.12.0/24 is directly connected, Loopback12                        <br>
+L&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.2.12.1/32 is directly connected, Loopback12                        <br>
+C&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.2.13.0/24 is directly connected, Loopback13                        <br>
+L&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.2.13.1/32 is directly connected, Loopback13                        <br>
+D&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.7.0.0/16 [90/104960000] via 172.30.1.1, 00:00:49, Tunnel0          <br>
+<span style="background:gray;">H&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  10.7.10.0/24 [250/1] via 172.30.1.7, 00:00:04, Tunnel0</span><br>
+D&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.8.10.0/24 [90/104960000] via 172.30.1.8, 03:24:44, Tunnel0 <br>
+D&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.8.11.0/24 [90/104960000] via 172.30.1.8, 03:24:44, Tunnel0 <br>
+D&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.8.12.0/24 [90/104960000] via 172.30.1.8, 03:24:44, Tunnel0 <br>
+!output omitted...<br><br>
+SPOKE2#<b>show ip route 10.7.10.0</b>                      <br>
+Routing entry for 10.7.10.0/24                             <br>
+&nbsp;&nbsp;Known via "nhrp", distance 250, metric 1                 <br>
+&nbsp;&nbsp;Last update from 172.30.1.7 on Tunnel0, 00:03:17 ago     <br>
+&nbsp;&nbsp;Routing Descriptor Blocks:                               <br>
+&nbsp;&nbsp;* 172.30.1.7, from 172.30.1.7, 00:03:17 ago, via Tunnel0 <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Route metric is 1, traffic share count is 1          <br>
+</code></div>
+</p>
+<p>
+The <code><b>ip nhrp shortcut</b></code> command on the spoke is required for 
+the installation of NHRP routes in the routing table. NHRP installed routes have 
+an administrative distance (AD) of 250.
+</p>
+<p>
+This NHRP installed route is also reflected in the NHRP table:
+</p>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+ <code style="font-size:110%">
+SPOKE2#<b>show ip nhrp</b>                            <br>   
+10.7.10.0/24 via 172.30.1.7                           <br>
+&nbsp;&nbsp; Tunnel0 created 00:00:21, expire 01:59:37<br>      
+&nbsp;&nbsp; Type: dynamic, <span style="background:gray;">Flags: router used rib</span><br>      
+&nbsp;&nbsp; NBMA address: 99.255.60.6                <br>      
+172.30.1.1/32 via 172.30.1.1                          <br>
+&nbsp;&nbsp; Tunnel0 created 04:35:26, never expire   <br>      
+&nbsp;&nbsp; Type: static, Flags: used                <br>      
+&nbsp;&nbsp; NBMA address: 99.255.10.2
+</code></div>
+</p>
+
+<p>
+In the NHRP table, entries have the flag "rib" indicating that a route has been
+generated and installed in the routing table.
+</p>
+<p>
+In the output of the DMVPN mapping table, NHRP installed routes have the flag 
+<code><b>DT1</b></code>.
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+ <code style="font-size:110%">
+SPOKE2#<b>show dmvpn detail</b>                                                                                     <br>
+Legend: Attrb --&gt; S - Static, D - Dynamic, I - Incomplete&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;          <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;N - NATed, L - Local, X - No Socket&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;         <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Ent --&gt; Number of NHRP entries with same NBMA peer&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;         <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;NHS Status: E --&gt; Expecting Replies, R --&gt; Responding, W --&gt; Waiting&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;         <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;UpDn Time --&gt; Up or Down Time for a Tunnel&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;         <br>
+==========================================================================&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;          <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;          <br>
+Interface Tunnel0 is up/up, Addr. is 172.30.1.2, VRF ""&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;         <br>
+&nbsp;&nbsp; Tunnel Src./Dest. addr: 99.255.30.1/MGRE, Tunnel VRF ""&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;          <br>
+&nbsp;&nbsp; Protocol/Transport: "multi-GRE/IP", Protect ""&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;         <br>
+&nbsp;&nbsp; Interface State Control: Disabled&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;          <br>
+&nbsp;&nbsp; nhrp event-publisher : Disabled&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;          <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;          <br>
+IPv4 NHS:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;         <br>
+172.30.1.1&nbsp;&nbsp;RE NBMA Address: 99.255.10.2 priority = 0 cluster = 0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;         <br>
+Type:Spoke, Total NBMA Peers (v4/v6): 3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;         <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;          <br>
+# Ent&nbsp;&nbsp;Peer NBMA Addr Peer Tunnel Add State&nbsp;&nbsp;UpDn Tm Attrb&nbsp;&nbsp;&nbsp;&nbsp;Target Network&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;          <br>
+----- --------------- --------------- ----- -------- ----- -----------------&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;          <br>
+&nbsp;&nbsp;&nbsp;&nbsp;1 99.255.60.6&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;172.30.1.7&nbsp;&nbsp;&nbsp;&nbsp;UP 00:40:42&nbsp;&nbsp;<span style="background:gray;">DT1</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 10.7.10.0/24  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;2 99.255.60.2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;172.30.1.8&nbsp;&nbsp;&nbsp;&nbsp;UP 00:03:29&nbsp;&nbsp;DT2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 10.8.10.0/24&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;          <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;99.255.60.2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;172.30.1.8&nbsp;&nbsp;&nbsp;&nbsp;UP 00:03:29&nbsp;&nbsp;&nbsp;&nbsp;D&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;172.30.1.8/32&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;          <br>
+&nbsp;&nbsp;&nbsp;&nbsp;1 99.255.10.2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;172.30.1.1&nbsp;&nbsp;&nbsp;&nbsp;UP 05:15:48&nbsp;&nbsp;&nbsp;&nbsp;S&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;172.30.1.1/32&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;          <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;          <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;          <br>
+Crypto Session Details:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;         <br>
+--------------------------------------------------------------------------------&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;          <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;          <br>
+Pending DMVPN Sessions:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;         <br>
+</code></div>
+</p>
+
+<h4>Next-hop Override</h4>
+<p>
+When the shortcut feature has been applied to a specific route, if the prefixes 
+are more specific, then the route learned through the overlay 
+routing protocol will have the next-hop override flag(%) is set.
+</p>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+ <code style="font-size:110%">
+SPOKE2#<b>ping 10.8.10.1</b>                                                          <br>            
+Type escape sequence to abort.                                                        <br>     
+Sending 5, 100-byte ICMP Echos to 10.8.10.1, timeout is 2 seconds:                    <br>     
+!!!!!                                                                                 <br>     
+Success rate is 100 percent (5/5), round-trip min/avg/max = 20/39/48 ms               <br>     
+SPOKE2#                                                                               <br>     
+SPOKE2#<b>show ip route eigrp</b>                                                     <br>            
+Codes: L - local, C - connected, S - static, R - RIP, M - mobile, B - BGP&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;     <br>     
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; D - EIGRP, EX - EIGRP external, O - OSPF, IA - OSPF inter area&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;     <br>     
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; N1 - OSPF NSSA external type 1, N2 - OSPF NSSA external type 2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;     <br>     
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; E1 - OSPF external type 1, E2 - OSPF external type 2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;     <br>     
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; i - IS-IS, su - IS-IS summary, L1 - IS-IS level-1, L2 - IS-IS level-2&nbsp;&nbsp;&nbsp;&nbsp;      <br>     
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ia - IS-IS inter area, * - candidate default, U - per-user static route&nbsp;&nbsp;      <br>     
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; o - ODR, P - periodic downloaded static route, H - NHRP, l - LISP&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;      <br>     
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; + - replicated route, % - next hop override&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;      <br>     
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;      <br>     
+Gateway of last resort is not set&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;     <br>     
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;      <br>     
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.0.0.0/8 is variably subnetted, 22 subnets, 3 masks&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;     <br>     
+D&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.1.10.0/24 [90/76800640] via 172.30.1.1, 05:20:53, Tunnel0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;     <br>     
+D&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.1.11.0/24 [90/76800640] via 172.30.1.1, 05:20:53, Tunnel0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;     <br>     
+D&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.1.12.0/24 [90/76800640] via 172.30.1.1, 05:20:54, Tunnel0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;     <br>     
+D&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.7.0.0/16 [90/104960000] via 172.30.1.1, 00:57:29, Tunnel0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;     <br>     
+<span style="background:gray;">D&nbsp;&nbsp; %&nbsp;&nbsp;&nbsp;&nbsp;10.8.10.0/24 [90/104960000] via 172.30.1.8, 04:21:24, Tunnel0</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;      <br>     
+D&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.8.11.0/24 [90/104960000] via 172.30.1.8, 04:21:24, Tunnel0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;      <br>     
+D&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.8.12.0/24 [90/104960000] via 172.30.1.8, 04:21:24, Tunnel0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;      <br>     
+SPOKE2#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;     <br>     
+SPOKE2#<b>show ip route 10.8.10.0</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;     <br>            
+Routing entry for 10.8.10.0/24&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;      <br>     
+&nbsp;&nbsp;Known via "eigrp 1", distance 90, metric 104960000, type internal&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;     <br>     
+&nbsp;&nbsp;Redistributing via eigrp 1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;      <br>     
+&nbsp;&nbsp;Last update from 172.30.1.8 on Tunnel0, 04:21:27 ago&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;      <br>     
+&nbsp;&nbsp;Routing Descriptor Blocks:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;      <br>     
+&nbsp;&nbsp;* 172.30.1.8, from 172.30.1.1, 04:21:27 ago, via Tunnel0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;      <br>     
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Route metric is 104960000, traffic share count is 1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;     <br>     
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Total delay is 105000 microseconds, minimum bandwidth is 100 Kbit&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;     <br>     
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Reliability 255/255, minimum MTU 1400 bytes&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;     <br>     
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Loading 2/255, Hops 2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;     <br>     
+SPOKE2#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;     <br>     
+SPOKE2#<b>show dmvpn detail</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;     <br>            
+Legend: Attrb --&gt; S - Static, D - Dynamic, I - Incomplete&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;         <br>     
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;N - NATed, L - Local, X - No Socket&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;     <br>     
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Ent --&gt; Number of NHRP entries with same NBMA peer&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;        <br>     
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;NHS Status: E --&gt; Expecting Replies, R --&gt; Responding, W --&gt; Waiting          <br>     
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;UpDn Time --> Up or Down Time for a Tunnel&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;      <br>     
+==========================================================================&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;      <br>     
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;      <br>     
+Interface Tunnel0 is up/up, Addr. is 172.30.1.2, VRF ""&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;     <br>     
+&nbsp;&nbsp; Tunnel Src./Dest. addr: 99.255.30.1/MGRE, Tunnel VRF ""&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;      <br>     
+&nbsp;&nbsp; Protocol/Transport: "multi-GRE/IP", Protect ""&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;     <br>     
+&nbsp;&nbsp; Interface State Control: Disabled&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;      <br>     
+&nbsp;&nbsp; nhrp event-publisher : Disabled&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;      <br>     
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;      <br>     
+IPv4 NHS:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;     <br>     
+172.30.1.1&nbsp;&nbsp;RE NBMA Address: 99.255.10.2 priority = 0 cluster = 0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;     <br>     
+Type:Spoke, Total NBMA Peers (v4/v6): 3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;     <br>     
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;      <br>     
+# Ent&nbsp;&nbsp;Peer NBMA Addr Peer Tunnel Add State&nbsp;&nbsp;UpDn Tm Attrb&nbsp;&nbsp;&nbsp;&nbsp;Target Network&nbsp;&nbsp;&nbsp;&nbsp;      <br>     
+----- --------------- --------------- ----- -------- ----- -----------------&nbsp;&nbsp;&nbsp;&nbsp;      <br>     
+&nbsp;&nbsp;&nbsp;&nbsp;1 99.255.60.6&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;172.30.1.7&nbsp;&nbsp;&nbsp;&nbsp;UP 00:56:58&nbsp;&nbsp;DT1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 10.7.10.0/24&nbsp;&nbsp;&nbsp;&nbsp;      <br>     
+&nbsp;&nbsp;&nbsp;&nbsp;<span style="background:gray;">2 99.255.60.2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;172.30.1.8&nbsp;&nbsp;&nbsp;&nbsp;UP 00:19:45&nbsp;&nbsp;DT2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 10.8.10.0/24</span>&nbsp;&nbsp;&nbsp;&nbsp;      <br>     
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;99.255.60.2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;172.30.1.8&nbsp;&nbsp;&nbsp;&nbsp;UP 00:19:45&nbsp;&nbsp;&nbsp;&nbsp;D&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;172.30.1.8/32&nbsp;&nbsp;&nbsp;&nbsp;      <br>     
+&nbsp;&nbsp;&nbsp;&nbsp;1 99.255.10.2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;172.30.1.1&nbsp;&nbsp;&nbsp;&nbsp;UP 05:32:04&nbsp;&nbsp;&nbsp;&nbsp;S&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;172.30.1.1/32&nbsp;&nbsp;&nbsp;&nbsp;      <br>     
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;      <br>    
+!Some output omitted                                                                  <br>
+</code></div>
+</p>
+<p>
+The next-hop override flag is also set in the NHRP table for this route:
+</p>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+ <code style="font-size:110%">
+SPOKE2#<b>show ip nhrp detail</b>             <br>
+10.7.10.0/24 via 172.30.1.7                   <br>
+&nbsp;&nbsp; Tunnel0 created 01:12:43, expire 00:47:15  <br>
+&nbsp;&nbsp; Type: dynamic, Flags: router used rib      <br>
+&nbsp;&nbsp; NBMA address: 99.255.60.6                  <br>
+10.8.10.0/24 via 172.30.1.8                   <br>
+&nbsp;&nbsp; Tunnel0 created 00:35:30, expire 01:24:29  <br>
+&nbsp;&nbsp; <span style="background:gray;">Type: dynamic, Flags: router used rib nho</span><br>
+&nbsp;&nbsp; NBMA address: 99.255.60.2                  <br>
+172.30.1.1/32 via 172.30.1.1                  <br>
+&nbsp;&nbsp; Tunnel0 created 05:47:49, never expire     <br>
+&nbsp;&nbsp; Type: static, Flags: used                  <br>
+&nbsp;&nbsp; NBMA address: 99.255.10.2                  <br>
+172.30.1.8/32 via 172.30.1.8                  <br>
+&nbsp;&nbsp; Tunnel0 created 00:35:30, expire 01:24:29  <br>
+&nbsp;&nbsp; Type: dynamic, Flags: router used          <br>
+&nbsp;&nbsp; NBMA address: 99.255.60.2
+</code></div>
+</p>
+<p>
+
+</p>
+
+<h1>Routing in DMVPN</h1>
+<p>
+DMVPN was developed by Cisco Systems with EIGRP in mind, as a routing protocol. 
+To fully utilise the features of DMVPN, EIGRP is recommended as the routing 
+protocol of the overlay network. However, other routing protocols such as OSPF, 
+RIP, IS-IS can be used as routing protocols as well in DMVPN configurations.
+
+If using EIGRP for the internal networks, split horizon needs to be disabled 
+on the tunnel interface.
+
+As EIGRP always maintain loop-free routes using the feasibility condition, 
+disabling split-horizon does not introduce loops. However, it might be 
+preferrable to disable it entirely.
+</p>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+ <code style="font-size:110%">
+HUB#<b>configure terminal</b>                       <br>
+HUB(config)#<b>interface tunnel 10</b>              <br>
+HUB(config-if)#<b>no ip split-horizon eigrp 100</b> <br>
+HUB(config-if)#<b>no ip next-hop-self eigrp 100</b>
+</code></div>
+</p>
+<p> 
+When configuring a routing protocol over the overlay network, never advertise 
+the underlay network in routing protocol over the overlay network.
+</p>
+
+<h1>Verification of DMVPN</h1>
+<h2>Viewing DMVPN Tunnel States</h2>
+<p>
+The tunnel interface experiences varying states based on the stage of tunnel 
+creation or if the tunnel experienced problems during establishment or operation. 
+Addition of encryption to the tunnel also affects the state of the DMVPN tunnels. 
+The commands to display the tunnel state are;
+<code><b>show dmvpn interface &lt;detail&gt;</b></code> and 
+<code><b>show dmvpn &lt;detail&gt;</b></code>. 
+
+<h3><code>show dmvpn</code></h3>
+<p>
+Run from the hub displays the mapping between the tunnel address and NBMA address.
+</p>
+
+<h3><code>show dmvpn interface</code></h3>
+<p>
 This command displays tunnel interface, role, state, peers and uptime.
 
-Tunnel states
-INTF: Line protocol of DMVPN tunnel is down
-
-IKE: DMVPN tunnels configured with IPSec have not yet successfully established an IKE session.
-
-IPSec: An IKE session is established but an IPSec SA has not yet been established.
-
-NHRP: The DMVPN spoke router has not yet successfully registered.
-
-Up: Spoke has registered with hub and received ACK (positive registration reply). An up state must be maintained for traffic to flow. #show dmvpn detail includes local tunnel and NBMA ip addresses, tunnel health monitoring and VRF contexts IPSec crypto info is displayed.
-
-HUB#show dmvpn detail
-Legend: Attrb --> S - Static, D - Dynamic, I - Incomplete
-        N - NATed, L - Local, X - No Socket
-        # Ent --> Number of NHRP entries with same NBMA peer
-        NHS Status: E --> Expecting Replies, R --> Responding, W --> Waiting
-        UpDn Time --> Up or Down Time for a Tunnel
-==========================================================================
-
-Interface Tunnel0 is up/up, Addr. is 10.100.100.1, VRF ""
-   Tunnel Src./Dest. addr: 10.10.10.10/MGRE, Tunnel VRF ""
-   Protocol/Transport: "multi-GRE/IP", Protect ""
-   Interface State Control: Disabled
-   nhrp event-publisher : Disabled
-Type:Hub, Total NBMA Peers (v4/v6): 2
-
-# Ent  Peer NBMA Addr Peer Tunnel Add State  UpDn Tm Attrb    Target Network
------ --------------- --------------- ----- -------- ----- -----------------
-    1 7.7.7.7            10.100.100.7    UP 01:18:58    D    10.100.100.7/32
-    1 8.8.8.8            10.100.100.8    UP 01:09:17    D    10.100.100.8/32
-
-
-Crypto Session Details:
---------------------------------------------------------------------------------
-
-Pending DMVPN Sessions:
-
-HUB#show dmvpn interface tunnel 0 detail
-Legend: Attrb --> S - Static, D - Dynamic, I - Incomplete
-        N - NATed, L - Local, X - No Socket
-        # Ent --> Number of NHRP entries with same NBMA peer
-        NHS Status: E --> Expecting Replies, R --> Responding, W --> Waiting
-        UpDn Time --> Up or Down Time for a Tunnel
-==========================================================================
-
-Interface Tunnel0 is up/up, Addr. is 10.100.100.1, VRF ""
-   Tunnel Src./Dest. addr: 10.10.10.10/MGRE, Tunnel VRF ""
-   Protocol/Transport: "multi-GRE/IP", Protect ""
-   Interface State Control: Disabled
-   nhrp event-publisher : Disabled
-Type:Hub, Total NBMA Peers (v4/v6): 2
-
-# Ent  Peer NBMA Addr Peer Tunnel Add State  UpDn Tm Attrb    Target Network
------ --------------- --------------- ----- -------- ----- -----------------
-    1 7.7.7.7            10.100.100.7    UP 01:19:31    D    10.100.100.7/32
-    1 8.8.8.8            10.100.100.8    UP 01:09:50    D    10.100.100.8/32
+Tunnel states can be any of the following:
+<ol>
+  <li><b>INTF:</b> Line protocol of DMVPN tunnel is down</li>
+  <li><b>IKE:</b> DMVPN tunnels configured with IPSec have not yet successfully established an IKE session.</li>
+  <li><b>IPSec:</b> An IKE session is established but an IPSec SA has not yet been established.</li>
+  <li><b>NHRP:</b> The DMVPN spoke router has not yet successfully registered.</li>
+  <li><b>Up:</b> Spoke has registered with hub and received ACK (positive registration reply). 
+  An up interface state must be maintained for traffic to flow. 
+</ol>
+</p>
+<h3><code>show dmvpn detail</code></h3>
+<p>This command displays local tunnel and NBMA ip addresses, tunnel health 
+monitoring and VRF contexts IPSec crypto info.
+</p>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+ <code style="font-size:110%">
+HUB#<b>show dmvpn detail</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <br>
+Legend: Attrb --> S - Static, D - Dynamic, I - Incomplete&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;N - NATed, L - Local, X - No Socket&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Ent --> Number of NHRP entries with same NBMA peer&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;NHS Status: E --> Expecting Replies, R --> Responding, W --> Waiting&nbsp;&nbsp; <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;UpDn Time --> Up or Down Time for a Tunnel&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <br>
+==========================================================================&nbsp;&nbsp;&nbsp;&nbsp; <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <br>
+Interface Tunnel0 is up/up, Addr. is 10.100.100.1, VRF ""&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  <br>
+&nbsp;&nbsp; Tunnel Src./Dest. addr: 10.10.10.10/MGRE, Tunnel VRF ""&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <br>
+&nbsp;&nbsp; Protocol/Transport: "multi-GRE/IP", Protect ""&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  <br>
+&nbsp;&nbsp; Interface State Control: Disabled&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <br>
+&nbsp;&nbsp; nhrp event-publisher : Disabled&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <br>
+Type:Hub, Total NBMA Peers (v4/v6): 2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <br>
+# Ent&nbsp;&nbsp;Peer NBMA Addr Peer Tunnel Add State&nbsp;&nbsp;UpDn Tm Attrb&nbsp;&nbsp;&nbsp;&nbsp;Target Network&nbsp;&nbsp; <br>
+----- --------------- --------------- ----- -------- ----- -----------------&nbsp;&nbsp; <br>
+&nbsp;&nbsp;&nbsp;&nbsp;1 7.7.7.7&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.100.100.7&nbsp;&nbsp;&nbsp;&nbsp;UP 01:18:58&nbsp;&nbsp;&nbsp;&nbsp;D&nbsp;&nbsp;&nbsp;&nbsp;10.100.100.7/32&nbsp;&nbsp; <br>
+&nbsp;&nbsp;&nbsp;&nbsp;1 8.8.8.8&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.100.100.8&nbsp;&nbsp;&nbsp;&nbsp;UP 01:09:17&nbsp;&nbsp;&nbsp;&nbsp;D&nbsp;&nbsp;&nbsp;&nbsp;10.100.100.8/32&nbsp;&nbsp; <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <br>
+Crypto Session Details:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  <br>
+-------------------------------------------------------------------------------<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <br>
+Pending DMVPN Sessions:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <br>
+HUB#<b>show dmvpn interface tunnel 0 detail</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <br>
+Legend: Attrb --> S - Static, D - Dynamic, I - Incomplete&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;N - NATed, L - Local, X - No Socket&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Ent --> Number of NHRP entries with same NBMA peer&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;NHS Status: E --> Expecting Replies, R --> Responding, W --> Waiting&nbsp;&nbsp; <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;UpDn Time --> Up or Down Time for a Tunnel&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <br>
+==========================================================================&nbsp;&nbsp;&nbsp;&nbsp; <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <br>
+Interface Tunnel0 is up/up, Addr. is 10.100.100.1, VRF ""&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  <br>
+&nbsp;&nbsp; Tunnel Src./Dest. addr: 10.10.10.10/MGRE, Tunnel VRF ""&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <br>
+&nbsp;&nbsp; Protocol/Transport: "multi-GRE/IP", Protect ""&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  <br>
+&nbsp;&nbsp; Interface State Control: Disabled&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <br>
+&nbsp;&nbsp; nhrp event-publisher : Disabled&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <br>
+Type:Hub, Total NBMA Peers (v4/v6): 2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <br>
+# Ent&nbsp;&nbsp;Peer NBMA Addr Peer Tunnel Add State&nbsp;&nbsp;UpDn Tm Attrb&nbsp;&nbsp;&nbsp;&nbsp;Target Network&nbsp;&nbsp; <br>
+----- --------------- --------------- ----- -------- ----- -----------------&nbsp;&nbsp; <br>
+&nbsp;&nbsp;&nbsp;&nbsp;1 7.7.7.7&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.100.100.7&nbsp;&nbsp;&nbsp;&nbsp;UP 01:19:31&nbsp;&nbsp;&nbsp;&nbsp;D&nbsp;&nbsp;&nbsp;&nbsp;10.100.100.7/32&nbsp;&nbsp; <br>
+&nbsp;&nbsp;&nbsp;&nbsp;1 8.8.8.8&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.100.100.8&nbsp;&nbsp;&nbsp;&nbsp;UP 01:09:50&nbsp;&nbsp;&nbsp;&nbsp;D&nbsp;&nbsp;&nbsp;&nbsp;10.100.100.8/32&nbsp;&nbsp; <br>
 
 HUB#
-Viewing the NHRP Cache
-#show ip nhrp (brief | detail) displays the local NHRP cache. The detail keyword lists routers that submitted an NHRP request and its request ID. The NHRP cache displays NHRP mapping entries and NHRP message flags.
+</code></div>
+</p>
+<h2>Viewing the NHRP Cache</h2>
 
-SPOKE8#show ip nhrp detail                                              
-10.100.100.1/32 via 10.100.100.1                                        
-   Tunnel0 created 01:22:00, never expire                               
-   Type: static, Flags: used                                            
-   NBMA address: 10.10.10.10                                            
-10.100.100.7/32 via 10.100.100.7                                        
-   Tunnel0 created 01:21:58, expire 00:38:02                            
-   Type: dynamic, Flags: router used                                    
-   NBMA address: 7.7.7.7
-The local NHRP cache contains
-
-Network entry for hosts (/32 or 128) or subnets (/24, /25, /16) and tunnel to NBMA address
-
-Interface number, duration of tunnel existence. Included is the amount of time to expiry of the tunnel for dynamic entries. Static entries do not expire.
-
-NHRP mapping types;
-
-Static: an entry created statically, on tunnel interface
-
-Dynamic: an entry created from a spoke that register
-
-Incomplete: a temporary entry placed locally while an NHRP resolution request is processing.
-
-Local: a typical entry is of a local network that was advertised for an NHRP resolution reply.
-
-(no socket): These mapping entries do not have an associated IPSec socket and encryption isn’t triggered yet.
-
-NBMA address: transport IP address where the entry was received.
-
+<h3><code>show ip nhrp &lt;brief | detail&gt;</code></h3>
+<p>
+The displays the local NHRP cache. The <code><b>detail</b></code> keyword lists routers that submitted
+an NHRP request and its request ID. The NHRP cache displays NHRP mapping entries and NHRP message flags.
+</p>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+ <code style="font-size:110%">
+SPOKE8#<b>show ip nhrp detail</b>            <br>                                 
+10.100.100.1/32 via 10.100.100.1             <br>                          
+&nbsp;&nbsp; Tunnel0 created 01:22:00, never expire    <br>                          
+&nbsp;&nbsp; Type: static, Flags: used                 <br>                          
+&nbsp;&nbsp; NBMA address: 10.10.10.10                 <br>                          
+10.100.100.7/32 via 10.100.100.7             <br>                          
+&nbsp;&nbsp; Tunnel0 created 01:21:58, expire 00:38:02 <br>                          
+&nbsp;&nbsp; Type: dynamic, Flags: router used         <br>                          
+&nbsp;&nbsp; NBMA address: 7.7.7.7
+</code></div>
+</p>
+<p>
+The local NHRP cache contains:
+<ol>
+  <li>Network entry for hosts (/32 or 128) or subnets (/24, /25, /16) and tunnel to NBMA address.</li>
+  <li>Interface number, duration of tunnel existence. Included is the amount of time 
+to expiry of the tunnel for dynamic entries. Static entries do not expire.</li>
+<li>NHRP mapping types;
+<ul>
+  <li><b>Static:</b> an entry created statically, on tunnel interface.</li>
+  <li><b>Dynamic:</b> an entry created from a spoke that register.</li>
+  <li><b>Incomplete:</b> a temporary entry placed locally while an NHRP resolution request is processing.</li>
+  <li><b>Local:</b> a typical entry is of a local network that was advertised for an NHRP resolution reply.</li>
+  <li><b>(no socket):</b> These mapping entries do not have an associated IPSec 
+  socket and encryption isn’t triggered yet.</li>
+  <li><b>NBMA address:</b> transport IP address where the entry was received.</li>
+</ul>
+</li>
+</ol>
+</p>
+<p>
 NHRP message flags specify attributes of an NHRP cache entry or of the peer for which the entry was created.
+<ol>
+  <li><b>Used:</b> this NHRP mapping was used to forward data packets within last 60 seconds.</li>
+  <li><b>Implicit:</b> Mapping entry was learned implicitly for example source 
+  mapping information gleaned from an NHRP resolution request was received by 
+  local router or forwarded through local router.</li>
+  <li><b>Unique:</b> This mapping entry must be unique and can’t be overwritten 
+  with a mapping entry that has the same tunnel IP address but different NBMA address.</li>
+  <li><b>Router:</b> mapping entry is from a remote router that provides access 
+  to a network or host behind the remote router.</li>
+  <li><b>Rib:</b> mapping entry has a corresponding routing entry in the routing table [H].</li>
+  <li><b>Nho:</b> mapping entry has a corresponding path overriding the next hop
+  for a remote network as installed by another routing protocol.</li>
+  <li><b>Nhop:</b> Mapping entry for remote next hop address for remote tunnel 
+  interface and its associated NBMA address.</li>
+</ol>
+</p>
 
-Used: this NHRP mapping was used to forward data packets within last 60 seconds.
+<h2>Overlay Routes</h2>
+<h3><code>show ip route</code></h3>
+<p>
+Overlay routes have the tunnel interface as the exit interface.
+</p>
 
-Implicit: Mapping entry was learned implicitly for example source mapping information gleaned from an NHRP resolution request was received by local router or forwarded through local router.
+<h1 id="OPTIMIZATION">Optimization of DMVPN Operation</h1>
 
-Unique: This mapping entry must be unique and can’t be overwritten with a mapping entry that has the same tunnel IP address but different NBMA address.
+<h2>Unique IP NHRP Registration</h2>
+<p>
+During registration, NHCs instruct NHS to keep their NBMA address unique. If a 
+loss of connectivity occurs between the NHC and NHS and a new NBMA address is 
+given to the NHC, say through DHCP, before the NHRP NHC cache timeout, the new 
+registration is blocked. This can be suppressed by using the command; 
+<code><b>ip nhrp registration no-unique</b></code> on the NHC tunnel interface. 
+Verify using the command <code><b>show ip nhrp 10.100.100.8</b></code>.
+</p>
 
-Router: mapping entry is from a remote router that provides access to a network or host behind the remote router.
+<h2>NHRP Route Table Manipulation</h2>
+<p>
+NHRP manipulates the routing table as necessary. An installed route is indicated 
+by the code <code><b>‘H’</b></code>. A next hop override is indicated by the
+code <code><b>‘%’</b></code>. To display 
+explicit NHRP shortcuts, <code><b>show ip route next-hop-override</b></code>. 
+The shortcut has a symbol <code><b>NHO</b></code> and has a lower metric (255).
+</p>
 
-Rib: mapping entry has a corresponding routing entry in the routing table [H]
+<h2>NHRP Route Table Manipulation with Summarisation</h2>
+<p>
+When summary routes are configured on routers the summary routes hide network 
+convergence. The summary route is installed on the NHS tunnel IP (through EIGRP) 
+and advertised to spokes. This reduces the unnecessary traffic entering the tunnel 
+as remote NHCs do not have to receive the EIGRP updates or queries on routes 
+internal to the NHS subnet. Also, convergence in the internal subnets of NHCs do
+not get sent to other NHCs by the NHSs.
 
-Nho: mapping entry has a corresponding path overriding the next hop for a remote network as installed by another routing protocol.
+When an NHRP redirect occurs, NHRP will install a more specific route to the 
+remote NHC hence no NHO occurs.
 
-Nhop: Mapping entry for remote next hop address for remote tunnel interface and its associated NBMA address.
+Both entries in <code><b>show dmvpn detail</b></code> will be DT1 and not DT2 showing no next-hop-override occurs.
+</p>
 
-Tuning DMVPN Operation
-Unique IP NHRP Registration
-During registration, NHCs instruct NHS to keep their NBMA address unique. If a loss of connectivity occurs between the NHC and NHS and a new NBMA address is given to the NHC, say through DHCP, before the NHRP NHC cache timeout, the new registration is blocked. This can be overcome, by using the command; #ip nhrp registration no-unique on the NHC tunnel interface. Verify using the command #show ip nhrp 10.100.100.8
+<h2>Recursive Routing Problems</h2>
+This happens when the transport/NBMA network is advertised into the same routing
+protocol that runs on the overlay network. One of the main preconditions for 
+recursive routing is the routing protocol in the overlay network having a lower 
+Administrative Distance (AD) than the routing protocol being used in the underlay
+network. An example of this can be where EIGRP is running on the overlay network 
+and OSPF in the underlay network.
 
-NHRP Route Table Manipulation
-NHRP manipulates the routing table as necessary. An installed route is indicated by the code ‘H’. A next hop override is indicated by the code ‘%’. To display explicit NHRP shortcuts, #show ip route next-hop-override. The shortcut has a symbol ‘NHO and has a lower metric (255).
+The two routers that have a DMVPN tunnel formed will share their routes using 
+the EIGRP over the tunnel. EIGRP having an AD (90) lower than OSPF (110) will 
+have its underlay route selected as the preferred route over the OSPF route by 
+the remote router. This remote router will attempt to route underlay traffic 
+through the tunnel. This will obviously fail. As it keeps attempting to route 
+underlay traffic through the tunnel, the OSPF neighborship in the underlay 
+network times out and gets terminated. As the router loses the tunnel, it creates
+a new OSPF neighborship with its underlay neighbor resulting in the reformation
+of the tunnel. Then EIGRP sends the same update of the underlay network across 
+the tunnel. This process repeats continuously.
+<h3>Solution</h3>
+<ul>
+<li>Removing the transport network from the overlay routing protocol resolves
+recursive routing.</li>
+<li>Front-door VRF</li>
+</ul>
+</P>
 
-NHRP Route Table Manipulation with Summarisation
-When summary routes are configured on routers the summary routes hide network convergence. The summary route is installed on the NHS tunnel IP (through EIGRP) and advertised to spokes. This reduces the unnecessary traffic entering the tunnel as remote NHCs do not have to receive the EIGRP updates or queries on routes internal to the NHS subnet. Also, convergence in the internal subnets of NHCs do not get sent to other NHCs by the NHSs.
-
-When an NHRP redirect occurs, NHRP will install a more specific route to the remote NHC hence no NHO occurs.
-
-Both entries in #show dmvpn detail will be DT1 and not DT2 showing no next-hop-override occurs.
-
-Problems with Overlay Networks
-Recursive Routing Problems
-This happens when the transport/NBMA network is advertised into the same routing protocol that runs on the overlay network. One of the main preconditions for recursive routing is the routing protocol in the overlay network having a lower Administrative Distance (AD) than the routing protocol being used in the underlay network. An example of this can be where EIGRP is running on the overlay network and OSPF in the underlay network.
-
-The two routers that have a DMVPN tunnel formed will share their routes using the EIGRP over the tunnel. EIGRP having an AD (90) lower than OSPF (110) will have its underlay route selected as the preferred route over the OSPF route by the remote router. This remote router will attempt to route underlay traffic through the tunnel. This will obviously fail. As it keeps attempting to route underlay traffic through the tunnel, the OSPF neighborship in the underlay network times out and gets terminated. As the router loses the tunnel, it creates a new OSPF neighborship with its underlay neighbor resulting in the reformation of the tunnel. Then EIGRP sends the same update of the underlay network across the tunnel. This process repeats continuously.
-
-Removing the transport network from the overlay routing protocol resolves recursive routing
-
-Outbound Interface Selection
+<h2>Outbound Interface Selection</h2>
+<p>
 Given two uplinks with two different routes, which interface to use for sending tunnel traffic?
+</p>
 
-Front-Door Virtual Route Forwarding (FVRF)
-A DMVPN tunnel source or destination can be made to be separate from the DMVPN tunnel itself. The VRF associated with the transport network is known as front-foor VRF. Using a front-door VRF for every DMVPN tunnel prevents route recursion because the transport and overlay networks remain in separate routing tables. The transport network and interface can be associated with the transport VRF and the tunnel network and interface associated with the tunnel VRF.
+<h3 id="FVRF"> Front-Door Virtual Route Forwarding (FVRF)</h3>
+<p>
+A DMVPN tunnel source or destination can be made to be separate from the DMVPN 
+tunnel itself. The VRF associated with the transport network is known as front-foor
+VRF. Using a front-door VRF for every DMVPN tunnel prevents route recursion because
+the transport and overlay networks remain in separate routing tables. The transport 
+network and interface can be associated with the transport VRF and the tunnel 
+network and interface associated with the tunnel VRF.
+</p>
+<h4>Configuring FVRF</h4>
+<p>
+The VRF can be created using the older global configuration command 
+<code><b>ip vrf &lt;vrf_name&gt;</b></code> or the newer global configuration command  
+<code><b>vrf definition &lt;vrf_name&gt;</b></code> which supports IPv6 in 
+addition to support for IPv4 through address families.
+</p>
+<p>
+Front-door VRF can be configured using the following sequence of steps:
+<ol>
+<li>
+<p>Create the front-door VRF; <code><b>ip vrf &lt;vrf_name&gt;</b></code>. If configuring
+IPv6 FVRFs, use the command <code><b>vrf definition &lt;vrf_name&gt;</b></code> as it is the 
+only command of the two that supports IPv6.
+</p>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+ <code style="font-size:110%">
+SPOKE1(config)#<b>vrf definition FVRF</b><br>
+SPOKE1(config-vrf)#<b>address-family ipv4</b>
+</code></div>
+</p>
+<p>
+If the VRF is created using the command <code><b>vrf definition &lt;vrf_name&gt;</b></code>, 
+the appropriate address-family needs to be activated. In the above example, IPv4 
+has been activated.
+</p>
+</li>
+<li>
+  <p>
+  Associate the front-door FVRF to the interface; <code><b>vrf forwarding &lt;vrf_name&gt;</b></code>.
+  </p>
+  <p>
+  <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+ <code style="font-size:110%">
+  SPOKE1(config-if)#<b>interface g0/0</b><br>
+  SPOKE1(config-if)#<b>vrf forwarding FVRF</b><br>
+  SPOKE1(config-if)#<b>ip address 99.255.20.2 255.255.255.252</b><br>
+  </code></div>
+  </p>
+</li>
+<li>
+  <p>
+  Make the DMVPN VRF-aware: <code><b>tunnel vrf &lt;fvrf_name&gt;</b></code>.
+  </p>
+  <p>
+    <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+ <code style="font-size:110%">
+  SPOKE1(config)#<b>interface tunnel 0                        </b> <br>
+  SPOKE1(config-if)#<b>ip address 172.30.1.100 255.255.255.0  </b> <br>
+  SPOKE1(config-if)#<b>tunnel mode gre multipoint             </b> <br>
+  SPOKE1(config-if)#<b>tunnel source g0/0                     </b> <br>
+  SPOKE1(config-if)#<b>tunnel vrf FVRF                        </b>
+</code></div>
+  </p>
+  </li>
+</ol>
+</p>
+<p>
+<b>Note:</b> FVRF interfaces with static IP addressing require only a static default route in
+the FVRF context. Interfaces that receive addresses through DHCP do not require 
+the configuration of a static route.
+</p>
+<p>
+   <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+ <code style="font-size:110%">
+SPOKE1(config)#<b>ip route vrf FVRF 0.0.0.0 0.0.0.0 99.255.20.1</b>
+</code></div>
+</p>
 
-Configuring FVRF
-The VRF can be created using the older global configuration command #ip vrf vrf_name or the newer global configuration command #vrf definition vrf_name which supports IPv6 in addition to support for IPv4 through address families.
+<h4>Verification of FVRF</h4>
+<p>
+FVRF configuration and operation can be verified using the command 
+<code><b>show dmvpn detail</b></code>.
+</p>
+<p>
+ <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+ <code style="font-size:110%">
+SPOKE1#<b>show dmvpn detail</b>                                                       <br>
+Legend: Attrb --&gt; S - Static, D - Dynamic, I - Incomplete&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;          <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;N - NATed, L - Local, X - No Socket&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;           <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Ent --&gt; Number of NHRP entries with same NBMA peer&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;           <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;NHS Status: E --&gt; Expecting Replies, R --&gt; Responding, W --&gt; Waiting <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;UpDn Time --&gt; Up or Down Time for a Tunnel&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;           <br>
+==========================================================================&nbsp;&nbsp;          <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;          <br>
+Interface Tunnel0 is up/up, Addr. is 172.30.1.100, VRF ""&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;           <br>
+&nbsp;&nbsp; Tunnel Src./Dest. addr: 99.255.20.2/MGRE, Tunnel VRF "FVRF"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;          <br>
+&nbsp;&nbsp; Protocol/Transport: "multi-GRE/IP", Protect ""&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;           <br>
+&nbsp;&nbsp; Interface State Control: Disabled&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;          <br>
+&nbsp;&nbsp; nhrp event-publisher : Disabled&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;          <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;          <br>
+IPv4 NHS:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;           <br>
+172.30.1.1&nbsp;&nbsp;RE priority = 0 cluster = 0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;           <br>
+Type:Spoke, Total NBMA Peers (v4/v6): 1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;           <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;          <br>
+# Ent&nbsp;&nbsp;Peer NBMA Addr Peer Tunnel Add State&nbsp;&nbsp;UpDn Tm Attrb&nbsp;&nbsp;&nbsp;&nbsp;Target Network          <br>
+----- --------------- --------------- ----- -------- ----- -----------------          <br>
+&nbsp;&nbsp;&nbsp;&nbsp;1 99.255.10.2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;172.30.1.1&nbsp;&nbsp;&nbsp;&nbsp;UP 00:25:24&nbsp;&nbsp;&nbsp;&nbsp;S&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;172.30.1.1/32          <br>
+!output omitted
+</code></div>
+</p>
 
-Step 1: Create the front-door VRF; # ip vrf vrf_name.If configuring IPv6 FVRFs, use the command vrf definition vrf_name as it is the only command of the two that supports IPv6.
-
-Step 2: Associate the front-door FVRF to the interface; #vrf forwarding vrf_name
-
-Step 3: Configure an IP address on the interface or sub-interface
-
-Step 4: Make the DMVPN VRF-aware: #tunnel vrf fvrf_name
-
-FVRF interfaces with static IP addressing require only a static default route in the FVRF context. Interfaces that receive addresses through DHCP do not require the configuration of a static route.
-
-DMVPN Failure Detection and High Availability
-By default, an NHRP mapping stays in the NHRP cache for 7200 seconds (2 hours) (holdtime). It can be modified to the recommended value of 600 seconds using the tunnel configuration command ip nhrp holdtime (1 – 65535).
-
-NHRP registration packets are sent every NHRP timeout period. If no registration reply is received, a new registration packet is sent with a delay of 1 second, second packet is delayed for two seconds and third four seconds. NHS is declared down after third attempt. Use the enable command show dmvpn to confirm.
-
-Periodic NHRP registration requests by spokes refresh the NHRP timeout period. In spoke to spoke tunnels, if tunnel is not used in two minutes of expiry time, it is torn down.
-
-Probe state: NHCs attempting to register with a down NHS start sending probe packets periodically to determine the availability of the NHS. The delay in probe packets is 1, 2, 4, 8, 16, 32, 64. After 64 seconds, no more probe packets are sent. This can be verified by debug statetements;
-
+<h2>DMVPN Failure Detection and High Availability</h2>
+<h3>Hold time</h3>
+<p>
+By default, an NHRP mapping stays in the NHRP cache for 7200 seconds (2 hours) 
+(holdtime). It can be modified to the recommended value of 600 seconds using the
+tunnel configuration command <code><b>ip nhrp holdtime &lt;1 – 65535&gt;</b></code>.
+</p>
+<h3>NHRP Registration</h3>
+<p>
+NHRP registration packets are sent every NHRP timeout period. If no registration
+reply is received, a new registration packet is sent with a delay of 1 second, 
+second packet is delayed for two seconds and third four seconds. NHS is declared
+down after third attempt. Use the command <code><b>show dmvpn</b></code> to confirm.
+</p>
+<p>
+Periodic NHRP registration requests by spokes refresh the NHRP timeout period. 
+In spoke to spoke tunnels, if tunnel is not used in two minutes of expiry time, 
+it is torn down.
+</p>
+<p>
+Probe state: NHCs attempting to register with a down NHS start sending probe 
+packets periodically to determine the availability of the NHS. The delay in probe
+packets is 1, 2, 4, 8, 16, 32, 64. After 64 seconds, no more probe packets are sent.
+This can be verified by debuggin messages;
+</p>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+ <code style="font-size:110%">
 . . . 
-*Feb 14 21:55:12.391: NHRP-RATE: Sending initial Registration Request for 10.100.100.1, reqid 2
-*Feb 14 21:55:14.303: NHRP: Setting retrans delay to 4 for nhs  dst 10.100.100.1
-*Feb 14 21:55:14.307: NHRP-ATTR:  Requester Ext Len: Total ext_len  with NHRP attribute VPE 40
-
-*Feb 14 21:55:14.307: NHRP: Attempting to send packet via DEST 10.100.100.1
-*Feb 14 21:55:14.311: NHRP: NHRP successfully mapped '10.100.100.1' to NBMA 10.10.10.10
-*Feb 14 21:55:14.315: NHRP: Encapsulation succeeded.  Sending NHRP Control Packet  NBMA Address: 10.10.10.10
-*Feb 14 21:55:14.319: NHRP: Send Registration Request via Tunnel0 vrf 0, packet size: 92
-*Feb 14 21:55:14.323:  src: 10.100.100.9, dst: 10.100.100.1
-*Feb 14 21:55:14.327:  (F) afn: AF_IP(1), type: IP(800), hop: 255, ver: 1
-*Feb 14 21:55:14.327:      shtl: 4(NSAP), sstl: 0(NSAP)
-*Feb 14 21:55:14.331:      pktsz: 92 extoff: 52
-*Feb 14 21:55:14.331:  (M) flags: "unique nat ", reqid: 2
-*Feb 14 21:55:14.331:      src NBMA: 9.9.9.9
-*Feb 14 21:55:14.335:      src protocol: 10.100.100.9, dst protocol: 10.100.100.1
-*Feb 14 21:55:14.339:  (C-1) code: no error(0)
-*Feb 14 21:55:14.339:        prefix: 32, mtu: 17912, hd_time: 7200
-*Feb 14 21:55:14.343:        addr_len: 0(NSAP), subaddr_len: 0(NSAP), proto_len: 0, pref: 0
-*Feb 14 21:55:14.343: Responder Address Extension(3):
-*Feb 14 21:55:14.343: Forward Transit NHS Record Extension(4):
-*Feb 14 21:55:14.347: Reverse Transit NHS Record Extension(5):
-*Feb 14 21:55:14.347: NAT address Extension(9):
-*Feb 14 21:55:14.347:  (C-1) code: no error(0)
-*Feb 14 21:55:14.351:        prefix: 32, mtu: 17912, hd_time: 0
-*Feb 14 21:55:14.351:        addr_len: 4(NSAP), subaddr_len: 0(NSAP), proto_len: 4, pref: 0
-*Feb 14 21:55:14.351:        client NBMA: 10.10.10.10
-*Feb 14 21:55:14.355:        client protocol: 10.100.100.1
-*Feb 14 21:55:14.355: NHRP: 120 bytes out Tunnel0
-*Feb 14 21:55:14.359: NHRP-RATE: Retransmitting Registration Request for 10.100.100.1, reqid 2, (retrans ivl 4 sec)
-*Feb 14 21:55:18.171: NHRP: NHS-DOWN: 10.100.100.1
-*Feb 14 21:55:18.187: NHRP: Already pending Registration Request for NHS: 10.100.100.1
-*Feb 14 21:55:18.191: NHRP: NHS 10.100.100.1 Tunnel0 vrf 0 Cluster 0 Priority 0 Transitioned to 'E' from 'E'
-
-*Feb 14 21:55:18.191: NHRP: Setting retrans delay to 8 for nhs  dst 10.100.100.1
-*Feb 14 21:55:18.195: NHRP-ATTR:  Requester Ext Len: Total ext_len  with NHRP attribute VPE 40
-. . .
-*Feb 14 21:55:18.251: NHRP-RATE: Retransmitting Registration Request for 10.100.100.1, reqid 2, (retrans ivl 8 sec)
-*Feb 14 21:55:25.567: NHRP: Setting retrans delay to 16 for nhs  dst 10.100.100.1
-*Feb 14 21:55:25.571: NHRP-ATTR:  Requester Ext Len: Total ext_len  with NHRP attribute VPE 40
-. . . 
-*Feb 14 21:55:25.623: NHRP-RATE: Retransmitting Registration Request for 10.100.100.1, reqid 2, (retrans ivl 16 sec)
-*Feb 14 21:55:39.495: NHRP: Setting retrans delay to 32 for nhs  dst 10.100.100.1
-. . . 
-*Feb 14 21:55:39.551: NHRP-RATE: Retransmitting Registration Request for 10.100.100.1, reqid 2, (retrans ivl 32 sec)
-*Feb 14 21:56:09.879: NHRP: Setting retrans delay to 64 for nhs  dst 10.100.100.1
+*Feb 14 21:55:12.391: NHRP-RATE: Sending initial Registration Request for 10.100.100.1, reqid 2                        <br>
+*Feb 14 21:55:14.303: <b>NHRP: Setting retrans delay to 4 for nhs  dst 10.100.100.1</b>                                       <br>
+*Feb 14 21:55:14.307: NHRP-ATTR:  Requester Ext Len: Total ext_len  with NHRP attribute VPE 40                         <br>
+                                                                                                                       <br>
+*Feb 14 21:55:14.307: NHRP: Attempting to send packet via DEST 10.100.100.1                                            <br>
+*Feb 14 21:55:14.311: NHRP: NHRP successfully mapped '10.100.100.1' to NBMA 10.10.10.10                                <br>
+*Feb 14 21:55:14.315: NHRP: Encapsulation succeeded.  Sending NHRP Control Packet  NBMA Address: 10.10.10.10           <br>
+*Feb 14 21:55:14.319: NHRP: Send Registration Request via Tunnel0 vrf 0, packet size: 92                               <br>
+*Feb 14 21:55:14.323:&nbsp;&nbsp;src: 10.100.100.9, dst: 10.100.100.1                                                            <br>
+*Feb 14 21:55:14.327:&nbsp;&nbsp;(F) afn: AF_IP(1), type: IP(800), hop: 255, ver: 1                                              <br>
+*Feb 14 21:55:14.327:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;shtl: 4(NSAP), sstl: 0(NSAP)                                                                <br>
+*Feb 14 21:55:14.331:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;pktsz: 92 extoff: 52                                                                        <br>
+*Feb 14 21:55:14.331:&nbsp;&nbsp;(M) flags: "unique nat ", reqid: 2                                                              <br>
+*Feb 14 21:55:14.331:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;src NBMA: 9.9.9.9                                                                           <br>
+*Feb 14 21:55:14.335:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;src protocol: 10.100.100.9, dst protocol: 10.100.100.1                                      <br>
+*Feb 14 21:55:14.339:&nbsp;&nbsp;(C-1) code: no error(0)                                                                         <br>
+*Feb 14 21:55:14.339:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;prefix: 32, mtu: 17912, hd_time: 7200                                                     <br>
+*Feb 14 21:55:14.343:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;addr_len: 0(NSAP), subaddr_len: 0(NSAP), proto_len: 0, pref: 0                            <br>
+*Feb 14 21:55:14.343: Responder Address Extension(3):                                                                  <br>
+*Feb 14 21:55:14.343: Forward Transit NHS Record Extension(4):                                                         <br>
+*Feb 14 21:55:14.347: Reverse Transit NHS Record Extension(5):                                                         <br>
+*Feb 14 21:55:14.347: NAT address Extension(9):                                                                        <br>
+*Feb 14 21:55:14.347:&nbsp;&nbsp;(C-1) code: no error(0)                                                                         <br>
+*Feb 14 21:55:14.351:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;prefix: 32, mtu: 17912, hd_time: 0                                                        <br>
+*Feb 14 21:55:14.351:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;addr_len: 4(NSAP), subaddr_len: 0(NSAP), proto_len: 4, pref: 0                            <br>
+*Feb 14 21:55:14.351:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;client NBMA: 10.10.10.10                                                                  <br>
+*Feb 14 21:55:14.355:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;client protocol: 10.100.100.1                                                             <br>
+*Feb 14 21:55:14.355: NHRP: 120 bytes out Tunnel0                                                                      <br>
+*Feb 14 21:55:14.359: NHRP-RATE: Retransmitting Registration Request for 10.100.100.1, reqid 2, (retrans ivl 4 sec)    <br>
+*Feb 14 21:55:18.171: NHRP: NHS-DOWN: 10.100.100.1                                                                     <br>
+*Feb 14 21:55:18.187: NHRP: Already pending Registration Request for NHS: 10.100.100.1                                 <br>
+*Feb 14 21:55:18.191: NHRP: NHS 10.100.100.1 Tunnel0 vrf 0 Cluster 0 Priority 0 Transitioned to 'E' from 'E'           <br>
+                                                                                                                       <br>
+*Feb 14 21:55:18.191: <b>NHRP: Setting retrans delay to 8 for nhs  dst 10.100.100.1</b>                                       <br>
+*Feb 14 21:55:18.195: NHRP-ATTR:  Requester Ext Len: Total ext_len  with NHRP attribute VPE 40                         <br>
+. . .                                                                                                                  <br>
+*Feb 14 21:55:18.251: NHRP-RATE: Retransmitting Registration Request for 10.100.100.1, reqid 2, (retrans ivl 8 sec)    <br>
+*Feb 14 21:55:25.567: <b>NHRP: Setting retrans delay to 16 for nhs  dst 10.100.100.1</b>                                      <br>
+*Feb 14 21:55:25.571: NHRP-ATTR:  Requester Ext Len: Total ext_len  with NHRP attribute VPE 40                         <br>
+. . .                                                                                                                  <br>
+*Feb 14 21:55:25.623: NHRP-RATE: Retransmitting Registration Request for 10.100.100.1, reqid 2, (retrans ivl 16 sec)   <br>
+*Feb 14 21:55:39.495: <b>NHRP: Setting retrans delay to 32 for nhs  dst 10.100.100.1,</b>                                      <br>
+. . .                                                                                                                  <br>
+*Feb 14 21:55:39.551: NHRP-RATE: Retransmitting Registration Request for 10.100.100.1, reqid 2, (retrans ivl 32 sec)   <br>
+*Feb 14 21:56:09.879: <b>NHRP: Setting retrans delay to 64 for nhs  dst 10.100.100.1</b>                                      <br>
 *Feb 14 21:56:09.883: NHRP-ATTR:  Requester Ext Len: Total ext_len  with NHRP attribute VPE 40
-Additional hubs can be added by additional mapping statements to the tunnel interface. A muti-hub topology increases redundancy and provides high availability. NHRP timeout period is one third of the holdtime period which is 2400 seconds. This can be changed with the command ip nhrp registration timeout 240.
+</code></div>
+</p>
+<h3>Multi-hop Topologies</h3>
+<p>
+Additional hubs can be added by additional mapping statements to the tunnel 
+interface. A muti-hub topology increases redundancy and provides high availability.
+</p>
 
-IPv6 DMVPN Configuration
+<h3>NHRP Timeout</h3>
+<p>
+NHRP timeout period is one third of the holdtime period which is 2400 seconds. 
+This can be changed with the command <code><b>ip nhrp registration timeout 240</b></code>.
+</p>
+
+<h1 id="DMVPN_IPv6">IPv6 DMVPN Configuration</h1>
+<p>
 IPv6 commands are similar to IPv4 commands. To create mGRE tunnels;
+</p>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+ <code style="font-size:110%">
+SPOKE8(config-if)#<b>tunnel mode gre multipoint ipv6</b>
+</code></div>
+</p>
+<p>
+A unique IPv6 link-local address should be assigned to the tunnel inteface when 
+the tunnelling protocol is IPv6. IPv6 routing protocols use link-local addresses
+to discover each other and install in the RIB.
+</p>
+<h2>IPv6 DMVPN Commands</h2>
+<p>
+<ul>
+  <li><code><b>show ipv6 nhrp (brief|detail)</b></code></li>
+  <li><code><b>show dmvpn [ipv6] [detail]</b></code></li>
+  <li><code><b>show ipv6 nhrp traffic</b></code></li>
+  <li><code><b>show ipv6 nhrp nhs detail</b></code></li>
+</ul>
+</p>
 
-SPOKE8(config-if)#tunnel mode gre multipoint ipv6
-A unique IPv6 link-local address should be assigned to the tunnel inteface when the tunnelling protocol is IPv6. IPv6 routing protocols use link-local addresses to discover each other and install in the RIB.
-
-IPv6 DMVPN Commands
-#show ipv6 nhrp (brief|detail)
-
-#show dmvpn [ipv6] [detail]
-
-#show ipv6 nhrp traffic
-
-#show ipv6 nhrp nhs detail
-
-Step 3: Securing the DMVPN Tunnel with IPSec
-Securing DMVPN tunnels is explained here.
+<h1 id="SECURITY"><a href="https://emmanueltoko.blogspot.com/2021/02/securingdmvpn-tunnels-with-ipsec-ikev1.html">Securing the DMVPN Tunnel with IPSec</a></h1>
+<p>
+Securing DMVPN tunnels is explained <a href="https://emmanueltoko.blogspot.com/2021/02/securingdmvpn-tunnels-with-ipsec-ikev1.html">here</a>.
+</p>
