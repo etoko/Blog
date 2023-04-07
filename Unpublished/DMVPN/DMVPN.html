@@ -2,16 +2,17 @@
 <h1>Contents</h1>
 <p>
   <ol>
-    <li><a href="#INTRODUCTION">Introduction </a></li>
+    <li><a href="#INTRODUCTION">Introduction and Overview</a></li>
     <li><a href="#GRE">Multipoint Generic Routing Encapsulation (mGRE)</a></li>
     <li><a href="#NHRP">Next Hop Resolution Protocol(NHRP)</a>
-    <ol>
-    <li><a href="#Phase1">Phase 1 </a></li>
-    <li><a href="#Phase2">Phase 2</a></li>
-    <li><a href="#Phase3">Phase 3</a></li>
+    <ol type="i">
+    <li><a href="#MESSAGES">Message Types</a></li>
+    <li><a href="#PHASE1">Phase 1 </a></li>
+    <li><a href="#PHASE2">Phase 2</a></li>
+    <li><a href="#PHASE3">Phase 3</a></li>
     </ol></li>
     <li><a href="#VERIFICATION">Verification</a></li>
-    <li><a href=""> </a></li>
+    <li><a href="#OPTIMIZATION">Optimization</a></li>
   </ol>
 </p>
 
@@ -108,7 +109,7 @@ information exchange. The spoke-to-spoke tunnel data-plane may flow through
 the hub initially but subsequent traffic does directly.
 </p>
 
-<h1>Multipoint Generic Routing Encapsulation Tunnels (mGRE)</h1>
+<h1 id="GRE">Multipoint Generic Routing Encapsulation Tunnels (mGRE)</h1>
 <p>
 mGRE creates Virtual Private Network (VPN) tunnels between routers. A hub
 router is the central connection point of what is a star topology. DMVPN provides
@@ -305,7 +306,7 @@ SPOKE7(config-if)#<b>ip address 172.30.1.7 255.255.255.0</b>
 </p>
 
 
-<h2>Next Hop Resolution Protocol (NHRP)</h2>
+<h1 id="NHRP">Next Hop Resolution Protocol (NHRP)</h1>
 <p>
 NHRP is used for mapping tunnel (overlay) addresses to transport (underlay) addresses. It 
 is defined in <a target="_blank" href="https://www.ietf.org/rfc/rfc2332.txt">RFC 2332</a>. NHRP operates using the client-server model with a hub 
@@ -320,7 +321,7 @@ All NHRP packets must include; source NBMA address, source protocol address,
 destination protocol address and NHRP message type.
 </p>
 
-<h3>NHRP Message Types</h3>
+<h2 id="MESSAGES">NHRP Message Types</h2>
 <p>
 These are the various types of messages NHCs and NHSs exchange with each other;
 <ul>
@@ -353,7 +354,7 @@ These are the various types of messages NHCs and NHSs exchange with each other;
   has occurred.</li>
 </ul>
 
-<h3>NHRP Extension Messages</h3>
+<h2>NHRP Extension Messages</h2>
 <p>
 These messages are included as an extension to an NHRP packet as shown in the image below;
 <ul>
@@ -369,7 +370,80 @@ These messages are included as an extension to an NHRP packet as shown in the im
   Spoke sites initiate a persistent VPN connection to the hub. DMVPN dynamically
   builds a VPN tunnel between spoke sites on an as-needed basis.
 </p>
-<h3>NHRP Table</h3>
+
+<h2>NHRP Registration</h2>
+<p>
+NHRP registration packets are sent every NHRP timeout period. If no registration
+reply is received, a new registration packet is sent with a delay of 1 second, 
+second packet is delayed for two seconds and third four seconds. NHS is declared
+down after third attempt. Use the command <code><b>show dmvpn</b></code> to confirm.
+</p>
+<p>
+Periodic NHRP registration requests by spokes refresh the NHRP timeout period. 
+In spoke to spoke tunnels, if tunnel is not used in two minutes of expiry time, 
+it is torn down.
+</p>
+<p>
+Probe state: NHCs attempting to register with a down NHS start sending probe 
+packets periodically to determine the availability of the NHS. The delay in probe
+packets is 1, 2, 4, 8, 16, 32, 64. After 64 seconds, no more probe packets are sent.
+This can be verified by debuggin messages;
+</p>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+ <code style="font-size:110%">
+. . . 
+*Feb 14 21:55:12.391: NHRP-RATE: Sending initial Registration Request for 10.100.100.1, reqid 2                        <br>
+*Feb 14 21:55:14.303: <b>NHRP: Setting retrans delay to 4 for nhs  dst 10.100.100.1</b>                                       <br>
+*Feb 14 21:55:14.307: NHRP-ATTR:  Requester Ext Len: Total ext_len  with NHRP attribute VPE 40                         <br>
+                                                                                                                       <br>
+*Feb 14 21:55:14.307: NHRP: Attempting to send packet via DEST 10.100.100.1                                            <br>
+*Feb 14 21:55:14.311: NHRP: NHRP successfully mapped '10.100.100.1' to NBMA 10.10.10.10                                <br>
+*Feb 14 21:55:14.315: NHRP: Encapsulation succeeded.  Sending NHRP Control Packet  NBMA Address: 10.10.10.10           <br>
+*Feb 14 21:55:14.319: NHRP: Send Registration Request via Tunnel0 vrf 0, packet size: 92                               <br>
+*Feb 14 21:55:14.323:&nbsp;&nbsp;src: 10.100.100.9, dst: 10.100.100.1                                                            <br>
+*Feb 14 21:55:14.327:&nbsp;&nbsp;(F) afn: AF_IP(1), type: IP(800), hop: 255, ver: 1                                              <br>
+*Feb 14 21:55:14.327:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;shtl: 4(NSAP), sstl: 0(NSAP)                                                                <br>
+*Feb 14 21:55:14.331:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;pktsz: 92 extoff: 52                                                                        <br>
+*Feb 14 21:55:14.331:&nbsp;&nbsp;(M) flags: "unique nat ", reqid: 2                                                              <br>
+*Feb 14 21:55:14.331:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;src NBMA: 9.9.9.9                                                                           <br>
+*Feb 14 21:55:14.335:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;src protocol: 10.100.100.9, dst protocol: 10.100.100.1                                      <br>
+*Feb 14 21:55:14.339:&nbsp;&nbsp;(C-1) code: no error(0)                                                                         <br>
+*Feb 14 21:55:14.339:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;prefix: 32, mtu: 17912, hd_time: 7200                                                     <br>
+*Feb 14 21:55:14.343:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;addr_len: 0(NSAP), subaddr_len: 0(NSAP), proto_len: 0, pref: 0                            <br>
+*Feb 14 21:55:14.343: Responder Address Extension(3):                                                                  <br>
+*Feb 14 21:55:14.343: Forward Transit NHS Record Extension(4):                                                         <br>
+*Feb 14 21:55:14.347: Reverse Transit NHS Record Extension(5):                                                         <br>
+*Feb 14 21:55:14.347: NAT address Extension(9):                                                                        <br>
+*Feb 14 21:55:14.347:&nbsp;&nbsp;(C-1) code: no error(0)                                                                         <br>
+*Feb 14 21:55:14.351:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;prefix: 32, mtu: 17912, hd_time: 0                                                        <br>
+*Feb 14 21:55:14.351:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;addr_len: 4(NSAP), subaddr_len: 0(NSAP), proto_len: 4, pref: 0                            <br>
+*Feb 14 21:55:14.351:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;client NBMA: 10.10.10.10                                                                  <br>
+*Feb 14 21:55:14.355:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;client protocol: 10.100.100.1                                                             <br>
+*Feb 14 21:55:14.355: NHRP: 120 bytes out Tunnel0                                                                      <br>
+*Feb 14 21:55:14.359: NHRP-RATE: Retransmitting Registration Request for 10.100.100.1, reqid 2, (retrans ivl 4 sec)    <br>
+*Feb 14 21:55:18.171: NHRP: NHS-DOWN: 10.100.100.1                                                                     <br>
+*Feb 14 21:55:18.187: NHRP: Already pending Registration Request for NHS: 10.100.100.1                                 <br>
+*Feb 14 21:55:18.191: NHRP: NHS 10.100.100.1 Tunnel0 vrf 0 Cluster 0 Priority 0 Transitioned to 'E' from 'E'           <br>
+                                                                                                                       <br>
+*Feb 14 21:55:18.191: <b>NHRP: Setting retrans delay to 8 for nhs  dst 10.100.100.1</b>                                       <br>
+*Feb 14 21:55:18.195: NHRP-ATTR:  Requester Ext Len: Total ext_len  with NHRP attribute VPE 40                         <br>
+. . .                                                                                                                  <br>
+*Feb 14 21:55:18.251: NHRP-RATE: Retransmitting Registration Request for 10.100.100.1, reqid 2, (retrans ivl 8 sec)    <br>
+*Feb 14 21:55:25.567: <b>NHRP: Setting retrans delay to 16 for nhs  dst 10.100.100.1</b>                                      <br>
+*Feb 14 21:55:25.571: NHRP-ATTR:  Requester Ext Len: Total ext_len  with NHRP attribute VPE 40                         <br>
+. . .                                                                                                                  <br>
+*Feb 14 21:55:25.623: NHRP-RATE: Retransmitting Registration Request for 10.100.100.1, reqid 2, (retrans ivl 16 sec)   <br>
+*Feb 14 21:55:39.495: <b>NHRP: Setting retrans delay to 32 for nhs  dst 10.100.100.1,</b>                                      <br>
+. . .                                                                                                                  <br>
+*Feb 14 21:55:39.551: NHRP-RATE: Retransmitting Registration Request for 10.100.100.1, reqid 2, (retrans ivl 32 sec)   <br>
+*Feb 14 21:56:09.879: <b>NHRP: Setting retrans delay to 64 for nhs  dst 10.100.100.1</b>                                      <br>
+*Feb 14 21:56:09.883: NHRP-ATTR:  Requester Ext Len: Total ext_len  with NHRP attribute VPE 40
+</code></div>
+</p>
+
+
+<h2>NHRP Table</h2>
 <p>
 All spokes statically define the hub in their configuration.
 
@@ -378,39 +452,15 @@ with it. This mapping is known as the NHRP table. This table is shared by the
 NHS to NHC so that when a spoke wishes to communicate to a remote NHC, when it 
 sends a resolution request to the NHS, the NHS shares the NHRP table with the NHC.
 </p>
-<h3>Dynamic Peers</h3>
-<p>
-The mapping of tunnel to NBMA addresses is dynamic on the NHS. Each NHC can register 
-with the NHC without any prior preconfigurations on the NHS. This results in the 
-NHCs being dynamic peers. The number of spokes may grow exponentially. Dynamic 
-peering makes the registration of this increasing number of NHCs scalable.
-</p>
-<p>
-Peering is automatic under the following conditions:
-<ul>
-  <li>Correct authentication</li>
-  <li>Proper phase 1, phase 2 matching.</li>
-</ul>
-</p>
-<p>
-The hub has open configuration accepting NHCs with the correct configuration. 
-The NHCs are configured with the IP address of the hub.
-</p>
-<p>
-The spoke to spoke tunnel information is temporary. The address of the hub is 
-permanent. However, for spoke information, it is dynamically 
-The tunnel is torn down after the communication is completed and the exipry of 
-the tunnel session timer.
-</p>
 
 <h2>Configuration of NHRP</h2>
 
-<h2>Hub Configuration</h2>
+<h3>Hub Configuration</h3>
 <p>
 NHRP configuration takes place under the tunnel interface. 
 Continuing from the previous stages on the configuration of a hub using mGRE;
 </p>
-<h3>Step 9: Enable NHRP on the tunnel interface</h3>
+<h4>Step 9: Enable NHRP on the tunnel interface</h4>
 <p>
 NHRP is enabled on the tunnel using the tunnel mode command 
 <code><b>ip nhrp network-id &lt;1 – 4294967295&gt;</b></code>.
@@ -426,7 +476,7 @@ HUB(config-if)#<b>ip nhrp network-id 200</b>
 </div>
 </p>
 
-<h3>Step 10: (Optional) Define the tunnel key</h3>
+<h4>Step 10: (Optional) Define the tunnel key</h4>
 <p>
 The tunnel key is defined using the tunnel interface configuration command 
 <code><b>tunnel key &lt;0 – 4294967295&gt;</b></code>. The tunnel key 
@@ -445,7 +495,7 @@ HUB(config-if)#<b>tunnel key 200</b>
 <p>
 Configuration of the tunnel key adds an additional 4-bytes to the DMVPN header.
 </p>
-<h3>Step 11: (Optional) Enable multicast support for NHRP</h3>
+<h4>Step 11: (Optional) Enable multicast support for NHRP</h4>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
  <code style="font-size:110%">
@@ -462,37 +512,7 @@ used for routing. IGPs use multicast for sending and receiving some packet
 types such as Hello packets to dynamically-learned spokes.
 </p>
 
-<!--
-<h3>Step 13: (Optional) Static NHRP Mapping</h3>
-<p>
-Perform static NHRP mapping on the hub that specifies that the VPN address maps 
-to the physical interface address using the tunnel mode command 
-<code><b>ip nhrp map &lt;tunnel-ip-address&gt; &lt;interface-ip-address&gt;</b></code>.
-In the following configuration, the VPN address 10.100.100.1 maps to the physical 
-address of 10.1.110.10 in the underlay network.
-</p>
-<p>
-<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
- <code style="font-size:110%">
-HUB(config-if)#<b>ip nhrp map 10.100.100.1 10.1.110.1</b>
-</code>
-</div>
-
-<h3>Step 14: (Optional) Specify the VPN Address of the NHS</h3>
-<p>
-Configure the VPN address of the NHS using the command <code><b>ip nhrp nhs &lt;ip-address&gt;</b></code>.
-This command explicitly specifies the NHS on the network. This command is 
-required specifically if step 13 is configured. 
-</p>
-<p>
-<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
- <code style="font-size:110%">
-HUB(config-if)#<b>ip nhrp hs 10.100.100.1</b>
-</code>
-</div>
-</p>
--->
-<h3>Step 12: (Optional) Authentication</h3>
+<h4>Step 12: (Optional) Authentication</h4>
 <p>
 To require spokes to authenticate with the NHS before registration or resolution 
 requests can be made. The password used with NHRP authentication is stored in plain text.
@@ -511,7 +531,7 @@ on all NHCs with the same password. For security of DMVPN tunnels, IPSec is
 used instead.
 </p>
 
-<h2>DMVPN Phase 1: Point to Point</h2>
+<h2 id="PHASE1">DMVPN Phase 1: Point to Point</h2>
 <p>
 DMVPN Phase 1 creates point to point tunnels between the hub and each of the 
 spokes resulting in a more traditional hub and spoke topology. For each NHC to 
@@ -581,7 +601,7 @@ The NHS NBMA address and multicast mapping is accomplished using the command
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
  <code style="font-size:110%">
-SPOKE7(config-if)#<b>ip nhrp nhs 10.100.100.1 nbma 10.10.10.10 multicast</b>
+SPOKE7(config-if)#<b>ip nhrp nhs 172.30.1.1 nbma 99.255.10.2 multicast</b>
 </code>
 </div>
 </p>
@@ -601,9 +621,9 @@ multicast map is needed for a node (NHC).
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
  <code style="font-size:110%">
-SPOKE7(config-if)#<b>ip nhrp nhs 10.100.100.1</b><br>
-SPOKE7(config-if)#<b>ip nhrp map 10.100.100.1 10.10.10.10</b><br>
-SPOKE7(config-if)#<b>ip nhrp map multicast 10.10.10.10</b>
+SPOKE7(config-if)#<b>ip nhrp nhs 172.30.1.1</b><br>
+SPOKE7(config-if)#<b>ip nhrp map 172.30.1.1 99.255.10.2</b><br>
+SPOKE7(config-if)#<b>ip nhrp map multicast 99.255.10.2</b>
 </code>
 </div>
 </p>
@@ -690,7 +710,7 @@ expire after 5 minutes if not used. On spokes, before communicating with any
 other remote spoke, only the hub information is contained in the NHRP table.
 </p>
 
-<h2>DMVPN Phase 2</h2>
+<h2 id="PHASE2">DMVPN Phase 2</h2>
 <p>
 In DMVPN phase 2 operation, all spoke to spoke communication happens directly without transiting the hub. 
 All routers i.e. NHCs and NHS implement multi-point GRE. A dynamic NHRP mapping 
@@ -731,7 +751,7 @@ Replace:
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
  <code style="font-size:110%">
-SPOKE7(config-if)#<b>tunnel destination 10.10.10.10</b>
+SPOKE7(config-if)#<b>tunnel destination 99.255.10.2</b>
 </code>
 </div>
 </p>
@@ -782,7 +802,33 @@ However, database synchronisation and convergence need to be completed first.
 With eBGP, third party next-hops can be used. IBGP does not modify the next-hop by default.
 </p>
 
-<h2>DMVPN Phase 3</h2>
+<h3>Dynamic Peers</h3>
+<p>
+The mapping of tunnel to NBMA addresses is dynamic on the NHS. Each NHC can register 
+with the NHC without any prior preconfigurations on the NHS. This results in the 
+NHCs being dynamic peers. The number of spokes may grow exponentially. Dynamic 
+peering makes the registration of this increasing number of NHCs scalable.
+</p>
+<p>
+Peering is automatic under the following conditions:
+<ul>
+  <li>Correct authentication</li>
+  <li>Proper phase 1, phase 2 matching.</li>
+</ul>
+</p>
+<p>
+The hub has open configuration accepting NHCs with the correct configuration. 
+The NHCs are configured with the IP address of the hub.
+</p>
+<p>
+The spoke to spoke tunnel information is temporary. The address of the hub is 
+permanent. However, for spoke information, it is dynamically 
+The tunnel is torn down after the communication is completed and the exipry of 
+the tunnel session timer.
+</p>
+
+
+<h2 id="PHASE3">DMVPN Phase 3</h2>
 <p>
 
 </p>
@@ -867,18 +913,145 @@ VRF info: (vrf in name/id, vrf out name/id)   <br>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
  <code style="font-size:110%">
 SPOKE7#<b>debug dmvpn all all</b>                                                         <br>
-SPOKE7#ping 10.100.100.8                                                                  <br>
-...                                                                                       <br>
-*Feb 14 21:44:08.387: NHRP: Receive Traffic Indication via Tunnel0 vrf 0, packet size: 84 <br>
-*Feb 14 21:44:08.391:&nbsp;nbsp;(F) afn: AF_IP(1), type: IP(800), hop: 255, ver: 1                 <br>
-*Feb 14 21:44:08.391:&nbsp;nbsp;&nbsp;nbsp;&nbsp;nbsp;shtl: 4(NSAP), sstl: 0(NSAP)                                   <br>
-*Feb 14 21:44:08.395:&nbsp;nbsp;&nbsp;nbsp;&nbsp;nbsp;pktsz: 84 extoff: 68                                           <br>
-*Feb 14 21:44:08.395:&nbsp;nbsp;(M) traffic code: redirect(0)                                      <br>
-*Feb 14 21:44:08.395:&nbsp;nbsp;&nbsp;nbsp;&nbsp;nbsp;src NBMA: 10.10.10.10                                          <br>
-*Feb 14 21:44:08.399:&nbsp;nbsp;&nbsp;nbsp;&nbsp;nbsp;src protocol: 10.100.100.1, .dst protocol: 10.100.100.7        <br>
-*Feb 14 21:44:08.403:&nbsp;nbsp;&nbsp;nbsp;&nbsp;nbsp;Contents of nhrp traffic indication packet:                     <br>
-*Feb 14 21:44:08.403:&nbsp;nbsp;&nbsp;nbsp;&nbsp;nbsp;&nbsp;nbsp; 45 00 00 64 00 50 00 00 FE 01 DF 71 0A 64 64 07
-...
+SPOKE7#<b>ping 10.2.10.1</b>                                                                                                                                          <br>
+Type escape sequence to abort.                                                                                                                                 <br>
+Sending 5, 100-byte ICMP Echos to 10.2.10.1, timeout is 2 seconds:                                                                                             <br>
+!!!!!                                                                                                                                                          <br>
+Success rate is 100 percent (5/5), round-trip min/avg/max = 16/82/256 ms                                                                                       <br>
+SPOKE7#                                                                                                                                                        <br>
+*Apr&nbsp;&nbsp;7 04:30:18.035: NHRP: NHRP could not map 172.30.1.2 to NBMA, cache entry not found                                                                       <br>
+*Apr&nbsp;&nbsp;7 04:30:18.039: NHRP: MACADDR: if_in null netid-in 0 if_out Tunnel0 netid-out 1000                                                                       <br>
+*Apr&nbsp;&nbsp;7 04:30:18.039: NHRP: Sending packet to NHS 172.30.1.1 on Tunnel0                                                                                        <br>
+*Apr&nbsp;&nbsp;7 04:30:18.039: NHRP: NHRP successfully mapped '172.30.1.1' to NBMA 99.255.10.2                                                                          <br>
+*Apr&nbsp;&nbsp;7 04:30:18.043: NHRP: Checking for delayed event NULL/172.30.1.2 on list (Tunnel0).                                                                      <br>
+*Apr&nbsp;&nbsp;7 04:30:18.043: NHRP: No node found.&nbsp;&nbsp;                                                                                                                   <br>
+*Apr&nbsp;&nbsp;7 04:30:18.043: NHRP: No cache for forwarding(flags:0x0) to 172.30.1.2                                                                                   <br>
+*Apr&nbsp;&nbsp;7 04:30:18.043: NHRP: Updating with NHS cache for dst:172.30.1.2                                                                                         <br>
+*Apr&nbsp;&nbsp;7 04:30:18.043: NHRP: Tunnel0: Cache add for target 172.30.1.2/32 next-hop 172.30.1.2                                                                    <br>
+*Apr&nbsp;&nbsp;7 04:30:18.043:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;99.255.10.2                                                                                                                   <br>
+*Apr&nbsp;&nbsp;7 04:30:18.043: NHRP: Adding Tunnel Endpoints (VPN: 172.30.1.2, NBMA: 99.255.10.2)                                                                       <br>
+*Apr&nbsp;&nbsp;7 04:30:18.055: NHRP: Successfully attached NHRP subblock for Tunnel Endpoints (VPN: 172.30.1.2, NBMA: 99.255.10.2)                                      <br>
+*Apr&nbsp;&nbsp;7 04:30:18.059&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                                                                                   <br>
+SPOKE7#: NHRP: Inserted subblock node for cache: Target Inserted subblock node for cache: Target 172.30.1.2/32nhop 172.30.1.2                                  <br>
+*Apr&nbsp;&nbsp;7 04:30:18.063: NHRP: Converted internal dynamic cache entry for 172.30.1.2/32 interface Tunnel0 to external                                             <br>
+*Apr&nbsp;&nbsp;7 04:30:18.067: NHRP: Enqueued NHRP Resolution Request for destination: 172.30.1.2                                                                       <br>
+*Apr&nbsp;&nbsp;7 04:30:18.083: NHRP: Checking for delayed event NULL/172.30.1.2 on list (Tunnel0).                                                                      <br>
+*Apr&nbsp;&nbsp;7 04:30:18.083: NHRP: No node found.&nbsp;&nbsp;                                                                                                                   <br>
+*Apr&nbsp;&nbsp;7 04:30:18.087: NHRP-ATTR:&nbsp;&nbsp;Requester Ext Len: Total ext_len  with NHRP attribute VPE 20                                                                 <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                                                                                   <br>
+*Apr&nbsp;&nbsp;7 04:30:18.091: NHRP: Sending NHRP Resolution Request for dest: 172.30.1.2 to nexthop: 172.30.1.2 using our src: 172.30.1.7                              <br>
+*Apr&nbsp;&nbsp;7 04:30:18.091: NHRP: Attempting to send packet via DEST 172.30.1.2                                                                                      <br>
+*Apr&nbsp;&nbsp;7 04:30:18.095: NHRP: Setting 'used' flag on cache entry with nhop: 172.30.1.2                                                                           <br>
+*Apr&nbsp;&nbsp;7 04:30:18.099: NHRP: NHRP successfully mapped '172.30.1.2' to NBMA 99.255.10.2                                                                          <br>
+*Apr&nbsp;&nbsp;7 04:30:18.103: NHRP: Encapsulation succeeded.  Sending                                                                                                  <br>
+SPOKE7# NHRP Control Packet&nbsp;&nbsp;NBMA Address: 99.255.10.2                                                                                                         <br>
+*Apr&nbsp;&nbsp;7 04:30:18.107: NHRP: Send Resolution Request via Tunnel0 vrf 0, packet size: 72                                                                         <br>
+*Apr&nbsp;&nbsp;7 04:30:18.111:&nbsp;&nbsp;src: 172.30.1.7, dst: 172.30.1.2                                                                                                        <br>
+*Apr&nbsp;&nbsp;7 04:30:18.111:&nbsp;&nbsp;(F) afn: AF_IP(1), type: IP(800), hop: 255, ver: 1                                                                                      <br>
+*Apr&nbsp;&nbsp;7 04:30:18.115:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;shtl: 4(NSAP), sstl: 0(NSAP)                                                                                                        <br>
+*Apr&nbsp;&nbsp;7 04:30:18.115:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;pktsz: 72 extoff: 52                                                                                                                <br>
+*Apr&nbsp;&nbsp;7 04:30:18.115:&nbsp;&nbsp;(M) flags: "router auth src-stable nat ", reqid: 3                                                                                      <br>
+*Apr&nbsp;&nbsp;7 04:30:18.119:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;src NBMA: 99.255.60.6                                                                                                               <br>
+*Apr&nbsp;&nbsp;7 04:30:18.119:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;src protocol: 172.30.1.7, dst protocol: 172.30.1.2                                                                                  <br>
+*Apr&nbsp;&nbsp;7 04:30:18.123:&nbsp;&nbsp;(C-1) code: no error(0)                                                                                                                 <br>
+*Apr&nbsp;&nbsp;7 04:30:18.127:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;prefix: 32, mtu: 17916, hd_time: 7200                                                                                             <br>
+*Apr&nbsp;&nbsp;7 04:30:18.127:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;addr_len: 0(NSAP), subaddr_len: 0(NSAP), proto_len: 0, pref: 0                                                                    <br>
+*Apr&nbsp;&nbsp;7 04:30:18.127: Responder Address Extension(3):                                                                                                          <br>
+*Apr&nbsp;&nbsp;7 04:30:18.127: Forward Transit NHS Record Extension(4):                                                                                                 <br>
+*Apr&nbsp;&nbsp;7 04:30:18.127: Reverse Transit NHS Record Extension(5):                                                                                                 <br>
+*Apr&nbsp;&nbsp;7 04:30:18.127: NAT a&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                                                                                  <br>
+SPOKE7#ddress Extension(9):&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                                                                                  <br>
+*Apr&nbsp;&nbsp;7 04:30:18.127: NHRP: 96 bytes out Tunnel0                                                                                                               <br>
+*Apr&nbsp;&nbsp;7 04:30:18.127: NHRP-RATE: Sending initial Resolution Request for 172.30.1.2, reqid 3                                                                    <br>
+*Apr&nbsp;&nbsp;7 04:30:18.171: NHRP-ATTR: ext_type: 32772, ext_len : 0                                                                                                  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                                                                                   <br>
+*Apr&nbsp;&nbsp;7 04:30:18.171: NHRP-ATTR: ext_type: 32773, ext_len : 0                                                                                                  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                                                                                   <br>
+*Apr&nbsp;&nbsp;7 04:30:18.175: NHRP-ATTR: ext_type: 9, ext_len : 0                                                                                                      <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                                                                                   <br>
+*Apr&nbsp;&nbsp;7 04:30:18.175: NHRP-ATTR: ext_type: 32768, ext_len : 0                                                                                                  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                                                                                   <br>
+*Apr&nbsp;&nbsp;7 04:30:18.179: NHRP: Receive Traffic Indication via Tunnel0 vrf 0, packet size: 84                                                                      <br>
+*Apr&nbsp;&nbsp;7 04:30:18.183:&nbsp;&nbsp;(F) afn: AF_IP(1), type: IP(800), hop: 255, ver: 1                                                                                      <br>
+*Apr&nbsp;&nbsp;7 04:30:18.183:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;shtl: 4(NSAP), sstl: 0(NSAP)                                                                                                        <br>
+*Apr&nbsp;&nbsp;7 04:30:18.187:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;pktsz: 84 extoff: 68                                                                                                                <br>
+*Apr&nbsp;&nbsp;7 04:30:18.187:&nbsp;&nbsp;(M) traffic code: redirect(0)                                                                                                           <br>
+*Apr&nbsp;&nbsp;7 04:30:18.187:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;src NBMA: 99.255.10.2                                                                                                               <br>
+*Apr&nbsp;&nbsp;7 04:30:18.187:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;src protocol: 172.30.1.1, dst protocol: 172.30.1.7                                                                                  <br>
+*Apr&nbsp;&nbsp;7 04:30:18.187:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Contents of nhrp traffic indication packet:                                                                                         <br>
+*Apr&nbsp;&nbsp;7 04:30:18.187:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 45 00 00 64 00 0                                                                                                                 <br>
+SPOKE7#5 00 00 FE 01 FB 6B AC 1E 01 07&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                                                                                   <br>
+*Apr&nbsp;&nbsp;7 04:30:18.187:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0A 02 0A 01 08 00 A8 4B 00 01 00                                                                                                 <br>
+*Apr&nbsp;&nbsp;7 04:30:18.187: Forward Transit NHS Record Extension(4):                                                                                                 <br>
+*Apr&nbsp;&nbsp;7 04:30:18.187: Reverse Transit NHS Record Extension(5):                                                                                                 <br>
+*Apr&nbsp;&nbsp;7 04:30:18.187: NAT address Extension(9):                                                                                                                <br>
+*Apr&nbsp;&nbsp;7 04:30:18.187: NHRP: netid_in = 1000, to_us = 1                                                                                                         <br>
+*Apr&nbsp;&nbsp;7 04:30:18.187: NHRP: netid_out 0, netid_in 1000                                                                                                         <br>
+*Apr&nbsp;&nbsp;7 04:30:18.187: NHRP: Parsing NHRP Traffic Indication                                                                                                    <br>
+*Apr&nbsp;&nbsp;7 04:30:18.259: NHRP-ATTR: ext_type: 32771, ext_len : 20                                                                                                 <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                                                                                   <br>
+*Apr&nbsp;&nbsp;7 04:30:18.263: NHRP-ATTR: ext_type: 32772, ext_len : 20                                                                                                 <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                                                                                   <br>
+*Apr&nbsp;&nbsp;7 04:30:18.263: NHRP-ATTR: ext_type: 32773, ext_len : 0                                                                                                  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                                                                                   <br>
+*Apr&nbsp;&nbsp;7 04:30:18.267: NHRP-ATTR: ext_type: 9, ext_len : 0                                                                                                      <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                                                                                   <br>
+*Apr&nbsp;&nbsp;7 04:30:18.267: NHRP-ATTR: ext_type: 32768, ext_len : 0                                                                                                  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                                                                                   <br>
+*Apr&nbsp;&nbsp;7 04:30:18.271: NHRP: Receive Resolution Reply via Tunnel0 vrf 0, packet size: 120                                                                       <br>
+*Apr&nbsp;&nbsp;7 04:30:18.271:&nbsp;&nbsp;(F) afn: AF_IP(1), type: IP(800), hop: 255, ver: 1                                                                                      <br>
+*Apr&nbsp;&nbsp;7 04:30:18.271:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;shtl: 4(NSAP), sstl: 0(NSAP)                                                                                                        <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                                                                                   <br>
+SPOKE7#*Apr&nbsp;&nbsp;7 04:30:18.271:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;pktsz: 120 extoff: 60                                                                                                        <br>
+*Apr&nbsp;&nbsp;7 04:30:18.271:&nbsp;&nbsp;(M) flags: "router auth dst-stable unique src-stable nat ", reqid: 3                                                                    <br>
+*Apr&nbsp;&nbsp;7 04:30:18.271:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;src NBMA: 99.255.60.6                                                                                                               <br>
+*Apr&nbsp;&nbsp;7 04:30:18.271:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;src protocol: 172.30.1.7, dst protocol: 172.30.1.2                                                                                  <br>
+*Apr&nbsp;&nbsp;7 04:30:18.271:&nbsp;&nbsp;(C-1) code: no error(0)                                                                                                                 <br>
+*Apr&nbsp;&nbsp;7 04:30:18.271:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;prefix: 32, mtu: 17916, hd_time: 7200                                                                                             <br>
+*Apr&nbsp;&nbsp;7 04:30:18.271:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;addr_len: 4(NSAP), subaddr_len: 0(NSAP), proto_len: 4, pref: 0                                                                    <br>
+*Apr&nbsp;&nbsp;7 04:30:18.275:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;client NBMA: 99.255.30.1                                                                                                          <br>
+*Apr&nbsp;&nbsp;7 04:30:18.275:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;client protocol: 172.30.1.2                                                                                                       <br>
+*Apr&nbsp;&nbsp;7 04:30:18.275: Responder Address Extension(3):                                                                                                          <br>
+*Apr&nbsp;&nbsp;7 04:30:18.275:&nbsp;&nbsp;(C) code: no error(0)                                                                                                                   <br>
+*Apr&nbsp;&nbsp;7 04:30:18.275:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;prefix: 32, mtu: 17916, hd_time: 7200                                                                                             <br>
+*Apr&nbsp;&nbsp;7 04:30:18.275:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;addr_len: 4(NSAP), subaddr_len: 0(NSAP), proto_len: 4, pref: 0                                                                    <br>
+*Apr&nbsp;&nbsp;7 04:30:18.275:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;client NBMA: 99.255.30.1                                                                                                          <br>
+*Apr&nbsp;&nbsp;7 04:30:18.275:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;client protocol: 172.30.1.2                                                                                                       <br>
+*Apr&nbsp;&nbsp;7 04:30:18.275: Forward&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                                                                                  <br>
+SPOKE7# Transit NHS Record Extension(4):&nbsp;&nbsp;&nbsp;&nbsp;                                                                                                                   <br>
+*Apr&nbsp;&nbsp;7 04:30:18.275:&nbsp;&nbsp;(C-1) code: no error(0)                                                                                                                 <br>
+*Apr&nbsp;&nbsp;7 04:30:18.275:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;prefix: 32, mtu: 17916, hd_time: 7200                                                                                             <br>
+*Apr&nbsp;&nbsp;7 04:30:18.275:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;addr_len: 4(NSAP), subaddr_len: 0(NSAP), proto_len: 4, pref: 0                                                                    <br>
+*Apr&nbsp;&nbsp;7 04:30:18.275:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;client NBMA: 99.255.10.2                                                                                                          <br>
+*Apr&nbsp;&nbsp;7 04:30:18.275:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;client protocol: 172.30.1.1                                                                                                       <br>
+*Apr&nbsp;&nbsp;7 04:30:18.275: Reverse Transit NHS Record Extension(5):                                                                                                 <br>
+*Apr&nbsp;&nbsp;7 04:30:18.275: NAT address Extension(9):                                                                                                                <br>
+*Apr&nbsp;&nbsp;7 04:30:18.275: NHRP: netid_in = 0, to_us = 1                                                                                                            <br>
+*Apr&nbsp;&nbsp;7 04:30:18.275: NHRP: nhrp_pak_reply_from_target: answer_nbma: 99.255.30.1, responder_nbma: 99.255.30.1                                                  <br>
+*Apr&nbsp;&nbsp;7 04:30:18.275: NHRP: Tunnels gave us pak src: 99.255.30.1                                                                                               <br>
+*Apr&nbsp;&nbsp;7 04:30:18.275: NHRP: Checking for delayed event NULL/172.30.1.2 on list (Tunnel0).                                                                      <br>
+*Apr&nbsp;&nbsp;7 04:30:18.275: NHRP: No node found.&nbsp;&nbsp;                                                                                                                   <br>
+*Apr&nbsp;&nbsp;7 04:30:18.279: NHRP: No need to delay processing of resolution event nbma src:99.255.60.6 nbma dst:99.255.30.1                                          <br>
+*Apr&nbsp;&nbsp;7 04:30:18.279: NHRP-ATTR: In nhrp_cach                                                                                                                  <br>
+SPOKE7#e_pak LINE: 1422&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                                                                                  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                                                                                   <br>
+*Apr&nbsp;&nbsp;7 04:30:18.279: NHRP: Tunnel0: Cache update for target 172.30.1.2/32 next-hop 172.30.1.2                                                                 <br>
+*Apr&nbsp;&nbsp;7 04:30:18.279:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;99.255.30.1                                                                                                                   <br>
+*Apr&nbsp;&nbsp;7 04:30:18.283: NHRP: Deleted subbblock node associated with Cache:  Prefix: Deleted subbblock node associated with Cache:  Prefix: 172.30.1.2/32nhop 17 <br>
+2.30.1.2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                                                                                   <br>
+*Apr&nbsp;&nbsp;7 04:30:18.283: NHRP: Deleted subbblock node associated with Cache:  Prefix: Deleted subbblock node associated with Cache:  Prefix: 172.30.1.2/32nhop 17 <br>
+2.30.1.2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                                                                                   <br>
+*Apr&nbsp;&nbsp;7 04:30:18.283: NHRP: Adding Tunnel Endpoints (VPN: 172.30.1.2, NBMA: 99.255.30.1)                                                                       <br>
+*Apr&nbsp;&nbsp;7 04:30:18.283: NHRP: Cleanup up 0 stale cache entries                                                                                                   <br>
+*Apr&nbsp;&nbsp;7 04:30:18.287: NHRP: Successfully attached NHRP subblock for Tunnel Endpoints (VPN: 172.30.1.2, NBMA: 99.255.30.1)                                      <br>
+*Apr&nbsp;&nbsp;7 04:30:18.287: NHRP: Inserted subblock node for cache: Target Inserted subblock node for cache: Target 172.30.1.2/32nhop 172.30.1.2                     <br>
+*Apr&nbsp;&nbsp;7 04:30:18.295: NHRP: Setting 'used' flag on cache entry with nhop: 172.30.1.2                                                                           <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                                                                                   <br>
+SPOKE7#*Apr&nbsp;&nbsp;7 04:30:18.295: NHRP: NHRP successfully mapped '172.30.1.2' to NBMA 99.255.30.1                                                                   <br>
+*Apr&nbsp;&nbsp;7 04:30:18.347: NHRP: NHRP successfully mapped '172.30.1.2' to NBMA 99.255.30.1                                                                          <br>
+*Apr&nbsp;&nbsp;7 04:30:18.367: NHRP: NHRP successfully mapped '172.30.1.2' to NBMA 99.255.30.1                                                                          <br>
+*Apr&nbsp;&nbsp;7 04:30:18.411: NHRP: NHRP successfully mapped '172.30.1.2' to NBMA 99.255.30.1                                                                          <br>
+SPOKE7#                                                                                                                                                        <br>
 </code></div>
 </p>
 <p>
@@ -888,14 +1061,204 @@ On the NHS:
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
  <code style="font-size:110%">
 HUB#<b>debug dmvpn all all</b>                                                                    <br>
-...                                                                                               <br>
-*Feb 14 21:30:56.151: NHRP RIB_RWATCH: Debugging is ON                                            <br>
-HUB#                                                                                              <br>
-*Feb 14 21:31:07.663: NHRP: Tunnels gave us remote_nbma: 7.7.7.7 for Redirect                     <br>
-*Feb 14 21:31:07.663: NHRP: Attempting to Redirect, remote_nbma: 7.7.7.7                          <br>
-*Feb 14 21:31:07.663: NHRP: inserting (7.7.7.7/10.100.100.8) in redirect table                    <br>
-*Feb 14 21:31:07.667: NHRP-ATTR:  Requester Ext Len: Total ext_len  with NHRP attribute VPE 16    <br>
-... <br>
+HUB#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                                                <br>
+*Apr&nbsp;&nbsp;7 04:57:28.563: NHRP: Tunnels gave us remote_nbma: 99.255.60.6 for Redirect                                   <br>
+*Apr&nbsp;&nbsp;7 04:57:28.563: NHRP: Attempting to Redirect, remote_nbma: 99.255.60.6                                        <br>
+*Apr&nbsp;&nbsp;7 04:57:28.567: NHRP: inserting (99.255.60.6/10.2.10.1) in redirect table                                     <br>
+*Apr&nbsp;&nbsp;7 04:57:28.571: NHRP-ATTR:&nbsp;&nbsp;Requester Ext Len: Total ext_len  with NHRP attribute VPE 16                      <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                                                <br>
+*Apr&nbsp;&nbsp;7 04:57:28.575: NHRP: Attempting to send packet via DEST 172.30.1.7                                           <br>
+*Apr&nbsp;&nbsp;7 04:57:28.579: NHRP: Encapsulation succeeded.  Sending NHRP Control Packet  NBMA Address: 99.255.60.6        <br>
+*Apr&nbsp;&nbsp;7 04:57:28.583: NHRP: Send Traffic Indication via Tunnel0 vrf 0, packet size: 84                              <br>
+*Apr&nbsp;&nbsp;7 04:57:28.587:&nbsp;&nbsp;src: 172.30.1.1, dst: 172.30.1.7                                                             <br>
+*Apr&nbsp;&nbsp;7 04:57:28.591:&nbsp;&nbsp;(F) afn: AF_IP(1), type: IP(800), hop: 255, ver: 1                                           <br>
+*Apr&nbsp;&nbsp;7 04:57:28.591:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;shtl: 4(NSAP), sstl: 0(NSAP)                                                             <br>
+*Apr&nbsp;&nbsp;7 04:57:28.591:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;pktsz: 84 extoff: 68                                                                     <br>
+*Apr&nbsp;&nbsp;7 04:57:28.595:&nbsp;&nbsp;(M) traffic code: redirect(0)                                                                <br>
+*Apr&nbsp;&nbsp;7 04:57:28.595:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;src NBMA: 99.255.10.2                                                                    <br>
+*Apr&nbsp;&nbsp;7 04:57:28.595:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;src protocol: 1                                                                          <br>
+HUB#72.30.1.1, dst protocol: 172.30.1.7                                                                             <br>
+*Apr&nbsp;&nbsp;7 04:57:28.595:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Contents of nhrp traffic indication packet:                                              <br>
+*Apr&nbsp;&nbsp;7 04:57:28.595:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 45 00 00 64 00 05 00 00 FE 01 FB 6B AC 1E 01 07                                       <br>
+*Apr&nbsp;&nbsp;7 04:57:28.595:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0A 02 0A 01 08 00 A8 4B 00 01 00                                                      <br>
+*Apr&nbsp;&nbsp;7 04:57:28.595: Forward Transit NHS Record Extension(4):                                                      <br>
+*Apr&nbsp;&nbsp;7 04:57:28.595: Reverse Transit NHS Record Extension(5):                                                      <br>
+*Apr&nbsp;&nbsp;7 04:57:28.595: NAT address Extension(9):                                                                     <br>
+*Apr&nbsp;&nbsp;7 04:57:28.595: NHRP: 108 bytes out Tunnel0                                                                   <br>
+*Apr&nbsp;&nbsp;7 04:57:28.599: NHRP-ATTR: ext_type: 32771, ext_len : 0                                                       <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                                                <br>
+*Apr&nbsp;&nbsp;7 04:57:28.599: NHRP-ATTR: ext_type: 32772, ext_len : 0                                                       <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                                                <br>
+*Apr&nbsp;&nbsp;7 04:57:28.599: NHRP-ATTR: ext_type: 32773, ext_len : 0                                                       <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                                                <br>
+*Apr&nbsp;&nbsp;7 04:57:28.599: NHRP-ATTR: ext_type: 9, ext_len : 0                                                           <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                                                <br>
+*Apr&nbsp;&nbsp;7 04:57:28.599: NHRP-ATTR: ext_type: 32768, ext_len : 0                                                       <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                                                <br>
+*Apr&nbsp;&nbsp;7 04:57:28.599: NHRP: Receive Resolution Request via Tunnel0 vrf 0, packet size: 72                           <br>
+*Apr&nbsp;&nbsp;7 04:57:28.599:&nbsp;&nbsp;(F) afn: AF_IP(1), type: IP(800), hop: 255, ver: 1                                           <br>
+*Apr&nbsp;&nbsp;7 04:57:28.599:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                                                 <br>
+HUB#&nbsp;&nbsp; shtl: 4(NSAP), sstl: 0(NSAP)                                                                                 <br>
+*Apr&nbsp;&nbsp;7 04:57:28.599:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;pktsz: 72 extoff: 52                                                                     <br>
+*Apr&nbsp;&nbsp;7 04:57:28.599:&nbsp;&nbsp;(M) flags: "router auth src-stable nat ", reqid: 3                                           <br>
+*Apr&nbsp;&nbsp;7 04:57:28.599:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;src NBMA: 99.255.60.6                                                                    <br>
+*Apr&nbsp;&nbsp;7 04:57:28.599:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;src protocol: 172.30.1.7, dst protocol: 172.30.1.2                                       <br>
+*Apr&nbsp;&nbsp;7 04:57:28.599:&nbsp;&nbsp;(C-1) code: no error(0)                                                                      <br>
+*Apr&nbsp;&nbsp;7 04:57:28.599:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;prefix: 32, mtu: 17916, hd_time: 7200                                                  <br>
+*Apr&nbsp;&nbsp;7 04:57:28.599:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;addr_len: 0(NSAP), subaddr_len: 0(NSAP), proto_len: 0, pref: 0                         <br>
+*Apr&nbsp;&nbsp;7 04:57:28.599: Responder Address Extension(3):                                                               <br>
+*Apr&nbsp;&nbsp;7 04:57:28.599: Forward Transit NHS Record Extension(4):                                                      <br>
+*Apr&nbsp;&nbsp;7 04:57:28.599: Reverse Transit NHS Record Extension(5):                                                      <br>
+*Apr&nbsp;&nbsp;7 04:57:28.599: NAT address Extension(9):                                                                     <br>
+*Apr&nbsp;&nbsp;7 04:57:28.599: NHRP: netid_in = 1000, to_us = 0                                                              <br>
+*Apr&nbsp;&nbsp;7 04:57:28.599: NHRP: nhrp_rtlookup for destination on 172.30.1.2 yielded interface Tunnel0, prefixlen 24     <br>
+*Apr&nbsp;&nbsp;7 04:57:28.603: NHRP: netid_out 1000, netid_in 1000                                                           <br>
+*Apr&nbsp;&nbsp;7 04:57:28.603: NHRP: Forwarding requ                                                                         <br>
+HUB#est due to authoritative request.                                                                               <br>
+*Apr&nbsp;&nbsp;7 04:57:28.603: NHRP-ATTR: In nhrp_recv_resolution_request NHRP Resolution Request packet is forwarded to 172.30.1.2<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                                                  <br>
+*Apr&nbsp;&nbsp;7 04:57:28.603: NHRP: Attempting to forward to destination: 172.30.1.2                                          <br>
+*Apr&nbsp;&nbsp;7 04:57:28.603: NHRP: Forwarding: NHRP SAS picked source: 172.30.1.1 for destination: 172.30.1.2                <br>
+*Apr&nbsp;&nbsp;7 04:57:28.603: NHRP: Attempting to send packet via DEST 172.30.1.2                                             <br>
+*Apr&nbsp;&nbsp;7 04:57:28.603: NHRP: NHRP successfully mapped '172.30.1.2' to NBMA 99.255.30.1                                 <br>
+*Apr&nbsp;&nbsp;7 04:57:28.607: NHRP: Encapsulation succeeded.  Sending NHRP Control Packet  NBMA Address: 99.255.30.1          <br>
+*Apr&nbsp;&nbsp;7 04:57:28.607: NHRP: Forwarding Resolution Request via Tunnel0 vrf 0, packet size: 92                          <br>
+*Apr&nbsp;&nbsp;7 04:57:28.607:&nbsp;&nbsp;src: 172.30.1.1, dst: 172.30.1.2                                                               <br>
+*Apr&nbsp;&nbsp;7 04:57:28.607:&nbsp;&nbsp;(F) afn: AF_IP(1), type: IP(800), hop: 254, ver: 1                                             <br>
+*Apr&nbsp;&nbsp;7 04:57:28.607:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;shtl: 4(NSAP), sstl: 0(NSAP)                                                               <br>
+*Apr&nbsp;&nbsp;7 04:57:28.607:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;pktsz: 92 extoff: 52                                                                       <br>
+*Apr&nbsp;&nbsp;7 04:57:28.607:&nbsp;&nbsp;(M) flags: "router auth src-s                                                                  <br>
+HUB#table nat ", reqid: 3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                                                   <br>
+*Apr&nbsp;&nbsp;7 04:57:28.607:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;src NBMA: 99.255.60.6                                                                      <br>
+*Apr&nbsp;&nbsp;7 04:57:28.607:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;src protocol: 172.30.1.7, dst protocol: 172.30.1.2                                         <br>
+*Apr&nbsp;&nbsp;7 04:57:28.607:&nbsp;&nbsp;(C-1) code: no error(0)                                                                        <br>
+*Apr&nbsp;&nbsp;7 04:57:28.607:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;prefix: 32, mtu: 17916, hd_time: 7200                                                    <br>
+*Apr&nbsp;&nbsp;7 04:57:28.607:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;addr_len: 0(NSAP), subaddr_len: 0(NSAP), proto_len: 0, pref: 0                           <br>
+*Apr&nbsp;&nbsp;7 04:57:28.607: Responder Address Extension(3):                                                                 <br>
+*Apr&nbsp;&nbsp;7 04:57:28.607: Forward Transit NHS Record Extension(4):                                                        <br>
+*Apr&nbsp;&nbsp;7 04:57:28.607:&nbsp;&nbsp;(C-1) code: no error(0)                                                                        <br>
+*Apr&nbsp;&nbsp;7 04:57:28.607:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;prefix: 32, mtu: 17916, hd_time: 7200                                                    <br>
+*Apr&nbsp;&nbsp;7 04:57:28.607:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;addr_len: 4(NSAP), subaddr_len: 0(NSAP), proto_len: 4, pref: 0                           <br>
+*Apr&nbsp;&nbsp;7 04:57:28.607:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;client NBMA: 99.255.10.2                                                                 <br>
+*Apr&nbsp;&nbsp;7 04:57:28.607:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;client protocol: 172.30.1.1                                                              <br>
+*Apr&nbsp;&nbsp;7 04:57:28.607: Reverse Transit NHS Record Extension(5):                                                        <br>
+*Apr&nbsp;&nbsp;7 04:57:28.607: NAT address Extension(9):                                                                       <br>
+*Apr&nbsp;&nbsp;7 04:57:28.607: NHRP: 116 bytes out Tunnel0                                                                     <br>
+*Apr&nbsp;&nbsp;7 04:57:28.679: NHRP: Tun&nbsp;&nbsp;&nbsp;&nbsp;                                                                                   <br>
+HUB#nels gave us remote_nbma: 99.255.30.1 for Redirect                                                                <br>
+*Apr&nbsp;&nbsp;7 04:57:28.679: NHRP: Attempting to Redirect, remote_nbma: 99.255.30.1                                          <br>
+*Apr&nbsp;&nbsp;7 04:57:28.683: NHRP: inserting (99.255.30.1/172.30.1.7) in redirect table                                      <br>
+*Apr&nbsp;&nbsp;7 04:57:28.687: NHRP-ATTR:&nbsp;&nbsp;Requester Ext Len: Total ext_len  with NHRP attribute VPE 16                        <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                                                  <br>
+*Apr&nbsp;&nbsp;7 04:57:28.691: NHRP: Attempting to send packet via DEST 10.2.10.1                                              <br>
+*Apr&nbsp;&nbsp;7 04:57:28.695: NHRP: Encapsulation succeeded.  Sending NHRP Control Packet  NBMA Address: 99.255.30.1          <br>
+*Apr&nbsp;&nbsp;7 04:57:28.695: NHRP: Send Traffic Indication via Tunnel0 vrf 0, packet size: 84                                <br>
+*Apr&nbsp;&nbsp;7 04:57:28.699:&nbsp;&nbsp;src: 172.30.1.1, dst: 10.2.10.1                                                                <br>
+*Apr&nbsp;&nbsp;7 04:57:28.699:&nbsp;&nbsp;(F) afn: AF_IP(1), type: IP(800), hop: 255, ver: 1                                             <br>
+*Apr&nbsp;&nbsp;7 04:57:28.699:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;shtl: 4(NSAP), sstl: 0(NSAP)                                                               <br>
+*Apr&nbsp;&nbsp;7 04:57:28.699:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;pktsz: 84 extoff: 68                                                                       <br>
+*Apr&nbsp;&nbsp;7 04:57:28.699:&nbsp;&nbsp;(M) traffic code: redirect(0)                                                                  <br>
+*Apr&nbsp;&nbsp;7 04:57:28.699:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;src NBMA: 99.255.10.2                                                                      <br>
+*Apr&nbsp;&nbsp;7 04:57:28.699:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;src protocol: 172.30.1.1, dst protocol: 10.2.10.1                                          <br>
+HUB#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                                                  <br>
+*Apr&nbsp;&nbsp;7 04:57:28.699:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Contents of nhrp traffic indication packet:                                                <br>
+*Apr&nbsp;&nbsp;7 04:57:28.699:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 45 00 00 64 00 05 00 00 FE 01 FB 6B 0A 02 0A 01                                         <br>
+*Apr&nbsp;&nbsp;7 04:57:28.699:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; AC 1E 01 07 00 00 B0 4B 00 01 00                                                        <br>
+*Apr&nbsp;&nbsp;7 04:57:28.699: Forward Transit NHS Record Extension(4):                                                        <br>
+*Apr&nbsp;&nbsp;7 04:57:28.699: Reverse Transit NHS Record Extension(5):                                                        <br>
+*Apr&nbsp;&nbsp;7 04:57:28.699: NAT address Extension(9):                                                                       <br>
+*Apr&nbsp;&nbsp;7 04:57:28.699: NHRP: 108 bytes out Tunnel0                                                                     <br>
+</code></div>
+</p>
+<p>
+The following is a Wireshark packet capture of an NHRP Traffic indication message:
+<img alt="Traffic Indication Packet Exchange" src="Images/NHRP Traffic Indication Capture.png">
+</p>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+ <code style="font-size:110%">
+Frame 47: 122 bytes on wire (976 bits), 122 bytes captured (976 bits) on interface -, id 0              <br>
+Ethernet II, Src: ca:06:06:9e:00:08 (ca:06:06:9e:00:08), Dst: ca:07:06:ad:00:1c (ca:07:06:ad:00:1c)     <br>
+Internet Protocol Version 4, Src: 99.255.10.2, Dst: 99.255.60.6                                         <br>
+Generic Routing Encapsulation (NHRP)                                                                    <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Flags and Version: 0x0000                                                                           <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Protocol Type: NHRP (0x2001)                                                                        <br>
+Next Hop Resolution Protocol (NHRP Traffic Indication)                                                  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;NHRP Fixed Header&nbsp;&nbsp;&nbsp;&nbsp;                                                                               <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Address Family Number: IPv4 (0x0001)                                                            <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Protocol Type (short form): IPv4 (0x0800)                                                       <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Protocol Type (long form): 0000000000                                                           <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Hop Count: 255&nbsp;&nbsp;&nbsp;&nbsp;                                                                              <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Packet Length: 84                                                                               <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;NHRP Packet Checksum: 0xe9dc [correct]                                                          <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[NHRP Packet Checksum Status: Good]                                                             <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Extension Offset: 68                                                                            <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Version: 1 (NHRP - rfc2332)                                                                     <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;NHRP Packet Type: NHRP Traffic Indication (8)                                                   <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Source Address Type/Len: NSAP format/4                                                          <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.0.. .... = Type: NSAP format (0)                                                           <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;..00 0100 = Length: 4                                                                       <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Source SubAddress Type/Len: NSAP format/0                                                       <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.0.. .... = Type: NSAP format (0)                                                           <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;..00 0000 = Length: 0                                                                       <br>
+&nbsp;&nbsp;&nbsp;&nbsp;NHRP Mandatory Part&nbsp;&nbsp;                                                                               <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Source Protocol Len: 4                                                                          <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Destination Protocol Len: 4                                                                     <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Source NBMA Address: 99.255.10.2                                                                <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Source Protocol Address: 172.30.1.1                                                             <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Destination Protocol Address: 172.30.1.7                                                        <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Packet Causing Indication                                                                           <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Internet Protocol Version 4, Src: 172.30.1.7, Dst: 10.2.10.1                                    <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0100 .... = Version: 4                                                                      <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.... 0101 = Header Length: 20 bytes (5)                                                     <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Differentiated Services Field: 0x00 (DSCP: CS0, ECN: Not-ECT)                               <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0000 00.. = Differentiated Services Codepoint: Default (0)                              <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.... ..00 = Explicit Congestion Notification: Not ECN-Capable Transport (0)             <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Total Length: 100                                                                           <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Identification: 0x000f (15)                                                                 <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;000. .... = Flags: 0x0                                                                      <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0... .... = Reserved bit: Not set                                                       <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.0.. .... = Don't fragment: Not set                                                     <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;..0. .... = More fragments: Not set                                                     <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...0 0000 0000 0000 = Fragment Offset: 0                                                    <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Time to Live: 254                                                                           <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Protocol: ICMP (1)                                                                          <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Header Checksum: 0xfb61 [validation disabled]                                               <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[Header checksum status: Unverified]                                                        <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Source Address: 172.30.1.7                                                                  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Destination Address: 10.2.10.1                                                              <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Internet Control Message Protocol                                                               <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Type: 8 (Echo (ping) request)                                                               <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Code: 0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                                               <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Checksum: 0xb321 [unverified] [in ICMP error packet]                                        <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[Checksum Status: Unverified]                                                               <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Identifier (BE): 3 (0x0003)                                                                 <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Identifier (LE): 768 (0x0300)                                                               <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Sequence Number (BE): 0 (0x0000)                                                            <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Sequence Number (LE): 0 (0x0000)                                                            <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;HiPerConTracer Trace Service                                                                    <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Magic Number: 0x80040000                                                                    <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Send TTL: 128                                                                               <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Round: 5&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                                              <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Checksum Tweak: 0x0000                                                                      <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Send Time Stamp: Jan  7, 2057 08:02:17.879552000 UTC                                        <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Forward Transit NHS Record Extension                                                                <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1... .... .... .... = Compulsory Flag: True                                                     <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;..00 0000 0000 0100 = Extension Type: 0x0004                                                    <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Extension length: 0                                                                             <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Reverse Transit NHS Record Extension                                                                <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1... .... .... .... = Compulsory Flag: True                                                     <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;..00 0000 0000 0101 = Extension Type: 0x0005                                                    <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Extension length: 0                                                                             <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Cisco NAT Address Extension                                                                         <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0... .... .... .... = Compulsory Flag: False                                                    <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;..00 0000 0000 1001 = Extension Type: 0x0009                                                    <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Extension length: 0                                                                             <br>
+&nbsp;&nbsp;&nbsp;&nbsp;End of Extension&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                                              <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1... .... .... .... = Compulsory Flag: True                                                     <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;..00 0000 0000 0000 = Extension Type: 0x0000                                                    <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Extension length: 0                                                                             <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                                              <br>
 </code></div>
 </p>
 
@@ -1215,15 +1578,21 @@ When configuring a routing protocol over the overlay network, never advertise
 the underlay network in routing protocol over the overlay network.
 </p>
 
-<h1>Verification of DMVPN</h1>
+<h1 id="VERIFICATION">Verification of DMVPN</h1>
 <h2>Viewing DMVPN Tunnel States</h2>
 <p>
 The tunnel interface experiences varying states based on the stage of tunnel 
 creation or if the tunnel experienced problems during establishment or operation. 
 Addition of encryption to the tunnel also affects the state of the DMVPN tunnels. 
-The commands to display the tunnel state are;
-<code><b>show dmvpn interface &lt;detail&gt;</b></code> and 
-<code><b>show dmvpn &lt;detail&gt;</b></code>. 
+<h3><code>show dmvpn interface &lt;interface&gt; &lt;detail&gt;</b></code> 
+<p>
+
+</p>
+
+<h3><code>show dmvpn &lt;detail&gt;</code><h3>
+<p>
+
+</p>
 
 <h3><code>show dmvpn</code></h3>
 <p>
@@ -1551,76 +1920,7 @@ By default, an NHRP mapping stays in the NHRP cache for 7200 seconds (2 hours)
 (holdtime). It can be modified to the recommended value of 600 seconds using the
 tunnel configuration command <code><b>ip nhrp holdtime &lt;1 – 65535&gt;</b></code>.
 </p>
-<h3>NHRP Registration</h3>
-<p>
-NHRP registration packets are sent every NHRP timeout period. If no registration
-reply is received, a new registration packet is sent with a delay of 1 second, 
-second packet is delayed for two seconds and third four seconds. NHS is declared
-down after third attempt. Use the command <code><b>show dmvpn</b></code> to confirm.
-</p>
-<p>
-Periodic NHRP registration requests by spokes refresh the NHRP timeout period. 
-In spoke to spoke tunnels, if tunnel is not used in two minutes of expiry time, 
-it is torn down.
-</p>
-<p>
-Probe state: NHCs attempting to register with a down NHS start sending probe 
-packets periodically to determine the availability of the NHS. The delay in probe
-packets is 1, 2, 4, 8, 16, 32, 64. After 64 seconds, no more probe packets are sent.
-This can be verified by debuggin messages;
-</p>
-<p>
-<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
- <code style="font-size:110%">
-. . . 
-*Feb 14 21:55:12.391: NHRP-RATE: Sending initial Registration Request for 10.100.100.1, reqid 2                        <br>
-*Feb 14 21:55:14.303: <b>NHRP: Setting retrans delay to 4 for nhs  dst 10.100.100.1</b>                                       <br>
-*Feb 14 21:55:14.307: NHRP-ATTR:  Requester Ext Len: Total ext_len  with NHRP attribute VPE 40                         <br>
-                                                                                                                       <br>
-*Feb 14 21:55:14.307: NHRP: Attempting to send packet via DEST 10.100.100.1                                            <br>
-*Feb 14 21:55:14.311: NHRP: NHRP successfully mapped '10.100.100.1' to NBMA 10.10.10.10                                <br>
-*Feb 14 21:55:14.315: NHRP: Encapsulation succeeded.  Sending NHRP Control Packet  NBMA Address: 10.10.10.10           <br>
-*Feb 14 21:55:14.319: NHRP: Send Registration Request via Tunnel0 vrf 0, packet size: 92                               <br>
-*Feb 14 21:55:14.323:&nbsp;&nbsp;src: 10.100.100.9, dst: 10.100.100.1                                                            <br>
-*Feb 14 21:55:14.327:&nbsp;&nbsp;(F) afn: AF_IP(1), type: IP(800), hop: 255, ver: 1                                              <br>
-*Feb 14 21:55:14.327:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;shtl: 4(NSAP), sstl: 0(NSAP)                                                                <br>
-*Feb 14 21:55:14.331:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;pktsz: 92 extoff: 52                                                                        <br>
-*Feb 14 21:55:14.331:&nbsp;&nbsp;(M) flags: "unique nat ", reqid: 2                                                              <br>
-*Feb 14 21:55:14.331:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;src NBMA: 9.9.9.9                                                                           <br>
-*Feb 14 21:55:14.335:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;src protocol: 10.100.100.9, dst protocol: 10.100.100.1                                      <br>
-*Feb 14 21:55:14.339:&nbsp;&nbsp;(C-1) code: no error(0)                                                                         <br>
-*Feb 14 21:55:14.339:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;prefix: 32, mtu: 17912, hd_time: 7200                                                     <br>
-*Feb 14 21:55:14.343:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;addr_len: 0(NSAP), subaddr_len: 0(NSAP), proto_len: 0, pref: 0                            <br>
-*Feb 14 21:55:14.343: Responder Address Extension(3):                                                                  <br>
-*Feb 14 21:55:14.343: Forward Transit NHS Record Extension(4):                                                         <br>
-*Feb 14 21:55:14.347: Reverse Transit NHS Record Extension(5):                                                         <br>
-*Feb 14 21:55:14.347: NAT address Extension(9):                                                                        <br>
-*Feb 14 21:55:14.347:&nbsp;&nbsp;(C-1) code: no error(0)                                                                         <br>
-*Feb 14 21:55:14.351:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;prefix: 32, mtu: 17912, hd_time: 0                                                        <br>
-*Feb 14 21:55:14.351:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;addr_len: 4(NSAP), subaddr_len: 0(NSAP), proto_len: 4, pref: 0                            <br>
-*Feb 14 21:55:14.351:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;client NBMA: 10.10.10.10                                                                  <br>
-*Feb 14 21:55:14.355:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;client protocol: 10.100.100.1                                                             <br>
-*Feb 14 21:55:14.355: NHRP: 120 bytes out Tunnel0                                                                      <br>
-*Feb 14 21:55:14.359: NHRP-RATE: Retransmitting Registration Request for 10.100.100.1, reqid 2, (retrans ivl 4 sec)    <br>
-*Feb 14 21:55:18.171: NHRP: NHS-DOWN: 10.100.100.1                                                                     <br>
-*Feb 14 21:55:18.187: NHRP: Already pending Registration Request for NHS: 10.100.100.1                                 <br>
-*Feb 14 21:55:18.191: NHRP: NHS 10.100.100.1 Tunnel0 vrf 0 Cluster 0 Priority 0 Transitioned to 'E' from 'E'           <br>
-                                                                                                                       <br>
-*Feb 14 21:55:18.191: <b>NHRP: Setting retrans delay to 8 for nhs  dst 10.100.100.1</b>                                       <br>
-*Feb 14 21:55:18.195: NHRP-ATTR:  Requester Ext Len: Total ext_len  with NHRP attribute VPE 40                         <br>
-. . .                                                                                                                  <br>
-*Feb 14 21:55:18.251: NHRP-RATE: Retransmitting Registration Request for 10.100.100.1, reqid 2, (retrans ivl 8 sec)    <br>
-*Feb 14 21:55:25.567: <b>NHRP: Setting retrans delay to 16 for nhs  dst 10.100.100.1</b>                                      <br>
-*Feb 14 21:55:25.571: NHRP-ATTR:  Requester Ext Len: Total ext_len  with NHRP attribute VPE 40                         <br>
-. . .                                                                                                                  <br>
-*Feb 14 21:55:25.623: NHRP-RATE: Retransmitting Registration Request for 10.100.100.1, reqid 2, (retrans ivl 16 sec)   <br>
-*Feb 14 21:55:39.495: <b>NHRP: Setting retrans delay to 32 for nhs  dst 10.100.100.1,</b>                                      <br>
-. . .                                                                                                                  <br>
-*Feb 14 21:55:39.551: NHRP-RATE: Retransmitting Registration Request for 10.100.100.1, reqid 2, (retrans ivl 32 sec)   <br>
-*Feb 14 21:56:09.879: <b>NHRP: Setting retrans delay to 64 for nhs  dst 10.100.100.1</b>                                      <br>
-*Feb 14 21:56:09.883: NHRP-ATTR:  Requester Ext Len: Total ext_len  with NHRP attribute VPE 40
-</code></div>
-</p>
+
 <h3>Multi-hop Topologies</h3>
 <p>
 Additional hubs can be added by additional mapping statements to the tunnel 

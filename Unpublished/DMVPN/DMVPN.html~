@@ -15,16 +15,11 @@
   </ol>
 </p>
 
-<h1 id="INTRODUCTION">Introduction</h1>
+<h1 id="INTRODUCTION">Introduction and Overview</h1>
 <p>
 DMVPN is a Cisco developed technology used in enterprise networks to create 
 Virtual Private Networks (VPNs) to interconnect an enterprise’s various 
-geographically separated offices over a public network such as the Internet. 
-The cost of implementing 
-DMVPN is so much lower than the cost of installing and operating a private or 
-leased Wide Area Network (WAN).
-</p>
-<p>
+geographically separated offices over a public network such as the Internet.
 DMVPN is a point-to-multipoint layer 3 overlay VPN providing full-meshed connectivity 
 with simple configuration of hub and spoke. It uses a logical hub and 
 spoke topology. Direct spoke-to-spoke traffic is supported. DMVPN's only requirement 
@@ -35,7 +30,7 @@ restrictions such as MPLS L3VPNs. DMVPN is highly scalable when properly designe
 <h2>How DMVPN Works</h2>
 <p>
 DMVPN relies on two technologies i.e. Multipoint Generic Routing Encapsulation 
-(mGRE) and Next Hop Resolution Protocol (NHRP). To create DMVPNs, the following 
+(mGRE) and Next Hop Resolution Protocol (NHRP). To configure DMVPN, the following 
 steps should be followed;
 <ul>
   <li>Step 1: Configuration of mGRE tunnels.</li>
@@ -46,54 +41,59 @@ steps should be followed;
 <p>
 DMVPN operates through one of three phases; Phase 1, Phase 2, and Phase 3. Each phase 
 incrementally adds features that improve and secure the operation of DMVPN.
-DMVPN reduces the need for N8(n-1)/2 static tunnel configuration. This happens 
+DMVPN reduces the need for n &times; <sup>(n-1)</sup> &#8260; <sub>2</sub>  static tunnel configuration. This happens 
 through the use of one mGRE interface for all connections. Tunnels are created 
-on-demand between nodes. Encryption is optional but recommend to be configured.
+dynamically on-demand between nodes. Encryption in DMVPN is optional but recommend to be configured.
 </p>
 <p>
 DMVPN creates on-demand tunnels between nodes: the initial tunnel-mesh is hub-and-spoke(always on).
-traffic patterns trigger spoke-to-spoke tunnels. This solves management scalability 
+Traffic patterns trigger spoke-to-spoke tunnels. This solves management scalability 
 problems. DMVPN maintains tunnels based on traffic patterns. Spoke-to-spoke tunnel 
 is on-demand and this tunnel's lifetime is based on traffic.
 </p>
 <p>
-DMVPN requires two IGPs; one operating for the underlay and the other for the overlay 
-network. IPv4 and IPv6 is supported for both passenger and transport.
+DMVPN supports IPv4 and IPv6 for both passenger(overlay) and transport(underlay)
+traffic.
 </p>
 
 <h3>DMVPN Features</h3>
 <p>
-Provides full meshed connectivity with simple configuration of hub and spoke.
-Supports dynamically addressed spokes.
-Facilitates zero-touch configuration for addition new spokes.
-Features automatic IPsec triggering for building IPsec tunnel.
-Supports IP Unicast, IP Multicast, and dynamic routing protocols.
-Supports spoke routers behind dynamic NAT and hub routers behind static NAT.
-Usable with or without IPsec encryption
-Improves network performance reducing latency and jitter
-Optimizes head office bandwidth utilization
-One mGRE interface on each spoke which supports all destinations
-Dynamic tunnel destination simplifies support for dynamically addressed spokes. 
-NHRP registration and dynamic routing protocols.
-Smaller hub configuration. with one interface for all spokes.
-
-Spoke-to-spoke data-plane traffic is through the hub (phase 1) or direct (phase 2 and 3). 
+<ul>
+<li>DMVPN provides full meshed connectivity with simple configuration of hub and spoke.</li>
+<li>It supports dynamically addressed spokes i.e. where spokes have their IP 
+addresses issued through DHCP and these IP addresses are not consistent over time.</li> 
+<li>DMVPN facilitates zero-touch configuration for addition new spokes i.e., no 
+configuration on the hub when adding a new spoke.</li>
+<li>DMVPN features automatic IPsec triggering for building IPsec protected 
+VPN tunnels. It remains usable with or without IPsec encryption.</li>
+<li>Supports IP Unicast and IP Multicast traffic enabling the support of interior routing
+protocols such as OSPF, EIGRP.</li>
+<li>DMVPN supports spoke routers behind dynamic NAT and hub routers behind static NAT.
+<li>DMVPN improves network performance reducing latency and jitter.</li>
+<li> DMVPN supports the configuration of one mGRE interface on each spoke which 
+supports multipoint VPN connectivity. On the hub, hub configuration is accomplished 
+with fewer configuration command and one tunnel interface for all spokes.</li>
+<li>Dynamic tunnel destination simplifies support for dynamically addressed spokes.</li> 
+<li>Spoke-to-spoke data-plane traffic is through the hub (phase 1) or direct (phase 2 and 3). 
 However, control-plane and multicast traffic is only exchanged with the hub regardless of phase. This results 
 in the spokes forming layer 3 adjacencies only with the hub. There are no spoke-to-spoke 
-layer 3 adjacencies. So routing protocol updates come only from the hub.
+layer 3 adjacencies. So routing protocol updates come only from the hub.</li>
+</ul>
 </p>
 
-<h3>Hub to Spokes</h3>
+<h3>Connectivity</h3>
+<h4>Hub to Spokes</h4>
 <p>
-Two main components:
+The two main components of a hub and spoke connection are:
 <ol>
   <li>DMVPN hub/NHRP server (NHS).</li>
   <li>DMVPN spokes / NHCs:
     <ul>
       <li>Spokes register with the hub/server.</li>
       <li>Spokes manually specify the hub's address.</li>
-      <li>Registration message is sent via NHRP Registration Request message type.</li>
-      <li>Hub dynamically learns Spoke's VPN address and NBMA address.</li>
+      <li>The Registration message from the spokes is sent via NHRP Registration 
+      Request message type.</li>
+      <li>The hub dynamically learns the spoke's VPN address and NBMA address.</li>
       <li>Spokes establish tunnels to the hub through which exchange of IGP routing 
       information takes place.</li>
     </ul>
@@ -101,14 +101,7 @@ Two main components:
 </ol>
 </p>
 
-<h3>Spoke to Spoke</h3>
-<p>
-Spoke 1 knows Spoke2's routes via IGP. These are learned via the tunnel to the hub.
-The next-hop is spoke2's VPN IP for DMVPN phase 2. The next-hop is the hub's VPN IP for DMVPN 
-phase 3. When forming the tunnel, Spoke1 asks for Spoke2's real address. This request 
-is sent using the NHRP Resolution Request. it maps next-hop(VPN) IP to tunnel 
-source(NBMA) IP.
-</p>
+<h4>Spoke to Spoke</h4>
 <p>
 With the spoke-to-spoke tunnel formed, the hub is only used for control-plane 
 information exchange. The spoke-to-spoke tunnel data-plane may flow through 
@@ -145,8 +138,7 @@ GRE tunnels support IPv4 or IPv6 addresses as underlay and/or the overlay networ
 By default, GRE does not support encryption. However, tunnel encryption can be 
 added through IPSec.
 </p>
-<h2>Steps for the configuration of GRE Tunnels</h2>
-<h3>Phase 1: Peer to Peer</h3>
+<h2 id="GRE_CONFIGURATION">Configuration of GRE Tunnels</h2>
 <p>
 Control-plane neighborships only happen between spoke and hub. Spokes are not 
 able to form dynamic routing protocol neighbor relationships with each other.
@@ -178,8 +170,9 @@ A tunnel source is the interface whose IP address will be used as the source IP
 in the IP packets sent through the underlay network.
 It is usually a good idea to specify a logical interface such as a loopback interface.
 A loopback interface is always up and if a router has more than one Internet 
-connection through different router interfaces, then any of the Interfaces can 
-be used to route the tunnel traffic if any one interface goes down. If a loopback
+connection through different router interfaces, then any one of the other "up" interfaces can 
+be used to route the tunnel traffic if the primary interface through which the 
+VPN tunnel has been created goes down. If a loopback
 interface is used, remember to advertise the configured network on this interface.
 The configuration command is <code><b>#tunnel source &lt;ip_address | interface&gt;</b></code>.
 </p>
@@ -207,12 +200,12 @@ The subnet should have a sufficient number of IP addresses to be able
 to accommodate the planned number of spokes and hubs in the network. Proper 
 planning during the design of the network should cater for this. For this 
 example, we will accommodate a maximum of 510 hubs and clients so a subnet mask 
-of 255.255.254.0 (/23) is used.
+of 255.255.255.0 (/24) is used.
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
       	<code style="font-size:110%">
-HUB(config-if)#<b>ip address 10.100.100.1 255.255.254.0</b>
+HUB(config-if)#<b>ip address 172.30.1.1 255.255.255.0</b>
 </code></div>
 </p>
 
@@ -279,7 +272,7 @@ HUB(config-if)#<b>ip tcp adjust-mss 1360</b>
 </div>
 </p>
 
-<h3>Spoke configuration</h3>
+<h3>Spoke configuration (DMVPN Phase 1)</h3>
 <p>
 Configuration of the Spoke in DMVPN phase 1 is similar to the configuration of 
 the hub. The only exception is that with the spoke GRE is configured instead of 
@@ -294,7 +287,7 @@ interface of the hub;
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
  <code style="font-size:110%">
-SPOKE7(config-if)#<b>tunnel destination 10.10.10.10</b>
+SPOKE7(config-if)#<b>tunnel destination 99.255.10.2</b>
 </code>
 </div>
 </p>
@@ -306,7 +299,7 @@ This IP address should be in the subnet of the tunnel of the Hub
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
  <code style="font-size:110%">
-SPOKE7(config-if)#<b>ip address 10.100.100.7 255.255.254.0</b>
+SPOKE7(config-if)#<b>ip address 172.30.1.7 255.255.255.0</b>
 </code>
 </div>
 </p>
@@ -314,16 +307,14 @@ SPOKE7(config-if)#<b>ip address 10.100.100.7 255.255.254.0</b>
 
 <h2>Next Hop Resolution Protocol (NHRP)</h2>
 <p>
-NHRP is used for mapping tunnel addresses to transport (overlay) addresses. It 
-is defined in RFC 2332. NHRP operates using the client-server model with a hub 
+NHRP is used for mapping tunnel (overlay) addresses to transport (underlay) addresses. It 
+is defined in <a target="_blank" href="https://www.ietf.org/rfc/rfc2332.txt">RFC 2332</a>. NHRP operates using the client-server model with a hub 
 as the server and the spokes as the client. The clients are also referred to as 
 Next Hop Clients (NHC) and the server as Next Hop Server (NHS).
 
-NHCs are statically configured with the IP address of the NHCs so they can register
-their tunnel and NBMA (transport) address. No manual registration of clients is 
-done at the NHS. They dynamically register themselves. This is known as zero-touch 
-configuration of clients at the NHS. Configuration on the spokes is similar with 
-only the tunnel IP address being changed.
+NHCs are statically configured with the IP address of the NHS so they can register
+their tunnel and NBMA (transport) address with the NHS. No manual registration of clients is 
+done on the NHS i.e., zero-touch configuration.
 
 All NHRP packets must include; source NBMA address, source protocol address, 
 destination protocol address and NHRP message type.
