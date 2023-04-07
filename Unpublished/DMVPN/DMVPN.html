@@ -36,53 +36,74 @@ steps should be followed;
 <ul>
   <li>Step 1: Configuration of mGRE tunnels.</li>
   <li>Step 2: Configuration of Next Hop Resolution Protocol (NHRP).</li>
-  <li>Step 3: Securing the DMVPN Tunnel with IPSec.</li>
+  <li>Step 3: Securing the DMVPN Tunnel with IPSec. IPsec is covered <a href="https://emmanueltoko.blogspot.com/2021/02/securingdmvpn-tunnels-with-ipsec-ikev1.html" target="_blank">here</a>.</li>
 </ul>
 </p>
 <p>
-DMVPN operates through one of three phases; Phase 1, Phase 2, and Phase 3. Each phase 
-incrementally adds features that improve and secure the operation of DMVPN.
-DMVPN reduces the need for n &times; <sup>(n-1)</sup> &#8260; <sub>2</sub>  static tunnel configuration. This happens 
-through the use of one mGRE interface for all connections. Tunnels are created 
-dynamically on-demand between nodes. Encryption in DMVPN is optional but recommend to be configured.
+DMVPN has three modes of operation; Phase 1, Phase 2, and Phase 3. Each phase 
+incrementally adds features that improve the operation of DMVPN.
+DMVPN reduces the need for n &times; <sup>(n-1)</sup> &#8260; <sub>2</sub>  
+static tunnel configurations. This happens through the use of one mGRE interface 
+for all connections. Encryption in DMVPN is optional but recommend to be configured.
 </p>
 <p>
-DMVPN creates on-demand tunnels between nodes: the initial tunnel-mesh is hub-and-spoke(always on).
-Traffic patterns trigger spoke-to-spoke tunnels. This solves management scalability 
-problems. DMVPN maintains tunnels based on traffic patterns. Spoke-to-spoke tunnel 
-is on-demand and this tunnel's lifetime is based on traffic.
+ DMVPN maintains tunnels based on traffic patterns. Spoke-to-spoke tunnel 
+is on-demand and this tunnel's lifetime is based on traffic utilization of the tunnel.
 </p>
 <p>
-DMVPN supports IPv4 and IPv6 for both passenger(overlay) and transport(underlay)
+DMVPN supports IPv4 and IPv6 protocols for both passenger(overlay) and transport(underlay)
 traffic.
 </p>
 
 <h3>DMVPN Features</h3>
 <p>
+DMVPN's characteristics make its operation flexible and scalable:
 <ul>
-<li>DMVPN provides full meshed connectivity with simple configuration of hub and spoke.</li>
-<li>It supports dynamically addressed spokes i.e. where spokes have their IP 
-addresses issued through DHCP and these IP addresses are not consistent over time.</li> 
-<li>DMVPN facilitates zero-touch configuration for addition new spokes i.e., no 
-configuration on the hub when adding a new spoke.</li>
-<li>DMVPN features automatic IPsec triggering for building IPsec protected 
-VPN tunnels. It remains usable with or without IPsec encryption.</li>
-<li>Supports IP Unicast and IP Multicast traffic enabling the support of interior routing
-protocols such as OSPF, EIGRP.</li>
-<li>DMVPN supports spoke routers behind dynamic NAT and hub routers behind static NAT.
-<li>DMVPN improves network performance reducing latency and jitter.</li>
-<li> DMVPN supports the configuration of one mGRE interface on each spoke which 
-supports multipoint VPN connectivity. On the hub, hub configuration is accomplished 
-with fewer configuration command and one tunnel interface for all spokes.</li>
-<li>Dynamic tunnel destination simplifies support for dynamically addressed spokes.</li> 
+<li>
+<p>
+DMVPN provides full meshed connectivity with simple configuration of hub and spoke.
+</p>
+<p>
+DMVPN creates on-demand tunnels between nodes: the initial tunnel-mesh is 
+hub-and-spoke(always on) topology.
+Traffic patterns trigger spoke-to-spoke tunnels thereby creating a topology that 
+dynamic shifts anywhere between a hub and spoke to full mesh topology. 
+This solves management scalability problems.
+</p>
+</li>
+<li>
+<p>
+It supports dynamically addressed spokes i.e. where spokes have their IP 
+addresses issued through DHCP or dynamic NAT and these IP addresses are not 
+consistent over time.
+DMVPN supports spoke routers behind dynamic NAT and hub routers behind static NAT.
+</p>
+</li> 
+<li>
+<p>DMVPN facilitates zero-touch configuration on the hub for addition new spokes i.e., no 
+configuration on the hub when adding a new spoke.</p></li>
+<li><p>DMVPN features automatic IPsec triggering for building IPsec protected 
+VPN tunnels. It remains usable with or without IPsec encryption.</p></li>
+<li><p>Supports IP unicast and IP multicast traffic enabling the support of interior routing
+protocols such as OSPF, EIGRP. Multicast packets are encapsulated bt GRE in unicast packets.</p></li>
+<li><p> DMVPN supports the configuration of one mGRE interface on each spoke which 
+supports multipoint VPN connectivity. On the hub, DMVPN configuration is accomplished 
+with fewer configuration command and one tunnel interface for all spokes.</p></li>
+<li><p>Dynamic tunnel destination simplifies support for dynamically addressed spokes.</p></li> 
 <li>Spoke-to-spoke data-plane traffic is through the hub (phase 1) or direct (phase 2 and 3). 
-However, control-plane and multicast traffic is only exchanged with the hub regardless of phase. This results 
+However, control-plane and multicast traffic is only exchanged with the hub regardless of DMVPN phase in operation.
+This results 
 in the spokes forming layer 3 adjacencies only with the hub. There are no spoke-to-spoke 
 layer 3 adjacencies. So routing protocol updates come only from the hub.</li>
 </ul>
 </p>
 
 <h3>Connectivity</h3>
+<p>
+As previously indicated, DMVPN toplogies start initially with a hub to spoke 
+topology. This dynamically changes to full mesh with hub to spoke and spoke-to-spoke 
+topologies depending on traffic patterns.
+</p>
 <h4>Hub to Spokes</h4>
 <p>
 The two main components of a hub and spoke connection are:
@@ -111,14 +132,16 @@ the hub initially but subsequent traffic does directly.
 
 <h1 id="GRE">Multipoint Generic Routing Encapsulation Tunnels (mGRE)</h1>
 <p>
-mGRE creates Virtual Private Network (VPN) tunnels between routers. A hub
+mGRE creates Virtual Private Network (VPN) tunnels between routers across a 
+network such as the Internet. A hub
 router is the central connection point of what is a star topology. DMVPN provides
 for the capablity to create topologies that contain more than one hub. For purposes
 of understanding DMVPN, we will implement a single-hub DMVPN topology.
 </p>
 <p>
 GRE is used as a transport mechanism for protocols such as IP by encapsulating 
-the IP packets. Dynamic routing protocols such as OSPF, EIGRP are supported. 
+the IP packets. Dynamic routing protocols such as OSPF, EIGRP are supported due 
+to multicast support provided by GRE. 
 Whereas GRE supports unicast packets, the default configuration of most dynamic 
 routing protocols (without optimization) is to use multicast packets. Spokes can 
 be configured to send encapsulated multicast packets in unicast GRE packets to 
