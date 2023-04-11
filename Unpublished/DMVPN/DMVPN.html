@@ -140,7 +140,8 @@ of understanding DMVPN, we will implement a single-hub DMVPN topology.
 </p>
 <p>
 GRE is used as a transport mechanism for protocols such as IP by encapsulating 
-the IP packets. Dynamic routing protocols such as OSPF, EIGRP are supported due 
+the IP packets. GRE uses IP protocol number 47. 
+Dynamic routing protocols such as OSPF, EIGRP are supported due 
 to multicast support provided by GRE. 
 Whereas GRE supports unicast packets, the default configuration of most dynamic 
 routing protocols (without optimization) is to use multicast packets. Spokes can 
@@ -2001,6 +2002,28 @@ NHRP message flags specify attributes of an NHRP cache entry or of the peer for 
   interface and its associated NBMA address.</li>
 </ol>
 </p>
+
+<h3><code>show ip nhrp traffic</code></h3>
+<p>
+The <code><b>show ip nhrp traffic</b></code> command is used to view the 
+statistics on NHRP packets sent and received.
+</p>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+ <code style="font-size:110%">
+HUB#<b>show ip nhrp traffic</b><br>
+Tunnel0: Max-send limit:100Pkts/10Sec, Usage:0%                           <br>
+&nbsp;&nbsp; Sent: Total 16&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;             <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 8 Resolution Request&nbsp;&nbsp;0 Resolution Reply&nbsp;&nbsp;0 Registration Request <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 4 Registration Reply&nbsp;&nbsp;0 Purge Request&nbsp;&nbsp;0 Purge Reply             <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0 Error Indication&nbsp;&nbsp;4 Traffic Indication&nbsp;&nbsp;0 Redirect Suppress    <br>
+&nbsp;&nbsp; Rcvd: Total 12&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;             <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 8 Resolution Request&nbsp;&nbsp;0 Resolution Reply&nbsp;&nbsp;4 Registration Request <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0 Registration Reply&nbsp;&nbsp;0 Purge Request&nbsp;&nbsp;0 Purge Reply             <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0 Error Indication&nbsp;&nbsp;0 Traffic Indication&nbsp;&nbsp;0 Redirect Suppress    <br>
+</code></div>
+</p>
+
 
 <h2>Overlay Routes</h2>
 <h3><code>show ip route</code></h3>
