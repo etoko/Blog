@@ -1,6 +1,6 @@
 <h1>Securing DMVPN Tunnels With IPSec, IKEv1 or IKEv2</h1>
 
-<h1>Introduction andOverview</h1>
+<h1>Introduction and Overview</h1>
 <p>
 In unencrypted DMVPN packets, the original packets have GRE flags added to them, and then the new GRE
 IP header is added for routing the packets through the transport (underlay) network. 
@@ -82,7 +82,14 @@ Traditional IPSec provides two modes of packet protection; tunnel and transport:
     does not add any perceived value and adds 20 bytes of overhead. It is 
     recommended that transport mode should be used for encrypted DMVPN tunnels.
     </p>
-    <li><b>Transport mode:</b> In this mode, the packet payload is encrypted. 
+    <p>
+    Additionally, the header added when tunnel is configured is redundant due to 
+    the already existing GRE header.
+    </p>
+    </li>
+    
+    <li><b>Transport mode:</b> In this mode, only the packet payload is encrypted.
+    The GRE header is maintained. 
     In this mode, the packet is routed based on the original IP headers. For 
     encrypted DMVPN packets that use ESP transport mode, the original packets have
     the generic routing encapsulation (GRE) flags added to them, and then that 
@@ -121,7 +128,11 @@ Originally DMVPN tunnel protection was provided by IKEv1. The configuration of
 DMVPN tunnel protection using DMVPN follows:
 </p>
 
-<h3>Step 1: Create the IKEv1policy:</h3>
+<h3>Step 1: Create the IKEv1 policy:</h3>
+<p>
+This is used for phase 1 negotiations in IPsec which is used to generate the key 
+information used in phase 2 for the actual data-plane.
+</p>
 <p>
 <ol>
 <li><h4>Define an IKE policy</h4></li>
@@ -161,6 +172,7 @@ key size.
 <p>
 The authentication method can be either preshared keys or RSA-signatures: 
 <code><b>authentication &lt;pre-share | rsa-encr | rsa-sig&gt;</b></code>.
+In this configuration, we opt to use preshared keys for authentication.
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
@@ -224,9 +236,21 @@ explicitly configured.
 HUB(config)#<b>crypto isakmp key simplesimple address 0.0.0.0</b>
 </code></div>
 </p>
+<p>
+The recommended approach is to use public-key infrastructure(PKI); here a certificate 
+is issued to the spokes. The hub can verify that certificate with the certificate 
+authority when spokes attempt to register. 
+</p>
+
 <h3>Step 3: Configure an IPSec transform set</h3>
+<p>
+In phase 2 of the creation of the IPsec security, the data-plane traffic is treated to the 
+encryption and hashing functions configured under the transform-set.
+</p>
+<p>
 <ol>
 <li><h4>Define the transform set and ESP or AH settings</h4>
+
 <p>
 Define the ESP authentication and ESP encryption or AH authentication algorithms
 for encryption or authentication.
@@ -270,7 +294,7 @@ If an encryption algorithm is configured, the key size should be defined.
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
  <code style="font-size:110%">
-HUB(config)#$<b>crypto ipsec transform-set DMVPN_IPSEC_TSET esp-aes esp-sha512-hmac</b>
+HUB(config)#<b>crypto ipsec transform-set DMVPN_IPSEC_TSET esp-aes esp-sha512-hmac</b>
 </code></div>
 </p>
 </li>
@@ -286,6 +310,8 @@ HUB(cfg-crypto-trans)#<b>mode transport</b>
 </p>
 </li>
 </ol>
+</p>
+
 <h3>Step 4 Create an IPSec profile</h3>
 <p>
 The IPsec profiile is created and the references the IPsec transform set previously 
@@ -318,11 +344,146 @@ of the templating that can be used with DMVPN.
 
 To configure a specific key for each spoke, enter the spoke address. This IP address 
 should be the one configured on the interface that is defined as the tunnel source 
-when configuring the DMVPN tunnel interface on the spoke. The hub and host must 
+when configuring the DMVPN tunnel interface on the spoke. The hub and spoke must 
 share the same key.
 </p>
 
-<h2>Verification</h2>
+<h2>IPsec with Frontdoor VRF</h2>
+<p>
+When a front-door VRF(FVRF) has been configured, to protect the tunnel using IPsec 
+requires a slightly different configuration particularly when defining the ISAKMP 
+key. Using the configuration sequence for IKEv1 above, the configuration of IPsec
+for a front-door VRF tunnel can be accomplished using the following procedure:
+</p>
+<h3>Step 2: Configure the IKEv1 key</h3>
+<p>
+<ol>
+<li>The key is configured using the command <code><b>crypto keyring &lt;keyring-name&gt; 
+vrf &lt;vrf-name&gt;</b></code> where:  
+<ul>
+ <li>keyring-name: is the suggested name of the keyring.</li>
+ <li>vrf-name: is the VRF under which the key will be used.</li>
+</ul>
+
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+ <code style="font-size:110%">
+ SPOKE4(config)#<b>crypto keyring DMVPN_ISAKMP_KEYRING vrf FVRF</b>
+ </code></div>
+ </p>
+</li>
+<li>
+Then define the key using the command <code><b>pre-shared-key address &lt;ip-address&gt; 
+&lt;netmask&gt; key &lt;key&gt;</b></code>.
+
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+ <code style="font-size:110%">
+SPOKE4(conf-keyring)#<b>pre-shared-key address 0.0.0.0 0.0.0.0 key simplesimple</b>
+</code></div>
+</p>
+
+</li>
+</ol>
+</p>
+
+<h3>Step 3: Configure the IKEv1 Profile</h3>
+<p>
+<ol>
+  <li>Create an IKEv1 profile: <code><b>create isakmp profile &lt;profile-name&gt;</b></code>.
+  <p>
+  <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+ <code style="font-size:110%">
+ SPOKE4(config)#<b>crypto isakmp profile DMVPN_ISAKMP_PROFILE</b>
+ </code></div>
+  </p>
+  </li>
+  <li>Configure the VRF that the profile will be used under: <code><b>vrf &lt;VRF-name&gt;</b></code>
+  <p>
+  <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+ <code style="font-size:110%">
+   SPOKE4(conf-isa-prof)#<b>vrf FVRF</b>
+ </code></div>
+  </p>
+  </li>
+  <li>Reference the configured keyring: <code><b>keyring &lt;keyring-name&gt;</b></code>
+    <p>
+  <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+ <code style="font-size:110%">
+  SPOKE4(conf-isa-prof)#<b>keyring DMVPN_ISAKMP_KEYRING</b><br>
+ </code></div></p>
+  </li>
+  <li>Define the IP address and VRF that this profile will be checked against and 
+  applied to: <code><b>match identity address &lt;ip-address&gt; &lt;vrf&gt;</b></code>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+ <code style="font-size:110%">
+SPOKE4(conf-isa-prof)#<b>match identity address 0.0.0.0 FVRF</b>
+</code></div>
+</p>
+  
+  
+  </li>
+</ol>
+</p>
+
+<h3>Step 4: Configure the IPsec Transform-set</h3>
+<p>
+The IPsec transform-set is configured as in step 3 above:
+</p>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+ <code style="font-size:110%">
+ SPOKE4(config)#<b>crypto ipsec transform-set DMVPN_IPSEC_TSET esp-aes esp-sha512-hmac</b><br>
+ SPOKE4(cfg-crypto-trans)#<b>mode transport</b>
+ </code></div>
+</p>
+
+<h3>Step 5: Configure the IPsec Profile</h3>
+<p>
+<ol>
+  <li>Define the IPsec profile:<code><b>crypto ipsec profile &lt;profile-name&gt;</b></code>
+  <p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+ <code style="font-size:110%">
+SPOKE4(config)#<b>crypto ipsec profile DMVPN_IPSEC_PROFILE</b>
+</code></div>
+</p>
+  </li>
+  <li>Reference the configured IPsec transform-set: 
+  <code><b>set transform-set &lt;transform-set-name&gt;</b></code>
+  <p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+ <code style="font-size:110%">
+SPOKE4(ipsec-profile)#<b>set transform-set DMVPN_IPSEC_TSET</b>
+</code></div>
+</p>
+
+  </li>
+  <li>Reference the ISAKMP/IKEv1 profile: <code><b>set isakmp-profile &lt;isakmp-profile-name&gt;</b></code> 
+    <p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+ <code style="font-size:110%">
+  SPOKE4(ipsec-profile)#<b>set isakmp-profile DMVPN_ISAKMP_PROFILE</b>
+ </code></div></p>
+  </li>
+</ol>
+</p>
+
+<h3>Step 6: Reference the IPsec Profile under the tunnel</h3>
+<p>
+Tunnel protection using IPsec is configured under the tunnel interface:
+</p>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+ <code style="font-size:110%">
+SPOKE4(config)#<b>interface tunnel 0</b><br>
+SPOKE4(config-if)#<b>tunnel protection ipsec profile DMVPN_IPSEC_PROFILE</b>
+</code></div>
+</p>
+
+
+<h2 id="VERIFICATION_IKEv1">Verification of IKEv1 Configuration</h2>
 <p>
 The following commands can be used to verify tunnel protection using IPsec:
 <ul>

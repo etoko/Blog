@@ -82,7 +82,14 @@ Traditional IPSec provides two modes of packet protection; tunnel and transport:
     does not add any perceived value and adds 20 bytes of overhead. It is 
     recommended that transport mode should be used for encrypted DMVPN tunnels.
     </p>
-    <li><b>Transport mode:</b> In this mode, the packet payload is encrypted. 
+    <p>
+    Additionally, the header added when tunnel is configured is redundant due to 
+    the already existing GRE header.
+    </p>
+    </li>
+    
+    <li><b>Transport mode:</b> In this mode, only the packet payload is encrypted.
+    The GRE header is maintained. 
     In this mode, the packet is routed based on the original IP headers. For 
     encrypted DMVPN packets that use ESP transport mode, the original packets have
     the generic routing encapsulation (GRE) flags added to them, and then that 
@@ -121,7 +128,11 @@ Originally DMVPN tunnel protection was provided by IKEv1. The configuration of
 DMVPN tunnel protection using DMVPN follows:
 </p>
 
-<h3>Step 1: Create the IKEv1policy:</h3>
+<h3>Step 1: Create the IKEv1 policy:</h3>
+<p>
+This is used for phase 1 negotiations in IPsec which is used to generate the key 
+information used in phase 2 for the actual data-plane.
+</p>
 <p>
 <ol>
 <li><h4>Define an IKE policy</h4></li>
@@ -161,6 +172,7 @@ key size.
 <p>
 The authentication method can be either preshared keys or RSA-signatures: 
 <code><b>authentication &lt;pre-share | rsa-encr | rsa-sig&gt;</b></code>.
+In this configuration, we opt to use preshared keys for authentication.
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
@@ -193,6 +205,10 @@ The Diffie-Hellman groups include the following;
 HUB(config-isakmp)#<b>group 16</b>
 </code></div>
 </p>
+<p>
+If not specified, the default group is enabled.
+</p>
+
 <li><h4>Configure the hash function for data integrity</h4></li>
 <p>
 The hash algorithm provides a check for data integrity i.e, a check to ensure 
@@ -224,9 +240,21 @@ explicitly configured.
 HUB(config)#<b>crypto isakmp key simplesimple address 0.0.0.0</b>
 </code></div>
 </p>
+<p>
+The recommended approach is to use public-key infrastructure(PKI); here a certificate 
+is issued to the spokes. The hub can verify that certificate with the certificate 
+authority when spokes attempt to register. 
+</p>
+
 <h3>Step 3: Configure an IPSec transform set</h3>
+<p>
+In phase 2 of the creation of the IPsec security, the data-plane traffic is treated to the 
+encryption and hashing functions configured under the transform-set.
+</p>
+<p>
 <ol>
 <li><h4>Define the transform set and ESP or AH settings</h4>
+
 <p>
 Define the ESP authentication and ESP encryption or AH authentication algorithms
 for encryption or authentication.
@@ -286,6 +314,8 @@ HUB(cfg-crypto-trans)#<b>mode transport</b>
 </p>
 </li>
 </ol>
+</p>
+
 <h3>Step 4 Create an IPSec profile</h3>
 <p>
 The IPsec profiile is created and the references the IPsec transform set previously 
@@ -692,6 +722,15 @@ maintain SA state including negotiation of a session. If CPU utilization is high
 limited CPU resources.
 </p>
 <p>
+IKEv2 advantages over IKEv1 include:
+Protection against DoS attacks
+Support for new encryption algorithms for phase 2 (suite B).
+</p>
+<p> 
+With IKEv2, asymetric authentication methods are possible where one end uses 
+preshared keys and the other PKI.
+</p>
+<p>
 Deploying IPsec tunnel protection is with the use of a static pre-shared key involves the creation of an:
 <ol>
  <li>IKEv2 keyring</li>
@@ -701,134 +740,135 @@ Deploying IPsec tunnel protection is with the use of a static pre-shared key inv
 </ol>
 </p>
 
-<h2>IKEv2 Keyring</h2>
+<h2>Step 1: Configure the IKEv2 Keyring</h2>
 <p>
 The IKEv2 keyring is a repository of the pre-shared keys. In a keyring, it is 
 possible to define which keys apply to which hosts. Identification of the password 
 is based on the IP address of the remote router. The IKEv2 keyrong is created 
 with the following steps:
 </p>
-<h3>Step 1: Define the keyring instance</h3>
 <p>
-It is created with the global configuration command crypto ikev2 keyring
-</p>
-
-<h3>Step 2: Create a peer name</h3>
-<p>
-Multiple peers can exist in a keyring. Each peer has a matching qualifier and 
-can use a different password. The peer is created with the command peer peer_name.
-</p>
-
-<h3>Step 3: Identify the IP address for the peer</h3>
-<p>
-Multiple peers can reside in a keyring. The IP address is identified so that the
+  <ol>
+    <li><b>Define the keyring instance:</b>
+    	It is created with the global configuration command <code><b>crypto ikev2 keyring &lt;keyring-name&gt;</b></code>.
+    </li>
+    <li><b>Create a peer name:</b> Multiple peers can exist in a keyring. Each 
+    peer has a matching qualifier and can use a different password. The peer is 
+    created with the command <code><b>peer &lt;peer_name&gt;</b></code>.
+    </li>
+    <li><b>Identify the IP address for the peer:</b> Multiple peers can reside in a keyring. The IP address is identified so that the
 appropriate peer configuration is used based upon the remote device’s IP address. 
 The command address network netmask defines the IP address/range. Though not
 recommended for a production network, the value of 0.0.0.0 0.0.0.0 may be used to 
-match against any peer. For IPv6, the address ::/0 matches any IPv6 address.
+match against any peer. For IPv6, the address ::/0 matches any IPv6 address.</li>
+ 
+   <li><b>Define a preshared key:</b> 
+     Define the preshared key with <code><b>pre-shared-key &lt;password&gt;</b></code>.
+   </li>
+  </ol>
 </p>
 
-<h3>Step 4: Define a preshared key</h3>
+
 <p>
-Define the preshared key with pre-shared-key key.
+
 </p>
 
-<h2>IKEv2 Profile</h2>
+<h2>Step 2: IKEv2 Profile</h2>
 <p>
 IKEv2 profile is a collection of non-negotiable security parameters used during 
 IKE security association. The IKEv2 profile is later associated with the IPSec
 profile. Within the IKEv2 profile, local and remote authentication methods must
 be defined as well as a match statement.
 </p>
-<h3>Step 1: Define the IKEv2 profile</h3>
 <p>
-It is defined with the global configuration command crypto ikev2 profile 
-profile_name
-</p>
-<h3>Step 2:Identify the IP address for the remote router</h3>
-<p>
-the IP address must be identified for the initial IKEv2 session to establish.
-The peer IP address is defined with the command match identity remote address 
-ip_address. This can be 0.0.0.0 0.0.0.0 to match against any peer. For IPv6, it can be ::/0.
-</p>
-
-<h3>Step 3: (Optional) Configure the local router’s identity</h3>
-<p>
-the local router’s identity can be set based on an IP address with the command 
+  <ol>
+    <li><b>Define the IKEv2 profile:</b>
+    <code><b>crypto ikev2 profile &lt;profile_name&gt;</b></code>
+    </li>
+    <li><b>Identify the IP address for the remote router:</b>
+    the IP address must be identified for the initial IKEv2 session to establish.
+The peer IP address is defined with the command <code><b>match identity remote address 
+&lt;ip_address&gt;</b></code>. This can be 0.0.0.0 0.0.0.0 to match against any peer. For IPv6, it can be ::/0.
+    </li>
+    <li>
+    the IP address must be identified for the initial IKEv2 session to establish.
+The peer IP address is defined with the command <code><b>match identity remote address 
+&lt;ip_address&gt;</b></code>. This can be 0.0.0.0 0.0.0.0 to match against any peer. For IPv6, it can be ::/0.
+    </li>
+    <li> 
+    <b>(Optional) Configure the local router’s identity:</b>
+    the local router’s identity can be set based on an IP address with the command 
 identity local address ip_address. A loopback address is recommended as it is 
 always ‘up’. Note that the IP address configured here should match the IP address
 used during the certificate registration. This step is really not needed with 
 preshared key authentication but is very important in the deployment of public
 key infrastructure.
-</p>
-
-<h3>Step 4: Identify the Front-door VRF (FVRF) for the tunnel end</h3>
-<p>
-if a front-door VRF is used on the DMVPN tunnel, then the FVRF must be associated 
-to the IKEv2 profile with the command match fvrf vrf_name | any. Keyword any allows
+    </li>
+    <li><b>Identify the Front-door VRF (FVRF) for the tunnel end:</b>
+    if a front-door VRF is used on the DMVPN tunnel, then the FVRF must be associated 
+to the IKEv2 profile with the command <code><b>match fvrf &lt;vrf_name | any&gt;</b></code>. Keyword any allows
 any configured FVRF to be selected.
-</p>
-
-<h3>Step 5: Define the local authentication method</h3>
-<p>
-The authentication method must be defined for connection requests that are received 
-by remote peers. The command authentication local pre-share | rsa-sig defines the 
+    </li>
+    <li><b>Define the local authentication method:</b>
+    The authentication method must be defined for connection requests that are received 
+by remote peers. The command <code><b>authentication local &lt;pre-share | rsa-sig&gt;</b></code> defines the 
 local authentication. Only one local authentication can be selected. The pre-share
 keyword is for pre-shared static keys and rsa-sig is used for certificate based 
 authentication.
-</p>
-
-<h3>Step 6: Define the remote authentication method</h3>
-<p>
-The authentication method must be defined for connection requests that are sent
+    </li>
+    <li><b>Define the remote authentication method:</b>
+    The authentication method must be defined for connection requests that are sent
 to remote peers. The command authentication remote pre-share | rsa-sig defines 
 the remote authentication. The pre-share keyword is used for pre-shared static 
 keys and rsa-sig is used for certificate-based authentication.
+    </li>
+    <li><b>Define the IKEv2 keyring (for preshared authentication):</b>
+    preshared authentication requires that the IKEv2 keyring be associated to the 
+IKEv2 profile. The command <code><b>keyring local &lt;keyring-name&gt;</b></code> associates the IKEv2 keyring.
+    </li>
+  </ol>
 </p>
 
-<h3>Step 7: Define the IKEv2 keyring (for preshared authentication)</h3>
-<p>
-preshared authentication requires that the IKEv2 keyring be associated to the 
-IKEv2 profile. The command keyring local keyring_name associates the IKEv2 keyring.
-</p>
-
-<h1>IPSec Transform Set</h1>
+<h2>Step 3: Configure the IPSec Transform Set</h2>
 <p>
 The transform set identifies the security protocols for encrypting traffic (ESP) 
 or protocols for authenticating the data (AH). The transform set is created with 
 the following steps;
-<h2>Step 1: Create the transform set and identify the transforms</h2>
+</p>
 <p>
-Only one transform set can be selected for ESP encryption, ESP authentication, 
-AH authentication using the command crypto ipsec transform-set transform_set_name 
-esp-encryption esp-authentication ah-authentication
+  <ol>
+    <li><b>Create the transform set and identify the transforms:</b> 
+    Only one transform set can be selected for ESP encryption, ESP authentication, 
+AH authentication using the command <code><b>crypto ipsec transform-set &lt;transform_set_name&gt; 
+&lt;esp-encryption esp-authentication | ah-authentication&gt;</b></code>
+    </li>
+    <li><b>Specify the Transform Set mode:</b> 
+    the transform set mode is configured with <code><b>mode &lt;transport | tunnel&gt;</b></code>. Tunnel mode 
+is the default mode. However, it adds 20bytes of additional IPSec header to the 
+overall packet.
+    </li>
+  </ol>
 </p>
 
-<h2>Step 2: Specify the Transform Set mode</h2>
-<p>
-the transform set mode is configured with mode transport | tunnel. Tunnel mode 
-is the default mode. However, it adds 20bytes of additional IPSec header to the 
-overall packet. I’d personally recommend use of the transport mode.
 
-<h1>IPSec Profile</h1>
+<p>
+
+<h2>Step 4: Configure the IPSec Profile</h2>
 <p>
 The IPSec profile combines the IPSec transform set and the IKEv2 profile. The 
 IPSec profile is created with the following steps;
 </p>
-
-<h2>Step 1: Create the IPSec profile</h2>
 <p>
-use the command crypto ipsec profile profile_name
-</p>
-
-<h2>Step 2: Specify the transform set</h2>
-<p>
-The transform set is specified with the command set transform-set transform-set-name
-</p>
-
-<h2>Step 3: Specify the IKEv2 profile</h2>
-<p>
-the IKEv2 profile is specified with the command set ikev2-profile ike2-profile-name
+<ol>
+<li><b>Create the IPSec profile:</b> use the command <code><b>crypto ipsec profile &lt;profile-name&gt;</b></code>
+</li>
+<li><b>Specify the transform set:</b> 
+The transform set is specified with the command <code><b>set transform-set &lt;transform-set-name&gt;</b></code>.
+</li>
+<li><b>Specify the IKEv2 profile:</b>
+the IKEv2 profile is specified with the command <code><b>set ikev2-profile &lt;ike2-profile-name&gt;</b></code>.
+ </li>
+</ol>
 </p>
 
 <h2>Verification</h2>
