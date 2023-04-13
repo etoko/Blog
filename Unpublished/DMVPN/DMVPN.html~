@@ -26,7 +26,8 @@ with simple configuration of hub and spoke. It uses a logical hub and
 spoke topology. Direct spoke-to-spoke traffic is supported. DMVPN's only requirement 
 is for IP connectivity between the local and remote site. The routing policy is 
 not dictated by the service provider; as such, it does not have 
-restrictions such as MPLS L3VPNs. DMVPN is highly scalable when properly designed.
+restrictions such as MPLS L3VPNs such as the routing protocol that the service 
+provider supports for the L3VPN. DMVPN is highly scalable when properly designed.
 </p>
 <h2>How DMVPN Works</h2>
 <p>
@@ -1051,6 +1052,17 @@ permanent. However, for spoke information,the tunnel is torn down after the
 communication is completed and the exipry of the tunnel session timer.
 </p>
 
+<h3>OSPF</h3>
+<p>
+In DMVPN phase 2, if OSPF is configured as the routing protocol for the overlay 
+network, the following should be considered:
+<ul>
+  <li>Configure the tunnel interface on the hub with the highest priority <code><b>ip ospf priority 255</b></code>. 
+  This ensures that the hub becomes the designated router (DR)</li>
+  <li>The spokes should be eliminated from DR/BDR election: <code><b>ip ospf priority 0</b></code>.</li>
+  <li>The tunnel interface should be set to BROADCAST: <code><b>ip ospf network broadcast</b></code>.</li>
+</ul>
+</p>
 
 <h2 id="PHASE3">DMVPN Phase 3</h2>
 <p>
@@ -1682,6 +1694,14 @@ Crypto Session Details:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nb
 Pending DMVPN Sessions:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;         <br>
 </code></div>
 </p>
+<p>
+One key limitation of OSPF as the overlay protocol is that all the tunnel interfaces 
+must be in the same area. Due to OSPF's strict summarization policies that do 
+not permit summarization in an area, the spokes will have to receive all the 
+routes in the same area as on the hub. Because of this, EIGRP and BGP have an 
+edge of OSPF and IS-IS(link-state protocols) as the preferred overlay routing 
+protocol.
+</p>
 
 <h4>Next-hop Override</h4>
 <p>
@@ -1695,6 +1715,9 @@ by the code <code><b>‘H’</b></code>. A next hop override is indicated by the
 code <code><b>‘%’</b></code>. To display 
 explicit NHRP shortcuts, <code><b>show ip route next-hop-override</b></code>. 
 The shortcut has a symbol <code><b>NHO</b></code> and has a lower metric (255).
+On the routing table, the route with the next-hop-override still displays its 
+original next-hop. However, to confirm that this next-hop is overridden, use the 
+command <code><b>ip cef &lt;prefix&gt;</b></code>.
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
@@ -2002,6 +2025,28 @@ NHRP message flags specify attributes of an NHRP cache entry or of the peer for 
   interface and its associated NBMA address.</li>
 </ol>
 </p>
+
+<h3><code>show ip nhrp traffic</code></h3>
+<p>
+The <code><b>show ip nhrp traffic</b></code> command is used to view the 
+statistics on NHRP packets sent and received.
+</p>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+ <code style="font-size:110%">
+HUB#<b>show ip nhrp traffic</b><br>
+Tunnel0: Max-send limit:100Pkts/10Sec, Usage:0%                           <br>
+&nbsp;&nbsp; Sent: Total 16&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;             <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 8 Resolution Request&nbsp;&nbsp;0 Resolution Reply&nbsp;&nbsp;0 Registration Request <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 4 Registration Reply&nbsp;&nbsp;0 Purge Request&nbsp;&nbsp;0 Purge Reply             <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0 Error Indication&nbsp;&nbsp;4 Traffic Indication&nbsp;&nbsp;0 Redirect Suppress    <br>
+&nbsp;&nbsp; Rcvd: Total 12&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;             <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 8 Resolution Request&nbsp;&nbsp;0 Resolution Reply&nbsp;&nbsp;4 Registration Request <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0 Registration Reply&nbsp;&nbsp;0 Purge Request&nbsp;&nbsp;0 Purge Reply             <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0 Error Indication&nbsp;&nbsp;0 Traffic Indication&nbsp;&nbsp;0 Redirect Suppress    <br>
+</code></div>
+</p>
+
 
 <h2>Overlay Routes</h2>
 <h3><code>show ip route</code></h3>

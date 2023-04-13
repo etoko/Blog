@@ -400,14 +400,14 @@ R1(config)#<b>ip cef distributed</b>
 </code></div>
 </p>
 <p>
-The <code style="font-size:120%;"<b>distributed</b></code> keyword is optional.
+The <code style="font-size:120%;"><b>distributed</b></code> keyword is optional.
 </p>
 <h2>Step 2: Configure the LSR ID</h2>
 <p>
 By default, LDP selects the IP address of the highest loopback interface 
 as the LSR ID. However, the LSR ID can be explicitly configured using the global 
-configuration command: <code style="font-size:120%;"<b>mpls ldp router-id &lt;interface&gt; force</b></code>.
-<code style="font-size:120%;"<b>interface</b></code> is the interface whose IP address is to be used 
+configuration command: <code style="font-size:120%;"><b>mpls ldp router-id &lt;interface&gt; force</b></code>.
+<code style="font-size:120%;"><b>interface</b></code> is the interface whose IP address is to be used 
 as LSR ID.
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
       	<code style="font-size:120%">
@@ -449,7 +449,7 @@ range to take effect.
 
 <h2>Step 4: Configure the label exchange protocol</h2>
 <p>
-Enable LDP on the appropriate interface using the interface command <code style="font-size:120%;"<b>mpls label 
+Enable LDP on the appropriate interface using the interface command <code style="font-size:120%;"><b>mpls label 
 protocol ldp</b></code>.
 </p>
 <p>
@@ -479,7 +479,7 @@ LDP supports authentication while TDP does not support authentication.
 
 <h2>Step 5: Enable MPLS</h2>
 <p>
-MPLS is enabled using the global command: <code style="font-size:120%;"<b>mpls ip</b></code> and on 
+MPLS is enabled using the global command: <code style="font-size:120%;"><b>mpls ip</b></code> and on 
 the specific interfaces as well;
 </p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
@@ -499,7 +499,7 @@ R1(config-router)#<b>mpls ldp autoconfig area 0</b>
 </code></div>
 </p>
 <p>
-The optional <code style="font-size:120%;"<b>area <i>area-id</i></i></b></code> adds the flexibility of 
+The optional <code style="font-size:120%;"><b>area <i>area-id</i></i></b></code> adds the flexibility of 
 enabling LDP on interfaces in the configured OSPF area.
 </p>
 <h2>Configuration Example</h2>
@@ -527,7 +527,7 @@ R7(config-if)#<b>mpls ip </b>
 <p>
 Note that setting the label range on an LSR that has an active TCP session with another LSR will
 not take effect immediately. To enforce the new label range; disable MPLS on the 
-interface using the command <code style="font-size:120%;"<b>no mpls ip</b></code>, 
+interface using the command <code style="font-size:120%;"><b>no mpls ip</b></code>, 
 then enable MPLS on the interface. However, if MPLS was enabled through the routing
 protocol, then disabling LDP in the interface with the interface sub-mode command #no mpls ip
 will return the following message;
@@ -602,7 +602,7 @@ routing paths between them. The reason for having the TCP session is that the tw
 LSRs may have multiple interconnecting links through which hello messages are sent. 
 This helps with preventing multiple sessions between the same LSRs.
 The TCP session between the LDP peers can be verified using the command: 
-<code style="font-size:120%;"<b>show tcp brief</b></code>
+<code style="font-size:120%;"><b>show tcp brief</b></code>
 </p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
       	<code style="font-size:120%">
@@ -636,7 +636,7 @@ and Label Information Base  (LIB) tables. On egress edge LSR, a connected networ
 entry. It uses IP for normal routing.
 </p>
 <p>
-LDP sessions can be verified using the command <code style="font-size:120%;"<b>show mpls ldp neighbor</b></code>.
+LDP sessions can be verified using the command <code style="font-size:120%;"><b>show mpls ldp neighbor</b></code>.
 </p>
 
 <h3>LDP Message Types</h3>
@@ -930,11 +930,11 @@ R7#
 <h2>Authentication Verification</h2>
 <p>
 The configuration of a password can be verified using the command 
-<code style="font-size:120%;"<b>show mpls ldp neighbor detail</b></code>. From the output of this 
+<code style="font-size:120%;"><b>show mpls ldp neighbor detail</b></code>. From the output of this 
 command, the stale state indicates that the configuration of the password has 
 not been enforced. Applying the configuration using the 
-command <code style="font-size:120%;"<b>R7#clear mpls ldp neighbor &lt;ip-address | * &gt;</b></code> 
-results in the output showing the  status of <code style="font-size:120%;"<b>in-use</b></code>.
+command <code style="font-size:120%;"><b>R7#clear mpls ldp neighbor &lt;ip-address | * &gt;</b></code> 
+results in the output showing the  status of <code style="font-size:120%;"><b>in-use</b></code>.
 </p>
 
 <p>
@@ -1044,7 +1044,7 @@ following:
 
 <h2>MPLS Interfaces</h2>
 <p>
-The command to display interfaces on which LDP is configured is <code style="font-size:120%;"<b>show mpls interface</b></code>.
+The command to display interfaces on which LDP is configured is <code style="font-size:120%;"><b>show mpls interface</b></code>.
 </p>
 
 <p>
@@ -1101,7 +1101,7 @@ Interface GigabitEthernet3/0:                                                   
 <h2>Forwarding Information Base  (FIB)</h2>
 <p>
 The FIB is created using data from the RIB and layer 2 sources such as the ARP 
-table. Its contents can be viewed using the command <code style="font-size:120%;"<b>show ip cef</b></code>.
+table. Its contents can be viewed using the command <code style="font-size:120%;"><b>show ip cef</b></code>.
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
@@ -1419,7 +1419,7 @@ R1#<b>show mpls ldp discovery</b>           <br>
 
 <h2>LDP Neighbors</h2>
 <p>
-LDP peers can be viewed using the command <code style="font-size:120%;"<b>show mpls ldp neighbor</b></code>.
+LDP peers can be viewed using the command <code style="font-size:120%;"><b>show mpls ldp neighbor</b></code>.
 
 
  To view neighboring LSRs. The optional ‘detail’ shows authentication information.

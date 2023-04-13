@@ -1,4 +1,3 @@
-<h1>Configuring Basic MPLS in Cisco IOS</h1>
 <h1>Contents</h1>
 <p>
 <ol>
@@ -182,7 +181,9 @@ headers of an IP packet.
 </p>
 <p>
 <div align="center">
-<img alt="IP Packet with MPLS Label" src="MPLS/IP_Packet_MPLS_Label.png">
+<!-- <img alt="IP Packet with MPLS Label" src="MPLS/IP_Packet_MPLS_Label.png"> -->
+  <div class="separator" style="clear: both;"><a href="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEi_rLVZ0X1WxTKsjnXkXTCGBzhJhgPhghNT0d30dq1gZOrEvXuvRjQ--JjSQZmCHI1s-PBR0-FB9ILgnOlCE4W8psmEdgQFnOpFasIhh3j1DKp9qHmYTJs9C5HYaXKtvDYwPzgnoC6JdJ4hEHTgCroStPngDJm2oqMVGcx3A5mfjVgDLmlMreQlglBw/s1600/IP_Packet_MPLS_Label.png" style="display: block; padding: 1em 0; text-align: center; "><img alt="" border="0" data-original-height="78" data-original-width="822" src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEi_rLVZ0X1WxTKsjnXkXTCGBzhJhgPhghNT0d30dq1gZOrEvXuvRjQ--JjSQZmCHI1s-PBR0-FB9ILgnOlCE4W8psmEdgQFnOpFasIhh3j1DKp9qHmYTJs9C5HYaXKtvDYwPzgnoC6JdJ4hEHTgCroStPngDJm2oqMVGcx3A5mfjVgDLmlMreQlglBw/s1600/IP_Packet_MPLS_Label.png"/></a></div>
+  
 </div>
 </p>
 <p>
@@ -204,7 +205,8 @@ also contain the same value.</li>
 <p>
 <div align="center">
 <figure>
-<img align="middle" alt="MPLS Label" src="MPLS/MPLS Label.png">
+<!--<img align="middle" alt="MPLS Label" src="MPLS/MPLS Label.png"> -->
+  <div class="separator" style="clear: both;"><a href="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjRQCK_MyTxAq7_tGCZCEauGJp21A86ERFTr5WoJMXtBQK6GqoZESVAJsgM3da9cK0iDbAzp5pHZlRCowjtBVnrB6QIKvzmJn0eJ6ZLWhGxVfkkDRy7dq0cekdtdiDpt9HNxY-9t4mk_v4oapvfw2LmGmu6sCUltgIwkkq0KkHzEApAKp4jW2BCxYUx/s1600/MPLS%20Label.png" style="display: block; padding: 1em 0; text-align: center; "><img alt="" border="0" data-original-height="102" data-original-width="822" src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjRQCK_MyTxAq7_tGCZCEauGJp21A86ERFTr5WoJMXtBQK6GqoZESVAJsgM3da9cK0iDbAzp5pHZlRCowjtBVnrB6QIKvzmJn0eJ6ZLWhGxVfkkDRy7dq0cekdtdiDpt9HNxY-9t4mk_v4oapvfw2LmGmu6sCUltgIwkkq0KkHzEApAKp4jW2BCxYUx/s1600/MPLS%20Label.png"/></a></div>
  <figcaption style="padding: 2px; font-style:italic;">MPLS Label</figcaption>
 </figure>
 </div>
@@ -227,7 +229,10 @@ the S-bit set to 1.
 <p>
 <div align="center">
 <figure>
-<img align="middle" alt="MPLS Label" src="MPLS/mpls_label_stack.png">
+<!-- <img align="middle" alt="MPLS Label" src="MPLS/mpls_label_stack.png"> -->
+ 
+  <div class="separator" style="clear: both;"><a href="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhE3YJ7u0DHQ-OKTa7Qh9Xid43HsdJQFc24ki-xCsC5ARMtbUezQki7zMV_ATCyGrnaYHYHfATPlzaF0oDaGTxlDkwZTm3unzF6Yu66FCJ6UyY-NS8_oG_4jmkXr62HHwwA3yXkousz8EoJFEra7S4dZSIKiejMiCzzuhS7ucYXuP32uy5h3QdRg4IR/s1600/mpls_label_stack.png" style="display: block; padding: 1em 0; text-align: center; "><img alt="" border="0" data-original-height="113" data-original-width="1008" src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhE3YJ7u0DHQ-OKTa7Qh9Xid43HsdJQFc24ki-xCsC5ARMtbUezQki7zMV_ATCyGrnaYHYHfATPlzaF0oDaGTxlDkwZTm3unzF6Yu66FCJ6UyY-NS8_oG_4jmkXr62HHwwA3yXkousz8EoJFEra7S4dZSIKiejMiCzzuhS7ucYXuP32uy5h3QdRg4IR/s1600/mpls_label_stack.png"/></a></div>
+  
  <figcaption style="padding: 2px; font-style:italic;">MPLS Label Stack</figcaption>
 </figure>
 </div>
@@ -253,7 +258,7 @@ routed using IP).</li>
 </p>
 <p>
 All known networks are assigned a label locally identified by the Label ID. The 
-assignable label ID is in the range <b>16 – 65,536</b>. <b>Labels IDs 1-15</b> are 
+assignable label ID is in the range <b>16 â€“ 65,536</b>. <b>Labels IDs 1-15</b> are 
 reserved. These labels are usually referred 
 to as <b>transport labels</b>. This is in contrast to VPN labels used in MPLS Layer 3 VPNs 
  (L3VPN), where directly connected networks are flagged with the symbol [V] assigned next to 
@@ -288,7 +293,7 @@ Data structures utilised by MPLS include;
 Information from RIB  (Routing Information Base) is converted into a Layer 2 
 data structure known as the forwarding information base (FIB)  
 by Cisco Express Forwarding  (CEF). You can view this data structure by running 
-the command <code style="font-size:120%;"><b>show ip cef</b></code>.
+the command <code><b>show ip cef</b></code>.
 A directly connected network is assigned the label ID 3 which is also known as 
 an <b>implicit null  (impl-null)</b>. 
 The FIB, additionally, contains information on layer 2
@@ -433,7 +438,7 @@ capture of an LDP Hello message:
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
- <code style="font-size:120%">
+ <code>
  Frame 43: 76 bytes on wire (608 bits), 76 bytes captured (608 bits) on interface -, id 0        <br>
 Ethernet II, Src: ca:04:04:6c:00:1c (ca:04:04:6c:00:1c), Dst: IPv4mcast_02 (01:00:5e:00:00:02)   <br>
 Internet Protocol Version 4, Src: 30.255.24.2, Dst: 224.0.0.2                                    <br>
@@ -506,7 +511,7 @@ The following is a Wireshark packet capture of an LDP initialization message:
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-   <code style="font-size:120%">
+   <code>
    Frame 55: 100 bytes on wire (800 bits), 100 bytes captured (800 bits) on interface -, id 0              <br>
 Ethernet II, Src: ca:04:04:6c:00:1c (ca:04:04:6c:00:1c), Dst: ca:02:04:45:00:1c (ca:02:04:45:00:1c)        <br>
 Internet Protocol Version 4, Src: 30.255.4.4, Dst: 30.255.2.2                                              <br>
@@ -566,7 +571,7 @@ The following is a Wireshark packet capure of an address message:
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-   <code style="font-size:120%">
+   <code>
 Frame 63: 371 bytes on wire (2968 bits), 371 bytes captured (2968 bits) on interface -, id 0          <br>
 Ethernet II, Src: ca:02:04:45:00:1c (ca:02:04:45:00:1c), Dst: ca:04:04:6c:00:1c (ca:04:04:6c:00:1c)   <br>
 Internet Protocol Version 4, Src: 30.255.2.2, Dst: 30.255.4.4                                         <br>
@@ -576,7 +581,7 @@ Transmission Control Protocol, Src Port: 646, Dst Port: 34749, Seq: 591, Ack: 60
 &nbsp;&nbsp;&nbsp;&nbsp;[Frame: 63, payload: 536-852 (317 bytes)]                                                         <br>
 &nbsp;&nbsp;&nbsp;&nbsp;[Segment count: 2]&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                            <br>
 &nbsp;&nbsp;&nbsp;&nbsp;[Reassembled TCP length: 853]&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                             <br>
-&nbsp;&nbsp;&nbsp;&nbsp;[Reassembled TCP Data: 000103511eff0202000003000042000000030101003a00011eff0c021e0201011e020201…] <br>
+&nbsp;&nbsp;&nbsp;&nbsp;[Reassembled TCP Data: 000103511eff0202000003000042000000030101003a00011eff0c021e0201011e020201â€¦] <br>
 Label Distribution Protocol&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                         <br>
 &nbsp;&nbsp;&nbsp;&nbsp;Version: 1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                        <br>
 &nbsp;&nbsp;&nbsp;&nbsp;PDU Length: 849&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                         <br>
@@ -1203,7 +1208,7 @@ message:
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-<code style="font-size:120%">
+<code>
 Frame 1737: 72 bytes on wire (576 bits), 72 bytes captured (576 bits) on interface -, id 0         <br>
 Ethernet II, Src: ca:02:04:45:00:1c (ca:02:04:45:00:1c), Dst: ca:04:04:6c:00:1c (ca:04:04:6c:00:1c)<br>
 Internet Protocol Version 4, Src: 30.255.2.2, Dst: 30.255.4.4                                      <br>
@@ -1258,10 +1263,10 @@ routing paths between them. The reason for having the TCP session is that the tw
 LSRs may have multiple interconnecting links through which hello messages are sent. 
 This helps with preventing multiple sessions between the same LSRs.
 The TCP session between the LDP peers can be verified using the command: 
-<code style="font-size:120%;"><b>show tcp brief</b></code>
+<code><b>show tcp brief</b></code>
 </p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-      	<code style="font-size:120%">
+      	<code>
 R11><b>show tcp brief</b>                                                  <br>
 TCB&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Local Address&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Foreign Address&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (state) <br>
 67FE0A48&nbsp;&nbsp;30.255.11.11.25761&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 30.255.5.5.646&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ESTAB    <br>
@@ -1277,7 +1282,7 @@ TCB&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Local Address&nbsp;&nbsp;&nbsp;&nbsp;&nb
 The LDP ID can also be explicitly selected using the global config command;
 </p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-      	<code style="font-size:120%">
+      	<code>
 <b>mpls ldp router-id &lt;interface&gt; force</b>
 </code></div>
 <p>
@@ -1292,7 +1297,7 @@ and Label Information Base  (LIB) tables. On egress edge LSR, a connected networ
 entry. It uses IP for normal routing.
 </p>
 <p>
-LDP sessions can be verified using the command <code style="font-size:120%;"><b>show mpls ldp neighbor</b></code>.
+LDP sessions can be verified using the command <code><b>show mpls ldp neighbor</b></code>.
 </p>
 
 
@@ -1329,27 +1334,30 @@ The following topology is used for the MPLS configurations. It has a fully
 converged OSPF network.
 </p>
 <p>
-<img alt="MPLS Topology" src="MPLS/mpls_topology.png">
+<!-- <img alt="MPLS Topology" src="MPLS/mpls_topology.png"> -->
+  
+  <div class="separator" style="clear: both;"><a href="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjHhReF-927gh89OhgNfsVrWA8euDNEQrEGEoAckKreT1tAlhYxDjwNvRxabD8PfreD-9NxitzmP0O02YYnssn5nzz7TncJI5ddlYRSZOWJlKIACFKBXRYXD1K6BUA1TOV4a1vgJK7p6_jeb7nvQUTDYhpubeIpVQKed8xS0Sn9RYKfdwRCUXLhCv8Q/s1600/mpls_topology.png" style="display: block; padding: 1em 0; text-align: center; "><img alt="" border="0" data-original-height="622" data-original-width="1230" src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjHhReF-927gh89OhgNfsVrWA8euDNEQrEGEoAckKreT1tAlhYxDjwNvRxabD8PfreD-9NxitzmP0O02YYnssn5nzz7TncJI5ddlYRSZOWJlKIACFKBXRYXD1K6BUA1TOV4a1vgJK7p6_jeb7nvQUTDYhpubeIpVQKed8xS0Sn9RYKfdwRCUXLhCv8Q/s1600/mpls_topology.png"/></a></div>
+  
 </p>
 <h3>Step 1: Enable IP CEF</h3>
 <p>Without the CEF database, the LIB will not be created making MPLS operation not possible.
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-      	<code style="font-size:120%">
+      	<code>
 R1(config)#<b>ip cef distributed</b>
 </code></div>
 </p>
 <p>
-The <code style="font-size:120%;"><b>distributed</b></code> keyword is optional.
+The <code><b>distributed</b></code> keyword is optional.
 </p>
 <h3>Step 2: Configure the LSR ID</h3>
 <p>
 By default, LDP selects the IP address of the highest loopback interface 
 as the LSR ID. However, the LSR ID can be explicitly configured using the global 
-configuration command: <code style="font-size:120%;"><b>mpls ldp router-id &lt;interface&gt; force</b></code>.
-<code style="font-size:120%;"><b>interface</b></code> is the interface whose IP address is to be used 
+configuration command: <code><b>mpls ldp router-id &lt;interface&gt; force</b></code>.
+<code><b>interface</b></code> is the interface whose IP address is to be used 
 as LSR ID.
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-      	<code style="font-size:120%">
+      	<code>
 R1(config)#<b>mpls ldp router-id loopback255 force</b>
 </code></div>
 </p>
@@ -1371,12 +1379,12 @@ Additionally, the label range should be wide enough to enable the creation of
 unique label IDs for all IGP learned routes. This ensures that the LSR does not 
 run out of Label ID values to use for newly learned networks.
 <b>Tip:</b> Try to configure the label range so that the source of the label is 
-instantly recognisable, for example, on LSR R1 the range can be 1000-1999, R2: 2000–2999 etc: 
-<code style="font-size:120%;"><b>mpls label range &lt;16 – 1048575&gt;</b></code>.
+instantly recognisable, for example, on LSR R1 the range can be 1000-1999, R2: 2000â€“2999 etc: 
+<code><b>mpls label range &lt;16 â€“ 1048575&gt;</b></code>.
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-      	<code style="font-size:120%">
+      	<code>
 R1(config)#<b>mpls label range 1000 1999</b>
 </code></div>
 </p>
@@ -1388,12 +1396,12 @@ range to take effect. <b>Take extra caution when doing this on a production netw
 
 <h3>Step 4: Configure the label exchange protocol</h3>
 <p>
-Enable LDP on the appropriate interface using the interface command <code style="font-size:120%;"><b>mpls label 
+Enable LDP on the appropriate interface using the interface command <code><b>mpls label 
 protocol ldp</b></code>.
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-      	<code style="font-size:120%">
+      	<code>
       	R1(config)#<b>interface gigabitethernet0/0</b> <br>
       	R1(config-if)#<b>mpls label protocol ldp</b>
 </code></div>
@@ -1404,7 +1412,7 @@ To change protocol from using LDP to TDP;
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-      	<code style="font-size:120%">
+      	<code>
 R1(config)#<b>interface gigabitethernet1/1</b><br>
 R1(config-if)#<b>mpls label protocol tdp</b>
 </code></div>
@@ -1418,21 +1426,21 @@ LDP supports authentication while TDP does not support authentication.
 
 <h3>Step 5: Enable MPLS</h3>
 <p>
-MPLS is enabled using the global command: <code style="font-size:120%;"><b>mpls ip</b></code> and on 
+MPLS is enabled using the global command: <code><b>mpls ip</b></code> and on 
 the specific interfaces as well;
 </p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-      	<code style="font-size:120%">
+      	<code>
 R1(config)#<b>mpls ip</b>
 </code></div>
 <p>
 OSPF and IS-IS  (link-state protocols) support the activation of MPLS from within the routing
 protocol configuration. In OSPF router configuration mode, this is accomplished using the
-command; <code style="font-size:120%;"><b>mpls ldp autoconfig &lt;area <i>area-id</i>&gt;</b></code>.
+command; <code><b>mpls ldp autoconfig &lt;area <i>area-id</i>&gt;</b></code>.
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-      	<code style="font-size:120%">
+      	<code>
 R1(config)#<b>router ospf 1</b><br>
 R1(config-router)#<b>mpls ldp autoconfig area 0</b>
 </code></div>
@@ -1442,14 +1450,14 @@ Another alternative is to configure the autoconfiguration at the interface:
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
- <code style="font-size:120%">
+ <code>
  R1(config)#<b>interface g0/0</b><br>
  R1(config-if)#<b>mpls ldp igp autoconfig</b>
  </code></div>
 </p>
 
 <p>
-The optional <code style="font-size:120%;"><b>area <i>area-id</i></i></b></code> adds the flexibility of 
+The optional <code><b>area <i>area-id</i></i></b></code> adds the flexibility of 
 enabling LDP on interfaces in the configured OSPF area.
 </p>
 
@@ -1458,7 +1466,7 @@ Synchronization between the IGP and LDP can be configured:
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
- <code style="font-size:120%">
+ <code>
  R1(config)#<b>interface g0/0</b><br>
  R1(config-if)#<b>mpls ldp igp sync delay &lt;5-60&gt;</b>
  </code></div>
@@ -1477,7 +1485,7 @@ Configuration edge LSR R7, the following configuration activates MPLS on interfa
 GigabitEthernet 2/0, GigabitEthernet 3/0 and FastEthernet6/0.
 
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-      	<code style="font-size:120%">
+      	<code>
 R7(config)#<b>ip cef                             </b>  <br>
 R7(config)#<b>mpls ip                            </b>  <br>
 R7(config)#<b>mpls label protocol ldp            </b>  <br>
@@ -1494,14 +1502,14 @@ R7(config-if)#<b>mpls ip </b>
 <p>
 Note that setting the label range on an LSR that has an active TCP session with another LSR will
 not take effect immediately. To enforce the new label range; disable MPLS on the 
-interface using the command <code style="font-size:120%;"><b>no mpls ip</b></code>, 
+interface using the command <code><b>no mpls ip</b></code>, 
 then enable MPLS on the interface. However, if MPLS was enabled through the routing
 protocol, then disabling LDP in the interface with the interface sub-mode command #no mpls ip
 will return the following message;
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-      	<code style="font-size:120%">
+      	<code>
 R7(config)#<b>interface g2/0</b>                                               <br>
 R7(config-if)#<b>no mpls ip</b>                                                <br>
 %LDP remains enabled on interface Gi2/0 by autoconfig.                  <br>
@@ -1514,7 +1522,7 @@ command in interface sub-mode;
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-      	<code style="font-size:120%">
+      	<code>
 R7(config-if)#<b>interface g2/0              </b>          <br>
 R7(config-if)#<b>no mpls ldp igp autoconfig  </b>          <br>
 R7(config-if)#<b>exit                        </b>          <br>
@@ -1531,12 +1539,12 @@ R7(config-if)#<b>mpls ip</b>
 <h2 id="AUTHENTICATION">Authentication</h2>
 <p>
 LDP supports authentication and by default, MD5 is used to hash the password. To configure
-authentication, the global configuration command <code style="font-size:120%;"><b>mpls ldp neighbor 
+authentication, the global configuration command <code><b>mpls ldp neighbor 
 &lt;ip-address&gt; password &lt;password&gt;</b></code>;
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-      	<code style="font-size:120%">
+      	<code>
 R1(config)#<b>mpls ldp neighbor 30.255.2.2 password simplesimple</b>
 </code></div>
 </p>
@@ -1546,7 +1554,7 @@ The output confirms that authentication has been configured:
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-      	<code style="font-size:120%">
+      	<code>
       	
 R1#<b>show mpls ldp neighbor detail</b>                                        <br>
 &nbsp;&nbsp;&nbsp;&nbsp;Peer LDP Ident: 30.255.3.3:0; Local LDP Ident 30.255.1.1:0                 <br>
@@ -1577,7 +1585,7 @@ The peer LSR(R2) does not have authentication configured:
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-      	<code style="font-size:120%">
+      	<code>
 R2#<b>show mpls ldp neighbor detail</b>                                         <br>           
 &nbsp;&nbsp;&nbsp;&nbsp;Peer LDP Ident: 30.255.4.4:0; Local LDP Ident 30.255.2.2:0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;        <br>    
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;TCP connection: 30.255.4.4.30399 - 30.255.2.2.646&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;         <br>    
@@ -1629,7 +1637,7 @@ authentication requirement, the command is;
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-      	<code style="font-size:120%">
+      	<code>
 R1(config)#<b>mpls ldp password required</b>                                                               <br>
 *Mar 18 14:48:38.799: %LDP-5-NBRCHG: LDP Neighbor 30.255.2.2:0 (1) is DOWN (Session's MD5 password changed)<br>
 *Mar 18 14:48:39.871: %TCP-6-BADAUTH: No MD5 digest from 30.255.2.2(23503) to 30.255.1.1(646) tableid - 0
@@ -1643,7 +1651,7 @@ authentication reequirement, run the following command;
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-      	<code style="font-size:120%">
+      	<code>
 R1#<b>clear mpls ldp neighbor &lt;ip-address | * &gt;</b>
 </code></div>
 </p>
@@ -1653,7 +1661,7 @@ generation the following log messages:
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-      	<code style="font-size:120%">
+      	<code>
 R7#                                                                                      <br>
 *Feb  8 01:32:46.594: %TCP-6-BADAUTH: No MD5 digest from 4.4.4.4 (646) to 7.7.7.7 (53621)  <br>
 tableid - 0                                                                              <br>
@@ -1667,10 +1675,15 @@ R7#
 </p>
 
 <h2 id="VERIFICATION">Verification</h2>
+<p>
+Verification commands for MPLS are usually commands that verify the operation of LDP or other label protocol in operation. These 
+commands verify the LDP operational state, authentication etc.
+</p>
 
 <h3>LDP Operational State</h3>
+<p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-      	<code style="font-size:120%">
+      	<code>
 R2#<b>show mpls ldp parameters</b>                                       <br>
 LDP Feature Set Manager: State Initialized                        <br>
 &nbsp;&nbsp;LDP features:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                             <br>
@@ -1690,8 +1703,10 @@ LDP initial/maximum backoff: 15/120 sec                           <br>
 LDP loop detection: off                                           <br>
 R2#
 </code></div>
+</p>
+
 <p>
-The command <code style="font-size:120%;"><b>show mpls ldp parameters</b></code> can be used to verify the 
+The command <code><b>show mpls ldp parameters</b></code> can be used to verify the 
 following:
 <ul>
   <li><b>Hello interval:</b> default is 5 seconds</li>
@@ -1704,12 +1719,12 @@ following:
 
 <h3>MPLS Interfaces</h3>
 <p>
-The command to display interfaces on which LDP is configured is <code style="font-size:120%;"><b>show mpls interface</b></code>.
+The command to display interfaces on which LDP is configured is <code><b>show mpls interface</b></code>.
 </p>
 
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-      	<code style="font-size:120%">
+      	<code>
 
 R11#<b>show mpls interfaces</b><br>
 Interface&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;IP&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Tunnel&nbsp;&nbsp; BGP Static Operational<br>
@@ -1761,11 +1776,12 @@ Interface GigabitEthernet3/0:                                                   
 <h3>Forwarding Information Base  (FIB)</h3>
 <p>
 The FIB is created using data from the RIB and layer 2 sources such as the ARP 
-table. Its contents can be viewed using the command <code style="font-size:120%;"><b>show ip cef</b></code>.
+table. Its contents can be viewed using the command <code><b>show ip cef</b></code>.
 </p>
+
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-      	<code style="font-size:120%">
+      	<code>
 R1><b>show ip cef</b>                                          <br>
 Prefix&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Next Hop&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Interface            <br>
 0.0.0.0/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;no route&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                <br>
@@ -1826,6 +1842,7 @@ R1><b>show ip cef 30.11.6.1/32 detail</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   
 &nbsp;&nbsp;nexthop 30.255.12.2 GigabitEthernet0/0 label 2033            <br>
 &nbsp;&nbsp;nexthop 30.255.13.2 GigabitEthernet1/0 label 3022            <br>
 </code></div>
+<p>
 
 <h3>Label Forwarding Information Base  (LFIB)</h3>
 <p>
@@ -1833,12 +1850,12 @@ The LFIB is created using information from the LIB, RIB and FIB.
 It operates at the data plane of MPLS.
 The LFIB is displayed using the command <code><b>show mpls forwarding-table</b></code>.
 The LFIB table shows the number of packets switched by MPLS. It also displays
-the LDP, TDP receive labels. ‘No Label’ indicates that the LSR on which this command 
+the LDP, TDP receive labels. â€˜No Labelâ€™ indicates that the LSR on which this command 
 is executed will perform PHP for traffic to these networks.
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-      	<code style="font-size:120%">
+      	<code>
 R1><b>show mpls forwarding-table</b>                                         <br>
 Local&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Outgoing&nbsp;&nbsp; Prefix&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Bytes Label&nbsp;&nbsp; Outgoing&nbsp;&nbsp; Next Hop&nbsp;&nbsp;&nbsp;&nbsp; <br>
 Label&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Label&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;or Tunnel Id&nbsp;&nbsp;&nbsp;&nbsp; Switched&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;interface&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <br>
@@ -1924,7 +1941,7 @@ traceroute ICMP expired packet.
 To verify operation of MPLS, issue a traceroute from R1 to R8:
 </p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-      	<code style="font-size:120%">
+      	<code>
 R1><b>traceroute 30.255.6.6</b>                           <br>
 Type escape sequence to abort.                     <br>
 Tracing the route to 30.255.6.6                    <br>
@@ -1940,14 +1957,14 @@ VRF info: (vrf in name/id, vrf out name/id)         <br>
 </code></div>
 </p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-      	<code style="font-size:120%">
+      	<code>
 R1(config)#<b>no mpls ip propagate-ttl local</b>
 </code></div>
 <p>
 The result;
 </p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-      	<code style="font-size:120%">
+      	<code>
 R1#<b>traceroute 30.255.6.6</b>                      <br>
 Type escape sequence to abort.                <br>
 Tracing the route to 30.255.6.6               <br>
@@ -1958,7 +1975,7 @@ VRF info: (vrf in name/id, vrf out name/id)    <br>
 <p>
 LSRs can be configured to not include the label IDs in the ICMP replies for locally 
 generated traffic or transit traffic or both. This is accomplished using the global 
-configuration command <code style="font-size:120%;"><b>no mpls ip propagate-ttl local|forwarded|cir</b></code>:
+configuration command <code><b>no mpls ip propagate-ttl local|forwarded|cir</b></code>:
 <ul>
 <li><code><b>local:</b></code> ICMP replies will not contain label IDs for locally generated traffic.</li>
 <li><code><b>forwarded:</b></code> ICMP replies will not contain label IDs for transit traffic; this option is usually 
@@ -1968,8 +1985,8 @@ configuration command <code style="font-size:120%;"><b>no mpls ip propagate-ttl 
 </p>
 <p>
 At the penultimate LSR, CEF does not show a label for the destination network; 
-the command <code><b>show mpls ldp binding</b></code> displays this as  <code><b>‘impl-null’</b></code> 
-label and <code><b>mpls forwarding-table</b></code> displays <code><b>‘Pop label’</b></code>.
+the command <code><b>show mpls ldp binding</b></code> displays this as  <code><b>â€˜impl-nullâ€™</b></code> 
+label and <code><b>mpls forwarding-table</b></code> displays <code><b>â€˜Pop labelâ€™</b></code>.
 
 By default, the Layer 3 TTL value of a packet is copied to the MPLS header TTL section.
 </p>
@@ -1977,12 +1994,13 @@ By default, the Layer 3 TTL value of a packet is copied to the MPLS header TTL s
 <h3>Label Information Base  (LIB)</h3>
 <p>
 The LIB operates at the MPLS control plane. If BGP is used for label exchange, 
-then the command is <code style="font-size:120%;">
+then the command is <code>
 <b>show ip bgp labels</b></code>
 </p>
 
+<p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-      	<code style="font-size:120%">
+      	<code>
 R1#<b>show mpls ldp bindings</b>                       <br>       
 &nbsp;&nbsp;lib entry: 30.1.1.0/24, rev 8&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                  <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;local binding:&nbsp;&nbsp;label: imp-null                <br>
@@ -2046,6 +2064,8 @@ R1#<b>show mpls ldp bindings detail</b>                <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;remote binding: lsr: 30.255.3.3:0, label: 3073 <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;remote binding: lsr: 30.255.2.2:0, label: 2007 
       	</code></div>
+</p>
+
 
 <h3>LDP Discovery</h3>
 <p>
@@ -2060,8 +2080,9 @@ The LDP ID values has the suffix value of zero(0). This value will always be zer
 unless running MPLS in cell mode which require specially configured ATM interfaces. 
 This command also verifies the exchange of Hello messages using UDP.
 </p>
+<p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-      	<code style="font-size:120%">
+      	<code>
 R1#<b>show mpls ldp discovery</b>           <br>
  Local LDP Identifier:                      <br>
 &nbsp;&nbsp;&nbsp;&nbsp;30.255.1.1:0                            <br>
@@ -2072,18 +2093,20 @@ R1#<b>show mpls ldp discovery</b>           <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;GigabitEthernet1/0 (ldp): xmit/recv <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;LDP Id: 30.255.3.3:0
 </code></div>
+</p>
 
 <h3>LDP Neighbors</h3>
 <p>
-LDP peers can be viewed using the command <code style="font-size:120%;"><b>show mpls ldp neighbor</b></code>.
+LDP peers can be viewed using the command <code><b>show mpls ldp neighbor</b></code>.
 
 
- To view neighboring LSRs. The optional ‘detail’ shows authentication information.
+ To view neighboring LSRs. The optional â€˜detailâ€™ shows authentication information.
     This command also verifies the operational state of the TCP session between
     the LDP neighbors.
 </p>
+<p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-      	<code style="font-size:120%">
+      	<code>
 R1#<b>show mpls ldp neighbor</b>                                               <br>       
 &nbsp;&nbsp;&nbsp;&nbsp;Peer LDP Ident: 30.255.3.3:0; Local LDP Ident 30.255.1.1:0                 <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;TCP connection: 30.255.3.3.20931 - 30.255.1.1.646&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                <br>
@@ -2151,20 +2174,21 @@ R1#<b>show mpls ldp neighbor detail</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[Typed Wildcard (0x050B)]&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                <br>
 R1#                                                                                                                                                                                                                                  
 </code></div>
+</p>
 
 <h2>Authentication</h2>
 <p>
 The configuration of a password can be verified using the command 
-<code style="font-size:120%;"><b>show mpls ldp neighbor detail</b></code>. From the output of this 
+<code><b>show mpls ldp neighbor detail</b></code>. From the output of this 
 command, the stale state indicates that the configuration of the password has 
 not been enforced. Applying the configuration using the 
-command <code style="font-size:120%;"><b>R7#clear mpls ldp neighbor &lt;ip-address | * &gt;</b></code> 
-results in the output showing the  status of <code style="font-size:120%;"><b>in-use</b></code>.
+command <code><b>R7#clear mpls ldp neighbor &lt;ip-address | * &gt;</b></code> 
+results in the output showing the  status of <code><b>in-use</b></code>.
 </p>
 
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-      	<code style="font-size:120%">
+      	<code>
 R2#<b>show mpls ldp neighbor detail </b>                                              <br>
 &nbsp;&nbsp;&nbsp;&nbsp;Peer LDP Ident: 30.255.4.4:0; Local LDP Ident 30.255.2.2:0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;TCP connection: 30.255.4.4.30399 - 30.255.2.2.646&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
@@ -2235,15 +2259,15 @@ R2#
 <h2>LDP Neighbors not forming</h2>
 <p>
 <ul>
-<li><code style="font-size:120%;"><b>show mpls ldp neighbor </b></code>
+<li><code><b>show mpls ldp neighbor </b></code>
     to identify neighbors.</li> 
-<li><code style="font-size:120%;"><b>show mpls interface</b></code>: to identify if MPLS is running</li>
+<li><code><b>show mpls interface</b></code>: to identify if MPLS is running</li>
 <li>traceroute</li>
 <li>Ensure that the LDP ID is reachable; of the local LSR or remote LSR.
-    To easily identify where MPLS is broken, go the one PE and <code style="font-size:120%;"><b>
+    To easily identify where MPLS is broken, go the one PE and <code><b>
     ping mpls ipv4 </b></code> to the remote PE device. Status code of B indicates that the packet was sent 
     using unlabeled output.
-    On affected LSR, use <code style="font-size:120%;"><b>show mpls interfaces</b></code>.
+    On affected LSR, use <code><b>show mpls interfaces</b></code>.
     </li>
     </li>
 </ul>
@@ -2269,11 +2293,11 @@ command. If run from a customer to customer site, the first label is the transpo
 label is the Layer 3 VPN  (L3VPN) .
 
 A fast way of identifying where LDP is broken at the PE LSR is to run the command;
-<code style="font-size:120%;"><b>ping mpls ipv4 &lt;remote-PE-loopback&gt; source &lt;local-loopback&gt; verbose</b></code>.
+<code><b>ping mpls ipv4 &lt;remote-PE-loopback&gt; source &lt;local-loopback&gt; verbose</b></code>.
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-      	<code style="font-size:120%">
+      	<code>
 R1#<b>ping mpls ipv4 30.255.6.6/32 source 30.255.1.1</b>                 <br>           
 Sending 5, 100-byte MPLS Echos to 30.255.6.6/32,                         <br>    
 &nbsp;&nbsp;&nbsp;&nbsp; timeout is 2 seconds, send interval is 0 msec:                      <br>    
@@ -2338,12 +2362,12 @@ B 30 30.255.24.2 MRU 1504 [No Label] 60 ms                                <br>
 </p>
 <p>
 The following output displays output of successful connectivity using 
-<code style="font-size:120%;"><b>ping</b></code> and <code style="font-size:120%;"><b>traceroute</b></code> and commands. 
+<code><b>ping</b></code> and <code><b>traceroute</b></code> and commands. 
 </p>
 
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-      	<code style="font-size:120%">
+      	<code>
 R1#<b>ping mpls ipv4 30.255.6.6/32 source 30.255.1.1 verbose</b>         <br>
 Sending 5, 100-byte MPLS Echos to 30.255.6.6/32,                         <br>
 &nbsp;&nbsp;&nbsp;&nbsp; timeout is 2 seconds, send interval is 0 msec:                      <br>
@@ -2386,14 +2410,14 @@ R1#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                         
 </p>
 
 <p>
-A code ‘B’ indicates unlabelled output interface.
+A code â€˜Bâ€™ indicates unlabelled output interface.
 
 To cause LDP to use a physical interface IP address instead of LDP ID, issue the
 following command;
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-      	<code style="font-size:120%">
+      	<code>
 R1(config)#<b>interface g0/0</b> <br>
 R1(config-if)#<b>mpls ldp discovery transport-address interface</b>
 </code></div>
