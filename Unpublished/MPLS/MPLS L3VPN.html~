@@ -1,6 +1,5 @@
  <h1>Configuring MPLS Layer 3 VPN on Cisco IOS</h1>
  
- <h1>Contents</h1>
  <p>
    <ol>
      <li><a href="#INTRODUCTION">Introduction</a></li>
@@ -12,16 +11,16 @@
    </ol>
  </p>
  
-<h1 id="INTRODUCTION">Introduction</h1>
+<h1 id="INTRODUCTION">Introduction and Overview</h1>
 <p>
 MPLS Layer 3 VPNs (L3VPNs) are used by service providers (SPs) to provide layer 3   
 connectivity between an enterprise and its different remote offices/locations 
 through the service provider's network. MPLS L3VPNs are defined by RFC 4364. 
 
-SPs are able to provide layer 3 connectivity to many different customers and their remote 
+SPs are able to provide different customers layer 3 connectivity to their remote 
 locations using the same underlaying infrastructure. This is possible regardless of 
 whether the different customer sites use the same overlapping RFC 1918 IP 
-addresses. 
+addresses or not. 
 Traffic from different customers is differentiated using VPNv4 addresses and routed 
 to their respective destinations using the SP's core network.
 </p>
@@ -31,7 +30,7 @@ The following topology will be used to configure MPLS Layer 3 VPNs.
 
 </p>
 <p>
-The routers R1 and R6 in the topology above are referred to as Provider Edge (PE) 
+The routers R1, R5, and R6 in the topology above are referred to as Provider Edge (PE) 
 routers or edge Label Switch Routers (LSR). The MPLS network is usually referred 
 to as the P network and the customer network, the C network. All LSRs in the P 
 network have MPLS configured. PE routers have VRFs for each customer. Customer 
@@ -62,8 +61,8 @@ In the service provider core of an MPLS L3VPN, the P routers run MPLS over an
  
  <h3>PE Routers</h3>
  <p>
- Only PE routers run BGP and they form an iBGP peering through the VPNv4 
-   address family.
+ For purposes of providing MPLS L3VPN services, only PE routers run BGP and they 
+ form an iBGP peering through the VPNv4 address family.
 	On the PE, a VRF is created for each customer. This ensures that each 
  customer has their prefixes in a separate routing table. 
 	In the VRF configuration, a route distinguisher (RD) is configured. This 
@@ -94,7 +93,7 @@ the format RD:IP address. An example can be 65000:10000:10.10.20.0 where the
 value 65000:10000 is the RD and 10.10.20.0 is the prefix being shared. VPNv4 
 addresses make addresses from the different customers unique. This results in the 
 ability of the SP to route traffic for different customers regardless of whether 
-the use overlapping address space or not.
+they use overlapping address space or not.
 
 VPNv4 NLRI main attributes include:
 <ul>
@@ -115,7 +114,7 @@ On an MPLS packet, the transport label is the top most label. It is typically
 derived from LDP. It is sometimes referred to as the IGP label. 
 The LDP label(transport label) is used for label switching from PE to PE through the MPLS domain 
 as intermediate LSRs run only MPLS and not BGP. The transport label basically 
-tells SP MPLS core LSRs which PE traffic is destined to (exit point) i.e., which 
+tells SP MPLS core LSRs which PE traffic is destined to i.e., which 
 PE device is the exit point out of the L3VPN to the CE. The VPN Label is derived from VPNv4 advertisements of PE and 
  is used by the PE router to determine which CE traffic is destined to.
  </p>
@@ -170,12 +169,12 @@ same RT value used in the RT-import of the appropriate VRF on the remote egress 
   
   <h2>PE-CE</h2> 
 <p>
-The CE forms an IGP peer relationship with the PE through this peering, it 
+The CE forms an IGP peer relationship with the PE. Through this peering, it 
 exchanges its prefixes with the PE. The PE isolates these prefixes received from 
 the CE into the VRF created for this customer. For ingress traffic, the PE 
 redistributes these customer prefixes from the IGP VRF table into MP-BGP VRF for 
 that customer. This configuration is implemented using the corresponding BGP VRF address-family.
-    For egress traffic, the prefixes are redistributed from BGP into the IGP.
+For egress traffic, the prefixes are redistributed from MP-BGP VRF into the IGP.
     </p>
 <p>If the PE and CE routers have an eBGP peering, the prefixes are exchanged using 
 BGP and no IGP (and redistribution) is required. MPLS is not configured on 
@@ -189,9 +188,10 @@ supported.
 To create L3VPNs, the following steps should be taken.
 <ul>
 <li>Step 1: Ensure MPLS infrastructure is in place. i.e. IP routing, MPLS.</li>
-<li>Step 2: Create the VRFs and associate interfaces with the created VRFs on PE or edge LSRs</li>
-<li>Step 3: Configure MP-BGP peerings between the PE routers using VPNv4 address-family.</li>
-<li>Step 4: Route Exchange Between the PE and CE devices.</li>
+<li>Step 2: Create the VRFs on the PE/edge LSR and interfaces connecting to each customer device should 
+be configured to be in the appropriate VRF.</li>
+<li>Step 3: Configure iBGP peering between the PE routers using VPNv4 address-family.</li>
+<li>Step 4: Enable IGP peering and route exchange between the PE and CE devices.</li>
 <li>Step 5: Redistribute routes between MP-BGP VRF address-family and PE-CE 
 routing protocol (this is not needed if PE-CE routing uses eBGP).</li>
 <li>Step 6: Test connectivity.</li>
@@ -201,20 +201,24 @@ routing protocol (this is not needed if PE-CE routing uses eBGP).</li>
 <h2>Step 1: Ensure MPLS Infrastructure is in Place</h2>
 <p>
 When configuring MP-BGP on an LSR, ensure that BGP peer address and the MPLS 
-router ID match for ease of configuration.
+LDP ID match for ease of configuration.
  
 Guidance on how to configure an operational MPLS infrastructure can be found 
-<a href="https://emmanueltoko.blogspot.com/2021/02/configuring-mpls-in-cisco-ios.html">here</a>.
+<a href="https://emmanueltoko.blogspot.com/2021/02/configuring-mpls-in-cisco-ios.html" target="_blank">here</a>.
 </p>
 
 <h2>Step 2: Create VRFs on PE Routers</h2>
 <p>
 Virtual Routing and Forwarding (VRFs) are used to create separate routing tables 
-for each customer on a router. These routing tables are separated from the global routing table (RIB).
+for each customer on a router. These routing tables are separated from the 
+global routing table (RIB). The RT and RD are then configured under each VRF.
+
 There are two ways to create a VRF; 
 <ol>
   <li><code style="font-size:120%;"><b>ip vrf &lt;vrf-name&gt;</b></code> (older method).
-
+   <p>
+   This command creates VRFs that for the IPv4 address family only.
+   </p>
   <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
       	<code style="font-size:130%">
@@ -230,15 +234,11 @@ R1(config-vrf)#<b>route-target import 200:100 </b> <br>
 </p>
 
   <p>
-Two VRFs CUST_X_HQ and CUST_Z_2 have been created. However, configuring VRFs with the 
-<code style="font-size:130%"><b>ip vrf CUST_X_HQ</b></code> command results in VRFs defined only for IPv4 
-as the command supports IPv4 only. 
-If IPv6 is required, the VRFs should be created using the command 
-<code style="font-size:130%"><b>vrf definition CUST_X_HQ</b></code>.
+Two VRFs CUST_X_HQ and CUST_Z_2 have been created.
 </p>
   
   </li> 
-  <li> <code style="font-size:120%;"><b>vrf definition vrf_name</b></code>.
+  <li> <code style="font-size:120%;"><b>vrf definition &lt;vrf_name&gt;</b></code>.
   <p>
   <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
       	<code style="font-size:130%">
@@ -256,8 +256,6 @@ significant.
   </li>
   </ol>
 </p>
-
-
 
 <h3><code style="font-size:120%;">vrf upgrade-cli</code></h3>
 <p>
@@ -285,11 +283,11 @@ R1(config-vrf)#<b>route-target import 200:100 </b> <br>
 <p>
 The command <code style="font-size:120%;"><b>vrf upgrade-cli multi-af-mode common-policies</b></code> 
 will apply the same RT values configured for address-family IPv4 to IPv6 
-configuration automatically. This can help make applying the same configuration 
+configuration automatically. This makes applying the same configuration 
 of IPv4 VRFs to IPv6 much easier.
 
 When configuring RT or other settings in new format VRF, the address family 
-configuration takes precedence over any other similar settings that may have been
+configuration takes precedence over any other similar configuration that may have been
 configured under the VRF sub-mode.
 </p>
 
@@ -339,9 +337,9 @@ R1(config)#                                                                    <
 <h3 id="VERIFICATION">Verification</h3>
 <p>
 To verify the creation of VRFs, use the command <code style="font-size:120%;"><b>show vrf</b></code> 
-as shown above.
+as demonstrated above.
 
-<h2>Step 3: Configure MP-BGP Peerings between the PE routers using VPNv4 address-family</h2>
+<h2>Step 3: Configure iBGP Peering between the PE routers using VPNv4 address-family</h2>
 <p>
 Configure an iBGP peering between the PE routers. This iBGP peering should be 
 formed using the VPNv4 address family. iBGP neighborships occur over a maximum 
@@ -409,15 +407,20 @@ This shows that the iBGP peering was created. A second iBGP peer(R5) was configu
 To confirm if extended BGP communities are being sent: 
 <code><b>debug bgp vpnv4 unicast updates</b></code> 
 </p>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+      	<code style="font-size:130%">
+*Apr 14 05:57:04.319: BGP(4): 30.255.6.6 rcvd UPDATE w/ attr: nexthop 30.255.6.6, origin ?, localpref 100, metric 2, extended community RT:200:100 OSPF DOMAIN ID:0x0005:0x000003E80200 OSPF RT:0.0.0.1:2:0 OSPF ROUTER ID:10.255.67.2:0<br>
+*Apr 14 05:57:04.331: BGP(4): 30.255.6.6 rcvd 200:1:10.7.7.1/32, label 44 <br>
+*Apr 14 05:57:04.351: BGP(4): Revise route installing 1 of 1 routes for 10.7.7.1/32 -> 30.255.6.6(CUST_Z_2) to CUST_Z_2 IP table<br>
+</code></div>
+</p>
 
-<h2>Step 4: Route Exchange Between the PE And CE Devices</h2>
+<h2>Step 4: IGP Peering and Route Exchange Between the PE And CE Devices</h2>
 <p>
 This can be implemented through configuration of an IGP between the PE-CE routers 
-or BGP with an eBGP relationship.
-A routing protocol needs to be configured between the PE and CE routers. Usually 
-this is an Interior Gateway Protocol (IGP) such as EIGRP, IS-IS or OSPF. Some 
-customers may prefer running BGP. This routing protocol is to share the customer
-routes from the CE to the PE.
+or BGP with an eBGP relationship. Some customers may prefer running BGP at the PE-CE. 
+This routing protocol is to share the customer routes from the CE to the PE.
 </p>
 <p>
 When configuring the routing protocol, the physical interface that the PE connects
@@ -445,7 +448,7 @@ On R9:
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
       	<code style="font-size:130%">
-R9(config-if)#<b>router eigrp EIGRP_CUSTOMERS                                                        </b><br>
+R9(config-if)#<b>router eigrp EIGRP_Z_S2                                                        </b><br>
 R9(config-router)#<b>address-family ipv4 unicast autonomous-system 10                             </b><br>
 R9(config-router-af)#<b>network 10.255.19.0 0.0.0.3                                                   </b><br>
 R9(config-router-af)#<b>network 10.90.0.0 0.0.255.255                                                   </b><br>
@@ -485,7 +488,7 @@ R1(config-router-af)#<b>redistribute eigrp 10                                 </
 R1(config-router-af)#<b>exit-address-family                                   </b>    <br>
 R1(config-router)#<b>exit                                                     </b>    <br>
 !REDISTRIBUTE MP-BGP ROUTES INTO EIGRP (REMOTE CUSTOMER SITES TO LOCAL SITE)   <br>
-R1(config)#<b>router eigrp EIGRP_CUSTOMERS                                    </b>    <br>
+R1(config)#<b>router eigrp EIGRP_Z_S2                                    </b>    <br>
 R1(config-router)#<b>address-family ipv4 vrf CUST_X_HQ autonomous-system 10      </b>    <br>
 R1(config-router-af)#<b>topology base                                         </b>    <br>
 R1(config-router-af-topology)#<b>redistribute bgp 100 100000 100 250 10 1500</b>
@@ -500,7 +503,7 @@ R5(config-router)#<b>address-family ipv4 vrf CUST_X_2    </b> <br>
 R5(config-router-af)#<b>redistribute eigrp 10                </b> <br>
 R5(config-router-af)#<b>exit-address-family                   </b> <br>
 R5(config-router)#<b>exit                                     </b> <br>
-R5(config)#<b>router eigrp EIGRP_CUSTOMERS</b> <br>
+R5(config)#<b>router eigrp EIGRP_Z_S2</b> <br>
 R1(config-router)#<b>address-family ipv4 vrf CUST_X_2 autonomous-system 10      </b>    <br>
 R1(config-router-af)#<b>topology base                                         </b>    <br>
 R1(config-router-af-topology)#<b>redistribute bgp 100 100000 100 250 10 1500</b><br>
@@ -556,26 +559,93 @@ B&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.10.255.1/32 [200/2] via 30.2
 C&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.255.19.0/30 is directly connected, GigabitEthernet3/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    <br>
 L&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.255.19.1/32 is directly connected, GigabitEthernet3/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    <br>
 B&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.255.67.0/30 [200/0] via 30.255.6.6, 00:39:18&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   <br>
+R1#<br>
+R1#<br>
+R1#<b>show bgp vpnv4 unicast vrf CUST_Z_2</b>                                     <br>
+BGP table version is 38, local router ID is 30.255.1.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                  <br>
+Status codes: s suppressed, d damped, h history, * valid, &gt; best, i - internal,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;r RIB-failure, S Stale, m multipath, b backup-path, f RT-Filter,    <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;x best-external, a additional-path, c RIB-compressed,               <br>
+Origin codes: i - IGP, e - EGP, ? - incomplete&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                  <br>
+RPKI validation codes: V valid, I invalid, N Not found&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                  <br>
+&nbsp;&nbsp;&nbsp;&nbsp; Network&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Next Hop&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Metric LocPrf Weight Path               <br>
+Route Distinguisher: 200:2 (default for vrf CUST_Z_2)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                 <br>
+ *>i 10.7.1.0/24&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;30.255.6.6&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2&nbsp;&nbsp;&nbsp;&nbsp;100&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 ?                  <br>
+ *>i 10.7.2.0/24&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;30.255.6.6&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2&nbsp;&nbsp;&nbsp;&nbsp;100&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 ?                  <br>
+ *>i 10.7.3.0/24&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;30.255.6.6&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2&nbsp;&nbsp;&nbsp;&nbsp;100&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 ?                  <br>
+ *>i 10.7.4.0/24&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;30.255.6.6&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2&nbsp;&nbsp;&nbsp;&nbsp;100&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 ?                  <br>
+ *>i 10.7.5.0/24&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;30.255.6.6&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2&nbsp;&nbsp;&nbsp;&nbsp;100&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 ?                  <br>
+ *>i 10.7.7.1/32&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;30.255.6.6&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2&nbsp;&nbsp;&nbsp;&nbsp;100&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 ?                  <br>
+ *>&nbsp;&nbsp;10.9.1.0/24&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.255.19.2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2570240&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 32768 ?                  <br>
+ *>&nbsp;&nbsp;10.9.2.0/24&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.255.19.2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2570240&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 32768 ?                  <br>
+ *>&nbsp;&nbsp;10.9.3.0/24&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.255.19.2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2570240&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 32768 ?                  <br>
+ *>&nbsp;&nbsp;10.9.4.0/24&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.255.19.2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2570240&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 32768 ?                  <br>
+ *>i 10.10.255.1/32&nbsp;&nbsp; 30.255.6.6&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2&nbsp;&nbsp;&nbsp;&nbsp;100&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 ?                  <br>
+ *>&nbsp;&nbsp;10.255.19.0/30&nbsp;&nbsp; 0.0.0.0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 32768 ?                  <br>
+ *>i 10.255.67.0/30&nbsp;&nbsp; 30.255.6.6&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0&nbsp;&nbsp;&nbsp;&nbsp;100&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 ?                  <br>
+R1#
 </code></div>
 </p>
+
 <p>
 On the CE router;
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
       	<code style="font-size:130%">
-R1#<b>show ip route</b>                                                       <br>
+R9><b>show ip route</b> <br>
+Codes: L - local, C - connected, S - static, R - RIP, M - mobile, B - BGP       <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; D - EIGRP, EX - EIGRP external, O - OSPF, IA - OSPF inter area           <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; N1 - OSPF NSSA external type 1, N2 - OSPF NSSA external type 2           <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; E1 - OSPF external type 1, E2 - OSPF external type 2                     <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; i - IS-IS, su - IS-IS summary, L1 - IS-IS level-1, L2 - IS-IS level-2    <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ia - IS-IS inter area, * - candidate default, U - per-user static route  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; o - ODR, P - periodic downloaded static route, H - NHRP, l - LISP        <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; + - replicated route, % - next hop override                              <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                <br>
+Gateway of last resort is not set&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                 <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.0.0.0/8 is variably subnetted, 18 subnets, 3 masks                     <br>
+D EX&nbsp;&nbsp;&nbsp;&nbsp; 10.7.1.0/24 [170/51456] via 10.255.19.1, 00:26:27, GigabitEthernet0/0  <br>
+D EX&nbsp;&nbsp;&nbsp;&nbsp; 10.7.2.0/24 [170/51456] via 10.255.19.1, 00:26:27, GigabitEthernet0/0  <br>
+D EX&nbsp;&nbsp;&nbsp;&nbsp; 10.7.3.0/24 [170/51456] via 10.255.19.1, 00:26:27, GigabitEthernet0/0  <br>
+D EX&nbsp;&nbsp;&nbsp;&nbsp; 10.7.4.0/24 [170/51456] via 10.255.19.1, 00:26:27, GigabitEthernet0/0  <br>
+D EX&nbsp;&nbsp;&nbsp;&nbsp; 10.7.5.0/24 [170/51456] via 10.255.19.1, 00:26:27, GigabitEthernet0/0  <br>
+D EX&nbsp;&nbsp;&nbsp;&nbsp; 10.7.7.1/32 [170/51456] via 10.255.19.1, 00:07:41, GigabitEthernet0/0  <br>
+C&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.9.1.0/24 is directly connected, Loopback1                           <br>
+L&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.9.1.1/32 is directly connected, Loopback1                           <br>
+C&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.9.2.0/24 is directly connected, Loopback2                           <br>
+L&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.9.2.1/32 is directly connected, Loopback2                           <br>
+C&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.9.3.0/24 is directly connected, Loopback3                           <br>
+L&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.9.3.1/32 is directly connected, Loopback3                           <br>
+C&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.9.4.0/24 is directly connected, Loopback4                           <br>
+L&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.9.4.1/32 is directly connected, Loopback4                           <br>
+D EX&nbsp;&nbsp;&nbsp;&nbsp; 10.10.255.1/32&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                 <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; [170/51456] via 10.255.19.1, 00:26:27, GigabitEthernet0/0            <br>
+C&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.255.19.0/30 is directly connected, GigabitEthernet0/0               <br>
+L&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.255.19.2/32 is directly connected, GigabitEthernet0/0               <br>
+D EX&nbsp;&nbsp;&nbsp;&nbsp; 10.255.67.0/30&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                 <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; [170/51456] via 10.255.19.1, 00:26:27, GigabitEthernet0/0            <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;99.0.0.0/32 is subnetted, 1 subnets&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                 <br>
+C&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;99.255.9.9 is directly connected, Loopback255                          <br>
+R9>                                                                             <br>
+R9>                                                                             <br>
+R9>                                                                             <br>
+R9>ping 10.7.7.1                                                                <br>
+Type escape sequence to abort.                                                  <br>
+Sending 5, 100-byte ICMP Echos to 10.7.7.1, timeout is 2 seconds:               <br>
+!!!!!                                                                           <br>
+Success rate is 100 percent (5/5), round-trip min/avg/max = 84/100/128 ms       <br>
+R9>
 
 </code></div>
 </p>
-<p>
-show bgp vpnv4 unicast all.
-</p>
+<h4><code>show bgp vpnv4 unicast all</code></h4>
 
 <p>
-Routes should customer local and remote customer site routes should start appearing 
-in the MP-BGP VPNv4 table at this point. This can be verified by the command; 
+Remote customer site routes are exchanged through L3VPN and are installed in the 
+MP-BGP VRF table. This can be verified by the command; 
 <code style="font-size:120%;"><b>show bgp vpnv4 unicast all</b></code>. This shows the routes in the 
-MP-BGP table for all VRFs. To view the routes for a specific VRF in the MP-BGP 
-table, issue the following command; show bgp vpnv4 unicast vrf CUST_X_HQ.
+MP-BGP table for all VRFs.
 </p>
 
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
@@ -756,13 +826,14 @@ Enabling OSPF on an interface that is already part of a VRF makes the OSPF
 process VRF-aware. 
 The OSPF behaviour when redistributing BGP routes into OSPF is for the routes to
 be external routes E1 or E2. However, with VPNv4, these routes are treated as 
-internal(inter-area if the OSPF on the CE devices are configured to be in 
+internal(inter-area if the networks on the CE devices are configured to be in 
 different areas). OSPF and BGP VPNv4 behave differently from normal redistribution.
 These routes are considered internal routes for the purpose of loop prevention 
 and traffic engineering. Note that when redistributing prefixes into OSPF, excluding 
 the <code><b>subnets</b></code> keyword results in classful prefixes being 
 advertised. 
-
+</p>
+<p>
 The output of <code><b>show ip ospf &lt;process-ID&gt;</b></code> on the PE 
 router displays the output "Domain ID type.. value ..." The value is inherited 
 from the OSPF process ID. 
@@ -902,41 +973,39 @@ A ping test or traceroute test can be used to confirm the operation of the MPLS 
 <h3><code style="font-size:120%;">traceroute</code></h3>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
       	<code style="font-size:130%">
-R8#<b>traceroute 172.30.1.1 source 172.31.1.1</b>                           <br>
-Type escape sequence to abort.                                              <br>
-Tracing the route to 172.30.1.1                                             <br>
-VRF info: (vrf in name/id, vrf out name/id)                                 <br>
-&nbsp;&nbsp;1 10.10.78.1 788 msec 12 msec 416 msec                                    <br>
-&nbsp;&nbsp;2 10.10.47.1 [MPLS: Labels 4002/2026 Exp 0] 1100 msec 144 msec 1244 msec  <br>
-&nbsp;&nbsp;3 10.10.34.1 [MPLS: Labels 3000/2026 Exp 0] 460 msec 92 msec 1224 msec    <br>
-&nbsp;&nbsp;4 10.10.12.2 [MPLS: Label 2026 Exp 0] 336 msec 136 msec 896 msec          <br>
-&nbsp;&nbsp;5 10.10.12.1 720 msec 504 msec 708 msec <br>
-R8#
+R7><b>traceroute 10.9.1.1</b>                                             <br>
+Type escape sequence to abort.                                            <br>
+Tracing the route to 10.9.1.1                                             <br>
+VRF info: (vrf in name/id, vrf out name/id)                               <br>
+&nbsp;&nbsp;1 10.255.67.2 20 msec 16 msec 20 msec                                   <br>
+&nbsp;&nbsp;2 30.255.46.1 [MPLS: Labels 4003/1000 Exp 0] 124 msec 92 msec 104 msec  <br>
+&nbsp;&nbsp;3 30.255.24.1 [MPLS: Labels 2006/1000 Exp 0] 144 msec 52 msec 76 msec   <br>
+&nbsp;&nbsp;4 10.255.19.1 [MPLS: Label 1000 Exp 0] 28 msec 76 msec 56 msec          <br>
+&nbsp;&nbsp;5 10.255.19.2 112 msec *  104 msec
 </code></div>
 </p>
 
 <p>
-In the output of the traceroute command, at the third hop with IP 10.10.34.1, two 
+In the output of the traceroute command, two 
 (2) MPLS labels are displayed; one label is the transport (MPLS) label and the 
 other label is the VPN label. This confirms operation of MPLS L3VPN. In this case, 
-the transport label is 3000 and VPN label 2026. As can be noticed, the transport
-label is continually swapped as the packet is switched from hop to hop while the
-VPN label travels with the packet from the nearby PE router to the remote PE 
-where it finally gets popped and the packet is then redistributed into the IGP 
-at the PE-CE link and routed using IP.
+the transport label is 4003 and VPN label 1000. As can be noticed, the transport
+label is continually swapped from 4003 to 2006 as the packet is switched from hop to hop while the
+VPN label is maintained with the packet from the ingress PE across the LSP 
+to the egress PE where it finally gets popped and the packet is then redistributed
+into the IGP at the PE-CE link and routed using IP.
 </p>
 
 <h3><code style="font-size:120%;">ping</code></h3>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
       	<code style="font-size:130%">
-R8#<b>ping  172.30.1.1 source 172.31.1.1</b>                                <br>
-Type escape sequence to abort.                                              <br>
-Sending 5, 100-byte ICMP Echos to 172.30.1.1, timeout is 2 seconds:         <br>
-Packet sent with a source address of 172.31.1.1                             <br>
-!!!!!                                                                       <br>
-Success rate is 100 percent (5/5), round-trip min/avg/max = 92/745/1668 ms  <br>
-R8#
+R7><b>ping 10.9.2.1</b>                                              <br>
+Type escape sequence to abort.                                       <br>
+Sending 5, 100-byte ICMP Echos to 10.9.2.1, timeout is 2 seconds:    <br>
+!!!!!                                                                <br>
+Success rate is 100 percent (5/5), round-trip min/avg/max = 44/65/100 ms
+
 </code></div>
 </p>
 <p>
@@ -946,23 +1015,86 @@ The ping command confirms the connectivity from customer site to remote customer
 To view the MPLS LFIB
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
       	<code style="font-size:130%">
-R7#<b>show mpls forwarding-table</b>                                       <br>
-Local&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Outgoing&nbsp;&nbsp; Prefix&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Bytes Label&nbsp;&nbsp; Outgoing&nbsp;&nbsp; Next Hop   <br>
-Label&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Label&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;or Tunnel Id&nbsp;&nbsp;&nbsp;&nbsp; Switched&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;interface&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;     <br>
-7000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Pop Label&nbsp;&nbsp;4.4.4.4/32&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Gi2/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.10.47.1 <br>
-7001&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 4001&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 3.3.3.3/32&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Gi2/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.10.47.1 <br>
-7002&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 4002&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2.2.2.2/32&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Gi2/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.10.47.1 <br>
-7003&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 4006&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 10.10.36.0/30&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Gi2/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.10.47.1 <br>
-7004&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 4007&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 10.10.26.0/30&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Gi2/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.10.47.1 <br>
-7005&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 4008&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 10.10.23.0/30&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Gi2/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.10.47.1 <br>
-7006&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Pop Label&nbsp;&nbsp;10.10.34.0/30&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Gi2/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.10.47.1 <br>
-7007&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; No Label&nbsp;&nbsp; 10.10.78.0/30[V] 0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; aggregate/CUST_X_HQ      <br>
-7008&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; No Label&nbsp;&nbsp; 172.31.1.1/32[V] 4152&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Gi1/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.10.78.2 <br>
-7009&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; No Label&nbsp;&nbsp; 172.31.2.1/32[V] 252&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Gi1/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.10.78.2 <br>
-7010&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; No Label&nbsp;&nbsp; 10.10.70.0/30[V] 0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; aggregate/CUST_Z_2      <br>
-7017&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; No Label&nbsp;&nbsp; 172.30.1.0/24[V] 0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Se5/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;point2point<br>
-7018&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; No Label&nbsp;&nbsp; 172.30.6.0/24[V] 0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Se5/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;point2point<br>
-R7#
+R6><b>show mpls forwarding-table</b>                                          <br>      
+Local&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Outgoing&nbsp;&nbsp; Prefix&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Bytes Label&nbsp;&nbsp; Outgoing&nbsp;&nbsp; Next Hop      <br>
+Label&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Label&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;or Tunnel Id&nbsp;&nbsp;&nbsp;&nbsp; Switched&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;interface&nbsp;&nbsp;&nbsp;&nbsp;            <br>
+16&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Pop Label&nbsp;&nbsp;30.255.114.0/30&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Gi0/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;30.255.46.1   <br>
+17&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 4006&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 30.255.112.0/30&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Gi0/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;30.255.46.1   <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 5024&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 30.255.112.0/30&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Gi1/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;30.255.56.1   <br>
+18&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Pop Label&nbsp;&nbsp;30.255.24.0/30&nbsp;&nbsp; 0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Gi0/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;30.255.46.1   <br>
+19&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 4000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 30.255.11.11/32&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Gi0/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;30.255.46.1   <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 5022&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 30.255.11.11/32&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Gi1/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;30.255.56.1   <br>
+20&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 4012&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 30.255.2.2/32&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Gi0/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;30.255.46.1   <br>
+21&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 4023&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 30.2.10.1/32&nbsp;&nbsp;&nbsp;&nbsp; 0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Gi0/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;30.255.46.1   <br>
+22&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Pop Label&nbsp;&nbsp;30.255.5.5/32&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Gi1/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;30.255.56.1   <br>
+23&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 4003&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 30.255.1.1/32&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Gi0/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;30.255.46.1   <br>
+24&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Pop Label&nbsp;&nbsp;30.255.115.0/30&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Gi1/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;30.255.56.1   <br>
+25&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 4007&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 30.255.113.0/30&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Gi0/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;30.255.46.1   <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 5001&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 30.255.113.0/30&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Gi1/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;30.255.56.1   <br>
+26&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 4009&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 30.255.12.0/30&nbsp;&nbsp; 0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Gi0/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;30.255.46.1   <br>
+27&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 4005&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 30.255.13.0/30&nbsp;&nbsp; 0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Gi0/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;30.255.46.1   <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 5003&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 30.255.13.0/30&nbsp;&nbsp; 0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Gi1/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;30.255.56.1   <br>
+28&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 4004&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 30.255.35.0/30&nbsp;&nbsp; 0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Gi0/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;30.255.46.1   <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 5037&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 30.255.35.0/30&nbsp;&nbsp; 0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Gi1/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;30.255.56.1   <br>
+29&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 4011&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 30.255.3.3/32&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Gi0/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;30.255.46.1   <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 5004&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 30.255.3.3/32&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Gi1/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;30.255.56.1   <br>
+Local&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Outgoing&nbsp;&nbsp; Prefix&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Bytes Label&nbsp;&nbsp; Outgoing&nbsp;&nbsp; Next Hop      <br>
+Label&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Label&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;or Tunnel Id&nbsp;&nbsp;&nbsp;&nbsp; Switched&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;interface&nbsp;&nbsp;&nbsp;&nbsp;            <br>
+30&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 4013&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 30.3.10.1/32&nbsp;&nbsp;&nbsp;&nbsp; 0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Gi0/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;30.255.46.1   <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 5005&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 30.3.10.1/32&nbsp;&nbsp;&nbsp;&nbsp; 0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Gi1/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;30.255.56.1   <br>
+31&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 4014&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 30.3.9.1/32&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Gi0/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;30.255.46.1   <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 5006&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 30.3.9.1/32&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Gi1/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;30.255.56.1   <br>
+32&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 4015&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 30.3.8.1/32&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Gi0/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;30.255.46.1   <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 5007&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 30.3.8.1/32&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Gi1/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;30.255.56.1   <br>
+33&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 4016&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 30.3.7.1/32&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Gi0/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;30.255.46.1   <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 5008&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 30.3.7.1/32&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Gi1/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;30.255.56.1   <br>
+34&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 4017&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 30.3.6.1/32&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Gi0/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;30.255.46.1   <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 5009&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 30.3.6.1/32&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Gi1/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;30.255.56.1   <br>
+35&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 4018&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 30.3.5.1/32&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Gi0/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;30.255.46.1   <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 5010&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 30.3.5.1/32&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Gi1/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;30.255.56.1   <br>
+36&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 4019&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 30.3.4.1/32&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Gi0/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;30.255.46.1   <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 5011&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 30.3.4.1/32&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Gi1/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;30.255.56.1   <br>
+37&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 4020&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 30.3.3.1/32&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Gi0/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;30.255.46.1   <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 5012&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 30.3.3.1/32&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Gi1/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;30.255.56.1   <br>
+38&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 4021&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 30.3.2.1/32&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Gi0/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;30.255.46.1   <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 5013&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 30.3.2.1/32&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Gi1/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;30.255.56.1   <br>
+39&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 4022&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 30.3.1.1/32&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Gi0/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;30.255.46.1   <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 5014&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 30.3.1.1/32&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Gi1/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;30.255.56.1   <br>
+40&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; No Label&nbsp;&nbsp; 10.7.3.0/24[V]&nbsp;&nbsp; 0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Gi2/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.255.67.1   <br>
+41&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Pop Label&nbsp;&nbsp;30.255.4.4/32&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Gi0/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;30.255.46.1   <br>
+Local&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Outgoing&nbsp;&nbsp; Prefix&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Bytes Label&nbsp;&nbsp; Outgoing&nbsp;&nbsp; Next Hop      <br>
+Label&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Label&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;or Tunnel Id&nbsp;&nbsp;&nbsp;&nbsp; Switched&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;interface&nbsp;&nbsp;&nbsp;&nbsp;            <br>
+42&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; No Label&nbsp;&nbsp; 30.4.10.1/32&nbsp;&nbsp;&nbsp;&nbsp; 0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Gi0/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;30.255.46.1   <br>
+43&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; No Label&nbsp;&nbsp; 30.4.9.1/32&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Gi0/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;30.255.46.1   <br>
+44&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; No Label&nbsp;&nbsp; 30.4.8.1/32&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Gi0/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;30.255.46.1   <br>
+45&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; No Label&nbsp;&nbsp; 30.4.7.1/32&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Gi0/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;30.255.46.1   <br>
+46&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; No Label&nbsp;&nbsp; 30.4.6.1/32&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Gi0/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;30.255.46.1   <br>
+47&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; No Label&nbsp;&nbsp; 30.4.5.1/32&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Gi0/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;30.255.46.1   <br>
+48&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; No Label&nbsp;&nbsp; 30.4.4.1/32&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Gi0/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;30.255.46.1   <br>
+49&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; No Label&nbsp;&nbsp; 30.4.3.1/32&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Gi0/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;30.255.46.1   <br>
+50&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; No Label&nbsp;&nbsp; 10.10.255.1/32[V]&nbsp;&nbsp; \&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;             <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Gi2/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.255.67.1   <br>
+51&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; No Label&nbsp;&nbsp; 10.255.67.0/30[V]&nbsp;&nbsp; \&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;             <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2372&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;aggregate/CUST_Z_HQ      <br>
+52&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 4024&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 30.2.9.1/32&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Gi0/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;30.255.46.1   <br>
+53&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 4025&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 30.2.8.1/32&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Gi0/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;30.255.46.1   <br>
+54&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 4026&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 30.2.7.1/32&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Gi0/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;30.255.46.1   <br>
+55&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 4027&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 30.2.6.1/32&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Gi0/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;30.255.46.1   <br>
+56&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 4028&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 30.2.5.1/32&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Gi0/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;30.255.46.1   <br>
+57&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 4029&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 30.2.4.1/32&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Gi0/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;30.255.46.1   <br>
+58&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 4030&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 30.2.3.1/32&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Gi0/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;30.255.46.1   <br>
+59&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 4031&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 30.2.2.1/32&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Gi0/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;30.255.46.1   <br>
+60&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 4032&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 30.2.1.1/32&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Gi0/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;30.255.46.1   <br>
+61&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; No Label&nbsp;&nbsp; 10.7.1.0/24[V]&nbsp;&nbsp; 0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Gi2/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.255.67.1   <br>
+Local&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Outgoing&nbsp;&nbsp; Prefix&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Bytes Label&nbsp;&nbsp; Outgoing&nbsp;&nbsp; Next Hop      <br>
+Label&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Label&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;or Tunnel Id&nbsp;&nbsp;&nbsp;&nbsp; Switched&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;interface&nbsp;&nbsp;&nbsp;&nbsp;            <br>
+62&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; No Label&nbsp;&nbsp; 10.7.4.0/24[V]&nbsp;&nbsp; 0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Gi2/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.255.67.1   <br>
+63&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; No Label&nbsp;&nbsp; 10.7.2.0/24[V]&nbsp;&nbsp; 0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Gi2/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.255.67.1   <br>
+64&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; No Label&nbsp;&nbsp; 10.7.5.0/24[V]&nbsp;&nbsp; 0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Gi2/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.255.67.1   <br>
+65&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; No Label&nbsp;&nbsp; 30.4.2.1/32&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Gi0/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;30.255.46.1   <br>
+66&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; No Label&nbsp;&nbsp; 30.4.1.1/32&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Gi0/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;30.255.46.1   <br>
+67&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Pop Label&nbsp;&nbsp;30.4.40.0/24&nbsp;&nbsp;&nbsp;&nbsp; 0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Gi0/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;30.255.46.1   <br>
+R6>                                                                           
 </code></div>
 </p>
 <p>
@@ -973,26 +1105,33 @@ To view the FIB for the different VRFs run the command <code style="font-size:12
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
       	<code style="font-size:130%">
-R2#<b>show ip cef vrf CUST_Z_2</b>                               <br>
-Prefix&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Next Hop&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Interface            <br>
-0.0.0.0/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;no route&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                    <br>
-0.0.0.0/8&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;drop&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                    <br>
-0.0.0.0/32&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; receive&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                   <br>
-10.10.29.0/30&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;attached&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Serial6/0            <br>
-10.10.29.0/32&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;receive&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Serial6/0            <br>
-10.10.29.1/32&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;receive&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Serial6/0            <br>
-10.10.29.3/32&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;receive&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Serial6/0            <br>
-10.10.70.0/30&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.10.23.2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; GigabitEthernet0/0   <br>
-127.0.0.0/8&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;drop&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                    <br>
-172.30.1.0/24&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.10.23.2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; GigabitEthernet0/0   <br>
-172.30.2.0/24&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.10.29.2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Serial6/0            <br>
-172.30.3.0/24&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.10.29.2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Serial6/0            <br>
-172.30.5.0/24&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.10.29.2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Serial6/0            <br>
-172.30.6.0/24&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.10.23.2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; GigabitEthernet0/0   <br>
-224.0.0.0/4&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;drop&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                    <br>
-224.0.0.0/24&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; receive&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                   <br>
-240.0.0.0/4&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;drop&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                    <br>
-255.255.255.255/32&nbsp;&nbsp; receive&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                   <br>
+R6><b>show ip cef vrf CUST_Z_HQ</b><br/>
+Prefix&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Next Hop&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Interface&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   <br>
+0.0.0.0/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;no route&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   <br>
+0.0.0.0/8&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;drop&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   <br>
+0.0.0.0/32&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; receive&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  <br>
+10.7.1.0/24&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.255.67.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;GigabitEthernet2/0  <br>
+10.7.2.0/24&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.255.67.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;GigabitEthernet2/0  <br>
+10.7.3.0/24&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.255.67.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;GigabitEthernet2/0  <br>
+10.7.4.0/24&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.255.67.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;GigabitEthernet2/0  <br>
+10.7.5.0/24&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.255.67.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;GigabitEthernet2/0  <br>
+10.9.1.0/24&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;30.255.46.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;GigabitEthernet0/0  <br>
+10.9.2.0/24&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;30.255.46.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;GigabitEthernet0/0  <br>
+10.9.3.0/24&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;30.255.46.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;GigabitEthernet0/0  <br>
+10.9.4.0/24&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;30.255.46.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;GigabitEthernet0/0  <br>
+10.10.255.1/32&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 10.255.67.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;GigabitEthernet2/0  <br>
+10.255.19.0/30&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 30.255.46.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;GigabitEthernet0/0  <br>
+10.255.67.0/30&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; attached&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; GigabitEthernet2/0  <br>
+10.255.67.0/32&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; receive&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;GigabitEthernet2/0  <br>
+10.255.67.1/32&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; attached&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; GigabitEthernet2/0  <br>
+10.255.67.2/32&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; receive&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;GigabitEthernet2/0  <br>
+10.255.67.3/32&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; receive&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;GigabitEthernet2/0  <br>
+127.0.0.0/8&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;drop&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   <br>
+224.0.0.0/4&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;drop&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   <br>
+224.0.0.0/24&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; receive&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  <br>
+Prefix&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Next Hop&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Interface&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   <br>
+240.0.0.0/4&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;drop&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   <br>
+255.255.255.255/32&nbsp;&nbsp; receive
 </code></div>
 </p>
 <p>
@@ -1001,13 +1140,22 @@ Additionally, to view the MPLS L3VPN on a specific route in the VRF LIB
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
       	<code style="font-size:130%">
-R2#<b>show ip cef vrf CUST_Z_2 172.30.6.0</b>              <br>
-172.30.6.0/24                                            <br>
-&nbsp;&nbsp;nexthop 10.10.23.2 GigabitEthernet0/0 label 3003 7020  <br>
-R2#<b>show ip cef vrf CUST_Z_2 172.30.1.0</b>                     <br>
-172.30.1.0/24                                            <br>
-&nbsp;&nbsp;nexthop 10.10.23.2 GigabitEthernet0/0 label 3003 7019  <br>
-R2#
+R6><b>show ip cef vrf CUST_Z_HQ 10.9.1.0</b>               <br>         
+10.9.1.0/24                                                <br>  
+&nbsp;&nbsp;nexthop 30.255.46.1 GigabitEthernet0/0 label 4003 1000   <br>  
+R6>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                <br>  
+R6><b>show ip cef vrf CUST_Z_HQ 10.7.1.0</b>               <br>         
+10.7.1.0/24                                                <br>  
+&nbsp;&nbsp;nexthop 10.255.67.1 GigabitEthernet2/0                   <br>                                                 
+R6><b>show ip cef vrf CUST_Z_HQ 10.7.1.0 detail</b>        <br>         
+10.7.1.0/24, epoch 0                                       <br>  
+&nbsp;&nbsp;local label info: other/61                               <br>  
+&nbsp;&nbsp;nexthop 10.255.67.1 GigabitEthernet2/0                   <br>  
+R6><b>show ip cef vrf CUST_Z_HQ 10.9.1.0 detail</b>        <br>         
+10.9.1.0/24, epoch 0, flags rib defined all labels         <br>  
+&nbsp;&nbsp;recursive via 30.255.1.1 label 1000                      <br>  
+&nbsp;&nbsp;&nbsp;&nbsp;nexthop 30.255.46.1 GigabitEthernet0/0 label 4003      <br>  
+R6>                                                          
 </code></div>
 </p>
 

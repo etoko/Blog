@@ -1,6 +1,5 @@
  <h1>Configuring MPLS Layer 3 VPN on Cisco IOS</h1>
  
- <h1>Contents</h1>
  <p>
    <ol>
      <li><a href="#INTRODUCTION">Introduction</a></li>
@@ -12,16 +11,16 @@
    </ol>
  </p>
  
-<h1 id="INTRODUCTION">Introduction</h1>
+<h1 id="INTRODUCTION">Introduction and Overview</h1>
 <p>
 MPLS Layer 3 VPNs (L3VPNs) are used by service providers (SPs) to provide layer 3   
 connectivity between an enterprise and its different remote offices/locations 
 through the service provider's network. MPLS L3VPNs are defined by RFC 4364. 
 
-SPs are able to provide layer 3 connectivity to many different customers and their remote 
+SPs are able to provide different customers layer 3 connectivity to their remote 
 locations using the same underlaying infrastructure. This is possible regardless of 
 whether the different customer sites use the same overlapping RFC 1918 IP 
-addresses. 
+addresses or not. 
 Traffic from different customers is differentiated using VPNv4 addresses and routed 
 to their respective destinations using the SP's core network.
 </p>
@@ -31,7 +30,7 @@ The following topology will be used to configure MPLS Layer 3 VPNs.
 
 </p>
 <p>
-The routers R1 and R6 in the topology above are referred to as Provider Edge (PE) 
+The routers R1, R5, and R6 in the topology above are referred to as Provider Edge (PE) 
 routers or edge Label Switch Routers (LSR). The MPLS network is usually referred 
 to as the P network and the customer network, the C network. All LSRs in the P 
 network have MPLS configured. PE routers have VRFs for each customer. Customer 
@@ -62,8 +61,8 @@ In the service provider core of an MPLS L3VPN, the P routers run MPLS over an
  
  <h3>PE Routers</h3>
  <p>
- Only PE routers run BGP and they form an iBGP peering through the VPNv4 
-   address family.
+ For purposes of providing MPLS L3VPN services, only PE routers run BGP and they 
+ form an iBGP peering through the VPNv4 address family.
 	On the PE, a VRF is created for each customer. This ensures that each 
  customer has their prefixes in a separate routing table. 
 	In the VRF configuration, a route distinguisher (RD) is configured. This 
@@ -94,7 +93,7 @@ the format RD:IP address. An example can be 65000:10000:10.10.20.0 where the
 value 65000:10000 is the RD and 10.10.20.0 is the prefix being shared. VPNv4 
 addresses make addresses from the different customers unique. This results in the 
 ability of the SP to route traffic for different customers regardless of whether 
-the use overlapping address space or not.
+they use overlapping address space or not.
 
 VPNv4 NLRI main attributes include:
 <ul>
@@ -115,7 +114,7 @@ On an MPLS packet, the transport label is the top most label. It is typically
 derived from LDP. It is sometimes referred to as the IGP label. 
 The LDP label(transport label) is used for label switching from PE to PE through the MPLS domain 
 as intermediate LSRs run only MPLS and not BGP. The transport label basically 
-tells SP MPLS core LSRs which PE traffic is destined to (exit point) i.e., which 
+tells SP MPLS core LSRs which PE traffic is destined to i.e., which 
 PE device is the exit point out of the L3VPN to the CE. The VPN Label is derived from VPNv4 advertisements of PE and 
  is used by the PE router to determine which CE traffic is destined to.
  </p>
@@ -170,12 +169,12 @@ same RT value used in the RT-import of the appropriate VRF on the remote egress 
   
   <h2>PE-CE</h2> 
 <p>
-The CE forms an IGP peer relationship with the PE through this peering, it 
+The CE forms an IGP peer relationship with the PE. Through this peering, it 
 exchanges its prefixes with the PE. The PE isolates these prefixes received from 
 the CE into the VRF created for this customer. For ingress traffic, the PE 
 redistributes these customer prefixes from the IGP VRF table into MP-BGP VRF for 
 that customer. This configuration is implemented using the corresponding BGP VRF address-family.
-    For egress traffic, the prefixes are redistributed from BGP into the IGP.
+For egress traffic, the prefixes are redistributed from MP-BGP VRF into the IGP.
     </p>
 <p>If the PE and CE routers have an eBGP peering, the prefixes are exchanged using 
 BGP and no IGP (and redistribution) is required. MPLS is not configured on 
@@ -189,9 +188,10 @@ supported.
 To create L3VPNs, the following steps should be taken.
 <ul>
 <li>Step 1: Ensure MPLS infrastructure is in place. i.e. IP routing, MPLS.</li>
-<li>Step 2: Create the VRFs and associate interfaces with the created VRFs on PE or edge LSRs</li>
-<li>Step 3: Configure MP-BGP peerings between the PE routers using VPNv4 address-family.</li>
-<li>Step 4: Route Exchange Between the PE and CE devices.</li>
+<li>Step 2: Create the VRFs on the PE/edge LSR and interfaces connecting to each customer device should 
+be configured to be in the appropriate VRF.</li>
+<li>Step 3: Configure iBGP peering between the PE routers using VPNv4 address-family.</li>
+<li>Step 4: Enable IGP peering and route exchange between the PE and CE devices.</li>
 <li>Step 5: Redistribute routes between MP-BGP VRF address-family and PE-CE 
 routing protocol (this is not needed if PE-CE routing uses eBGP).</li>
 <li>Step 6: Test connectivity.</li>
@@ -201,20 +201,24 @@ routing protocol (this is not needed if PE-CE routing uses eBGP).</li>
 <h2>Step 1: Ensure MPLS Infrastructure is in Place</h2>
 <p>
 When configuring MP-BGP on an LSR, ensure that BGP peer address and the MPLS 
-router ID match for ease of configuration.
+LDP ID match for ease of configuration.
  
 Guidance on how to configure an operational MPLS infrastructure can be found 
-<a href="https://emmanueltoko.blogspot.com/2021/02/configuring-mpls-in-cisco-ios.html">here</a>.
+<a href="https://emmanueltoko.blogspot.com/2021/02/configuring-mpls-in-cisco-ios.html" target="_blank">here</a>.
 </p>
 
 <h2>Step 2: Create VRFs on PE Routers</h2>
 <p>
 Virtual Routing and Forwarding (VRFs) are used to create separate routing tables 
-for each customer on a router. These routing tables are separated from the global routing table (RIB).
+for each customer on a router. These routing tables are separated from the 
+global routing table (RIB). The RT and RD are then configured under each VRF.
+
 There are two ways to create a VRF; 
 <ol>
   <li><code style="font-size:120%;"><b>ip vrf &lt;vrf-name&gt;</b></code> (older method).
-
+   <p>
+   This command creates VRFs that for the IPv4 address family only.
+   </p>
   <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
       	<code style="font-size:130%">
@@ -230,15 +234,11 @@ R1(config-vrf)#<b>route-target import 200:100 </b> <br>
 </p>
 
   <p>
-Two VRFs CUST_X_HQ and CUST_Z_2 have been created. However, configuring VRFs with the 
-<code style="font-size:130%"><b>ip vrf CUST_X_HQ</b></code> command results in VRFs defined only for IPv4 
-as the command supports IPv4 only. 
-If IPv6 is required, the VRFs should be created using the command 
-<code style="font-size:130%"><b>vrf definition CUST_X_HQ</b></code>.
+Two VRFs CUST_X_HQ and CUST_Z_2 have been created.
 </p>
   
   </li> 
-  <li> <code style="font-size:120%;"><b>vrf definition vrf_name</b></code>.
+  <li> <code style="font-size:120%;"><b>vrf definition &lt;vrf_name&gt;</b></code>.
   <p>
   <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
       	<code style="font-size:130%">
@@ -256,8 +256,6 @@ significant.
   </li>
   </ol>
 </p>
-
-
 
 <h3><code style="font-size:120%;">vrf upgrade-cli</code></h3>
 <p>
@@ -285,11 +283,11 @@ R1(config-vrf)#<b>route-target import 200:100 </b> <br>
 <p>
 The command <code style="font-size:120%;"><b>vrf upgrade-cli multi-af-mode common-policies</b></code> 
 will apply the same RT values configured for address-family IPv4 to IPv6 
-configuration automatically. This can help make applying the same configuration 
+configuration automatically. This makes applying the same configuration 
 of IPv4 VRFs to IPv6 much easier.
 
 When configuring RT or other settings in new format VRF, the address family 
-configuration takes precedence over any other similar settings that may have been
+configuration takes precedence over any other similar configuration that may have been
 configured under the VRF sub-mode.
 </p>
 
@@ -339,9 +337,9 @@ R1(config)#                                                                    <
 <h3 id="VERIFICATION">Verification</h3>
 <p>
 To verify the creation of VRFs, use the command <code style="font-size:120%;"><b>show vrf</b></code> 
-as shown above.
+as demonstrated above.
 
-<h2>Step 3: Configure MP-BGP Peerings between the PE routers using VPNv4 address-family</h2>
+<h2>Step 3: Configure iBGP Peering between the PE routers using VPNv4 address-family</h2>
 <p>
 Configure an iBGP peering between the PE routers. This iBGP peering should be 
 formed using the VPNv4 address family. iBGP neighborships occur over a maximum 
@@ -409,15 +407,20 @@ This shows that the iBGP peering was created. A second iBGP peer(R5) was configu
 To confirm if extended BGP communities are being sent: 
 <code><b>debug bgp vpnv4 unicast updates</b></code> 
 </p>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+      	<code style="font-size:130%">
+*Apr 14 05:57:04.319: BGP(4): 30.255.6.6 rcvd UPDATE w/ attr: nexthop 30.255.6.6, origin ?, localpref 100, metric 2, extended community RT:200:100 OSPF DOMAIN ID:0x0005:0x000003E80200 OSPF RT:0.0.0.1:2:0 OSPF ROUTER ID:10.255.67.2:0<br>
+*Apr 14 05:57:04.331: BGP(4): 30.255.6.6 rcvd 200:1:10.7.7.1/32, label 44 <br>
+*Apr 14 05:57:04.351: BGP(4): Revise route installing 1 of 1 routes for 10.7.7.1/32 -> 30.255.6.6(CUST_Z_2) to CUST_Z_2 IP table<br>
+</code></div>
+</p>
 
-<h2>Step 4: Route Exchange Between the PE And CE Devices</h2>
+<h2>Step 4: IGP Peering and Route Exchange Between the PE And CE Devices</h2>
 <p>
 This can be implemented through configuration of an IGP between the PE-CE routers 
-or BGP with an eBGP relationship.
-A routing protocol needs to be configured between the PE and CE routers. Usually 
-this is an Interior Gateway Protocol (IGP) such as EIGRP, IS-IS or OSPF. Some 
-customers may prefer running BGP. This routing protocol is to share the customer
-routes from the CE to the PE.
+or BGP with an eBGP relationship. Some customers may prefer running BGP at the PE-CE. 
+This routing protocol is to share the customer routes from the CE to the PE.
 </p>
 <p>
 When configuring the routing protocol, the physical interface that the PE connects
@@ -445,7 +448,7 @@ On R9:
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
       	<code style="font-size:130%">
-R9(config-if)#<b>router eigrp EIGRP_CUSTOMERS                                                        </b><br>
+R9(config-if)#<b>router eigrp EIGRP_Z_S2                                                        </b><br>
 R9(config-router)#<b>address-family ipv4 unicast autonomous-system 10                             </b><br>
 R9(config-router-af)#<b>network 10.255.19.0 0.0.0.3                                                   </b><br>
 R9(config-router-af)#<b>network 10.90.0.0 0.0.255.255                                                   </b><br>
@@ -485,7 +488,7 @@ R1(config-router-af)#<b>redistribute eigrp 10                                 </
 R1(config-router-af)#<b>exit-address-family                                   </b>    <br>
 R1(config-router)#<b>exit                                                     </b>    <br>
 !REDISTRIBUTE MP-BGP ROUTES INTO EIGRP (REMOTE CUSTOMER SITES TO LOCAL SITE)   <br>
-R1(config)#<b>router eigrp EIGRP_CUSTOMERS                                    </b>    <br>
+R1(config)#<b>router eigrp EIGRP_Z_S2                                    </b>    <br>
 R1(config-router)#<b>address-family ipv4 vrf CUST_X_HQ autonomous-system 10      </b>    <br>
 R1(config-router-af)#<b>topology base                                         </b>    <br>
 R1(config-router-af-topology)#<b>redistribute bgp 100 100000 100 250 10 1500</b>
@@ -500,7 +503,7 @@ R5(config-router)#<b>address-family ipv4 vrf CUST_X_2    </b> <br>
 R5(config-router-af)#<b>redistribute eigrp 10                </b> <br>
 R5(config-router-af)#<b>exit-address-family                   </b> <br>
 R5(config-router)#<b>exit                                     </b> <br>
-R5(config)#<b>router eigrp EIGRP_CUSTOMERS</b> <br>
+R5(config)#<b>router eigrp EIGRP_Z_S2</b> <br>
 R1(config-router)#<b>address-family ipv4 vrf CUST_X_2 autonomous-system 10      </b>    <br>
 R1(config-router-af)#<b>topology base                                         </b>    <br>
 R1(config-router-af-topology)#<b>redistribute bgp 100 100000 100 250 10 1500</b><br>
@@ -556,26 +559,93 @@ B&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.10.255.1/32 [200/2] via 30.2
 C&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.255.19.0/30 is directly connected, GigabitEthernet3/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    <br>
 L&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.255.19.1/32 is directly connected, GigabitEthernet3/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    <br>
 B&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.255.67.0/30 [200/0] via 30.255.6.6, 00:39:18&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   <br>
+R1#<br>
+R1#<br>
+R1#<b>show bgp vpnv4 unicast vrf CUST_Z_2</b>                                     <br>
+BGP table version is 38, local router ID is 30.255.1.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                  <br>
+Status codes: s suppressed, d damped, h history, * valid, &gt; best, i - internal,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;r RIB-failure, S Stale, m multipath, b backup-path, f RT-Filter,    <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;x best-external, a additional-path, c RIB-compressed,               <br>
+Origin codes: i - IGP, e - EGP, ? - incomplete&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                  <br>
+RPKI validation codes: V valid, I invalid, N Not found&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                  <br>
+&nbsp;&nbsp;&nbsp;&nbsp; Network&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Next Hop&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Metric LocPrf Weight Path               <br>
+Route Distinguisher: 200:2 (default for vrf CUST_Z_2)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                 <br>
+ *>i 10.7.1.0/24&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;30.255.6.6&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2&nbsp;&nbsp;&nbsp;&nbsp;100&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 ?                  <br>
+ *>i 10.7.2.0/24&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;30.255.6.6&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2&nbsp;&nbsp;&nbsp;&nbsp;100&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 ?                  <br>
+ *>i 10.7.3.0/24&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;30.255.6.6&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2&nbsp;&nbsp;&nbsp;&nbsp;100&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 ?                  <br>
+ *>i 10.7.4.0/24&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;30.255.6.6&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2&nbsp;&nbsp;&nbsp;&nbsp;100&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 ?                  <br>
+ *>i 10.7.5.0/24&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;30.255.6.6&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2&nbsp;&nbsp;&nbsp;&nbsp;100&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 ?                  <br>
+ *>i 10.7.7.1/32&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;30.255.6.6&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2&nbsp;&nbsp;&nbsp;&nbsp;100&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 ?                  <br>
+ *>&nbsp;&nbsp;10.9.1.0/24&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.255.19.2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2570240&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 32768 ?                  <br>
+ *>&nbsp;&nbsp;10.9.2.0/24&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.255.19.2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2570240&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 32768 ?                  <br>
+ *>&nbsp;&nbsp;10.9.3.0/24&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.255.19.2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2570240&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 32768 ?                  <br>
+ *>&nbsp;&nbsp;10.9.4.0/24&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.255.19.2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2570240&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 32768 ?                  <br>
+ *>i 10.10.255.1/32&nbsp;&nbsp; 30.255.6.6&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2&nbsp;&nbsp;&nbsp;&nbsp;100&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 ?                  <br>
+ *>&nbsp;&nbsp;10.255.19.0/30&nbsp;&nbsp; 0.0.0.0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 32768 ?                  <br>
+ *>i 10.255.67.0/30&nbsp;&nbsp; 30.255.6.6&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0&nbsp;&nbsp;&nbsp;&nbsp;100&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 ?                  <br>
+R1#
 </code></div>
 </p>
+
 <p>
 On the CE router;
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
       	<code style="font-size:130%">
-R1#<b>show ip route</b>                                                       <br>
+R9><b>show ip route</b> <br>
+Codes: L - local, C - connected, S - static, R - RIP, M - mobile, B - BGP       <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; D - EIGRP, EX - EIGRP external, O - OSPF, IA - OSPF inter area           <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; N1 - OSPF NSSA external type 1, N2 - OSPF NSSA external type 2           <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; E1 - OSPF external type 1, E2 - OSPF external type 2                     <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; i - IS-IS, su - IS-IS summary, L1 - IS-IS level-1, L2 - IS-IS level-2    <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ia - IS-IS inter area, * - candidate default, U - per-user static route  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; o - ODR, P - periodic downloaded static route, H - NHRP, l - LISP        <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; + - replicated route, % - next hop override                              <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                <br>
+Gateway of last resort is not set&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                 <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.0.0.0/8 is variably subnetted, 18 subnets, 3 masks                     <br>
+D EX&nbsp;&nbsp;&nbsp;&nbsp; 10.7.1.0/24 [170/51456] via 10.255.19.1, 00:26:27, GigabitEthernet0/0  <br>
+D EX&nbsp;&nbsp;&nbsp;&nbsp; 10.7.2.0/24 [170/51456] via 10.255.19.1, 00:26:27, GigabitEthernet0/0  <br>
+D EX&nbsp;&nbsp;&nbsp;&nbsp; 10.7.3.0/24 [170/51456] via 10.255.19.1, 00:26:27, GigabitEthernet0/0  <br>
+D EX&nbsp;&nbsp;&nbsp;&nbsp; 10.7.4.0/24 [170/51456] via 10.255.19.1, 00:26:27, GigabitEthernet0/0  <br>
+D EX&nbsp;&nbsp;&nbsp;&nbsp; 10.7.5.0/24 [170/51456] via 10.255.19.1, 00:26:27, GigabitEthernet0/0  <br>
+D EX&nbsp;&nbsp;&nbsp;&nbsp; 10.7.7.1/32 [170/51456] via 10.255.19.1, 00:07:41, GigabitEthernet0/0  <br>
+C&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.9.1.0/24 is directly connected, Loopback1                           <br>
+L&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.9.1.1/32 is directly connected, Loopback1                           <br>
+C&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.9.2.0/24 is directly connected, Loopback2                           <br>
+L&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.9.2.1/32 is directly connected, Loopback2                           <br>
+C&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.9.3.0/24 is directly connected, Loopback3                           <br>
+L&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.9.3.1/32 is directly connected, Loopback3                           <br>
+C&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.9.4.0/24 is directly connected, Loopback4                           <br>
+L&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.9.4.1/32 is directly connected, Loopback4                           <br>
+D EX&nbsp;&nbsp;&nbsp;&nbsp; 10.10.255.1/32&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                 <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; [170/51456] via 10.255.19.1, 00:26:27, GigabitEthernet0/0            <br>
+C&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.255.19.0/30 is directly connected, GigabitEthernet0/0               <br>
+L&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.255.19.2/32 is directly connected, GigabitEthernet0/0               <br>
+D EX&nbsp;&nbsp;&nbsp;&nbsp; 10.255.67.0/30&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                 <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; [170/51456] via 10.255.19.1, 00:26:27, GigabitEthernet0/0            <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;99.0.0.0/32 is subnetted, 1 subnets&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                 <br>
+C&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;99.255.9.9 is directly connected, Loopback255                          <br>
+R9>                                                                             <br>
+R9>                                                                             <br>
+R9>                                                                             <br>
+R9>ping 10.7.7.1                                                                <br>
+Type escape sequence to abort.                                                  <br>
+Sending 5, 100-byte ICMP Echos to 10.7.7.1, timeout is 2 seconds:               <br>
+!!!!!                                                                           <br>
+Success rate is 100 percent (5/5), round-trip min/avg/max = 84/100/128 ms       <br>
+R9>
 
 </code></div>
 </p>
-<p>
-show bgp vpnv4 unicast all.
-</p>
+<h4><code>show bgp vpnv4 unicast all</code></h4>
 
 <p>
-Routes should customer local and remote customer site routes should start appearing 
-in the MP-BGP VPNv4 table at this point. This can be verified by the command; 
+Remote customer site routes are exchanged through L3VPN and are installed in the 
+MP-BGP VRF table. This can be verified by the command; 
 <code style="font-size:120%;"><b>show bgp vpnv4 unicast all</b></code>. This shows the routes in the 
-MP-BGP table for all VRFs. To view the routes for a specific VRF in the MP-BGP 
-table, issue the following command; show bgp vpnv4 unicast vrf CUST_X_HQ.
+MP-BGP table for all VRFs.
 </p>
 
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
@@ -753,30 +823,217 @@ R1>
 <h3>OSPF</h3>
 <p>
 Enabling OSPF on an interface that is already part of a VRF makes the OSPF 
-process VRF-aware. 
+process VRF-aware.
+</p>
+
+
+<h4>External Routes as Inter-area Routes</h4>
+<p>
 The OSPF behaviour when redistributing BGP routes into OSPF is for the routes to
-be external routes E1 or E2. However, with VPNv4, these routes are treated as 
-internal(inter-area if the OSPF on the CE devices are configured to be in 
-different areas). OSPF and BGP VPNv4 behave differently from normal redistribution.
+be external routes E1 or E2.
+</p>
+<p>
+The following output shows the OSPF database of a remote PE router:
+</p>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+<code style="font-size:130%">
+R5#<b>show ip ospf 1001 database</b>                                      <br>                
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                  <br>         
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;OSPF Router with ID (10.255.58.1) (Process ID 1001)           <br>         
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                  <br>         
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Router Link States (Area 1)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                 <br>         
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                  <br>         
+Link ID&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ADV Router&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Age&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Seq#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Checksum Link count<br>         
+10.255.58.1&nbsp;&nbsp;&nbsp;&nbsp; 10.255.58.1&nbsp;&nbsp;&nbsp;&nbsp; 1196&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0x80000006 0x00BD57 1         <br>         
+88.255.8.8&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;88.255.8.8&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;38&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0x80000006 0x00E82C 5         <br>         
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                  <br>         
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Net Link States (Area 1)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                  <br>         
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                  <br>         
+Link ID&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ADV Router&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Age&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Seq#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Checksum           <br>         
+10.255.58.2&nbsp;&nbsp;&nbsp;&nbsp; 88.255.8.8&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;38&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0x80000004 0x00617C           <br>         
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                  <br>         
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Type-5 AS External Link States&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                  <br>         
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                  <br>         
+Link ID&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ADV Router&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Age&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Seq#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Checksum Tag       <br>         
+10.10.1.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 10.255.58.1&nbsp;&nbsp;&nbsp;&nbsp; 28&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0x80000001 0x00EEB2 3489661028<br>         
+10.10.2.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 10.255.58.1&nbsp;&nbsp;&nbsp;&nbsp; 28&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0x80000001 0x00E3BC 3489661028<br>         
+10.10.3.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 10.255.58.1&nbsp;&nbsp;&nbsp;&nbsp; 28&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0x80000001 0x00D8C6 3489661028<br>         
+10.10.4.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 10.255.58.1&nbsp;&nbsp;&nbsp;&nbsp; 28&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0x80000001 0x00CDD0 3489661028<br>         
+10.10.5.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 10.255.58.1&nbsp;&nbsp;&nbsp;&nbsp; 28&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0x80000001 0x00C2DA 3489661028<br>         
+10.255.110.0&nbsp;&nbsp;&nbsp;&nbsp;10.255.58.1&nbsp;&nbsp;&nbsp;&nbsp; 28&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0x80000001 0x00A1A1 3489661028<br>         
+</code></div>
+</p>
+<p>
+On the CE router, these prefixes are E2 routes:
+</p>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+<code style="font-size:130%">
+R8><b>show ip route</b><br>
+Codes: L - local, C - connected, S - static, R - RIP, M - mobile, B - BGP      <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; D - EIGRP, EX - EIGRP external, O - OSPF, IA - OSPF inter area          <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; N1 - OSPF NSSA external type 1, N2 - OSPF NSSA external type 2          <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; E1 - OSPF external type 1, E2 - OSPF external type 2                    <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; i - IS-IS, su - IS-IS summary, L1 - IS-IS level-1, L2 - IS-IS level-2   <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ia - IS-IS inter area, * - candidate default, U - per-user static route <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; o - ODR, P - periodic downloaded static route, H - NHRP, l - LISP       <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; + - replicated route, % - next hop override                             <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                         <br>
+Gateway of last resort is not set                                              <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                         <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.0.0.0/8 is variably subnetted, 16 subnets, 3 masks                    <br>
+O E2&nbsp;&nbsp;&nbsp;&nbsp; 10.10.1.1/32 [110/2] via 10.255.58.1, 00:02:39, GigabitEthernet0/0    <br>
+O E2&nbsp;&nbsp;&nbsp;&nbsp; 10.10.2.1/32 [110/2] via 10.255.58.1, 00:02:39, GigabitEthernet0/0    <br>
+O E2&nbsp;&nbsp;&nbsp;&nbsp; 10.10.3.1/32 [110/2] via 10.255.58.1, 00:02:39, GigabitEthernet0/0    <br>
+O E2&nbsp;&nbsp;&nbsp;&nbsp; 10.10.4.1/32 [110/2] via 10.255.58.1, 00:02:39, GigabitEthernet0/0    <br>
+O E2&nbsp;&nbsp;&nbsp;&nbsp; 10.10.5.1/32 [110/2] via 10.255.58.1, 00:02:39, GigabitEthernet0/0    <br>
+.....<br>
+!!!!Additional output omitted<br>
+...
+</code></div>
+</p>
+<p>
+With VPNv4, OSPF on the PE LSRs can be configured to consider these routes as 
+internal(inter-area). OSPF and BGP VPNv4 operate differently from normal redistribution.
 These routes are considered internal routes for the purpose of loop prevention 
 and traffic engineering. Note that when redistributing prefixes into OSPF, excluding 
 the <code><b>subnets</b></code> keyword results in classful prefixes being 
 advertised. 
+</p>
 
+<p>
 The output of <code><b>show ip ospf &lt;process-ID&gt;</b></code> on the PE 
-router displays the output "Domain ID type.. value ..." The value is inherited 
-from the OSPF process ID. 
+router displays the output "<code><b>Domain ID type.. value ...</b></code>".
+The value is inherited from the OSPF process ID. 
+</P>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+<code style="font-size:130%">
+R1#<b>show ip ospf 1000</b><br>
+ Routing Process "ospf 1000" with ID 10.255.1.1                                <br>
+&nbsp;&nbsp; <span style="background:gray;">Domain ID type 0x0005, value 0.0.3.232</span><br>
+ Start time: 00:00:36.340, Time elapsed: 01:48:49.108                          <br>
+ Supports only single TOS(TOS0) routes                                         <br>
+ Supports opaque LSA                                                           <br>
+ Supports Link-local Signaling (LLS)                                           <br>
+ Supports area transit capability                                              <br>
+ Supports NSSA (compatible with RFC 3101)                                      <br>
+ Connected to MPLS VPN Superbackbone, VRF CUST_X_HQ                            <br>
+ Event-log disabled                                                            <br>
+ It is an area border and autonomous system boundary router                    <br>
+ Redistributing External Routes from,                                          <br>
+&nbsp;&nbsp;&nbsp;&nbsp;bgp 100, includes subnets in redistribution                                <br>
+ Router is not originating router-LSAs with maximum metric                     <br>
+ Initial SPF schedule delay 5000 msecs                                         <br>
+ Minimum hold time between two consecutive SPFs 10000 msecs                    <br>
+ Maximum wait time between two consecutive SPFs 10000 msecs                    <br>
+ Incremental-SPF disabled                                                      <br>
+ Minimum LSA interval 5 secs                                                   <br>
+ Minimum LSA arrival 1000 msecs                                                <br>
+ LSA group pacing timer 240 secs                                               <br>
+ Interface flood pacing timer 33 msecs                                         <br>
+ Retransmission pacing timer 66 msecs                                          <br>
+ Number of external LSA 0. Checksum Sum 0x000000                               <br>
+ Number of opaque AS LSA 0. Checksum Sum 0x000000                              <br>
+ Number of DCbitless external and opaque AS LSA 0                              <br>
+ Number of DoNotAge external and opaque AS LSA 0                               <br>
+ Number of areas in this router is 1. 1 normal 0 stub 0 nssa                   <br>
+ Number of areas transit capable is 0                                          <br>
+ External flood list length 0                                                  <br>
+ IETF NSF helper support enabled                                               <br>
+ Cisco NSF helper support enabled                                              <br>
+ Reference bandwidth unit is 100 mbps                                          <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Area 1                                                                     <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Number of interfaces in this area is 1                                 <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Area has no authentication                                             <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SPF algorithm last executed 01:11:49.224 ago                           <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SPF algorithm executed 2 times                                         <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Area ranges are                                                        <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Number of LSA 9. Checksum Sum 0x02ADF2                                 <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Number of opaque link LSA 0. Checksum Sum 0x000000                     <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Number of DCbitless LSA 0                                              <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Number of indication LSA 0                                             <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Number of DoNotAge LSA 0                                               <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Flood list length 0                                                    
+</code></div>        
+</p>
+<p>
+On the remote PE R5:
+</p>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+<code style="font-size:130%">
+R5(config-if)#<b>do show ip ospf 1001</b><br>
+ Routing Process "ospf 1001" with ID 10.255.58.1               <br>
+&nbsp;&nbsp; <span style="background:gray;">Domain ID type 0x0005, value 0.0.3.233</span><br>
+ Start time: 00:15:57.372, Time elapsed: 00:13:48.868          <br>
+ Supports only single TOS(TOS0) routes                         <br>
+ Supports opaque LSA&nbsp;&nbsp;                                         <br>
+ Supports Link-local Signaling (LLS)                           <br>
+ Supports area transit capability                              <br>
+ Supports NSSA (compatible with RFC 3101)                      <br>
+ Connected to MPLS VPN Superbackbone, VRF CUST_X_2             <br>
+ Event-log disabled&nbsp;&nbsp;                                          <br>
+ It is an area border and autonomous system boundary router    <br>
+ Redistributing External Routes from,                          <br>
+&nbsp;&nbsp;&nbsp;&nbsp;bgp 100, includes subnets in redistribution                <br>
+ Router is not originating router-LSAs with maximum metric     <br>
+ Initial SPF schedule delay 5000 msecs                         <br>
+ Minimum hold time between two consecutive SPFs 10000 msecs    <br>
+ Maximum wait time between two consecutive SPFs 10000 msecs    <br>
+ Incremental-SPF disabled                                      <br>
+ Minimum LSA interval 5 secs                                   <br>
+ Minimum LSA arrival 1000 msecs                                <br>
+ LSA group pacing timer 240 secs                               <br>
+ Interface flood pacing timer 33 msecs                         <br>
+ Retransmission pacing timer 66 msecs                          <br>
+ Number of external LSA 6. Checksum Sum 0x04DD7F               <br>
+ Number of opaque AS LSA 0. Checksum Sum 0x000000              <br>
+ Number of DCbitless external and opaque AS LSA 0              <br>
+ Number of DoNotAge external and opaque AS LSA 0               <br>
+ Number of areas in this router is 1. 1 normal 0 stub 0 nssa   <br>
+ Number of areas transit capable is 0                          <br>
+ External flood list length 0                                  <br>
+ IETF NSF helper support enabled                               <br>
+ Cisco NSF helper support enabled                              <br>
+ Reference bandwidth unit is 100 mbps                          <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Area 1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                         <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Number of interfaces in this area is 1                 <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Area has no authentication                             <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SPF algorithm last executed 00:11:09.780 ago           <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SPF algorithm executed 4 times                         <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Area ranges are                                        <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Number of LSA 3. Checksum Sum 0x0218F6                 <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Number of opaque link LSA 0. Checksum Sum 0x000000     <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Number of DCbitless LSA 0                              <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Number of indication LSA 0                             <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Number of DoNotAge LSA 0                               <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Flood list length 0                                    <br>
+</code></div>
+</p>
 
-The logic is that if the domain ID matches between the two sides, any prefixes 
-that were originally an intra-area route is encoded as inter-area route when 
-redistributed from BGP to OSPF e.g., OSPF with process ID 100 on both ends of 
-the link, since the OSPF process ID is matching, then the routes can be encoded 
-as inter-area routes. 
-
-The domain-ID value can be changed in OSPF using the OSPF 
-command <code><b>domain-id &lt;ip-address&gt;</b></code> the domain-ID is in the form of 
-an IPv4 address. Changing the OSPF domain ID on one end of the PE results in the 
-OSPF route type being encoded as external routes(Type 2) as opposed to internal routes.
+<p>
+If the domain ID matches on the local and remote PE devices, prefixes that were 
+originally external after redistribution will be considered as inter-area routes 
+after redistribution from BGP to OSPF e.g., OSPF with
+process ID 1000 on both the local and remote PE devices; because the OSPF process 
+ID is matching, then the routes can be encoded as inter-area routes. 
+</p>
+<p>
+The domain-ID can be configured to be the same on the local and remote PE by:
+<ul>
+  <li>Configuring the same OSPF process ID on the local and remote PE.</li>
+  <li>A second option is to configure the same domain-id value on the local and remote PE.</li>
+</ul>
+</p>
+<p>
+The domain-ID value can be modified in OSPF using the OSPF 
+command <code><b>domain-id &lt;ip-address&gt;</b></code>; the domain-ID value is
+in the form of an IPv4 address. 
+If the domain-ID value is different in the OSPF process of the local and remote 
+PE LSRs, then the routes redistributed from BGP to OSPF will be flagged as 
+E2 external routes.
 
 The domain-ID is encoded(in HEX) in the BGP path attributes as an extended community 
 value.
@@ -785,20 +1042,187 @@ The domain-ID value takes precedence over the OSPF process ID value; i.e., if th
 process IDs are different but the domain-IDs are the same, then the routes will 
 be advertised as inter-area routes.
 </p>
+
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+<code style="font-size:130%">
+R5(config)#<b>router ospf 1001 vrf CUST_X_2</b>                          <br>
+R5(config-router)#<b>domain-id 0.0.3.232 </b>                            <br>
+R5(config-router)#<b>do show ip ospf 1001</b>                            <br>
+ Routing Process "ospf 1001" with ID 10.255.58.1                  <br>
+&nbsp;&nbsp; Domain ID type 0x0005, value 0.0.3.232                         <br>
+ Start time: 00:15:57.372, Time elapsed: 02:33:44.228             <br>
+ Supports only single TOS(TOS0) routes                            <br>
+ Supports opaque LSA                                              <br>
+ Supports Link-local Signaling (LLS)                              <br>
+ Supports area transit capability                                 <br>
+ Supports NSSA (compatible with RFC 3101)                         <br>
+ Connected to MPLS VPN Superbackbone, VRF CUST_X_2                <br>
+ Event-log disabled                                               <br>
+ It is an area border and autonomous system boundary router       <br>
+ Redistributing External Routes from,                             <br>
+&nbsp;&nbsp;&nbsp;&nbsp;bgp 100, includes subnets in redistribution                   <br>
+ Router is not originating router-LSAs with maximum metric        <br>
+ Initial SPF schedule delay 5000 msecs                            <br>
+ Minimum hold time between two consecutive SPFs 10000 msecs       <br>
+ Maximum wait time between two consecutive SPFs 10000 msecs       <br>
+ Incremental-SPF disabled                                         <br>
+ Minimum LSA interval 5 secs                                      <br>
+ Minimum LSA arrival 1000 msecs                                   <br>
+ LSA group pacing timer 240 secs                                  <br>
+ Interface flood pacing timer 33 msecs                            <br>
+ Retransmission pacing timer 66 msecs                             <br>
+ Number of external LSA 0. Checksum Sum 0x000000                  <br>
+ Number of opaque AS LSA 0. Checksum Sum 0x000000                 <br>
+ Number of DCbitless external and opaque AS LSA 0                 <br>
+ Number of DoNotAge external and opaque AS LSA 0                  <br>
+ Number of areas in this router is 1. 1 normal 0 stub 0 nssa      <br>
+ Number of areas transit capable is 0                             <br>
+ External flood list length 0                                     <br>
+ IETF NSF helper support enabled                                  <br>
+ Cisco NSF helper support enabled                                 <br>
+ Reference bandwidth unit is 100 mbps                             <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Area 1&nbsp;&nbsp;&nbsp;&nbsp;                                                    <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Number of interfaces in this area is 1                    <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Area has no authentication                                <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SPF algorithm last executed 02:31:05.160 ago              <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SPF algorithm executed 4 times                            <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Area ranges are                                           <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Number of LSA 9. Checksum Sum 0x059C39                    <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Number of opaque link LSA 0. Checksum Sum 0x000000        <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Number of DCbitless LSA 0                                 <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Number of indication LSA 0                                <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Number of DoNotAge LSA 0                                  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Flood list length 0                                       <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                    <br>
+R5(config-router)#<b>end</b></br>
+R5><b>show ip ospf 1001 database</b><br>                                               
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                 <br> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;OSPF Router with ID (10.255.58.1) (Process ID 1001)            <br> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                 <br> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Router Link States (Area 1)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                  <br> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                 <br> 
+Link ID&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ADV Router&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Age&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Seq#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Checksum Link count <br> 
+10.255.58.1&nbsp;&nbsp;&nbsp;&nbsp; 10.255.58.1&nbsp;&nbsp;&nbsp;&nbsp; 109&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0x80000008 0x00B959 1          <br> 
+88.255.8.8&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;88.255.8.8&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;67&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0x80000007 0x00E62D 5          <br> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                 <br> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Net Link States (Area 1)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                 <br> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                 <br> 
+Link ID&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ADV Router&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Age&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Seq#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Checksum            <br> 
+10.255.58.2&nbsp;&nbsp;&nbsp;&nbsp; 88.255.8.8&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;67&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0x80000005 0x005F7D            <br> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                 <br> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Summary Net Link States (Area 1)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                 <br> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                 <br> 
+Link ID&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ADV Router&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Age&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Seq#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Checksum            <br> 
+10.10.1.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 10.255.58.1&nbsp;&nbsp;&nbsp;&nbsp; 789&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0x80000001 0x000E51            <br> 
+10.10.2.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 10.255.58.1&nbsp;&nbsp;&nbsp;&nbsp; 789&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0x80000001 0x00035B            <br> 
+10.10.3.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 10.255.58.1&nbsp;&nbsp;&nbsp;&nbsp; 789&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0x80000001 0x00F765            <br> 
+10.10.4.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 10.255.58.1&nbsp;&nbsp;&nbsp;&nbsp; 789&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0x80000001 0x00EC6F            <br> 
+10.10.5.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 10.255.58.1&nbsp;&nbsp;&nbsp;&nbsp; 789&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0x80000001 0x00E179            <br> 
+10.255.110.0&nbsp;&nbsp;&nbsp;&nbsp;10.255.58.1&nbsp;&nbsp;&nbsp;&nbsp; 789&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0x80000001 0x00C040            <br> 
+</code></div>
+</p>
+<p>
+The OSPF database on R5 shows that the routes are now considered inter-area.
+</p>
+<p>
+On the remote site client CE, the routes are now considered inter-area:
+</p>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+<code style="font-size:130%">
+R8><b>show ip route ospf</b><br>                                                <br>           
+Codes: L - local, C - connected, S - static, R - RIP, M - mobile, B - BGP       <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; D - EIGRP, EX - EIGRP external, O - OSPF, IA - OSPF inter area           <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; N1 - OSPF NSSA external type 1, N2 - OSPF NSSA external type 2           <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; E1 - OSPF external type 1, E2 - OSPF external type 2                     <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; i - IS-IS, su - IS-IS summary, L1 - IS-IS level-1, L2 - IS-IS level-2    <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ia - IS-IS inter area, * - candidate default, U - per-user static route  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; o - ODR, P - periodic downloaded static route, H - NHRP, l - LISP        <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; + - replicated route, % - next hop override                              <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                                    <br>
+Gateway of last resort is not set                                               <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                                    <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.0.0.0/8 is variably subnetted, 16 subnets, 3 masks                     <br>
+O IA&nbsp;&nbsp;&nbsp;&nbsp; 10.10.1.1/32 [110/3] via 10.255.58.1, 00:10:22, GigabitEthernet0/0     <br>
+O IA&nbsp;&nbsp;&nbsp;&nbsp; 10.10.2.1/32 [110/3] via 10.255.58.1, 00:10:22, GigabitEthernet0/0     <br>
+O IA&nbsp;&nbsp;&nbsp;&nbsp; 10.10.3.1/32 [110/3] via 10.255.58.1, 00:10:22, GigabitEthernet0/0     <br>
+O IA&nbsp;&nbsp;&nbsp;&nbsp; 10.10.4.1/32 [110/3] via 10.255.58.1, 00:10:22, GigabitEthernet0/0     <br>
+O IA&nbsp;&nbsp;&nbsp;&nbsp; 10.10.5.1/32 [110/3] via 10.255.58.1, 00:10:22, GigabitEthernet0/0     <br>
+O IA&nbsp;&nbsp;&nbsp;&nbsp; 10.255.110.0/30 [110/2] via 10.255.58.1, 00:10:22, GigabitEthernet0/0  <br>
+</code></div>
+</p>
 <p>
 <code><b>show ip cef</b></code> displays both the transport label and VPN label.
 </p>
 
+<h4>Superbackbone</h4>
 <p>
-On the PE router of the provider, In the OSPF output of the command <code><b>
-show ip ospf &lt;process-ID&gt;</b></code>, the message, Connected to the MPLS 
-VPN superbackbone. The superbackbone is a hierarchy above area 0. With a superbackbone 
-topology, permitted hierarchies include:
+On the PE router of the provider, in the OSPF output of the command <code><b>
+show ip ospf &lt;process-ID&gt;</b></code>, the message, 
+<code><b>Connected to the MPLS VPN superbackbone</b></code>.
+</p>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+<code style="font-size:130%">
+R5(config-router)#<b>do show ip ospf 1001</b>                            <br>
+ Routing Process "ospf 1001" with ID 10.255.58.1                  <br>
+&nbsp;&nbsp; Domain ID type 0x0005, value 0.0.3.232                         <br>
+ Start time: 00:15:57.372, Time elapsed: 02:33:44.228             <br>
+ Supports only single TOS(TOS0) routes                            <br>
+ Supports opaque LSA                                              <br>
+ Supports Link-local Signaling (LLS)                              <br>
+ Supports area transit capability                                 <br>
+ Supports NSSA (compatible with RFC 3101)                         <br>
+ <span style="background:gray;">Connected to MPLS VPN Superbackbone, VRF CUST_X_2</span>     <br>
+ Event-log disabled                                               <br>
+ It is an area border and autonomous system boundary router       <br>
+ Redistributing External Routes from,                             <br>
+&nbsp;&nbsp;&nbsp;&nbsp;bgp 100, includes subnets in redistribution                   <br>
+ Router is not originating router-LSAs with maximum metric        <br>
+ Initial SPF schedule delay 5000 msecs                            <br>
+ Minimum hold time between two consecutive SPFs 10000 msecs       <br>
+ Maximum wait time between two consecutive SPFs 10000 msecs       <br>
+ Incremental-SPF disabled                                         <br>
+ Minimum LSA interval 5 secs                                      <br>
+ Minimum LSA arrival 1000 msecs                                   <br>
+ LSA group pacing timer 240 secs                                  <br>
+ Interface flood pacing timer 33 msecs                            <br>
+ Retransmission pacing timer 66 msecs                             <br>
+ Number of external LSA 0. Checksum Sum 0x000000                  <br>
+ Number of opaque AS LSA 0. Checksum Sum 0x000000                 <br>
+ Number of DCbitless external and opaque AS LSA 0                 <br>
+ Number of DoNotAge external and opaque AS LSA 0                  <br>
+ Number of areas in this router is 1. 1 normal 0 stub 0 nssa      <br>
+ Number of areas transit capable is 0                             <br>
+ External flood list length 0                                     <br>
+ IETF NSF helper support enabled                                  <br>
+ Cisco NSF helper support enabled                                 <br>
+ Reference bandwidth unit is 100 mbps                             <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Area 1&nbsp;&nbsp;&nbsp;&nbsp;                                                    <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Number of interfaces in this area is 1                    <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Area has no authentication                                <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SPF algorithm last executed 02:31:05.160 ago              <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SPF algorithm executed 4 times                            <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Area ranges are                                           <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Number of LSA 9. Checksum Sum 0x059C39                    <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Number of opaque link LSA 0. Checksum Sum 0x000000        <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Number of DCbitless LSA 0                                 <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Number of indication LSA 0                                <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Number of DoNotAge LSA 0                                  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Flood list length 0                                       <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                    <br>
+R5(config-router)#<b>end</b></br>
+</code></div>
+</p>
+<p>
+The superbackbone is a hierarchy above area 0. With a superbackbone hierarchy in the 
+OSPF domain, permitted hierarchies include:
 <ul>
-  <li>Super-backbone (MPLS)&rarr; Area 0 &rarr; R1 &rarr; Area 1</li>
-  <li>Super-backbone (MPLS)&rarr; Area 1 &rarr; R1 &rarr; Area 1</li>
+  <li>Super-backbone (MPLS)&rarr; Area 0 &rarr; Area 1</li>
+  <li>Super-backbone (MPLS)&rarr; Area 1 &rarr; Area 1</li>
   Not permitted is: 
-  <li>Super-backbone (MPLS)&rarr; Area 1&rarr; R1 &rarr; Area 0. 
+  <li>Super-backbone (MPLS)&rarr; Area 1 &rarr; Area 0. 
   Here, a virtual link would be required to be configured to connect the Area 0 to 
 the superbackbone as it would be considered a discontiguous area.
   </li> 
@@ -818,7 +1242,7 @@ OSPF sham-links are similar to virtual links going over the SP network. It does
 not have to be in area 0.
 </p>
 <p>
-Steps:
+To configure OSPF sham-links:
 <ol>
   <li><b>Advertise a new prefix (/32) of a loopback into the VRF and advertise this into BGP:</b>
   Remember, the netmask must be /32 for this feature to work. This is done on 
@@ -831,14 +1255,14 @@ Steps:
   but in the reverse direction on the remote device.
   
   </li>
-  <li>Verify with the command <code><b>show ip ospf 100 neighbor</b></code>. It 
+  <li>Verify with the command <code><b>show ip ospf &lt;process-id&gt; neighbor</b></code>. It 
   shows neighborship over the sham-link.
   routes that were previously learned thru BGP are now learned thru OSPF (because 
   of lower AD); verify this on PE router using command: <code><b>show ip route</b></code>.
 </ol>
 </p>
 <p>
-Practical use case is that if you had a point2point VPN and you are migrating to 
+Practical use case is that if you had a point-to-point VPN and you are migrating to 
 MPLS L3VPN from legacy frame relay service, the backdoor link will be preferred 
 from an OSPF point of view because intra-area is preferred to inter-area preferred 
 to external routes.
@@ -848,7 +1272,7 @@ Traffic engineering can be implemented based on the cost.
 </p>
 <h4>Load-balancing</h4>
 <p>
-If a SP network employs the use of BGP route reflector, and the will only 
+If the SP network employs the use of BGP route reflector, and will only 
 advertise what it considers as the best path of the available paths and not 
 use the available paths simultaneously. For RR groups these updates based on the 
 RD and performs path selection between the two of them.
