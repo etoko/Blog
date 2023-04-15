@@ -1,0 +1,603 @@
+<h1>Introduction and Overview</h1>
+<p>
+As IPv4 public addresses get depleted, the number of IPv6 deployments  has increased 
+exponentially. This exponential increase in the adoption of IPv6 can also be 
+attributed to introduction of Internet of Things (IoT).
+</p>
+
+<p>
+With all these devices gaining access to networks, security concerns are growing 
+in IPv6 deployments. It is important that these IPv6 deployments are secured for
+optimum operation of these networks. A critical part of the network that needs 
+to be considered when implementing security mechanisms is at the local links (Layer 2)
+where hosts are connected to the network.
+</p>
+
+<p>
+First hop is the network segment between the end hosts and their default gateway 
+i.e., the access layer. Security at the first hop aims to prevent against internal 
+threats at the access layer such as a man-in-the-middle(MiM) attack.
+In IPv4, security at the access layer is implemented through DHCP snooping, IP source guard 
+and dynamic ARP inspection.
+Most IPv6 first-hop security features are implemented on a layer 2 device(switch).
+</p>
+
+<p>
+In IPv6, ICMPv6 ND/NDP replaces IPv4 ARP. ARP uses two messages: request and reply.
+With ICMPv6 ND uses four messages:
+<ol>
+  <li><b>Neighbor Solicitation(NS):</b> a device requests for information about a
+  neighbor.</li>
+  <li><b>Neighbor Advertisement(NA):</b> a device advertises its information to other neighbors.</li>
+  <li><b>Router Solicitation(RS):</b> a device requests for information about 
+  local routers i.e., routers in the network segment.</li>
+  <li><b>Router Advertisement(RA):</b> a device advertises itself as an active 
+  router.</li>
+</ol>
+</p>
+
+<p>
+When a host is added to a network:
+<ol>
+  <li>The host chooses a link-local address; usually FE80::/10 for the network 
+  segment of the address. The host segment of the address is generated using EUI-64.</li>
+  <li>The host then checks to confirm that the link-local address is unique by 
+  sending an NS on the local link to the solicited node multicast address(FF02:0:0:0:0:1:FF00::/104 + 24 
+  low-order bits from the EUI-64). If no response is received for the NS, then 
+  the link-local address is confirmed as unique.</li>
+  <li>The host then sends a NA to the "all hosts multicast address" FF02::1
+  (similar to 255.255.255.255 in IPv4) announcing itself as a host.</li>
+  <li>Router discovery is then attempted by sending RS messages to FF02::2 (all routers multicast address).</li>
+  <li>A local router replies with RA that contains the router's IPv6 address and MAC 
+   address along with prefix information for SLAAC.</li>
+  <li>The host chooses a global prefix for SLAAC where the address is generated 
+  using the RA advertised prefix and EUI-64 for the host part of the address. The 
+  host performs DAD to verify that the global prefix address is unique. If 
+  unique, the host sends a NA for the global prefix.</li>
+</ol>
+</p>
+
+<h2>IPv6 First Hop Attack Surface</h2>
+<p>
+IPv6 features such as ICMPv6 Neighbor Discovery’s Neighbor Solicitation (NS), 
+Neighbor Advertisement (NA) messages and Router Discovery Router Solicitation 
+(RS) and Router Advertisement (RA) introduce attack options that 
+were previously not possible in IPv4.
+IPv6 first hop security concerns on the local links are usually associated with 
+router discovery, neighbor discovery, duplicate address detection(DAD), 
+stateless address autoconfiguration(SLAAC) and DHCPv6.
+</p>
+
+
+<p>
+This process presents several attack surfaces that can be exploited in some of the 
+following ways:
+<ul>
+  <li><b>Spoof the router:</b> a rogue device can send gratuitous RA to announce itself as the router.
+  Spoofing the router is a MiM attack or a basic DoS attack</li>
+  <li><b>Spoof DHCPv6 server:</b> a rogue device can respond with bogus DHCPv6 
+  messages. Spoofing the DHCPv6 server is a form of DoS attack or MiM if it is 
+  combined with RA spoofing.</li>
+  <li><b>Poison the router's ND cache:</b> a rogue device can send gratuitous NA messages with other 
+  device's addresses. Poisoning the router's ND cache is a MiM or DoS attack.</li>
+  <li><b>Overload the router's ND cache:</b> a rogue device sends packets to 
+  the entire /64 prefix range. This results in the DoS attack as router is 
+  overwhelmed trying to respond with NS messages.</li>
+</ul>
+</p>
+
+<h1>Router Discovery Attacks</h1>
+
+<p>
+Router discovery is a means for hosts to locate routers that reside on a local 
+link. Security concerns with router discovery include attacks on ICMPv6 Router 
+Discovery (RD) and host address allocation using SLAAC (Stateless Address 
+Autoconfiguration). RD attacks are categorized as man-in-the-middle attacks.
+</p>
+<h2>Attack</h2>
+<p>
+One of the several ways that an RD attack may take place follows this sequence:
+
+<li>Host A sends a Router Solicitation (RS) message on its local link to discover
+local routers connected to its link.</li>
+<li>A legitimate router R1 responds with a Router Advertisement (RA) with lifetime 
+X to the RS from Host A. Host A installs R1 as its default gateway for duration X.</li>
+<li>An intruder Rx inserts itself in the local link by connecting to one of the 
+switchports on the local link switch or connecting to the wireless network common 
+to R1 and Host A. Rx can then spoof R1’s RA messages and sends R1’s RA messages 
+with a shorter lifetime Y.</li>
+<li>When duration X is about to elapse, Host A request a renewal of the prefix lease.</li>
+<li>Rx then sends new RA messages with lifetime Z. Host A will receive these RA 
+messages and install Rx as its default gateway.</li>
+<li>Host A starts to direct traffic to remote networks through Rx as its gateway. 
+Rx can then monitor traffic from Host A.</li>
+</ol>
+<p>
+The above sequence of events is an example of a man-in-the-middle (MiTM) attack on IPv6 local links.
+</p>
+
+<h2>IPv6 RA Guard</h2>
+<p>
+Router advertisements should enter a network through an authorized switchport and 
+from an authorized source. 
+RA Guard protects against router spoofing and prefix spoofing on the segment.
+This is accomplished by blocking or rejection of rogue or unwanted router 
+advertisements that are received on certain ports.
+</p>
+<p>
+Deploying RA Guard involves configuration of a policy and attaching the policy to  
+a specific VLAN or switchport. Traffic is permitted on the ports that comply with the 
+policy and blocked/dropped on non-compliant ports.
+</p>
+
+<h4>Configuration</h4>
+<p>
+When configuring RA Guard policies, device roles are specified for each of the 
+ports that the policy will be applied. The configurable device roles include:
+<ul>
+<li><b>host:</b> attached device is a end-user host device. In host mode, 
+all RA redirect messages are disallowed on the port.</li>
+<li><b>router:</b> attached device is a router. RA and RS messages are to be 
+expected from this port. Additionally, switchports with routers can be configured 
+as trusted ports.</li>
+  <li><b>monitor:</b> for attached devices that have network monitoring features or 
+  are network sniffers.</li>
+  <li><b>switch:</b> attached device is a switch.</li>
+</ul>
+</p>
+<p>
+When configuring RA Guard, two policies are usually configued; one policy for 
+ports where routers are attached and a separate policy for ports where hosts are 
+attached.
+</p>
+<p>
+<ol>
+<li><b>Configure the RA Guard Policy:</b>
+<p>
+Defining a policy for hosts:
+  <ol type="a">
+    <li><b>Define the RA guard policy:</b> <code><b>ipv6 nd raguard policy &lt;policy-name&gt;</b></code>
+    <p>
+    <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+ <code style="font-size:110%">
+    SW1(config)#<b>ipv6 nd raguard policy HOSTS</b>
+ </code></div>
+ </p>
+    </li>
+    <li><b>Specify the device role:</b> The device role can be host or router: 
+    <code><b>device-role host</b></code>.
+    <p>
+    <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+ <code style="font-size:110%">
+ SW1(config-nd-raguard)#<b>device-role host</b>
+ </code></div>
+ </p>
+    </li>
+  </ol>
+</p>
+<p>
+Creating a second policy for routers:
+<ol type="a">
+   <li><b>Define the RA guard policy:</b> <code><b>ipv6 nd raguard policy &lt;policy-name&gt;</b></code>
+    <p>
+    <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+ <code style="font-size:110%">
+    SW1(config)#<b>ipv6 nd raguard policy ROUTERS</b>
+ </code></div>
+ </p>
+  </li>
+
+  <li><b>Specify the device role:</b> The device role can be host or router: 
+    <code><b>device-role host</b></code>.
+    <p>
+    <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+ <code style="font-size:110%">
+ SW1(config-nd-raguard)#<b>device-role host</b>
+ </code></div>
+ </p>
+    </li>
+  
+  <li><b>Configure the port as trusted:</b> <code><b>trusted-port</b></code>
+      <p>
+    <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+ <code style="font-size:110%">
+ SW1(config-nd-raguard)#<b>trusted-port</b>
+ </code></div>
+ </p>
+  </li>
+  <li><b>Enable of O  flag/bit:</b> <code><b>other-config-flag on</b></code>. The 
+  O bit indicates to the client additional information is to be extracted from 
+  another source such as a DHCP or DNS server.
+  <p>
+    <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+ <code style="font-size:110%">
+ SW1(config-nd-raguard)#<b>other-config-flag on</b>
+ </code></div>
+ </p>
+  
+  </li>
+  <li>All optional features are bypassed if not configured. They include:
+  <p>
+     <ul>                                                          </li>
+      <li><code><b>hop limit &lt;maximum | minimum&gt; &lt;number&gt;</b></code>: (Optional) Enable verification of advertised hop count limit.</li>
+      <li><code><b>managed-config-flag &lt;on | off&gt;</b></code>: (Optional) Enable verification that the advertised managed address configuration flag is on. </li>
+      <li> <code><b>match ipv6 access-list alc</b></code> </li>
+      <li><code><b>match ra prefix-list ipv6_prefix_list</b></code>: (Optional) Verification of the advertised prefixes in inspected messages from configured prefix-list. </li>
+      <li><code><b>other-config-flag &lt;on | off&gt;</b></code> : (Optional) Verification of advertised other-config parameter</li>
+      <li><code><b>router-preference maximum &lt; high | low | medium &gt; </b></code>: (Optional) Verification that the advertised default router preference parameter value is lower than or equal to a specified limit </li>
+      <li><code><b>match ipv6 access-list &lt;acl&gt;</b></code>: (Optional) Enable verification of the sender’s IPv6 address in 
+      inspected messages from the configured authorized device source access-list 
+ </li>
+    </ul>  
+</p>
+  </li>
+</ol>
+</p>
+<p>
+</li>
+<li><b>Apply the RA Guard policy to the switchport or VLAN:</b>
+<ul>
+  <li><b>VLAN:</b>
+  <p>
+  <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code style="font-size:110%">
+ SW1(config)#<b>vlan configuration 1</b><br>
+ SW1(config-vlan-config)#<b>ipv6 nd raguard attach-policy HOSTS</b><br>
+ </code></div>
+ </p>
+ 
+  </li>
+  <li><b>interface:</b> 
+  Apply IPv6 RAGuard feature to a specified interface using the command
+  <code><b>ipv6 nd raguard attach-policy &lt;policy-name&gt; [vlan &lt;add|except|none|remove|all&gt; vlan &lt;vlan1, vlan2 … vlan n&gt;]</b></code>
+  <p>
+  <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code style="font-size:110%">
+ SW1(config)#<b>interface g0/0</b><br>
+ SW1(config-if)#<b>ipv6 nd raguard attach-policy ROUTERS</b><br>
+ </code></div>
+ </p>
+  </li>
+</ul>
+</p>
+</li>
+</ol>
+</p>
+<h3>Verification</h3>
+<p>
+The following commands verify RA Guard configuration and operation:
+<ul>
+  <li><code><b>show ipv6 snooping policies</b></code>: RA guard will appear as one of the snooping policies configured</li>
+  <li><code><b>show ipv6 nd raguard policy &lt;policy-name&gt;</b></code></li>
+  <li><code><b>debug ipv6 snooping raguard &lt;filter | interface | vlanID&gt;</b></code></li>
+  <li><code><b>show ipv6 snooping capture-policy interface &lt;interface_id&gt;</b></code>: for configured interfaces</li>
+</ul>
+</p>
+
+<h3>Restrictions for IPv6 RA guard</h3>
+<p>
+<ul>
+<li>IPv6 RA guard does not offer protection when IPv6 traffic is tunneled.</li>
+<li>RA guard is supported on hardware when the TCAM is programmed.</li>
+<li>RA Guard can be configured on a switchport interface in the ingress direction.</li>
+<li>Supports host and router mode.</li>
+<li>Not supported in etherchannel and etherchannel port members.</li>
+<li>Not supported on trunk ports with merge mode.</li>
+<li>Is supported on auxiliary VLANs and private VLANs (PvLANs). Primary VLAN 
+features are inherited and merged with port features.</li>
+<li>Packets dropped by IPv6 RA guard can be spanned.</li>
+<li>RA guard cannot be configured if the following command is configured 
+<code><b>platform ipv6 acl icmp optimize neighbor-discovery</b></code></li>
+</ul>
+</p>
+
+<h2>SLAAC</h2>
+<p>
+SLAAC is a mechanism that enables an IPv6 host to obtain an IPv6 address prefix 
+from its local router through one of its local links without the use of all DHCPv6 features.
+Unlike DHCPv6, due to the stateless nature of SLAAC, address assignments are not verified before addresses are issued.
+</p>
+<p>
+Steps involved in a SLAAC attack:
+<ol>
+<li>Host A sends a Router Solicitation (RS) message on its local link to discover 
+local routers connected to its link.</li>
+<li>A legitimate router R1 responds with a Router Advertisement (RA) that provides 
+the IPv6 prefix. 2001:DB8:C0FF:EE::/64 with lifetime X.</li>
+<li>Host A configures the address 2001:DB8:COFF:EE::2/128 and checks the availability 
+of the address using Duplicate Address Detection (DAD) and begins using this address.</li>
+<li>An intruder Rx inserts itself in the local link by connecting to one of the 
+switchports on the local link switch or connecting to the wireless network common 
+to R1 and Host A. Rx can then spoof R1’s RA messages and sends R1’s RA messages with a shorter lifetime Y.</li>
+<li>Host A’s IPv6 address will then expire at the lapse of duration Y.</li>
+<li>Rx can then send a new RA with a new prefix 2001:DB9:COFF:EA::/64.</li>
+<li>Upon receiving the new prefix, Host A will configure the address 2001:DB9:COFF:EA::09/128 
+with R1 still being retained as the default gateway. R1 may block Host A’s network 
+traffic due to the fact that it is from an unknown network.</li>
+<li>R1 may drop Host A’s traffic resulting in black-holing all network traffic from Host A.</li>
+</ol>
+</p>
+
+<h1>Neighbor Discovery Attacks</h1>
+<p>
+Similar to RA messages ND messages are used to discover other hosts on the local 
+link. It replaces ARP in IPv6. ND performs DAD and address resolution, neighbor 
+unreachability and redirection. Neighbor discovery messages are mainly Neighbor 
+Solicitation (NS) and Neighbor Advertisement (NA).
+
+ND Attacks usually involve Address Resolution, Duplicate Address Detection and Neighbor Cache attacks.
+</p>
+
+<h2>Address Resolution Attacks</h2>
+<p>
+Address resolution is the process that a host (Host A) follows when it wants to 
+send network traffic to another host (Host B) on the local link when it does not 
+know its Layer 2 address (MAC address in Ethernet networks). Host A resolves the 
+IPv6 address of Host B into a MAC address and forwards the packet with Host B’s 
+MAC address as the destination address of the Layer 2 frame.
+</p>
+<p>
+Stages in IPv6 address resolution attacks include the following;
+<ol>
+<li>Host A sends a Neighbor Solicitation message on the local link requesting for
+Host B’s link local address. Host B sends a Neighbor Advertisement (NA) message 
+on the local link containing its MAC address which Host A stores in its neighbor
+table binding the MAC address with the IPv6 address.</li>
+<li>If a malicious Host X inserts itself into the local network, it can masquerade
+as Host B and intercept all packets sent to Host B. Without effective IPv6 first-hop
+security, Host X can perform a Man-in-the-Middle (MiTM) attack.</li>
+<li>Host A will attempt to send packets destined to Host B but using Host X’s link-layer address.</li>
+</ol>
+</p>
+
+<h2>Duplicate Address Detection Attacks</h2>
+<p>
+Duplicate Address Detection (DAD) is an IPv6 protocol that enables a host to 
+detect a duplicate address on the local network. DAD attacks are usually aimed 
+at preventing hosts from having IPv6 addresses. Steps involved in deploying a DAD attack;
+<ol>
+  <li>Host A wants to use the address 2001:DB8:C0FF:EE::1. So it sends an NS 
+  message on its local link to determine if any other host is using this address. 
+  If no NA response is received from other hosts on the local link, Host A will 
+  go ahead to use this address.</li>
+  <li>However, malicious host Host X which has inserted itself on the local link 
+  receives this NS message. It responds with an NA claiming that it is currently 
+  using that same address 2001:DB8:C0FF:EE::1 yet it does not actually use this address.</li>
+  <li>Host A sends another NS message requesting to use another IPv6 address
+  2001:DB8:C0FF:EE::A. Host X again claims that this address is already taken. 
+  Host X essentially claims all addresses that Host A requests to use thereby 
+  preventing Host A from having a valid IPv6 address.</li>
+</ol>
+</p>
+
+<h2>Neighbor Cache Attacks</h2>
+<p>
+When performing address resolution after receiving IPv6 an NA response to an NS 
+request, a host stores the MAC address to IPv6 address binding in its neighbor table/cache. 
+If many hosts reside on the local link, the neighbor table can grow large in size. 
+In IPv6, the interface identifier is 64-bits long. There could be as many as 264 
+potential number of hosts on the link resulting in potentially 264 neighbor table
+entries. With IoT devices prevalent these possibilities become close to reality.
+</p>
+<p>
+A malicious host (Host X) can attempt to fill up the neighbor cache / table of
+another host or router resulting in a DoS condition.
+</p>
+<p>
+Step 1: Malicious Host X sends packets to all potential addresses in its local link. 
+The local router R1 will attempt to resolve the IPv6 addresses in order to forward 
+the frames to them. For hosts whose addresses are not yet resolved, R1 will create 
+an incomplete cache entry for a few seconds as it awaits a response that is never 
+received. This entry eventually times out.
+</p>
+<p>
+However, if Host X sends many such packets fast, it could fill up the R1 neighbor 
+table resulting in a DoS condition.
+</p>
+
+<h1>DHCPv6 Attacks</h1>
+<p>
+DHCPv6 assigns hosts IPv6 prefixes and other configuration options. DHCPv6 is 
+both a stateful and stateless protocol. A rogue DHCPv6 server could be inserted 
+into a network. The attackers can then deploy man-in-the-middle attacks ,traffic
+interception or blackhole traffic.
+</p>
+
+<h2>DHCPV6 Guard</h2>
+<p>
+DHCPv6 Guard blocks reply and advertisements that come from unauthorized / rogue 
+DHCPv6 servers and relay agents. Client messages or messages sent by replay agents 
+from clients are not blocked.
+
+DHCPv6 server messages are only processed if the device role is set to server.
+</p>
+
+<h3>Restrictions</h3>
+<p>
+DHCPv6Guard is not supported on etherchannel ports.
+</p>
+<h3>Configuration</h3>
+<p>
+The configuration of the DHCPv6 Guard is similar to that of the RA Guard. A 
+DHCPv6 Guard policy is configured for the DHCPv6 clients and a separate policy for the 
+servers. The policy is then applied to a VLAN or interface.
+</p>
+<p>
+<ol>
+  <li><b>Configure the DHCPv6 policy:</b>
+     <p>
+     Policy for servers:
+     <ol type="a">
+       <li>
+         <p>
+          <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code style="font-size:110%">
+  SW1(config)#<b>ipv6 dhcp guard policy SERVERS</b><br>
+  SW1(config)#<b>trusted-port</b>
+  </code></div>
+         </p>
+       </li>
+     </ol>
+     </p>
+     <p>
+     Policy for clients:
+     <ol type="a">
+       <li>
+         <p>
+          <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code style="font-size:110%">
+  SW1(config)#<b>ipv6 dhcp guard policy CLIENTS</b><br>
+  SW1(config)#<b>device-role client</b>
+  </code></div>
+         </p>
+       </li>
+     </ol>
+     </p>
+  </li>
+  <li><b>Apply the DHCPv6 Guard policy:</b>
+    <ol type="a">
+      <li>Interface: 
+      <p>
+      <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code style="font-size:110%">
+  SW1(config)#<b>interface g0/0</b><br>
+  SW1(config-if)#<b>ipv6 dhcp guard attach-policy SERVERS</b><br>
+  </code>
+  </div></p>
+      </li>
+      <li>VLAN:
+      <p>
+      <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code style="font-size:110%">
+  SW1(config)#<b>vlan configuration 1</b><br>
+  SW1(config-vlan-config)#<b>ipv6 dhcp guard attach-policy CLIENTS</b>
+  </code></div>
+      </p>
+      </li>
+    </ol>
+  </b>
+</ol>
+
+
+</p>
+
+
+<p>
+<ol>
+<li>
+Step 1: Define an IPv6 ACL;
+#ipv6 access-list acl_name
+#permit host ip_address any
+<li>Step 2: Create an entry in an IPv6 prefix-list;
+#ipv6 prefix-list prefix_list_name permit ipv6_prefix 128
+<li>Step 3: Define the DHCPv6 Guard policy name;
+#ipv6 dhcp guard policy policy_name
+
+<li>Step 4: Specify the device role of the device attached to the target (interface or VLAN);
+#device-role < client | server >
+
+<li>Step 5: Enable verification of the advertised DHCP server and relay address in inspected messages from the configured authorized server ACL. An empty ACL is treated as a permit.
+#match server access-list acl
+
+<li>Step 6: (Optional) Enable verification of advertised prefixes in DHCP reply messages from the configured authorized prefix-list. An empty ACL is treated as a permit.
+
+<li>Step 7: (Optional) Enable verification that the advertised preference (in preference option) is greater than the specified limit; #preference min limit
+
+<li>Step 8: (Optional) Enable verification that the advertised preference is less than the specified limit #preference max limit
+
+<li>Step 9: (Optional) Specify that this policy is being applied to trusted ports. All DHCPv6 guard policing will be disabled; #trusted-port
+
+<ii>Step 10: put an interface into Layer 2 mode;
+
+#interface gigabitethernet0/0
+
+#switchport
+</ol>
+</p>
+<h3>Verification</h3>
+<p>
+#show ipv6 dhcp guard policy policy_name
+</p>
+
+<h2>IPv6 Snooping</h2>
+<p>
+IPv6 snooping bundles several IPv6 first-hop security features such as ND inspection, 
+IPv6 device tracking, IPv6 address glean, IPv6 binding table recovery.
+
+IPv6 ND inspection operates at Layer 2 or between Layer 2 and Layer 3.
+
+IPv6 mitigates vulnerabilities in the ICMPv6 ND mechanisms for example attacks on 
+DAD, address resolution, device discovery and neighbor cache/table.
+IPv6 snooping learns and secures binding for SLAAC addresses in Layer 2 neighbor
+tables and analyses ND messages in order to build a trust binding table. An ND 
+message is considered trustworthy if its IPv6-to-MAC mapping is verifiable. The 
+IPv6 first-hop security binding table recovery mechanism enables the binding table
+to recover in the event of a device reboot.
+</p>
+<p>
+The binding table is a database of IPv6 neighbors connected to the device and is 
+created from sources such as ND snooping. It is used by various IPv6 guard features
+to validate link-layer addresses, IPv4 or IPv6 addresses prefix-binding of neighbors 
+to prevent spoofing and redirect attacks.
+</p>
+
+<h3>Restriction</h3>
+IPv6 snooping is not supported on etherchannels.
+</>
+<h3>Configuration</h3>
+<p>
+To configure an IPv6 snooping policy;
+
+#ipv6 snooping policy policy-name
+
+#Attach the snooping policy to an interface
+
+#interface interface_name_number
+
+#ipv6 snooping attach-policy policy-name
+</p>
+
+<h3>Verification</h3>
+<p>
+Display snooping ND messages and capture policies
+
+#show ipv6 snooping capture-policy interface interface_number
+
+To display information about the packets counted by the interface counter;
+
+#show ipv6 snooping counter interface interface_name_number
+
+To display information about snooping features configured on a device;
+
+#show ipv6 snooping features
+
+To display information about configured policies and interfaces that they are attached to;
+
+#show ipv6 snooping policies
+
+Debugging of IPv6 snooping information;
+
+#debug ipv6 snooping
+</p>
+
+<h1>IPv6 First Hop Security Binding Table</h1>
+<p>
+The binding table recovery mechanism feature enables the binding table to recover
+in the event of a device reboot. The binding table is a database of IPv6 neighbors
+connected to the device and is created from informational sources such as ND snooping,
+DHCP gleaning. It is used by various IPv6 guard features to prevent spoofing and redirect attacks.
+</p>
+<p>
+The recovery mechanism will block any data traffic sourced from an unknown source
+(a source that is not in the binding table).
+
+The binding table introduces the capacity to provide a prefix-list that is matched 
+before the recovery is attempted for both DHCP and NDP.
+
+If an address does not match the prefix-list associated with the protocol, the
+recovery of the binding table entry will not be attempted with that protocol.
+</p>
+<p>
+A binding table is a mapping of layer 2 addresses to IPv6 addresses. Limits can 
+be set for the number of IPv6 addresses that a MAC address can have.
+</p>
