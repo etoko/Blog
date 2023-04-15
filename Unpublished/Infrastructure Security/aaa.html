@@ -1,0 +1,368 @@
+<h1>Introduction</h1>
+Privileges
+
+The default authorisation of Cisco IOS devices is the line password and authorisation is base on privilege level 15. This privilege level grants the user access to most features of the Cisco device.
+
+Privilege Level
+	
+
+Origin
+	
+
+Accessibility
+
+0
+	
+
+Built-in
+	
+
+No access. Few commands are available.
+
+1
+	
+
+Built-in
+	
+
+User mode, very limited access. It is the default exec user level and provides some show commands.
+
+15
+	
+
+Built-in
+	
+
+Privilege exec / enable mode, verification and full access.
+
+2 – 14
+	
+
+User-defined
+	
+
+Granular control over commands users are authorised to use
+
+It is possible to define custom privilege levels and assign commands to them. These custom privilege levels are defined in the range 2 – 14. Users can then be assigned these privileges based on the level of configuration depth that you would like then to make on the devices.
+
+When configuring allowable commands to privilege levels, higher privilege levels inherit commands allowed in lower privilege levels. For example assigning a privilege level of 7 to a user allows the user to run commands that have been allowed to be run in privilege levels 0 – 6 in addition n to level 7.
+
+Example Configuration
+
+R1#configure terminal
+Enter configuration commands, one per line.  End with CNTL/Z.
+R1(config)#privilege exec level 7 configure terminal
+R1(config)#privilege exec level 7 show running-config
+R1(config)#privilege configure level 7 interface
+R1(config)#privilege interface level 7 shutdown
+
+Local Database
+
+A local user database can be created using the global config command username username privilege level secret password.
+
+R1(config)#username user7 privilege 7 secret complexpasswd
+
+Where; user7 is the username, password is complexpasswd and privilege level is level 7.
+Local Database for Authentication
+
+If the local database is to be used for authenticating remote users through vty lines or local console connections, then the following commands can be used.
+
+R1(config)#line vty 0 4
+R1(config-line)#login local
+R1(config-line)#transport input ssh telnet
+
+The above command enables authentication using the local database on vty lines 0 to 4 (5 simultaneous remote logins). In this snippet, SSH has been enabled as the primary remote access method with telnet as backup if SSH fails. Note: It is not recommended to use Telnet.
+
+Take note that accounting is not supported with local AAA.
+
+The series of commands to enable and verify the status of SSH.
+
+R1(config)#                                                                                                                                   
+R1(config)#ip domain-name emmanueltoko.blogspot.com                                                                                                                                                                                                                                         
+R1(config)#crypto key generate rsa modulus 2048                                                                                               
+The name for the keys will be: R1.emmanueltoko.blogspot.com                                                                                   
+                                                                                                                                              
+% The key modulus size is 2048 bits                                                                                                           
+% Generating 2048 bit RSA keys, keys will be non-exportable...                                                                                
+[OK] (elapsed time was 33 seconds)                                                                                                            
+                                                                                                                                              
+R1(config)#                                                                                                                                   
+*Feb 22 13:29:06.599: %SSH-5-ENABLED: SSH 1.99 has been enabled                                                                                                                                                                                                                       
+R1(config)#ip ssh version 2                                                                                                                   
+R1(config)#do show ip ssh                                                                                                                     
+SSH Enabled - version 2.0                                                                                                                     
+Authentication timeout: 120 secs; Authentication retries: 3                                                                                   
+Minimum expected Diffie Hellman key size : 1024 bits                                                                                          
+IOS Keys in SECSH format(ssh-rsa, base64 encoded):                                                                                            
+ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC2ErQIRNGA/SVNcDfgoGZs2KTF3nNPXPC19zUVakD9                                                              
+NGKyb88AhWu1kVJeOSBarZzivfezJY5E2QLzFw6FjZ6Tla41NOTduziwzHht2dvO3kDTCli61wW9bF5Q                                                              
+ekjXc8HOwOXd2f0kslx8Il9QxELY1Sq01tPk/Q4Pgza3NOqC+oLHVLkJt5JBDn84AybjYn56OgXk1ETb                                                              
+Mjj2VKy7M7WdNlhful17LHX/mkVVZSavpMfMhpjaz/Z+yHbgGsNu5r5wNS29+rMpjB4OCAbpATy/Ee1V                                                              
+GsEEiQU8XChJk9kwM8ADxFJZKz5bHHlmbyiI9LS/jN3SaEtZbU2pKpQwMaKN                                                                                  
+R1(config)#                                                                                                                                   
+R1(config)#                                                                                                                                    
+
+Device Security With AAA
+
+When implementing AAA using the local database, the router authenticates the username and password using the local database and the user is authorized to access the network device based on the information in the local database.
+
+AAA features are not available until enabled globally using the global config mode command aaa new-model.
+AAA Authentication with Local Database
+
+Step 1: Turn on AAA services;
+
+R1(config)# aaa new-model
+
+
+Step 2: Create a local user:
+
+R1(config)#username user secret pass
+
+
+Step 3: Set the enable password:
+
+R1(config)#enable secret pass
+
+
+Step 4a: Configure login authentication to use the enable password as the default method:
+
+R1(config)#aaa authentication login default enable
+
+
+OR
+
+
+Step 4b: Create a login authentication method named local_auth and set it to authenticate users against the local database:
+
+R1(config)#aaa authentication login default local_authent local
+
+
+Step 5: Apply local_authent to the VTY lines;
+
+R1(config)#line vty 0 15
+
+R1(config-line)#login authentication local_auth
+
+ 
+
+Step 6: SSH to above router: It uses the local database to authenticate;
+
+R1#ssh -l user7 192.168.1.1
+
+
+AAA Exec Authorization using Local Database
+
+Step 1: Create a user:
+
+R1(config)#username user secret pass
+
+
+Step 2: Login to the above router from the remote host: What is the privilege level?
+
+
+Step 3: Create an exec-authorization method: Create method list local-author. Configure authorization to be performed against the local router’s database
+
+R1(config)#aaa authorization exec local-author local
+
+
+Step 4: Apply ‘local-author’ as an authorisation method for the vty lines
+
+R1(config)#line vty 0 4
+R1(config-line)#authorisation exec local-author
+
+Step 5: Telnet to router and authenticate.
+
+
+AAA Authentication using RADIUS (Remote Authentication Dial-In User Service)
+
+RADIUS is standards-based and combines authentication and authorization into a single resource. It offers robust accounting features. RADIUS uses UDP ports 1812 and 1813. With RADIUS, only password is encrypted.
+Configuration
+
+Step 1: # Enable AAA with aaa new-model command;
+
+R1(config)# aaa new-model
+
+
+Step 2: Define the source of authentication: Use local database as last resort;
+
+The default RADIUS authentication port is 1645 and accounting port 1646.
+
+R1(config)#radius-server host 192.168.1.2 auth-port 1812 acc-port 1813
+R1(config)#radius-server host 192.168.1.2  key password
+
+OR
+
+R1(config)#radius server RADIUS_SERVER01                                                                                                                                                                                                               
+R1(config-radius-server)#address ipv4 192.168.1.2 auth-port 1812 acct-port 1813                                                                                                                                                                                                                                                                                         
+R1(config-radius-server)#key complexpassword                                                                                                                                                                                                                                                                                                                                                            
+R1(config)#radius server RADIUS_SERVER02
+R1(config-radius-server)#address ipv4 192.168.1.5 auth-port 1812 acct-port 1813
+R1(config-radius-server)#key complexkey                                                                                                                           
+
+Step 3: Define a group name that will contain the list of servers:
+
+#aaa group server radius group_name
+
+Define each server in the group: #server ip_address
+
+R1(config)#aaa group server radius RADIUS_SERVERS                                                                                                                                                                           
+R1(config-sg-radius)#server name RADIUS_SERVER01                                                                                                                                                                                                  
+R1(config-sg-radius)#server name RADIUS_SERVER02                                                                                                                                                                                                                        
+
+Alternatively, IP addresses of the RADIUS servers can be defined in place of the server names.
+
+ 
+
+Step 4: Define a list of authentication methods to try: You can list authentication methods by giving the method a descriptive name or using the unnamed ‘default’ method;
+
+Using unnamed default method:
+
+#aaa authentication login default | list-name method1, methhod2, method3
+
+R1(config)#aaa authentication login default group radius local enable
+
+Using a defined group: authent_group
+
+R1(config)#aaa authentication login AAA_AUTHENTICATION group radius local enable 
+
+The methods refer to the following;
+
+    tacacs+; each tacacs+ server is tried in configuration order
+
+    radius: each radius server is tried in configuration order
+
+    local: the local user database containing the username commands configured on the switch
+
+    line: line passwords authenticate any connected user. No usernames can be used.
+
+Note: Add the local, line and/or enable methods at the end of the list as a last resort authentication method.
+
+Step 5: Apply a method list to a line (Console, VTY):
+
+To enable AAA authentication on VTY lines 0 to 4 (5 simultaneous connections).
+
+R1(config)#line vty 0 4
+R1(config-line)#login authentication AAA_AUTHENTICATION
+
+Instead the default unnamed method list can be used if method list was not defined in Step 4.
+AAA Authentication using TACACS+ (Terminal Access Controller Access Control System)
+
+TACACS+ is Cisco-proprietary and uses port 49. It provides separate services for authentication, authorisation and accounting. TACACS+ offers basic accounting features. Unlike RADIUS where only the password is encrypted, with TACACS+, the entire packet is encrypted.
+Configuration
+
+Step 1: Enable AAA:
+
+R1(config)#aaa new-model
+
+
+Step 2: Configure a TACACS+ server s
+
+R1(config)#tacacs server TACACS+_SERVER01                                                                                                                                                                                                               
+R1(config-tacacs-server)#address ipv4 192.168.1.2                                                                                                                                                                                                                                                                                         
+R1(config-tacacs-server)#key complexpassword                                                                                                                                                                                                                                                                                                                                                            
+R1(config)#tacacs server TACACS+_SERVER02
+R1(config-tacacs-server)#address ipv4 192.168.1.5
+R1(config-tacacs-server)#key complexkey   
+
+The TACACS+ port does not need to be explicitly configured as the default port of 49 is used. However, it can be explicitly configured if the TACACS+ server is listening on a port that is not the default TCP port 49.
+
+R1(config-tacacs-server)#port 65000
+
+Step 3: Configure TACACS+ server groups;
+
+R1(config)#aaa group server tacacs+ TACACS+_SERVER_GROUP                                                                                                                                                                           
+R1(config-sg-tacacs)#server name TACACS+_SERVER01                                                                                                                                                                                                  
+R1(config-sg-tacacs)#server name TACACS+_SERVER02 
+
+Step 4: Create a login authentication method named ‘AAA_AUTHENTICATION’ and configure it to authenticate against a TACACS+ server. The local user database should be the backup authentication method.
+
+R1(config)#aaa authentication login AAA_AUTHENTICATION group tacacs+ local
+
+Step 5: Apply ‘AAA_AUTHENTICATION’ method to vty lines
+
+R1(config)#line vty 0 4
+R1(config-line)#login authentication AAA_AUTHENTICATION
+
+Step 6: Telnet above router. What credentials were used and why?
+AAA Authorization
+
+AAA authorization determines what commands an authenticated user is permitted to issue to the network device. Authenticated users are by default put at EXEC level.
+
+Step 1: Configure authorisation by defining any RADIUS or TACACS+ servers. Follow steps 1 -3 of RADIUS and/or TACACS+ configurations above.
+
+Step 2: Define a method list of authorisation that will be tried in sequence using;
+
+#aaa authorisation <commands | config-commands | configuration | exec| network| reverse-access> <default | list-name> method1, method2, method3 …. methodn
+
+Specify the function or service needing authorisation with one of the following keywords;
+
+    commands: the server must return permission to use any command at any privilege level
+
+    config-commands: the server must return permission to use any configuration command.
+
+    configuration: The server must return permission to enter configuration mode.
+
+    exec: server must return permission for the user to run an EXEC session. The server can also return the privilege level for the user so that the user immediately can be put into privileged EXEC (enabled) mode without typing ‘enable’
+
+    network: the server must return permission to use network-related services.
+
+    reverse-access: the server must return permission for the user to access a reverse telnet session.
+
+You can identify the method with a descriptive name (list-name) or use the single unnamed list (default). Each authorisation method will be listed in the order it will be tried;
+
+    group: <group-name>: requests are sent to servers in a group.
+
+    group<radius|tacacs+: requests are sent to all servers of this type.
+
+    if-authenticated: requests are granted if the user is already authenticated.
+
+    none: no external authorisation is used; every user is authorised successfully.
+
+Only TACACS+ servers can authorise users with permission to use specific commands. RADIUS servers offer more of an all or nothing approach.
+
+Step 3: Apply an authorisation method list to a specific line;
+
+R1(config-line)#authorization <commands level | exec | reverse-access> <default | list-name>.
+
+If this command is not entered, the default group is used for all lines.
+
+To configure a switch / router to use AAA authorisation for all lines using configured TACACS+ group, with the local user database as backup authorisation.
+
+R1(config)#aaa authorisation exec aaa-exec group tacacs+ local
+
+Configuring Accounting
+
+AAA accounting logs all actions including configurations and show commands issued on the network device. To configure accounting, the following sequence of commands needs to be configured;
+
+Step 1: Enable AAA and configure RADIUS and TACACS+ server groups as described in steps 1 -3 of RADIUS and TACACS+ authentication procedures.
+
+Define a method list giving a sequence of accounting methods;
+
+#aaa accounting <system | exec | commands level > <default | list-name> <start | stop | stop-only | wait-start | none > method1 method2 method3 ..methodn
+
+The function triggering the accounting can be one of the following;
+
+    system: major events such as reloading are recorded.
+
+    exec: user authentication into an EXEC session is recorded along with the user’s address, time, duration.
+
+    commands level: information about any command running at a specific privilege level is recorded, along with the user who issued the command.
+
+You can specify that certain types of accounting records to be sent to the accounting server using;
+
+    start-stop: events are recorded when they start and stop-only
+
+    stop-only: event are recorded only when they stop.
+
+    none: no events are recorded.
+
+Apply an accounting method list to a specific line;
+
+#accounting <commands level | connection | exec> <default | list-name>
+
+If the above command is not used, default group will be used for all lines. User EXEC sessions will be recorded as they start and stop along with user information. Any commands that are entered while a user is in privilege 15 (enable mode) will also b recorded.
+
+Example:
+
+R1(config)#aaa accounting exec default start-stop group myauthserver
+R1(config)#aaa accounting commands 15 default start-stop group myauthserver.
