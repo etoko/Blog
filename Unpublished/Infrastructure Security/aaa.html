@@ -1,13 +1,14 @@
 <h1>Introduction</h1>
 <h1>Privileges</h1>
 <p>
-The default authorisation of Cisco IOS devices is the line password and 
-authorisation is base on privilege level 15. This privilege level grants the 
-user access to most features of the Cisco device.
+Privileges are the list of commands that a user is authorized to execute. Cisco 
+defines different privilege levels with level 0, 1 and 15 reversed. Privilege 
+levels 2-14 are open for customization. The following table displays the different 
+levels of privileges in Cisco IOS:
 </p>
 <p>
 <table cellspacing="0" width="100%">
-<thead>
+<thead style="background:#d3d3d3; font-weight: bold;">
 <tr>
   <td style="border-bottom:1px solid; border-top:1px solid;">Privilege Level</td>
   <td style="border-bottom:1px solid; border-top:1px solid;">Origin</td>
@@ -40,32 +41,20 @@ user access to most features of the Cisco device.
 </table>
 </p>
 <h2>Custom Privileges</h2>
-<p>
-It is possible to define custom privilege levels and assign commands to them. 
+<p> 
 These custom privilege levels are defined in the range 2 – 14. Users can then be 
 assigned these privileges based on the level of configuration depth that you would 
-like then to make on the devices.
-</p>
-<p>
-The default privilege for remote access is 1(one) while console is 15. If a privilege 
+like them to make on the devices.
+The default privilege for remote access (SSH, Telnet) is 1(one) while console is 15. If a privilege 
 level is not assigned to a line or user, then the default privilege is used.
 </p>
 <p>
 When configuring allowable commands to privilege levels, higher privilege levels 
 inherit commands allowed in lower privilege levels. For example assigning a 
 privilege level of 7 to a user allows the user to run commands that have been 
-allowed to be run in privilege levels 0 – 6 in addition n to level 7.
+allowed to be run in privilege levels 0 – 6 in addition to level 7.
 </p>
 
-<p>
-<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-  <code style="font-size:110%">
-R1(config)#<b>privilege exec level 7 configure terminal</b><br>
-R1(config)#<b>privilege exec level 7 show running-config</b><br>
-R1(config)#<b>privilege configure level 7 interface</b><br>
-R1(config)#<b>privilege interface level 7 shutdown</b>
-</code></div>
-</p>
 <p>
 The following example configuration sets the commands that the custom privilege 
 level 2 is permitted to run. Here, the user is permitted to access the configuration 
@@ -79,6 +68,7 @@ R1(config)#<b>privilege exec level 2 configure terminal</b><br>
 R1(config)#<b>privilege configure level 2 interface</b><br>
 R1(config)#<b>privilege interface level 2 shutdown</b><br>
 R1(config)#<b>privilege interface level 2 no shutdown</b><br>
+R1(config)#<b>privilege exec level 2 show privilege</b><br>
 R1(config)#<b>username bob privilege 2 secret alice</b>
 </code></div>
 </p>
@@ -95,19 +85,45 @@ and privileges from a centralized point.
 <h3>Line Privilege</h3>
 <p>
 Privilege level can be configured for a line rather than a user (see Local Database section).
-This can be accomplished using the line command <code><b>privilege level &lt;level&gt;</b></code>
+This can be accomplished using the line command <code><b>privilege level &lt;level&gt;</b></code>.
+Here, all users who login into the device through the configured line will be 
+granted the same privilege level.
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
   <code style="font-size:110%">
-  <b>line vty 0 5</b><br>
-  <b>privilege level 15</b>
+  R1(config)#<b>line vty 0 4</b><br>
+  R1(config-line)#<b>privilege level 10</b>
   </code></div>
+</p>
+<p>
+If a user has a privilege configured in the local database, if the user logs into a device  
+through the line that has a configured privilege, the user's local database 
+configured-privilege supersedes the configured line privilege.
 </p>
 
 <h2>Verification</h2>
 <p>
-To verify privileges of the login session, use the command <code><b>show privileges</b></code>.
+To verify privileges of the login session, use the command <code><b>show privilege</b></code>.
+</p>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code style="font-size:110%">
+R2#<b>192.168.1.1</b>           <br>
+Trying 192.168.1.1 ... Open     <br>
+                                <br>
+User Access Verification        <br>
+                                <br>
+Username: <b>bob</b>                   <br>
+Password:                       <br>
+R1#<b>show privilege</b>               <br>
+Current privilege level is 2    <br>
+  </code></div>
+</p>
+<p>
+From the output above, the VTY line was configured with a privilege level of 10. 
+However, the user bob's session privilege is 2(two) which is the privilege 
+level configured in the local database. 
 </p>
 
 <h1>Local Database</h1>
@@ -302,6 +318,10 @@ single resource. It offers robust accounting features. The default ports for RAD
 servers are 1645 for authentication and 1646 for accounting. The new RFC sets the 
 RADIUS ports on UDP ports 1812 for authentication and 1813 for accounting. 
 With RADIUS, only password is encrypted. 
+</p>
+<p>
+RADIUS combines authentication and authorization features. It offers robust 
+accounting features.
 </p>
 <p>
 The RADIUS server may be located in the same subnet or remote network. All that 
@@ -646,7 +666,7 @@ R1(config-line)#<b>authorization exec CON</b><br>
 </li>
 </ol>
 
-<h3>Autologout</h3>
+<h3><code>autocommand logout</code></h3>
 <p>
 Given a user, bob, if we want to ensure that this account is authenticated for 
 some purposes but not for login, one option available is not to use the aaa 
@@ -708,7 +728,8 @@ R1(config)#<b>aaa accounting commands 15 default start-stop group myauthserver</
 
 <h2>Authentication using TACACS+</h2>
 <p>
-TACACS+ (Terminal Access Controller Access Control System) is Cisco-proprietary and uses port 49. It provides separate services for 
+TACACS+ (Terminal Access Controller Access Control System) is Cisco-proprietary 
+and uses port 49. It provides separate services for 
 authentication, authorisation and accounting. TACACS+ offers basic accounting features. 
 Unlike RADIUS where only the password is encrypted, with TACACS+, the entire packet is encrypted.
 </p>

@@ -39,11 +39,16 @@ user access to most features of the Cisco device.
 </tbody>
 </table>
 </p>
+<h2>Custom Privileges</h2>
 <p>
 It is possible to define custom privilege levels and assign commands to them. 
 These custom privilege levels are defined in the range 2 – 14. Users can then be 
 assigned these privileges based on the level of configuration depth that you would 
 like then to make on the devices.
+</p>
+<p>
+The default privilege for remote access is 1(one) while console is 15. If a privilege 
+level is not assigned to a line or user, then the default privilege is used.
 </p>
 <p>
 When configuring allowable commands to privilege levels, higher privilege levels 
@@ -52,7 +57,6 @@ privilege level of 7 to a user allows the user to run commands that have been
 allowed to be run in privilege levels 0 – 6 in addition n to level 7.
 </p>
 
-<h2>Configuration</h2>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
   <code style="font-size:110%">
@@ -62,11 +66,58 @@ R1(config)#<b>privilege configure level 7 interface</b><br>
 R1(config)#<b>privilege interface level 7 shutdown</b>
 </code></div>
 </p>
+<p>
+The following example configuration sets the commands that the custom privilege 
+level 2 is permitted to run. Here, the user is permitted to access the configuration 
+mode and shutdown or enable interfaces only. Privilege level 2 is then assigned 
+to a user account on the local database.
+</p>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code style="font-size:110%">
+R1(config)#<b>privilege exec level 2 configure terminal</b><br>
+R1(config)#<b>privilege configure level 2 interface</b><br>
+R1(config)#<b>privilege interface level 2 shutdown</b><br>
+R1(config)#<b>privilege interface level 2 no shutdown</b><br>
+R1(config)#<b>username bob privilege 2 secret alice</b>
+</code></div>
+</p>
+<p>
+When the privilege level is defined on the router as in the case above, by default, 
+the router will use the local database for commands.
+</p>
+<p>
+The use of role-based access control(RBAC) provides granular control over commands 
+and privileges from a centralized point. 
+</p>
+
+
+<h3>Line Privilege</h3>
+<p>
+Privilege level can be configured for a line rather than a user (see Local Database section).
+This can be accomplished using the line command <code><b>privilege level &lt;level&gt;</b></code>
+</p>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code style="font-size:110%">
+  <b>line vty 0 5</b><br>
+  <b>privilege level 15</b>
+  </code></div>
+</p>
+
+<h2>Verification</h2>
+<p>
+To verify privileges of the login session, use the command <code><b>show privileges</b></code>.
+</p>
 
 <h1>Local Database</h1>
 <p>
 A local user database can be created using the global config command 
-<code><b>username &lt;username&gt; privilege &lt;level&gt; secret &lt;password&gt;</b></code>
+<code><b>username &lt;username&gt; privilege &lt;level&gt; secret &lt;password&gt;</b></code>.
+Use of the keyword <code><b>secret</b></code> is preferred to <code><b>password</b></code>
+because it encrypts the secret key in the configuration file. If <code><b>password</b></code> 
+is used, then the secret key has to be encrypted in the configuration file using 
+the command <code><b>service password encryption</b></code>.
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
@@ -247,8 +298,10 @@ R1(config-line)#<b>authorisation exec local-author</b>
 <p>
 RADIUS (Remote Authentication Dial-In User Service) is standards-based and combines 
 authentication and authorization into a 
-single resource. It offers robust accounting features. RADIUS uses UDP ports 
-1812 and 1813. With RADIUS, only password is encrypted. 
+single resource. It offers robust accounting features. The default ports for RADIUS 
+servers are 1645 for authentication and 1646 for accounting. The new RFC sets the 
+RADIUS ports on UDP ports 1812 for authentication and 1813 for accounting. 
+With RADIUS, only password is encrypted. 
 </p>
 <p>
 The RADIUS server may be located in the same subnet or remote network. All that 
@@ -265,7 +318,17 @@ IP address and connects to the port number 1812.
 When configuring RADIUS authentication, ensure that a backup authentication method 
 is configured to avoid being unable to access the device due to misconfiguration 
 of the RADIUS authentication. Usually, this backup authentication method uses the 
-local database.
+local database. When authenticating a user login session against a RADIUS server, 
+IOS will attempt to connect to the RADIUS server up to five times  to make an 
+access request. If it the connection attempt fails all these five times, then 
+the backup authentication method is used. 
+A RADIUS server will not respond to an access request if the requester is not 
+configured as a client. This happens regardless of whether IP connectivity 
+between the client and the server exists.
+</p>
+<p>
+If the RADIUS server does respond with an access denied message, then the IOS 
+will deny access and not use the configured backup authentication method.
 </p>
 
 <h3>Configuration</h3>
@@ -302,6 +365,23 @@ R1(config-radius-server)#<b>address ipv4 192.168.1.5 auth-port 1812 acct-port 18
 R1(config-radius-server)#<b>key complexkey</b>          
 </code></div>
 </p>
+<p>
+Additional interaction with the RADIUS servers can be configured using the following 
+options:
+<ul>
+  <li><b>timeout:</b> configure the timeout period when requesting for an authentication attempt. 
+  If access to the first server times out, an attempt to connect to the second server 
+  is initiated.</li>
+  <li><b>retransmit:</b> number of retransmits after every failure. The default 
+  number of retransmit attempts is five times.</li>
+</ul>
+</p>
+<p>
+When configuring a server, it is automatically added to a group <b>radius</b>. If 
+a server group is explicitly configured (step below), then the server will be 
+added to this group.
+</p>
+
 </li>
 <li>
 <ol type="a">
@@ -323,7 +403,16 @@ R1(config-sg-radius)#<b>server name RADIUS_SERVER01</b><br>
 R1(config-sg-radius)#<b>server name RADIUS_SERVER02</b>
 </code></div>
 </p>
+<p>
 Alternatively, IP addresses of the RADIUS servers can be defined in place of the server names.
+The timeout and retransmit settings can also be configured for each server in this group.
+</p>
+<p>
+If configuring a server as private, using <code><b>server-private</b></code> instead
+of <code><b>server</b></code>, it 
+does not get added to the group radius but is only available in the group can 
+it is defined in.
+</p>
 </li>
  </ol>
 <li>
@@ -370,9 +459,9 @@ R1(config)#<b>aaa authentication login AAA_AUTHENTICATION </b>
 </p>
 </li>
 </ol>
-<li><b>Define the authentication method:</b> 
+<li><b>Define the authentication method(s):</b> 
 <p>
-The methods refer to the following;
+More than one method can be configured. The methods refer to the following;
 
 <ul>
  <li><b>tacacs+:</b> each tacacs+ server is tried in configuration order</li>
@@ -384,17 +473,34 @@ The methods refer to the following;
 </ul>    
 </p>
 <p>
-
-</p><div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+The following configuration uses the enable authentication as a backup for RADIUS 
+authentication. 
+</p>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
   <code style="font-size:110%">
 R1(config)#<b>aaa authentication login AAA_AUTHENTICATION group radius local enable</b> 
 </code></div>
+</p>
 <p>
-The keyword &lt;group&gt; has the options RADIUS or TACACS and the authentication 
+The keyword <code><b>group</b></code> has the options RADIUS or TACACS and the authentication 
 request will be forwarded to the configured RADIUS groups first, the next 'local' will be 
 used if the RADIUS servers are unavailable/unreachable. Lastly, the enable password will be used 
 for authentication.
 Note: Add the local, line and/or enable methods at the end of the list as a last resort authentication method.
+</p>
+<p>
+If the authentication using RADIUS fails, the next authentication method is not used. 
+RADIUS authentication failure happens when a user account is not available in the 
+RADIUS server or when a user's password is not correct. The second authentication 
+method is only used if the RADIUS server is not reachable.
+</p>
+<p>
+However, if the local or local-case authentication method is configured as first 
+authentication method and RADIUS as second, if an authentication request fails for 
+the local method, then RADIUS authentication is attempted next. This fact can 
+be used to ensure that some users are authenticated using the local database and 
+others use RADIUS only.
 </p>
 </li>
 </ol>
@@ -419,11 +525,25 @@ R1(config-line)#<b>login authentication AAA_AUTHENTICATION</b>
 Instead the default unnamed method list can be used if method list was not defined in Step 4.
 </p>
 
+<h3>Verification</h3>
+<p>
+RADIUS authentication can be verified using the command <code><b>debug radius authentication</b></code>.
+</p>
 
 <h3>Authorization</h3>
 <p>
 AAA authorization determines what commands an authenticated user is permitted to 
 issue to the network device. Authenticated users are by default put at EXEC level.
+Command authorization involves configuring the commands that an authenticated user 
+is permitted to use. Here, an authorization request is sent to the RADIUS server 
+each time that the user types a command. Authorization can be configured to 
+set the login session to a configured privilege. If privileges have not been 
+configured, then the default privilege is set (one for remote session and fifteen 
+for a console session).
+</p>
+<p>
+ Configuring a privilege at the line level is not recommended as all users will 
+ have the same privilege. It is recommended to set the privilege for each user.
 </p>
 <p>
 <ol>
@@ -478,9 +598,61 @@ configured TACACS+ group, with the local user database as backup authorisation.
 R1(config)#<b>aaa authorisation exec aaa-exec group tacacs+ local</b>
 </code></div>
 </p>
+<p>
+Another example:
+</p>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code style="font-size:110%">
+R1(config)#<b>aaa authorisation exec VTY group radius local</b>
+</code></div>
+</p>
+<p>
+Here authorization is attempted using configured RADIUS servers; if this fails, 
+then the local database is used as backup.
+</p>
+</li>
+<li>
+Apply the authorization to the line:
+<ol type="a">
+  <li>For remote sessions(vty):
+  <p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code style="font-size:110%">
+R1(config)#<b>line vty 0 98</b><br>
+R1(config-line)#<b>authorization exec VTY</b>
+</code></div>
+</p>
+  </li>
+  <li>For console sessions:
+  <p>
+  Authorization is not enabled on console by default. It should be explicitly 
+  enabled first.
+  </p>
+  <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code style="font-size:110%">
+R1(config)#<b>aaa authorization console</b><br>
+</code></div>
+  <p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code style="font-size:110%">
+R1(config)#<b>line console 0</b><br>
+R1(config-line)#<b>authorization exec CON</b><br>
+</code></div>
+</p>
+</li>
+  </li>
+</ol>
 </li>
 </ol>
 
+<h3>Autologout</h3>
+<p>
+Given a user, bob, if we want to ensure that this account is authenticated for 
+some purposes but not for login, one option available is not to use the aaa 
+authentication for login. Another option is to use <code><b>username bob autocommand logout</b></code>.
+Under authorization, <code><b>aaa authorization exec default local group MYRADIUS</b></code>.
+</p>
 <h1>Accounting</h1>
 <p>
 AAA accounting logs all actions including configurations and show commands issued
