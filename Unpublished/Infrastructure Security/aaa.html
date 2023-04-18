@@ -128,7 +128,17 @@ level configured in the local database.
 
 <h1>Local Database</h1>
 <p>
-A local user database can be created using the global config command 
+The local database is a list of user accounts configured on the local device. 
+The local database contains records of the username, password and configured 
+privilege levels for users. 
+The local database supports authentication and authorization features. However, 
+it does not support accounting functionality. Authorization is 
+supported through the configuration of privilege levels.
+This database can be used to authenticate many types 
+of sessions such as login sessions.
+</p>
+<p>
+A local user database is created using the global config command 
 <code><b>username &lt;username&gt; privilege &lt;level&gt; secret &lt;password&gt;</b></code>.
 Use of the keyword <code><b>secret</b></code> is preferred to <code><b>password</b></code>
 because it encrypts the secret key in the configuration file. If <code><b>password</b></code> 
@@ -138,7 +148,13 @@ the command <code><b>service password encryption</b></code>.
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
   <code style="font-size:110%">
-R1(config)#<b>username user7 privilege 7 secret complexpasswd</b>
+R1(config)#<b>username bob privilege 1 secret alice      </b>     <br>
+R1(config)#<b>username alice privilege 1 secret bob      </b>     <br>
+R1(config)#<b>username rasta privilege 1 password reggae </b>     <br>
+R1(config)#<b>do show run | in username </b>                      <br>
+username bob privilege 2 secret 5 $1$WHSh$PYERWv2eq6ud0txH8G4id.  <br>
+username alice privilege 3 secret 5 $1$HxyA$IHet6l6lilvR7A2z7bYme.<br>
+username rasta password 0 reggae                                  <br>
 </code>
 </div>
 </p>
@@ -147,28 +163,6 @@ R1(config)#<b>username user7 privilege 7 secret complexpasswd</b>
 <p>
 If the local database is to be used for authenticating remote users through vty 
 lines or local console connections, then the following commands can be used.
-</p>
-<p>
-<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-  <code style="font-size:110%">
-R1(config)#<b>line vty 0 4</b><br>
-R1(config-line)#<b>login local</b><br>
-R1(config-line)#<b>transport input ssh telnet</b>
-</code></div>
-</p>
-<p>
-The above command enables authentication using the local database on vty lines 
-0 to 4 (5 simultaneous remote logins). In this snippet, SSH has been enabled as 
-the primary remote access method with telnet as backup if SSH fails.
-</p>
-<p>
-<b>Note:</b> It is not recommended to use Telnet.
-</p>
-<p>
-Take note that accounting is not supported with local AAA.
-</p>
-<p>
-The series of commands to enable and verify the status of SSH.
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
@@ -193,21 +187,41 @@ ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC2ErQIRNGA/SVNcDfgoGZs2KTF3nNPXPC19zUVakD9
 NGKyb88AhWu1kVJeOSBarZzivfezJY5E2QLzFw6FjZ6Tla41NOTduziwzHht2dvO3kDTCli61wW9bF5Q <br>                                                             
 ekjXc8HOwOXd2f0kslx8Il9QxELY1Sq01tPk/Q4Pgza3NOqC+oLHVLkJt5JBDn84AybjYn56OgXk1ETb <br>                                                             
 Mjj2VKy7M7WdNlhful17LHX/mkVVZSavpMfMhpjaz/Z+yHbgGsNu5r5wNS29+rMpjB4OCAbpATy/Ee1V <br>                                                             
-GsEEiQU8XChJk9kwM8ADxFJZKz5bHHlmbyiI9LS/jN3SaEtZbU2pKpQwMaKN                                                                                  
-</code></div>                                                                                                                                   
+GsEEiQU8XChJk9kwM8ADxFJZKz5bHHlmbyiI9LS/jN3SaEtZbU2pKpQwMaKN      <br>  
+R1(config)#<b>line vty 0 4</b><br>
+R1(config-line)#<b>login local</b><br>
+R1(config-line)#<b>transport input ssh telnet</b>
+</code></div>
+</p>
+<p>
+The above command enables authentication using the local database on vty lines 
+0 to 4 (5 simultaneous remote logins). In this snippet, SSH has been enabled as 
+the primary remote access method with telnet as backup if SSH fails.
+</p>
+<p>
+<b>Note:</b> It is recommended disable remote access using telnet as it sends 
+the authentication credentials and commands to the remote device in clear text.
 </p>
 
 <h1>Device Security With AAA</h1>
+<p>
+AAA refers to authentication, authorization and accounting. It is a refined 
+approach to authenticating users, authorizing their activities and logging (accounting) 
+for all their activities and commands issued on a network device. AAA supports 
+the local database, RADIUS and TACACS+.
+</p>
+
+<p>
+AAA features are not available until enabled globally using the global config 
+mode command aaa new-model.
+</p>
+
+<h2>Local Database</h2>
 <p>
 When implementing AAA using the local database, the router authenticates the 
 username and password using the local database and the user is authorized to 
 access the network device based on the information in the local database.
 </p>
-<p>
-AAA features are not available until enabled globally using the global config 
-mode command aaa new-model.
-</p>
-<h2>Local Database</h2>
 <h3>Authentication with Local Database</h3>
 <p>
 <ol>
@@ -253,7 +267,7 @@ authenticate users against the local database:
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
   <code style="font-size:110%">
-R1(config)#<b>aaa authentication login default local_authent local</b>
+R1(config)#<b>aaa authentication login local_auth local</b>
 </code></div>
 </p>
 <li>Apply local_authent to the VTY lines;
@@ -275,6 +289,11 @@ R1#ssh -l user7 192.168.1.1
 </p>
 
 <h3>Authorization using Local Database</h3>
+<p>
+If authorization is enabled for a line, and <code><b>enable secret</b></code> is 
+configured, the enable secret is superseded by the aaa authorization. To enable 
+authorization,
+</p>
 <p>
 <ol>
   <li>Create a user:
@@ -312,14 +331,12 @@ R1(config-line)#<b>authorisation exec local-author</b>
 
 <h2 id="RADIUS">RADIUS</h2>
 <p>
-RADIUS (Remote Authentication Dial-In User Service) is standards-based and combines 
-authentication and authorization into a 
+RADIUS (Remote Authentication Dial-In User Service) is standards-based protocol 
+for implementing AAA. It combines authentication and authorization into a 
 single resource. It offers robust accounting features. The default ports for RADIUS 
 servers are 1645 for authentication and 1646 for accounting. The new RFC sets the 
 RADIUS ports on UDP ports 1812 for authentication and 1813 for accounting. 
-With RADIUS, only password is encrypted. 
-</p>
-<p>
+With RADIUS, only the password is encrypted. 
 RADIUS combines authentication and authorization features. It offers robust 
 accounting features.
 </p>
@@ -337,18 +354,19 @@ IP address and connects to the port number 1812.
 <p>
 When configuring RADIUS authentication, ensure that a backup authentication method 
 is configured to avoid being unable to access the device due to misconfiguration 
-of the RADIUS authentication. Usually, this backup authentication method uses the 
+of the RADIUS authentication. Usually, this backup authentication method is the 
 local database. When authenticating a user login session against a RADIUS server, 
-IOS will attempt to connect to the RADIUS server up to five times  to make an 
-access request. If it the connection attempt fails all these five times, then 
+by default, IOS will attempt to connect to the RADIUS server up to five times to make an 
+access request. If the connection attempt fails all these five times, then 
 the backup authentication method is used. 
 A RADIUS server will not respond to an access request if the requester is not 
 configured as a client. This happens regardless of whether IP connectivity 
 between the client and the server exists.
 </p>
 <p>
-If the RADIUS server does respond with an access denied message, then the IOS 
-will deny access and not use the configured backup authentication method.
+If the RADIUS server does respond with an access denied message to an authentication 
+request, then the IOS will deny access and not use the configured backup 
+authentication method.
 </p>
 
 <h3>Configuration</h3>
@@ -365,6 +383,7 @@ R1(config)#<b>aaa new-model</b>
 <li>
 Define the source of authentication: Use local database as last resort;
 The default RADIUS authentication port is 1645 and accounting port 1646.
+<p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
   <code style="font-size:110%">
 R1(config)#<b>radius-server host 192.168.1.2 auth-port 1812 acc-port 1813</b><br>
@@ -389,17 +408,37 @@ R1(config-radius-server)#<b>key complexkey</b>
 Additional interaction with the RADIUS servers can be configured using the following 
 options:
 <ul>
-  <li><b>timeout:</b> configure the timeout period when requesting for an authentication attempt. 
-  If access to the first server times out, an attempt to connect to the second server 
-  is initiated.</li>
-  <li><b>retransmit:</b> number of retransmits after every failure. The default 
-  number of retransmit attempts is five times.</li>
+  <li><b><code><b>timeout &lt;1-1000&gt;</b></code>:</b> the time to wait(in seconds) for the server to respond when 
+  requesting for an authentication attempt. If access to the first server times 
+  out, an attempt to connect to the second server is initiated.</li>
+  <li><code><b>retransmit &lt;0-100&gt;:</b></code> number of retries to active server after every failure. 
+  The default number of retransmit attempts is five times.</li>
 </ul>
 </p>
 <p>
-When configuring a server, it is automatically added to a group <b>radius</b>. If 
+When configuring a server, it is automatically added to a group <code><b>radius</b></code>. If 
 a server group is explicitly configured (step below), then the server will be 
-added to this group.
+added to this group. This can be verified using the command <code><b>show radius 
+server-group all</b></code>:
+</p>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code style="font-size:110%">
+R1#<b>show radius server-group all</b><br>                  
+<span style="background:#d3d3d3;">Server group radius</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>          
+&nbsp;&nbsp;&nbsp;&nbsp;Sharecount = 1&nbsp;&nbsp;sg_unconfigured = FALSE                                                <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Type = standard&nbsp;&nbsp;Memlocks = 1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                      <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Server(192.168.1.2:1812,1813) Transactions:                                                      <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Authen: 0&nbsp;&nbsp; Author: 0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Acct: 0                      <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Server_auto_test_enabled: FALSE&nbsp;&nbsp;&nbsp;&nbsp;                                          <br>
+&nbsp;&nbsp;&nbsp;&nbsp; Keywrap enabled: FALSE&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  <br>        
+&nbsp;&nbsp;&nbsp;&nbsp;Server(192.168.1.5:1812,1813) Transactions:                                                      <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Authen: 0&nbsp;&nbsp; Author: 0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Acct: 0                      <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Server_auto_test_enabled: FALSE&nbsp;&nbsp;&nbsp;&nbsp;                                          <br>
+&nbsp;&nbsp;&nbsp;&nbsp; Keywrap enabled: FALSE&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  <br>        
+                                                 
+R1#
+</code></div>
 </p>
 
 </li>
@@ -424,14 +463,53 @@ R1(config-sg-radius)#<b>server name RADIUS_SERVER02</b>
 </code></div>
 </p>
 <p>
-Alternatively, IP addresses of the RADIUS servers can be defined in place of the server names.
+Alternatively, IP address or server name(requires DNS server to be configured) 
+of the RADIUS servers can be defined in place of the server names using the 
+command <code><b>server &lt;ip-address|hostname&gt;</b></code>.
 The timeout and retransmit settings can also be configured for each server in this group.
+</p>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code style="font-size:110%">
+R1(config-sg-radius)#<b>do show radius server-group all</b> <br>
+Server group radius&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;            <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Sharecount = 1&nbsp;&nbsp;sg_unconfigured = FALSE          <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Type = standard&nbsp;&nbsp;Memlocks = 1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;            <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Server(192.168.1.2:1812,1813) Transactions:      <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Authen: 0&nbsp;&nbsp; Author: 0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Acct: 0&nbsp;&nbsp;            <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Server_auto_test_enabled: FALSE&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;            <br>
+&nbsp;&nbsp;&nbsp;&nbsp; Keywrap enabled: FALSE&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;            <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Server(192.168.1.5:1812,1813) Transactions:      <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Authen: 0&nbsp;&nbsp; Author: 0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Acct: 0&nbsp;&nbsp;            <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Server_auto_test_enabled: FALSE&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;            <br>
+&nbsp;&nbsp;&nbsp;&nbsp; Keywrap enabled: FALSE&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;            <br>
+Server group RADIUS_SERVERS&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;            <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Sharecount = 1&nbsp;&nbsp;sg_unconfigured = FALSE          <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Type = standard&nbsp;&nbsp;Memlocks = 1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;            <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Server(192.168.1.2:1812,1813) Transactions:      <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Authen: 0&nbsp;&nbsp; Author: 0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Acct: 0&nbsp;&nbsp;            <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Server_auto_test_enabled: FALSE&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;            <br>
+&nbsp;&nbsp;&nbsp;&nbsp; Keywrap enabled: FALSE&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;            <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Server(192.168.1.5:1812,1813) Transactions:      <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Authen: 0&nbsp;&nbsp; Author: 0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Acct: 0&nbsp;&nbsp;            <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Server_auto_test_enabled: FALSE&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;            <br>
+&nbsp;&nbsp;&nbsp;&nbsp; Keywrap enabled: FALSE&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;            <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;           <br>
+R1(config-sg-radius)#
+</code></div>
 </p>
 <p>
 If configuring a server as private, using <code><b>server-private</b></code> instead
 of <code><b>server</b></code>, it 
 does not get added to the group radius but is only available in the group can 
 it is defined in.
+</p>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code style="font-size:110%">
+R1(config)#<b>aaa group server radius RADIUS_SERVERS</b><br>  
+R1(config-sg-radius)#<b>server-private 192.168.1.7 auth-port 1645 acct-port 1646 key cisco</b>
+</code></div>
 </p>
 </li>
  </ol>
@@ -445,7 +523,7 @@ Configure the purpose of the authentication and method of authentication:
     <li><b>enable:</b> executing the <code><b>enable</b></code> command to move into 
     privileged mode. The authentication prompt for enable appears regardless of 
     connection type i.e., console, SSH, telnet.</li>
-    <li><b>dot1x:</b> authentication by cabled
+    <li><b>dot1x:</b> authentication by cable network access.</li>
   </ul>
   </li>
   <li>
@@ -525,8 +603,6 @@ others use RADIUS only.
 </li>
 </ol>
 </li>
-</ol>
-</li>
 <li>
 Apply a method list to a line (Console, VTY):
 
@@ -545,10 +621,114 @@ R1(config-line)#<b>login authentication AAA_AUTHENTICATION</b>
 Instead the default unnamed method list can be used if method list was not defined in Step 4.
 </p>
 
+</ol>
+</li>
+
 <h3>Verification</h3>
 <p>
 RADIUS authentication can be verified using the command <code><b>debug radius authentication</b></code>.
+The following output shows an attempt to login remotely using telnet. The RADIUS 
+servers in the server group are unreachable, so the backup authentication method, 
+<code><b>local-case</b></code> is used and is successful:
 </p>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code style="font-size:110%">
+!!On R1
+
+R1#<b>debug radius authentication</b><br>
+!--------------------------                                                                                                 <br>
+!!On R2                                                                                                                     <br>
+R2#192.168.1.1                                                                                                              <br>
+Trying 192.168.1.1 ... Open                                                                                                 <br>
+                                                                                                                            <br>
+User Access Verification                                                                                                    <br>
+                                                                                                                            <br>
+Username: bob                                                                                                               <br>
+Password:                                                                                                                   <br>
+                                                                                                                            <br>
+R1#                                                                                                                         <br>
+                                                                                                                            <br>
+!!! Debug messages on R1                                                                                                    <br>
+!---------------                                                                                                            <br>
+*Apr 17 22:47:31.367: RADIUS/ENCODE(00000024): ask "Username: "                                                             <br>
+*Apr 17 22:47:31.367: RADIUS/ENCODE(00000024): send packet; GET_USER                                                        <br>
+R1(config)#                                                                                                                 <br>
+*Apr 17 22:47:37.479: RADIUS/ENCODE(00000024): ask "Password: "                                                             <br>
+*Apr 17 22:47:37.483: RADIUS/ENCODE(00000024): send packet; GET_PASSWORD                                                    <br>
+R1(config)#                                                                                                                 <br>
+*Apr 17 22:47:41.855: RADIUS/ENCODE(00000024):Orig. component type = Exec                                                   <br>
+*Apr 17 22:47:41.859: RADIUS:  AAA Unsupported Attr: interface         [221] 4   1797168952                                 <br>
+*Apr 17 22:47:41.859: RADIUS/ENCODE(00000024): dropping service type, "radius-server attribute 6 on-for-login-auth" is off  <br>
+*Apr 17 22:47:41.859: RADIUS(00000024): Config NAS IP: 0.0.0.0                                                              <br>
+*Apr 17 22:47:41.859: RADIUS(00000024): Config NAS IPv6: ::                                                                 <br>
+*Apr 17 22:47:41.863: RADIUS/ENCODE(00000024): acct_session_id: 19                                                          <br>
+*Apr 17 22:47:41.863: RADIUS(00000024): sending                                                                             <br>
+*Apr 17 22:47:41.867: RADIUS/ENCODE: Best Local IP-Address 192.168.1.1 for Radius-Server 192.168.1.2                        <br>
+*Apr 17 22:47:41.867: RADIUS(00000024): Send Access-Request to 192.168.1.2:1812 id 1645/2, len 67                           <br>
+*Apr 17 22:47:41.867: RADIUS:  authenticator 83 1D 62 A3 6C FD D2 D4 - A2 59 29 65 B0 96 39 3D                              <br>
+*Apr 17 22:47:41.867: RADIUS:  User-Name           [1]   5   "bob"                                                          <br>
+*Apr 17 22:47:41.867: RADIUS:  User-Password       [2]   18  *                                                              <br>
+*Apr 17 22:47:41.867: RADIUS:  NAS                                                                                          <br>
+R1(config)#-Port            [5]   6   2                                                                                     <br>
+*Apr 17 22:47:41.867: RADIUS:  NAS-Port-Id         [87]  6   "tty2"                                                         <br>
+*Apr 17 22:47:41.867: RADIUS:  NAS-Port-Type       [61]  6   Virtual                   [5]                                  <br>
+*Apr 17 22:47:41.867: RADIUS:  NAS-IP-Address      [4]   6   192.168.1.1                                                    <br>
+*Apr 17 22:47:41.867: RADIUS(00000024): Sending a IPv4 Radius Packet                                                        <br>
+*Apr 17 22:47:41.867: RADIUS(00000024): Started 5 sec timeout                                                               <br>
+R1(config)#                                                                                                                 <br>
+*Apr 17 22:47:46.875: RADIUS(00000024): Request timed out!                                                                  <br>
+*Apr 17 22:47:46.875: RADIUS: Retransmit to (192.168.1.2:1812,1813) for id 1645/2                                           <br>
+*Apr 17 22:47:46.879: RADIUS(00000024): Started 5 sec timeout                                                               <br>
+R1(config)#                                                                                                                 <br>
+*Apr 17 22:47:51.923: RADIUS(00000024): Request timed out!                                                                  <br>
+*Apr 17 22:47:51.923: RADIUS: Retransmit to (192.168.1.2:1812,1813) for id 1645/2                                           <br>
+*Apr 17 22:47:51.927: RADIUS(00000024): Started 5 sec timeout                                                               <br>
+R1(config)#                                                                                                                 <br>
+*Apr 17 22:47:56.959: RADIUS(00000024): Request timed out!                                                                  <br>
+*Apr 17 22:47:56.959: RADIUS: Retransmit to (192.168.1.2:1812,1813) for id 1645/2                                           <br>
+*Apr 17 22:47:56.963: RADIUS(00000024): Started 5 sec timeout                                                               <br>
+R1(config)#                                                                                                                 <br>
+*Apr 17 22:48:01.979: RADIUS(00000024): Request timed out!                                                                  <br>
+*Apr 17 22:48:01.979: RADIUS: Fail-over to (192.168.1.5:1812,1813) for id 1645/2                                            <br>
+*Apr 17 22:48:01.983: RADIUS(00000024): Started 5 sec timeout                                                               <br>
+R1(config)#                                                                                                                 <br>
+*Apr 17 22:48:07.019: RADIUS(00000024): Request timed out!                                                                  <br>
+*Apr 17 22:48:07.019: RADIUS: Retransmit to (192.168.1.5:1812,1813) for id 1645/2                                           <br>
+*Apr 17 22:48:07.019: RADIUS(00000024): Started 5 sec timeout                                                               <br>
+R1(config)#                                                                                                                 <br>
+*Apr 17 22:48:12.047: RADIUS(00000024): Request timed out!                                                                  <br>
+*Apr 17 22:48:12.047: RADIUS: Retransmit to (192.168.1.5:1812,1813) for id 1645/2                                           <br>
+*Apr 17 22:48:12.051: RADIUS(00000024): Started 5 sec timeout                                                               <br>
+R1(config)#                                                                                                                 <br>
+*Apr 17 22:48:17.083: RADIUS(00000024): Request timed out!                                                                  <br>
+*Apr 17 22:48:17.083: RADIUS: Retransmit to (192.168.1.5:1812,1813) for id 1645/2                                           <br>
+*Apr 17 22:48:17.087: RADIUS(00000024): Started 5 sec timeout                                                               <br>
+R1(config)#                                                                                                                 <br>
+*Apr 17 22:48:22.111: RADIUS(00000024): Request timed out!                                                                  <br>
+*Apr 17 22:48:22.111: RADIUS: Fail-over to (192.168.1.7:1645,1646) for id 1645/2                                            <br>
+*Apr 17 22:48:22.115: RADIUS(00000024): Started 5 sec timeout                                                               <br>
+R1(config)#                                                                                                                 <br>
+*Apr 17 22:48:27.135: RADIUS(00000024): Request timed out!                                                                  <br>
+*Apr 17 22:48:27.135: RADIUS: Retransmit to (192.168.1.7:1645,1646) for id 1645/2                                           <br>
+*Apr 17 22:48:27.139: RADIUS(00000024): Started 5 sec timeout                                                               <br>
+R1(config)#                                                                                                                 <br>
+*Apr 17 22:48:32.175: RADIUS(00000024): Request timed out!                                                                  <br>
+*Apr 17 22:48:32.179: RADIUS: Retransmit to (192.168.1.7:1645,1646) for id 1645/2                                           <br>
+*Apr 17 22:48:32.183: RADIUS(00000024): Started 5 sec timeout                                                               <br>
+R1(config)#                                                                                                                 <br>
+*Apr 17 22:48:37.215: RADIUS(00000024): Request timed out!                                                                  <br>
+*Apr 17 22:48:37.215: RADIUS: Retransmit to (192.168.1.7:1645,1646) for id 1645/2                                           <br>
+*Apr 17 22:48:37.219: RADIUS(00000024): Started 5 sec timeout                                                               <br>
+R1(config)#                                                                                                                 <br>
+*Apr 17 22:48:42.243: RADIUS(00000024): Request timed out!                                                                  <br>
+*Apr 17 22:48:42.243: RADIUS: No response from (192.168.1.7:1645,1646) for id 1645/2                                        <br>
+*Apr 17 22:48:42.247: RADIUS/DECODE: No response from radius-server; parse response; FAIL                                   <br>
+*Apr 17 22:48:42.247: RADIUS/DECODE: Case error(no response/ bad packet/ op decode);parse response; FAIL                    <br>
+R1(config)#                                                                                                                
+</code></div>
+</p>
+
 
 <h3>Authorization</h3>
 <p>
