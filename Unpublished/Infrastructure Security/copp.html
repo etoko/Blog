@@ -1,0 +1,335 @@
+<h1>Control Plane Policing (CoPP)</h1>
+<p>
+Control-plane Policing (CoPP) is used to control the number of packets that 
+have to be processed by the CPU of a router. This helps in reducing the load on 
+a router’s CPU at any given point in time. Controlling the number of packets 
+directly routed by the CPU is particularly important because it ensures that the 
+CPU is not bogged down in routing traffic. It also frees-up the CPU to implement 
+other functions.
+</p>
+<p>
+In CoPP, it is important to control traffic on all interfaces destined for the 
+local router. A logical interface exists on all routers called the control plane 
+interface. Rate-limiting packets on this interface limits the number of packets 
+on all the physical interfaces that need to be processed by the CPU. Quality of 
+Service (QoS) and policing on the control plane interface rate-limits packets 
+entering any interface to protect the CPU.
+</p>
+
+<h1>Implementation of CoPP</h1>
+<p>
+To implement CoPP, the following seequence of steps should be followed:
+<ol>
+<li>Create an Access Control List (ACL) to identify traffic.</li>
+<li>Create a Class Map (CM) to identify traffic to be policed (rate-limited).</li>
+<li>Create a Policy Map (PM) to define the action to take on identified traffic 
+by implementing a defined policy.</li>
+<li>Create a Service Policy which specifies where to apply the policy map</li>
+</ol>
+</p>
+
+<h2>Create ACLs to Identify Traffic</h2>
+<p>
+ACLs are used to identify traffic to be policed. In the configuration below, we 
+will match ICMP traffic.
+</p>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code style="font-size:130%">
+R1(config)#<b>ip access-list extended ACL_IDENTIFY_ICMP</b><br>
+R1(config-ext-nacl)#<b>10 permit icmp any any</b>
+</code></div>
+</p>
+<p>
+<p>Verification</p>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code style="font-size:130%">
+R1#<b>show access-lists</b><br>
+Extended IP access list ACL_IDENTIFY_ICMP<br>
+&nbsp;&nbsp;&nbsp;&nbsp;10 permit icmp any any <br>
+R1#
+</code></div>
+</p>
+
+<h2>Create Class Maps to Define Traffic Class</h2>
+<p>
+Class map commands contain a name, one or more match commands and instructions 
+on how the match commands will be evaluated:
+</p>
+<p>
+<code><b>class-map &lt;match-any | match-all&gt; &lt;class-map-name&gt;</b></code><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<code><b>match &lt;access-group | protocol | ip prec | ip dscp &gt;</b></code>
+</p>
+<p>
+<ul>
+    <li><b>Access-group:</b> reference the access control list defined in 
+    <code><b>match</b></code> statement. ACL names are case sensitive.</li>
+    <li><b>Instruction:</b> <code><b>&lt;match-any | match-all&gt;</b></code></li>
+    <ul>
+      <li><code><b>match-any:</b></code> traffic must match only one of the commands to be classified 
+      as part of the traffic class.</li>
+      <li><code><b>match-all:</b></code> traffic must match all the match commands to be part of the 
+      traffic class. Care must be taken with match-all keyword as the traffic 
+      will have to match all characteristics in all the match commands.</li>
+    </ul>    
+    <li><b>Protocol:</b> You can match by protocol instead of ACL; for example 
+    to match ARP packets; <code><b>match protocol arp</b></code></li>
+    <li><b>IP Prec | IP dscp:</b> to match against only ip packet precedence or dscp</li>
+</ul>
+</p>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code style="font-size:130%">
+R1(config)#<b>class-map match-any CM_IDENTIFY_ICMP_TRAFFIC    </b> <br>
+R1(config-cmap)#<b>description Identify incoming ICMP traffic </b> <br>
+R1(config-cmap)#<b>match access-group name ACL_IDENTIFY_ICMP  </b>
+</code></div>
+</p>
+<p>
+Traffic that doesn’t match any of the class maps will be classified as a member 
+of the default class and have a default policy map applied.
+</p>
+
+<h3>Verification</h3>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code style="font-size:130%">
+R1#<b>show class-map</b>                                   <br>
+ Class Map match-any CM_IDENTIFY_ICMP_TRAFFIC (id 1)<br>
+&nbsp;&nbsp;Description: Identify incoming ICMP traffic       <br>
+&nbsp;&nbsp; Match access-group name  ACL_IDENTIFY_ICMP       <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                              <br>
+ Class Map match-any class-default (id 0)           <br>
+&nbsp;&nbsp; Match any                                        <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                              <br>
+R1#
+</code></div>
+</p>
+
+<h2>Create Policy Maps to Define a Service Policy</h2>
+<p>
+Policy maps are used to associate the traffic class (defined with a class map) 
+with one or more policies resulting in a service policy. Its three main elements 
+are; name, traffic class and policy:
+<ul>
+  <li><code><b>policy-map &lt;service-policy-name&gt;</b></code></li>
+  <li><code><b>class &lt;traffic-class-name&gt;</b></code></li>
+  <li><code><b>police &lt;cir | rate&gt; conform-action &lt;transmit | drop &gt; 
+exceed-action &lt;transmit | drop &gt; violate-action &lt; transmit | drop &gt;</b></code></li>
+</ul>
+</p>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code style="font-size:130%">
+R1(config)#<b>policy-map POLICY-MAP_ICMP_RATE_LIMIT</b><br>                
+R1(config-pmap)#<b>class CM_IDENTIFY_ICMP_TRAFFIC  </b><br>
+R1(config-pmap-c)#<b>police rate 5 pps  conform-action transmit</b><br>
+R1(config-pmap-c-police)#<b>exceed-action drop</b>
+</code></div>
+</p>
+
+<h3>Verification</h3>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code style="font-size:130%">
+R1#<b>show policy-map</b><br>
+&nbsp;&nbsp;Policy Map POLICY-MAP_ICMP_RATE_LIMIT<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Class CM_IDENTIFY_ICMP_TRAFFIC     <br>
+&nbsp;&nbsp;&nbsp;&nbsp; police rate 5 pps                 <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; conform-action transmit         <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; exceed-action drop
+</code></div>       
+</p>
+
+<h2>Apply the Policy Map</h2>
+<p>
+A policy map can be applied to a single interface or all interfaces. Depending 
+on your security model, you may wish to apply different policy-maps with different
+rates to all interfaces and other policies to specific interfaces for instance, 
+the interface pointing to the Internet may have a more restrictive policing than 
+that connected to the internal network.
+</p>
+
+<h3>Apply policy map to all interfaces</h3>
+<p>
+A router has a single control-plane interface. To apply the policy-map to all 
+interfaces, enter the control-plane configuration mode and apply the policy-map;
+</p>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code style="font-size:130%">
+R1(config)#<b>control-plane</b><br>
+R1(config-cp)#<b>service-policy input POLICY-MAP_ICMP_CTRL-PLANE_LIMIT</b>
+</code></div>
+</p>
+<p>
+The <code><b>input</b></code> keyword enforces the policy on ingress traffic.
+</p>
+
+<h3>Apply the policy-map to a single interface</h3>
+<p>
+To apply the policy-map to a single interface, enter the specific interface and 
+configure the policy map using the service-policy interface command;
+</p>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code style="font-size:130%">
+R1(config)#<b>interface g0/0</b><br>
+R1(config-if)#<b>service-policy input POLICY-MAP_ICMP_RATE_LIMIT</b>
+</code></div>
+</p>
+
+<h3>Test and Verify Configuration</h3>
+<p>
+On a second device (another router or host device such as PC), you can test the 
+control-plane policing by pinging. In this case, a linux computer will be used 
+to test the control plane policing using the flood handle of the linux ping 
+command (<code><b>ping -f 192.168.1.1</b></code>).
+</p>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code style="font-size:130%">
+R1#<b>show policy-map control-plane</b><br>
+ Control Plane                                             <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                 <br>
+&nbsp;&nbsp;Service-policy input: POLICY-MAP_ICMP_RATE_LIMIT         <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                 <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Class-map: CM_IDENTIFY_ICMP_TRAFFIC (match-any)        <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 packets, 0 bytes                                   <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;5 minute offered rate 0000 bps, drop rate 0000 bps   <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Match: access-group name ACL_IDENTIFY_ICMP           <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;police:                                              <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;rate 5 pps, burst 1 packets                      <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;conformed 0 packets, 0 bytes; actions:             <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;transmit                                         <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;exceeded 0 packets, 0 bytes; actions:              <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;drop                                             <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;conformed 0 pps, exceeded 0 pps                    <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                 <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Class-map: class-default (match-any)                   <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 packets, 0 bytes                                   <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;5 minute offered rate 0000 bps, drop rate 0000 bps   <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Match: any
+R1#
+</code></div>
+</p>
+<p>
+Pinging from an Ubuntu Host
+</p>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code style="font-size:130%">
+osboxes@osboxes:~$<b>sudo ping -f 192.168.1.1</b><br>
+PING 192.168.1.1 (192.168.1.1) 56(84) bytes of data.<br>
+................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................^C<br>
+--- 192.168.1.1 ping statistics ---<br>
+655 packets transmitted, 47 received, 92.8244% packet loss, time 10400ms<br>
+rtt min/avg/max/mdev = 4.651/15.895/42.778/6.278 ms, pipe 3, ipg/ewma 15.901/14.159 ms<br>
+osboxes@osboxes:~$<br>
+</code></div>
+</p>
+
+<h3>Policing results</h3>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code style="font-size:130%">
+R1#<b>show policy-map control-plane</b><br>
+ Control Plane
+                                                                                          <br>
+&nbsp;&nbsp;Service-policy input: POLICY-MAP_ICMP_RATE_LIMIT                              <br>
+                                                                                          <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Class-map: CM_IDENTIFY_ICMP_TRAFFIC (match-all)                   <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;655 packets, 64190 bytes                              <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;5 minute offered rate 2000 bps, drop rate 0000 bps    <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Match: access-group name ACL_IDENTIFY_ICMP            <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;police:                                               <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;rate 5 pps, burst 1 packets   <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;conformed 48 packets, 48 bytes; actions:  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;transmit                      <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;exceeded 607 packets, 607 bytes; actions: <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;drop                          <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;conformed 0 pps, exceeded 8 pps           <br>
+                                                                                          <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Class-map: class-default (match-any)                              <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2 packets, 120 bytes                                  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;5 minute offered rate 0000 bps, drop rate 0000 bps    <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Match: any                                            <br>
+R1#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</code></div>
+</p>
+
+<h1>Troubleshooting Control-Plane Policing</h1>
+<p>
+Troubleshooting control plane policing requires troubleshooting of the various 
+components of CoPP i.e., access control lists, class maps, 
+policy maps and service policies. When troubleshooting CoPP, consider;
+</p>
+
+<h2>ACLs</h2>
+<p>
+When troubleshooting ACLs for CoPP, focus on the following;
+<ul>
+<li>Verify correct source and destination addresses, protocols, 
+ port number, action (permit | deny): <code><b>show access-list</b></code></li>
+ <li><b>Grouping:</b> if grouping traffic types, ensure that they are grouped 
+ based on function; e.g. routing protocols (BGP, OSPF, EIGRP), management protocols 
+ (SSH, TELNET, HTTP(S), TFTP, SNMP, DNS, NTP).</li>
+ <li><b>Action:</b> with CoPP, a permit action in an ACL means match the traffic
+ and apply the policy. Deny means exclude the traffic from the class and move on
+ to the next class.</li>
+ <li><b>Protocol:</b> If the wrong protocol is specified in the ACL, the wrong 
+ type of traffic will be matched.</li>
+ <li><b>Source and destination:</b> the correct source and destination ACLs should 
+ be applied. During troubleshooting, change IP address to any to see the effect.</li>
+ <li><b>Operators and Ports:</b> Ensure correct ACL operator and port numbers are defined.</li>
+ <li>Avoid log and log-input ACL keywords for CoPP due to unexpected results in CoPP functionality.</li>
+</ul>
+</p>
+
+<h2>Class Maps</h2>
+<p>
+<ul>
+<li>Watch-out for the <code><b>match-all</b></code> and <code><b>match-any</b></code> commands.</li>
+<li>Verify that the class-map is configured correctly <code><b>show class-map</b></code>. 
+ Verify correct instructions (match-any, match-all), correct ACL, protocol,IP prec, DSCP.</li>
+ </ul>
+</p>
+
+<h2>Policy Maps</h2>
+<p>
+When troubleshooting policy maps, consider;
+<ul>
+<li>Verify that the service policy is applied in the correct direction: 
+  <code><b>show policy-map control-plane</b></code>.</li>
+  <li>Verify that the policy-map is correctly configured;
+   <code><b>show policy-map</b></code></li>
+   <li>Check the correct class-map, rate or CIR, conform-action, exceed-action,correct order.</li>
+ <li><b>Order of operations:</b> classes defined are processed from top to down.</li>
+ <li><b>Class-map:</b> has the correct class-map been configured correctly.</li>
+ <li><b>Policy:</b> Ensure the correct CIR in bps and rate in pps have been 
+ configured. In some IOS versions, if traffic that matches a class is to be dropped,
+ replace police command with <code><b>drop</b></code> keyword.</li>
+ <li><b>Default-class:</b> if traffic does not match any defined class, it will 
+ be subjected to conditions laid out in the default class.</li>
+ <li><b>Case:</b> class names are case sensitive.</li>
+</ul>
+</p>
+
+<h2>Service Policy</h2>
+<p>
+When troubleshooting the application of a service policy;
+<ul>
+  <li><b>Correct interface:</b> service policy can be applied only to one interface,
+  the control-plane. If applying to a physical interface, ensure that the service
+  policy is configured on the correct interface. Confirm with 
+  <code><b>show policy-map interface &lt;interface-name&gt;</b></code></li>
+  <li><b>Direction:</b> input for incoming packets. Confirm direction with; 
+  <code><b>show policy-map control-plane</b></code>. Not all IOS versions support 
+  output. For routing protocols, output CoPP would be for replies to queries / 
+  requests or ACKs. For ICMP; error or informational reply, for telnet, SSH, HTTP, 
+  SNMP replies or traps. Ensure the ACL and class-map are configured appropriately for replies.</li>
+  <li><b>Case:</b> Policy maps are case-sensitive; verify with 
+  <code><b>show policy-map control-plane</b></code></li>.
+</ul>
+</p>
