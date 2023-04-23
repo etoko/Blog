@@ -1,0 +1,800 @@
+<h1>Introduction and Overview</h1>
+<p>
+Dynamic Host Configuration Protocol(DHCP) is an IP protocol used by hosts on a 
+TCP/IP network to receive IP configuration parameters such as IP address, default 
+gateway, DNS server addresses, domain name among others. 
+DHCP is used to assign IP configuration information to the clients automatically. 
+It works at layer 4 and is a client-server protocol.  DHCP uses UDP with 
+the <b>client using port 68</b> as the source port number and <b>67</b> as destination 
+port number which is used by the server. DHCP is based on the BootP protocol.
+DHCP server can be local within the subnet, in a remote server. It can also be the 
+default gateway.
+</p>
+<p>
+Components of DHCP:
+<ul>
+  <li><b>DHCP server:</b> devices assign IP configuration information to requesting 
+  clients. These may be dedicated such as Windows/Linux servers, or configured switches/routers.
+  Routers and some switches can be configured as DHCP servers. 
+  </li>
+  <li><b>DHCP client:</b> devices that request for IP addresses and other network services 
+  such as DNS server addresses.</li>
+  <li><b>IP address pool:</b> Range of IP addresses to be assigned to clients.</li>
+  <li><b>Lease:</b> length of time that a client can use an IP addresses</li>
+  <li><b>DHCP relay:</b> used to forward DHCP requests from clients to servers when the 
+  server is located in a remote network. Device listens to broadcasts from the 
+  clients and forwards them to the server. This usually used when the network 
+  adopts a centralised DHCP server.</li>
+</ul>
+</p>
+<p>
+Some of the IP configuration information 
+<ul>
+  <li>IP address</li>
+  <li>subnet mask</li>
+  <li>default gateway IP address</li>
+  <li>DNS server IP address</li>
+  <li>Other IP addressing information</li>
+</ul>
+</p>
+<p>
+DHCP supports three mechanisms for IP address allocation:
+<ol type="a">
+  <li><b>Automatic Allocation:</b> DHCP assigns a permanent IP address to a client.</li>
+  <li><b>Dynamic Allocation:</b> DHCP assigns an IP address to a client for a 
+  limited period of time.</li>
+  <li><b>Manual allocation:</b> network administrator assigns an IP address to a 
+  client and DHCP is used simply to convey the assigned address to the client.</li>
+</ol>
+</p>
+
+
+<h1>IP Configuration Allocation by DHCP</h1>
+<p>
+DHCP uses a four stage process for DHCP servers to allocate IP configuration 
+parameters to DHCP clients. These stages are: DHCPDISCOVER, DHCPOFFER, DHCPREQUEST, 
+DHCPACK. These four stages are usually abbreviated as DORA. In DORA, servers 
+usually send unicasts while clients send broadcasts.
+</p>
+<h2>Discover</h2>
+<p>
+Devices that would like to receive addresses through DHCP should be configured 
+as clients. On host devices, by default, they are configured to request for 
+DHCP services automatically. On network and server devices, by default, they 
+are set to receive static IP addresses. On IOS, interfaces are configured as 
+DHCP clients using the command <code><b>ip address dhcp</b></code>.
+</p>
+<p>
+Client sends a broadcast message onto the network using source port UDP port 68 
+and destination UDP port 67. Any DHCP servers on the local network will respond 
+to this with an offer message. DHCP relays will receive the DHCP Discover message 
+and forward it to the remote DHCP server. 
+<ul>
+  <li><b>Source IP:</b> 0.0.0.0</li>
+  <li><b>MAC:</b> client MAC</li>
+  <li><b>Destination IP:</b> 255.255.255.255</li>
+  <li><b>Destination MAC:</b> FFFF.FFFF.FFFF</li>
+</ul>
+</p>
+<p>
+Because clients send broadcasts, any DHCP servers listening can respond to the 
+client. A client usually accepts the first offer it receives. If a client does 
+not respond to a DHCPOffer message within a given amount of time the server can 
+reclaim the IP addresses that it had reserved for the client.
+If a DHCP server cannot satisfy a DHCP request from its own database, it can 
+forward the request to one or more secondary servers.
+</p>
+<p>
+If clients are not in the same subnet as the server, the DHCPDISCOVER message will 
+have a non-zero value for <code><b>giaddr</b></code> field. If the client is in 
+the same subnet as the DHCP server, the DHCPDISCOVER packet will have a value 
+of zero.
+</p>
+
+<h2>Offer</h2>
+<p>
+A DHCP server that receives a DHCP Discover message will reply to the Discover 
+message with an offer message. The offer is sent in *****unicast to the client.
+It matches the DHCPDISCOVER message with a configured DHCP address pool that has
+the network that contains the IP address in the <code><b>giaddr</b></code> field. 
+For directly connected clients, the receiving interface helps.
+</p>
+<p>
+If an offer contains invalid configuration parameters, a client can respond with
+a DHCPDECLINE message sent in broadcast. A server sends a DHCPNAK denial broadcast message 
+indicating that parameters are not assigned if an error occurred during the 
+parameter negotiation or client was slow in responding to the offer, particularly
+if the address was assigned to another client.
+</p>
+
+<h2>Request</h2>
+<p>
+The client which receives the offer will send a request for the offered IP 
+settings. If multiple DHCP servers respond with DHCP offer messages, the client 
+usually processes the forst offer and declines the others.
+</p>
+
+<h2>Acknowledge</h2>
+<p>
+DHCP servers acknowledge the IP address settings that were offered to the client. 
+The DHCP process also sets the IP address of the gateway. This is usually  a 
+static route.
+</p>
+
+<h2>DHCP Relay</h2>
+<p>
+Routers block broadcast messages. So these messages do not get sent to a remote 
+DHCP server unless a DHCP relay has been configured. The DHCP relay takes the 
+DHCP Discover broadcast and sends a unicast DHCP Discover to the DHCP server.
+</p>
+<p>
+The network that the DHCP relay (and client) reside in (DHCP scope) should be 
+configured on the DHCP server. Otherwise the DHCP server will not have a route 
+to replay to the DHCP Discover message. The DHCP relay should have IP reachability 
+to the network of the remote DHCP server.
+</p>
+<p>
+The DHCP relay is configured on the interface facing the clients i.e., the interface 
+directly connected to the clients.
+</p>
+
+<p>
+A DHCP relay agent forwards the following:
+<ul>
+  <li>TFTP</li>
+  <li>DNS</li>
+  <li>Internet Time Service(ITS)</li>
+  <li>NetBIOS name server</li>
+  <li>NetBIOS datagram server</li>
+  <li>BootP</li>
+  <li>TACACS</li>
+</ul>
+</p>
+
+<p>
+The command to configure the DHCP relay is <code><b>ip helper-address 10.10.10.10</b></code>.
+
+</p>
+
+<h2>DHCP Messages</h2>
+<p>
+DHCP messages include:
+<ul>
+ <li> DHCPDISCOVER</li>
+ <li> DHCPOFFER</li>
+ <li> DHCPREQUEST</li>
+ <li> DHCPACK</li>
+ <li> DHCPDECLINE</li>
+ <li> DHCPNAK</li>
+ <li> DHCPRELEASE</li>
+ <li> DHCPINFORM</li>
+</ul>
+</p>
+
+<h2>DHCPDISCOVER</h2>
+<p>
+client sends this message to locate a DHCP server. port number is UDP 67.
+</p>
+
+<h2>DHCPOFFER</h2>
+<p>
+DHCP server sends the DHCPOffer in response to the discover message. The source 
+port is 68.
+</p>
+
+<h2>DHCPREQUEST</h2>
+<p>
+This broadcast message is a request from the client to the DHCP server for the 
+IP addressing information and options that were received in the offer message.
+</p>
+
+<h2>DHCPACK</h2>
+<p>
+Server sends this message to a client that includes IP configuration paramters.
+</p>
+
+<h2>DHCPDECLINE</h2>
+<p>
+Message is sent by a client to a server informing that an IP address is already 
+in use on the network.
+</p>
+
+<h2>DHCPNAK</h2>
+<p>
+server sends this message to a client and informs that the server declines to 
+provide the client the requested IP configuration information.
+</p>
+
+<h2>DHCPRELEASE</h2>
+<p>
+Clinet sends this message to a server informing it that the client has released 
+its DHCP lease, this allowwing the DHCP server to reassign the client IP address 
+to another client.
+</p>
+
+<h2>DHCPINFORM</h2>
+<p>
+client sends this message to a server requesting IP configuration parameters. Such 
+a message might be sent from an access server requesting IP configuration 
+information for a remote client attaching to the access server.
+</p>
+
+<h2>DHCP Options</h2>
+<p>
+The DHCP server sends IP configuration parameters to the clients. DHCP Options 
+are defined by the numeric variable and value. There are up to 255 DHCP options 
+available (from 0 to 254). These options can be categorized into options for:
+<ul>
+  <li>IP Layer parameters per host such as policy filters, maximum datagrame reassembly 
+  size, default IP TTL, path MTU aging timeout etc.</li>
+  <li>IP Layer parameters per interface such as interface MTU, broadcast address, 
+  router solicitation address etc.</li>
+  <li>TCP parameters suchas TCP keepalive interval, TCP keepalive garbage option</li>
+  <li>Application and service parameters</li>
+</ul>
+Some DHCP options are configured on the server. Others are included in DHCP messages 
+sent by the client.
+
+Some frequently used DHCP options are listed in the 
+following table;
+<p>
+<table width="100%" cellspacing="0">
+<thead style="background: #d3d3d3; border-bottom: 1px solid; border-top: 1px solid;">
+  <tr>
+    <td style="border-bottom: 1px solid; border-top: 1px solid;">Option Number</td>
+    <td style="border-bottom: 1px solid; border-top: 1px solid;" width="15%">Value</td>
+    <td style="border-bottom: 1px solid; border-top: 1px solid;">Description </td>
+  </tr>        
+</thead>
+<tbody>
+<tr>
+    <td style="border-bottom: 1px solid">3 </td>
+    <td style="border-bottom: 1px solid">Router</td>
+    <td style="border-bottom: 1px solid">The router option specifies a list of 
+    IP addresses for routers on the client's subnet.  Routers SHOULD be listed
+    in order of preference..</td>
+  </tr>
+  <tr>
+    <td style="border-bottom: 1px solid">6 </td>
+    <td style="border-bottom: 1px solid">Domain Name Server</td>
+    <td style="border-bottom: 1px solid">The domain name server option specifies 
+    a list of Domain Name System name servers available to the client.  Servers
+   SHOULD be listed in order of preference.</td>
+  </tr>
+ 
+  <tr>
+    <td style="border-bottom: 1px solid">15 </td>
+    <td style="border-bottom: 1px solid">Domain Name </td>
+    <td style="border-bottom: 1px solid">This option specifies the domain name 
+    that client should use when resolving hostnames via the Domain Name System.</td>
+  </tr>
+   <tr>
+    <td style="border-bottom: 1px solid"> 50</td>
+    <td style="border-bottom: 1px solid">Requested IP Address</td>
+    <td style="border-bottom: 1px solid">
+    This option is used in a client request (DHCPDISCOVER) to allow the
+   client to request that a particular IP address be assigned.
+
+    </td>
+  </tr>
+   <tr>
+    <td style="border-bottom: 1px solid">51 </td>
+    <td style="border-bottom: 1px solid">IP Address Lease Time</td>
+    <td style="border-bottom: 1px solid">
+   This option is used in a client request (DHCPDISCOVER or DHCPREQUEST)
+   to allow the client to request a lease time for the IP address.  In a
+   server reply (DHCPOFFER), a DHCP server uses this option to specify
+   the lease time it is willing to offer.
+   The time is in units of seconds, and is specified as a 32-bit
+   unsigned integer.
+    </td>
+  </tr>
+   <tr>
+    <td style="border-bottom: 1px solid">53 </td>
+    <td style="border-bottom: 1px solid"> DHCP Message Type</td>
+    <td style="border-bottom: 1px solid">
+    This option is used to convey the type of the DHCP message.  The code
+   for this option is 53, and its length is 1.  Legal values and message types 
+   for this option are:
+   <ol>
+   	<li>DHCPDISCOVER</li>
+    <li>DHCPOFFER   </li>
+    <li>DHCPREQUEST </li>
+    <li>DHCPDECLINE </li>
+    <li>DHCPACK     </li>
+    <li>DHCPNAK     </li>
+    <li>DHCPRELEASE </li>
+    <li>DHCPINFORM  </li>
+   </ol>
+    </td>
+  </tr>
+  <tr>
+    <td style="border-bottom: 1px solid">54 </td>
+    <td style="border-bottom: 1px solid">Server Identifier </td>
+    <td style="border-bottom: 1px solid">Used in DHCPOFFER and DHCPREQUEST messages 
+    to alow the client to distinguish between lease offers received from 
+    different DHCP servers. 
+    DHCP clients use the
+   contents of the 'server identifier' field as the destination address
+   for any DHCP messages unicast to the DHCP server.  DHCP clients also
+   indicate which of several lease offers is being accepted by including
+   this option in a DHCPREQUEST message.
+   The identifier is the IP address of the selected server.
+    </td>
+  </tr>
+
+  <tr>
+    <td style="border-bottom: 1px solid">55 </td>
+    <td style="border-bottom: 1px solid"> Parameter Request List</td>
+    <td style="border-bottom: 1px solid">
+   This option is used by a DHCP client to request values for specified
+   configuration parameters.  The list of requested parameters is
+   specified as n octets, where each octet is a valid DHCP option code.
+
+   The client MAY list the options in order of preference.  The DHCP
+   server is not required to return the options in the requested order,
+   but MUST try to insert the requested options in the order requested
+   by the client.
+    </td>
+  </tr>
+     <tr>
+    <td style="border-bottom: 1px solid"> 56</td>
+    <td style="border-bottom: 1px solid">Message</td>
+    <td style="border-bottom: 1px solid">
+   This option is used by a DHCP server to provide an error message to a
+   DHCP client in a DHCPNAK message in the event of a failure. A client
+   may use this option in a DHCPDECLINE message to indicate the why the
+   client declined the offered parameters.  The message consists of n
+   octets of NVT ASCII text, which the client may display on an
+   available output device.
+    </td>
+  </tr>
+   <tr>
+    <td style="border-bottom: 1px solid">61 </td>
+    <td style="border-bottom: 1px solid">Client-identifier</td>
+    <td style="border-bottom: 1px solid">
+    This option is used by DHCP clients to specify their unique
+   identifier.  DHCP servers use this value to index their database of
+   address bindings.  This value is expected to be unique for all
+   clients in an administrative domain.
+
+   Identifiers SHOULD be treated as opaque objects by DHCP servers.
+
+   The client identifier MAY consist of type-value pairs. 
+   For instance, it MAY consist
+   of a hardware type and hardware address. In this case the type field
+   SHOULD be one of the ARP hardware types.  A
+   hardware type of 0 (zero) should be used when the value field
+   contains an identifier other than a hardware address (e.g. a fully
+   qualified domain name).
+
+   For correct identification of clients, each client's client-
+   identifier MUST be unique among the client-identifiers used on the
+   subnet to which the client is attached.  Vendors and system
+   administrators are responsible for choosing client-identifiers that
+   meet this requirement for uniqueness.
+   </td>
+  </tr>
+   <tr>
+    <td style="border-bottom: 1px solid">66 </td>
+    <td style="border-bottom: 1px solid">TFTP server </td>
+    <td style="border-bottom: 1px solid">This option is used to identify a TFTP server when the 'sname' field
+   in the DHCP header has been used for DHCP options. This option is usually used 
+   by IP Phones to locate the TFTP server from which they can download configurations 
+   or update their firmware.
+   </td>
+  </tr>
+  <tr>
+    <td style="border-bottom: 1px solid">69 </td>
+    <td style="border-bottom: 1px solid">SMTP</td>
+    <td style="border-bottom: 1px solid">The SMTP server option specifies a list 
+    of SMTP servers available to the client.  Servers SHOULD be listed in order 
+    of preference.</td>
+  </tr>
+  <tr>
+    <td style="border-bottom: 1px solid">70 </td>
+    <td style="border-bottom: 1px solid">POP3</td>
+    <td style="border-bottom: 1px solid">
+    The POP3 server option specifies a list of POP3 available to the
+   client.  Servers SHOULD be listed in order of preference.
+    </td>
+  </tr>
+ 
+   
+  <tr>
+    <td style="border-bottom: 1px solid">61</td>
+    <td style="border-bottom: 1px solid">Client-identifier</td>
+    <td style="border-bottom: 1px solid">
+   This option is used by DHCP clients to specify their unique
+   identifier.  DHCP servers use this value to index their database of
+   address bindings.  This value is expected to be unique for all
+   clients in an administrative domain.
+
+   Identifiers SHOULD be treated as opaque objects by DHCP servers.
+
+   The client identifier MAY consist of type-value pairs.
+   For instance, it MAY consist
+   of a hardware type and hardware address. In this case the type field
+   SHOULD be one of the ARP hardware types defined in STD2 [22].  A
+   hardware type of 0 (zero) should be used when the value field
+   contains an identifier other than a hardware address (e.g. a fully
+   qualified domain name).
+
+   For correct identification of clients, each client's client-
+   identifier MUST be unique among the client-identifiers used on the
+   subnet to which the client is attached.  Vendors and system
+   administrators are responsible for choosing client-identifiers that
+   meet this requirement for uniqueness.
+    </td>
+  </tr>
+ 
+</tbody>
+</table>
+</p>
+
+You can configure a domain name using the DHCP options;
+
+DHCP_SERVER(dhcp-config)#option 15 ascii emmanueltoko.blogspot.com
+
+The entire list of DHCP options can be obtained from the RFC document defining DHCP.
+</p>
+
+<h1>Configuration</h1>
+<p>
+To enable DHCP servers on a router or switch, the DHCP needs to be enabled. This 
+is done using the command <code><b>service dhcp</b></code>.
+</p>
+<h2>Client</h2>
+<p>
+<code><b>ip address dhcp</b></code>
+</p>
+
+<h2>Server</h2>
+<p>
+The server is not bound to any network. It can issue IP addresses for many networks 
+if many DHCP pools are configured. Servers and relay agent features are enabled 
+by default. If disabled, re-enable using the global configuration command <code><b>
+service dhcp</b></code>.
+</p>
+<p>
+
+</p>
+
+<p>
+Features include:
+<ul>
+  <li>network</li>
+  <li>default-router</li>
+  <li>lease</li> 
+  <li>dns-server</li>
+  <li>Options:
+  TFTP servers can be specified as an option. This is important particularly for 
+  IP phones. This value is in digits.
+  </li>
+</ul>
+</p>
+
+<p>
+<ol>
+  <li><b>Excluded Addresses:</b> 
+  Before configuring the DHCP features, it is best to first configure addresses to
+be excluded from being assigned to clients. These are usually addresses reserved 
+for hosts to receive addresses through static configuration. To exclude a range 
+addresses from being assigned to clients, use the command <code><b>
+ip dhcp excluded-address &lt;low-ip-address&gt; &lt;high-ip-address&gt;</b></code>.
+
+
+DHCP_SERVER(config)#ip dhcp excluded-address 192.168.1.2 192.168.1.20
+<code><b>ip dhcp excluded-address &lt;start&gt; &lt;end&gt;</b></code>
+  
+  <p>
+Note that a router cannot issue an IP address for one of its interfaces even 
+if that address is not included in the range of the excluded addresses.
+</p>
+  </li>
+  <li>
+<b>DHCP Pool:</b> 
+A DHCP Pool is a range of addresses that the DHCP server will use for assigning 
+IP addresses to clients. When a client sends out a DHCPDiscover message, the 
+server will pick an IP address from the pool (usually the lowest available address)
+and offer it to the client.  
+  
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code style="font-size:130%">
+DHCP_SERVER(dhcp-config)#<b>?</b>                                            <br>
+DHCP pool configuration commands:                                            <br>
+&nbsp;&nbsp;accounting&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Send Accounting Start/Stop messages                   <br>
+&nbsp;&nbsp;bootfile&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Boot file name                                        <br>
+&nbsp;&nbsp;class&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Specify a DHCP class                                  <br>
+&nbsp;&nbsp;client-identifier&nbsp;&nbsp;&nbsp;&nbsp;Client identifier                                     <br>
+&nbsp;&nbsp;client-name&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Client name                                           <br>
+&nbsp;&nbsp;default-router&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Default routers                                       <br>
+&nbsp;&nbsp;dns-server&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; DNS servers                                           <br>
+&nbsp;&nbsp;domain-name&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Domain name                                           <br>
+&nbsp;&nbsp;exit&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Exit from DHCP pool configuration mode                <br>
+&nbsp;&nbsp;hardware-address&nbsp;&nbsp;&nbsp;&nbsp; Client hardware address                               <br>
+&nbsp;&nbsp;host&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Client IP address and mask                            <br>
+&nbsp;&nbsp;import&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Programatically importing DHCP option parameters      <br>
+&nbsp;&nbsp;lease&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Address lease time                                    <br>
+&nbsp;&nbsp;netbios-name-server&nbsp;&nbsp;NetBIOS (WINS) name servers                           <br>
+&nbsp;&nbsp;netbios-node-type&nbsp;&nbsp;&nbsp;&nbsp;NetBIOS node type                                     <br>
+&nbsp;&nbsp;network&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Network number and mask                               <br>
+&nbsp;&nbsp;next-server&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Next server in boot process                           <br>
+&nbsp;&nbsp;no&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Negate a command or set its defaults                  <br>
+&nbsp;&nbsp;odap&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Configure ODAP                                        <br>
+&nbsp;&nbsp;option&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Raw DHCP options                                      <br>
+&nbsp;&nbsp;origin&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Configure the origin of the pool                      <br>
+&nbsp;&nbsp;relay&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Function as a DHCP relay                              <br>
+&nbsp;&nbsp;remember&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Remember released bindings                            <br>
+&nbsp;&nbsp;renew&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Configure renewal policy                              <br>
+&nbsp;&nbsp;server&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Configure the server ID option value                  <br>
+&nbsp;&nbsp;subnet&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Subnet allocation commands                            <br>
+&nbsp;&nbsp;update&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Dynamic updates                                       <br>
+&nbsp;&nbsp;utilization&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Configure various utilization parameters              <br>
+&nbsp;&nbsp;vrf&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Associate this pool with a VRF                        <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                     <br>
+DHCP_SERVER(config)#                                                         <br>
+DHCP_SERVER(config)#<b>ip dhcp pool DHCP_POOL_10.3.1.0/24</b>                       <br>
+DHCP_SERVER(dhcp-config)#<b>network 10.3.1.0 255.255.255.0</b>                      <br>
+DHCP_SERVER(dhcp-config)#<b>default-router 10.3.1.1 10.3.1.2</b>                    <br>
+DHCP_SERVER(dhcp-config)#<b>lease 1 12 0</b>                                        <br>
+DHCP_SERVER(dhcp-config)#<b>option 15 ? </b>                                        <br>
+&nbsp;&nbsp;ascii&nbsp;&nbsp;&nbsp;&nbsp; Data is an NVT ASCII string                                      <br>
+&nbsp;&nbsp;hex&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Data is a hexadecimal string                                     <br>
+&nbsp;&nbsp;instance&nbsp;&nbsp;Specify the option instance                                      <br>
+&nbsp;&nbsp;ip&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Data is one or more IP addresses                                 <br>
+DHCP_SERVER(dhcp-config)#<b>option 15 ascii emmanueltoko.blogspot.com</b>           <br>
+DHCP_SERVER(dhcp-config)#<b>dns-server 8.8.4.4 8.8.8.8</b>                          <br>
+DHCP_SERVER(dhcp-config)#<b>exit</b>                                                <br>
+DHCP_SERVER(config)#
+</code></div>
+</p>
+<p>
+<ul>
+ <li>The DHCP pool has been defined using the name DHCP_POOL_10.3.1.0/24.</li>
+ <li><b>network:</b> The subnet is defined here alongside the subnet mask. 
+ Here, it is 10.3.1.0 with a subnetwork mask of 255.255.255.0</li>
+ <li><b>default-router:</b> defines the default gateway(s) for the subnet. More 
+ than one default gateway can be defined. Here, it is 10.3.1.1 and 10.3.1.2</li>
+ <li><b>lease:</b> Defines the lease. By default it is set to 1 day (24 hours). 
+ Here, it is configured for one day and twelve hours and zero minutes (36 hours)</li>
+ <li><b>option:</b> 15 is the DHCP option for domain name. Here it is 
+ emmanueltoko.blogspot.com. The domain name could have easily been entered using 
+ the move common command
+ DHCP_SERVER(dhcp-config)#domain-name emmanueltoko.blogspot.com</li>
+</ul>
+</p>
+  </li>
+</ol>
+</p>
+
+<h3>DHCP Server Pinging an address before Offer to Client</h3>
+<p>
+Before a DHCP server offers an IP address to a client, the server first pings 
+the IP address to confirm that no other host has that address. By default, the 
+address is pinged twice before being issued. However, you can configure the 
+number of times that a DHCP server pings an address before it offers the address 
+using the command;
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code style="font-size:130%">
+DHCP_SERVER(config)#ip dhcp ping packets 5
+</code></div>
+</p>
+<p>
+Here, the value five (5) has been entered indicating that the DHCP server should 
+ping the IP address five times before offering the address in a DHCPOFFER message 
+to the client. 
+Setting the ping number to zero deactivates the ability of the DHCP server to
+ping an IP address before offering it in a DHCPOFFER message. Take note that 
+this may compromise the ability of a DHCP server from detecting IP address 
+conflicts using the ping method.
+
+If a host exists on the network with an IP address that the DHCP server intends 
+to offer to a client, the server will record an IP address conflict and how it 
+determined the conflict. In this case the conflict will the determined by pinging.
+</p>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code style="font-size:130%">
+DHCP_SERVER#  <br>
+DHCP_SERVER#  <br>
+*Jan 23 21:50:17.155: %DHCPD-4-PING_CONFLICT: DHCP address conflict:  server pinged 10.1.13.1.<br>
+DHCP_SERVER#<b>show ip dhcp conflict</b><br>
+IP address&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Detection method&nbsp;&nbsp; Detection time&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;VRF        <br>
+10.1.13.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Ping&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Jan 23 2021 09:50 PM&nbsp;&nbsp;&nbsp;&nbsp;           <br>
+DHCP_SERVER#
+</code></div>
+</p>
+
+<h3>Ping Timeout</h3>
+<p>
+The default timeout of these DHCP servers is 500ms (milliseconds). To change 
+this value, issue the following command in global configuration mode;
+</p>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code style="font-size:130%">
+DHCP_SERVER(config)#ip dhcp ping timeout 200
+</code></div>
+</p>
+<p>
+Note that setting a higher value for ping timeout and number of packets increases
+the amount of time that a client takes to receive an IP address through DHCP.
+</p>
+
+
+<h2>Relay</h2>
+<p>
+Relay agents are used to forward requests and replies between clients and servers 
+when they are not in the same subnet. Relay agent supports the use of unnumbered 
+interfaces through adding a static host route.
+To configure a local router as a DHCP relay, use the following command;
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code style="font-size:130%">
+Router(config)#<b>interface gigabitEthernet0/0</b><br>
+Router(config-if)#<b>ip helper-address 10.1.14.2</b>
+</code></div>
+</p>
+The IP address entered here is the address of the dhcp server. The ip helper-address 
+is entered under interface configuration mode of the interface connected to the 
+subnet that contains the DHCP clients. This is the interface that will receive 
+the DHCPDiscover messages from the clients.
+</p>
+
+<h2>Database Agents</h2>
+<p>
+A database agent is any host for example a (T)FTP server, RCP (Remote Copy Protocol)
+server that stores the DHCP bindings database. It could also be a storage media 
+device or partition on the DHCP server.y
+It is recommended by Cisco for a DHCP database agent to be configured. The purpose
+of the DHCP database agent is to store the recording od DHCP address conflicts. 
+So that if the Cisco IOS device (router or switch) reboots, the conflict loggings
+cannot be lost. If these are lost, some addresses run the risk of being removed
+from the pool and yet are not assigned to a client. This leads to wastage of addresses.
+To entirely disable a DHCP address conflict logging, run the command;
+</p>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code style="font-size:130%">
+DHCP_SERVER(config)#<b>no ip dhcp conflict logging</b>
+</code></div>
+</p>
+<p>
+To export the DHCP bindings database to a database agent, enter the following command;
+</p>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code style="font-size:130%">
+DHCP_SERVER(config)#<b>ip dhcp database &lt;ip-address&gt;</b>
+</code></div>
+</p>
+
+<h1 id="OPTIMIZATION">DHCP Optimization</h1>
+<p>
+In order to optimise DHCP operation, it may be advisable to carryout the following 
+configurations:
+<ul>
+  <li>In an Ethernet network (wired) with fewer than 254 hosts, the default 
+  number of pings is OK. It may be possible to decrease the ping timeout value 
+  if the DHCP server is in the same subnet as the host, or less than three hops 
+  away. Timeout values of 70ms are OK for an entirely wired path from client to 
+  server with no more than 5 hops.</li>
+  <li>In a wireless configuration, the timeout value can be decreased to 200ms.</li>
+  <li>In a large network with several hosts (more than 254) having static addresses, 
+  increase the number of pings to four.</li>
+  <li>Increasing the switch MAC address holdtime may also help improve DHCP 
+  performance. This may eliminate the need for ARP when a client initially 
+  connects to the network.</li>
+</ul>
+</p>
+<h2>Import Configuration Parameters</h2>
+<p>
+To import DHCP options into a local DHCP server database from a remote/central 
+DHCP server, use the following command;
+</p>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code style="font-size:130%">
+DHCP_SERVER(config)#<b>ip dhcp pool DHCP_POOL</b><br>
+DHCP_SERVER(dhcp-config)#<b>network 192.168.1.0 255.255.255.0</b><br>
+DHCP_SERVER(dhcp-config)#<b>import all</b>
+</code></div>
+</p>
+
+
+<h2>Monitoring and Maintaining a DHCP Server</h2>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code style="font-size:130%">
+Router#<b>clear ip dhco binding &lt;ip-address | *&gt;</b><br>
+Router#<b>clear ip dhcp conflict </b><br>
+Router#<b>clear ip dhcp server statistics</b><br>
+</code></div>
+
+</p>
+To remove a route from the routing table added by a DHCP server or DHCP relay 
+agent or clients using unnumbered interfaces:
+</p>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code style="font-size:130%">
+Router#<b>clear ip route &lt;vrf-name&gt; dhcp &lt;ip_address&gt;</b>
+</code></div>
+</p>
+
+<h1 id="VERIFICATION">Verification</h1>
+<p>
+
+</p>
+
+
+<h2><code>show ip dhcp binding</code></h2>
+<p>
+Displays information about the allocated IP addresses and the lease period.
+</p>
+
+<h2><code>show ip dhcp database</code></h2> 
+<p>
+
+</p>
+
+<h2><code>show ip dhcp server statistics</code></h2>
+<p>
+Number of messages exchanged using DHCP. 
+</p>
+
+<h2><code>show ip dhcp conflict</code></h2>
+<p>
+
+</p>
+
+
+<h2><code>show ip dhcp pool</code></h2>
+<p>
+Displays configured DHCP pools and their respective info.
+</p>
+
+
+<h2><code>debug ip dhcp server events</code></h2>
+<p>
+
+</p>
+
+<h2><code>debug ip dhcp server packet</code></h2>
+<p>
+
+</p>
+
+<h2><code>show dhcp</code></h2>
+<p>
+Verify DHCP IP parameters on the client.
+</p>
+
+<h2><code>show ip route dhcp &lt;ip-address&gt;</code></h2>
+Router#show ip route <vrf name> dhcp <ip_address>
+
+<h1 id="TROUBLESHOOTING">Troubleshooting</h1>
+<p>
+Routers, by default, do not forward broadcasts.
+</p>
+<p>
+<ul>
+  <li>DHCP pool out of addresses: expand the scope of addresses or purge the old 
+  leases. Issue shorter releases.</li>
+  <li>Misconfiguration</li>
+  <li>Duplicate address</li>
+  <li>Redundant DHCP services not communicating and handing out overlapping addresses</li>
+  <li>"Pull" nature of DHCP: DHCP server cannot initiate a change on the client
+  if a problem is detected.</li>
+  <li>Interface not configured with IP address in DHCP Pool. IP addresses should 
+  be in the pool.</li>
+  <li>DHCP snooping may be blocking messages.</li>
+</ul>
+</p>
+<p>
+IP address conflict: <code><b>clear ip dhcp conflict *</b></code>.
+</p>
+
