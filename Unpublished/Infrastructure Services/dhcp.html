@@ -20,15 +20,16 @@ Components of DHCP:
   <li><b>DHCP client:</b> devices that request for IP addresses and other network services 
   such as DNS server addresses.</li>
   <li><b>IP address pool:</b> Range of IP addresses to be assigned to clients.</li>
-  <li><b>Lease:</b> length of time that a client can use an IP addresses</li>
+  <li><b>Lease:</b> length of time that a client can use an assigned IP address.</li>
   <li><b>DHCP relay:</b> used to forward DHCP requests from clients to servers when the 
   server is located in a remote network. Device listens to broadcasts from the 
-  clients and forwards them to the server. This usually used when the network 
-  adopts a centralised DHCP server.</li>
+  clients and forwards them to the server. This is common in networks with
+  centralised DHCP servers.</li>
 </ul>
 </p>
 <p>
-Some of the IP configuration information 
+DHCP is used to send IP configuration information to clients. Some of the IP 
+configuration information that is issued by DHCP includes the following: 
 <ul>
   <li>IP address</li>
   <li>subnet mask</li>
@@ -40,34 +41,62 @@ Some of the IP configuration information
 <p>
 DHCP supports three mechanisms for IP address allocation:
 <ol type="a">
-  <li><b>Automatic Allocation:</b> DHCP assigns a permanent IP address to a client.</li>
+  <li><b>Automatic Allocation:</b> DHCP assigns a permanent IP address to a client.
+  Addresses for new clients are assigned from the address pool and, then mapped.</li>
   <li><b>Dynamic Allocation:</b> DHCP assigns an IP address to a client for a 
-  limited period of time.</li>
+  limited period of time. The IP address is then returned to the pool when the 
+  lease is not renewed.</li>
   <li><b>Manual allocation:</b> network administrator assigns an IP address to a 
-  client and DHCP is used simply to convey the assigned address to the client.</li>
+  client and DHCP is used simply to convey the assigned address to the client.
+  This address is permanently assigned to the host.
+  </li>
 </ol>
+</p>
+<p>
+The lease period must be renewed if a device wants to continue using the assigned 
+IP configuration information. An infinite lease has the time set to 4294967295 seconds
+(136 years). The lease period must be renewed while it is still valid. Once a lease 
+expires, the address issued is returned to the address pool. The first attempt 
+to renew the lease period is at half the lease time. The second attempt occurs at 
+half the remaining time limit i.e., at 3/4 of the original lease time.
+</p>
+<p>
+The lease can be terminated by the client or server:
+<ul>
+  <li><b>Client:</b> with the DHCPRELEASE message.</li>
+  <li><b>Server:</b> with the DHCPFORCERENEW and DHCPNACK messages.</li>
+</ul>
+</p>
+<p>
+In corporate networks, the lease should be made longer, say 24 hours or longer, as 
+these users connect to the network frequently and routinely. For guest networks, the lease 
+should be made short as guests users are likely to be connected for a shorter time period. 
 </p>
 
 
 <h1>IP Configuration Allocation by DHCP</h1>
 <p>
-DHCP uses a four stage process for DHCP servers to allocate IP configuration 
-parameters to DHCP clients. These stages are: DHCPDISCOVER, DHCPOFFER, DHCPREQUEST, 
-DHCPACK. These four stages are usually abbreviated as DORA. In DORA, servers 
-usually send unicasts while clients send broadcasts.
+DHCP uses a four stage process for servers to allocate IP configuration 
+parameters to clients. These stages are: DHCPDISCOVER, DHCPOFFER, DHCPREQUEST, 
+DHCPACK. These four stages are usually abbreviated as DORA. Most of the server 
+DHCP messages are sent in unicast while clients send broadcasts.
 </p>
 <h2>Discover</h2>
 <p>
 Devices that would like to receive addresses through DHCP should be configured 
-as clients. On host devices, by default, they are configured to request for 
-DHCP services automatically. On network and server devices, by default, they 
-are set to receive static IP addresses. On IOS, interfaces are configured as 
+as clients. End-user devices, by default, are configured to request for 
+DHCP services automatically. On IOS, interfaces are configured as 
 DHCP clients using the command <code><b>ip address dhcp</b></code>.
 </p>
 <p>
-Client sends a broadcast message onto the network using source port UDP port 68 
+ Network and server devices, should be configured 
+with static IP addresses or receive their IP addresses through DHCP manual 
+allocation.
+</p>
+<p>
+A client sends a broadcast DHCPDISCOVER message onto the network using source port UDP port 68 
 and destination UDP port 67. Any DHCP servers on the local network will respond 
-to this with an offer message. DHCP relays will receive the DHCP Discover message 
+to the DHCPDISCOVER with an offer message. DHCP relays will receive the DHCP Discover message 
 and forward it to the remote DHCP server. 
 <ul>
   <li><b>Source IP:</b> 0.0.0.0</li>
@@ -77,12 +106,60 @@ and forward it to the remote DHCP server.
 </ul>
 </p>
 <p>
-Because clients send broadcasts, any DHCP servers listening can respond to the 
-client. A client usually accepts the first offer it receives. If a client does 
-not respond to a DHCPOffer message within a given amount of time the server can 
-reclaim the IP addresses that it had reserved for the client.
-If a DHCP server cannot satisfy a DHCP request from its own database, it can 
-forward the request to one or more secondary servers.
+The following is a Wireshark packet capture of a DHCPDISCOVER message:
+</p>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code style="font-size:130%">
+Frame 321: 333 bytes on wire (2664 bits), 333 bytes captured (2664 bits) on interface -, id 0  <br>
+Ethernet II, Src: ca:07:06:8d:00:08 (ca:07:06:8d:00:08), Dst: Broadcast (ff:ff:ff:ff:ff:ff)    <br>
+Internet Protocol Version 4, Src: 0.0.0.0, Dst: 255.255.255.255                                <br>
+User Datagram Protocol, Src Port: 68, Dst Port: 67                                             <br>
+Dynamic Host Configuration Protocol (Discover)                                                 <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Message type: Boot Request (1)                                                             <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Hardware type: Ethernet (0x01)                                                             <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Hardware address length: 6                                                                 <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Hops: 0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                                        <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Transaction ID: 0x000026e0                                                                 <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Seconds elapsed: 7                                                                         <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Bootp flags: 0x8000, Broadcast flag (Broadcast)                                            <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1... .... .... .... = Broadcast flag: Broadcast                                        <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.000 0000 0000 0000 = Reserved flags: 0x0000                                           <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Client IP address: 0.0.0.0                                                                 <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Your (client) IP address: 0.0.0.0                                                          <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Next server IP address: 0.0.0.0                                                            <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Relay agent IP address: 0.0.0.0                                                            <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Client MAC address: ca:07:06:8d:00:08 (ca:07:06:8d:00:08)                                  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Client hardware address padding: 00000000000000000000                                      <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Server host name not given                                                                 <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Boot file name not given                                                                   <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Magic cookie: DHCP                                                                         <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Option: (53) DHCP Message Type (Discover)                                                  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Length: 1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                                        <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;DHCP: Discover (1)                                                                     <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Option: (57) Maximum DHCP Message Size                                                     <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Length: 2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                                        <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Maximum DHCP Message Size: 1200                                                        <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Option: (61) Client identifier                                                             <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Length: 27&nbsp;&nbsp;&nbsp;&nbsp;                                                                         <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Type: 0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                                        <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Client Identifier: cisco-ca07.068d.0008-Gi0/0                                          <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Option: (12) Host Name                                                                     <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Length: 2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                                        <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Host Name: R7&nbsp;&nbsp;                                                                        <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Option: (55) Parameter Request List                                                        <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Length: 8&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                                        <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Parameter Request List Item: (1) Subnet Mask                                           <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Parameter Request List Item: (6) Domain Name Server                                    <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Parameter Request List Item: (15) Domain Name                                          <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Parameter Request List Item: (44) NetBIOS over TCP/IP Name Server                      <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Parameter Request List Item: (3) Router                                                <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Parameter Request List Item: (33) Static Route                                         <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Parameter Request List Item: (150) TFTP Server Address                                 <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Parameter Request List Item: (43) Vendor-Specific Information                          <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Option: (255) End&nbsp;&nbsp;                                                                        <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Option End: 255
+</code></div>
 </p>
 <p>
 If clients are not in the same subnet as the server, the DHCPDISCOVER message will 
@@ -94,10 +171,87 @@ of zero.
 <h2>Offer</h2>
 <p>
 A DHCP server that receives a DHCP Discover message will reply to the Discover 
-message with an offer message. The offer is sent in *****unicast to the client.
-It matches the DHCPDISCOVER message with a configured DHCP address pool that has
-the network that contains the IP address in the <code><b>giaddr</b></code> field. 
-For directly connected clients, the receiving interface helps.
+message with an offer message. The offer is sent to the broadcast address 
+255.255.255.255. Clients will identify the DHCPOFFER is intended for them because 
+the DHCP server includes the client MAC address that was in the DHCPDISCOVER 
+message received from the client.
+
+For DHCPDISCOVER messages received from a DHCP relay, the appropriate address 
+pool is determined using the value of the <code><b>giaddr</b></code> field. 
+For a DHCPDISCOVER message received from a local subnet, the IP address of the interface 
+through which the message was received determines the pool to be used for assigning 
+the address.
+</p>
+
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code style="font-size:130%">
+Frame 37: 365 bytes on wire (2920 bits), 365 bytes captured (2920 bits) on interface -, id 0 <br>
+Ethernet II, Src: ca:01:05:ca:00:08 (ca:01:05:ca:00:08), Dst: Broadcast (ff:ff:ff:ff:ff:ff)  <br>
+Internet Protocol Version 4, Src: 172.30.1.1, Dst: 255.255.255.255                           <br>
+User Datagram Protocol, Src Port: 67, Dst Port: 68                                           <br>
+Dynamic Host Configuration Protocol (Offer)                                                  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Message type: Boot Reply (2)                                                             <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Hardware type: Ethernet (0x01)                                                           <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Hardware address length: 6                                                               <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Hops: 0&nbsp;&nbsp;&nbsp;&nbsp;                                                                              <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Transaction ID: 0x000010eb                                                               <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Seconds elapsed: 0                                                                       <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Bootp flags: 0x8000, Broadcast flag (Broadcast)                                          <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1... .... .... .... = Broadcast flag: Broadcast                                      <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.000 0000 0000 0000 = Reserved flags: 0x0000                                         <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Client IP address: 0.0.0.0                                                               <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Your (client) IP address: 172.30.1.26                                                    <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Next server IP address: 0.0.0.0                                                          <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Relay agent IP address: 0.0.0.0                                                          <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Client MAC address: ca:07:06:8d:00:08 (ca:07:06:8d:00:08)                                <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Client hardware address padding: 00000000000000000000                                    <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Server host name not given                                                               <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Boot file name not given                                                                 <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Magic cookie: DHCP                                                                       <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Option: (53) DHCP Message Type (Offer)                                                   <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Length: 1                                                                            <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;DHCP: Offer (2)                                                                      <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Option: (54) DHCP Server Identifier (172.30.1.1)                                         <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Length: 4                                                                            <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;DHCP Server Identifier: 172.30.1.1                                                   <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Option: (51) IP Address Lease Time                                                       <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Length: 4                                                                            <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;IP Address Lease Time: (86340s) 23 hours, 59 minutes                                 <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Option: (58) Renewal Time Value                                                          <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Length: 4                                                                            <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Renewal Time Value: (43170s) 11 hours, 59 minutes, 30 seconds                        <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Option: (59) Rebinding Time Value                                                        <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Length: 4                                                                            <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Rebinding Time Value: (75544s) 20 hours, 59 minutes, 4 seconds                       <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Option: (1) Subnet Mask (255.255.255.0)                                                  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Length: 4                                                                            <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Subnet Mask: 255.255.255.0                                                           <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Option: (3) Router                                                                       <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Length: 4                                                                            <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Router: 172.30.1.1                                                                   <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Option: (150) TFTP Server Address                                                        <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Length: 4                                                                            <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;TFTP Server Address: 172.30.1.10                                                     <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Option: (6) Domain Name Server                                                           <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Length: 8                                                                            <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Domain Name Server: 172.30.1.1                                                       <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Domain Name Server: 172.30.5.10                                                      <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Option: (15) Domain Name                                                                 <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Length: 25                                                                           <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Domain Name: emmanueltoko.blogspot.com                                               <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Option: (255) End                                                                        <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Option End: 255                                                                      <br>
+</code></div>
+</p>
+
+<p>
+Because clients send broadcasts, any DHCP servers listening can respond to the 
+client. A client usually accepts the first offer it receives. If a client does 
+not respond to a DHCPOffer message within a given amount of time the server can 
+reclaim the IP addresses that it had reserved for the client.
+If a DHCP server cannot satisfy a DHCP request from its own database, it can 
+forward the request to one or more secondary servers.
 </p>
 <p>
 If an offer contains invalid configuration parameters, a client can respond with
@@ -110,26 +264,149 @@ if the address was assigned to another client.
 <h2>Request</h2>
 <p>
 The client which receives the offer will send a request for the offered IP 
-settings. If multiple DHCP servers respond with DHCP offer messages, the client 
-usually processes the forst offer and declines the others.
+configuration parameters. If multiple DHCP servers respond with DHCP offer messages, the client 
+usually processes the first offer and declines the others.
 </p>
-
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code style="font-size:130%">
+  Frame 38: 345 bytes on wire (2760 bits), 345 bytes captured (2760 bits) on interface -, id 0    <br>
+Ethernet II, Src: ca:07:06:8d:00:08 (ca:07:06:8d:00:08), Dst: Broadcast (ff:ff:ff:ff:ff:ff)       <br>
+Internet Protocol Version 4, Src: 0.0.0.0, Dst: 255.255.255.255                                   <br>
+User Datagram Protocol, Src Port: 68, Dst Port: 67                                                <br>
+Dynamic Host Configuration Protocol (Request)                                                     <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Message type: Boot Request (1)                                                                <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Hardware type: Ethernet (0x01)                                                                <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Hardware address length: 6                                                                    <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Hops: 0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                                       <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Transaction ID: 0x000010eb                                                                    <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Seconds elapsed: 0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                                      <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Bootp flags: 0x8000, Broadcast flag (Broadcast)                                               <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1... .... .... .... = Broadcast flag: Broadcast                                           <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.000 0000 0000 0000 = Reserved flags: 0x0000                                              <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Client IP address: 0.0.0.0                                                                    <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Your (client) IP address: 0.0.0.0                                                             <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Next server IP address: 0.0.0.0                                                               <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Relay agent IP address: 0.0.0.0                                                               <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Client MAC address: ca:07:06:8d:00:08 (ca:07:06:8d:00:08)                                     <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Client hardware address padding: 00000000000000000000                                         <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Server host name not given                                                                    <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Boot file name not given                                                                      <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Magic cookie: DHCP&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                                      <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Option: (53) DHCP Message Type (Request)                                                      <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Length: 1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                                       <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;DHCP: Request (3)&nbsp;&nbsp;                                                                       <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Option: (57) Maximum DHCP Message Size                                                        <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Length: 2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                                       <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Maximum DHCP Message Size: 1200                                                           <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Option: (61) Client identifier                                                                <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Length: 27&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                                      <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Type: 0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                                       <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Client Identifier: cisco-ca07.068d.0008-Gi0/0                                             <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Option: (54) DHCP Server Identifier (172.30.1.1)                                              <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Length: 4&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                                       <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;DHCP Server Identifier: 172.30.1.1                                                        <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Option: (50) Requested IP Address (172.30.1.26)                                               <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Length: 4&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                                       <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Requested IP Address: 172.30.1.26                                                         <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Option: (12) Host Name&nbsp;&nbsp;                                                                      <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Length: 2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                                       <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Host Name: R7&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                                       <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Option: (55) Parameter Request List                                                           <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Length: 8&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                                       <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Parameter Request List Item: (1) Subnet Mask                                              <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Parameter Request List Item: (6) Domain Name Server                                       <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Parameter Request List Item: (15) Domain Name                                             <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Parameter Request List Item: (44) NetBIOS over TCP/IP Name Server                         <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Parameter Request List Item: (3) Router                                                   <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Parameter Request List Item: (33) Static Route                                            <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Parameter Request List Item: (150) TFTP Server Address                                    <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Parameter Request List Item: (43) Vendor-Specific Information                             <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Option: (255) End&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                                       <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Option End: 255&nbsp;&nbsp;&nbsp;&nbsp;                                                                       <br>
+</code></div>
+  </p>
+  
 <h2>Acknowledge</h2>
 <p>
-DHCP servers acknowledge the IP address settings that were offered to the client. 
+DHCP servers acknowledge the IP configuration parameters that were offered to the client. 
 The DHCP process also sets the IP address of the gateway. This is usually  a 
-static route.
+static route with an administrative distance of 254.
+</p>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code style="font-size:130%">
+
+Frame 39: 365 bytes on wire (2920 bits), 365 bytes captured (2920 bits) on interface -, id 0     <br>
+Ethernet II, Src: ca:01:05:ca:00:08 (ca:01:05:ca:00:08), Dst: Broadcast (ff:ff:ff:ff:ff:ff)      <br>
+Internet Protocol Version 4, Src: 172.30.1.1, Dst: 255.255.255.255                               <br>
+User Datagram Protocol, Src Port: 67, Dst Port: 68                                               <br>
+Dynamic Host Configuration Protocol (ACK)                                                        <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Message type: Boot Reply (2)                                                                 <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Hardware type: Ethernet (0x01)                                                               <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Hardware address length: 6                                                                   <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Hops: 0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                                            <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Transaction ID: 0x000010eb                                                                   <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Seconds elapsed: 0                                                                           <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Bootp flags: 0x8000, Broadcast flag (Broadcast)                                              <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1... .... .... .... = Broadcast flag: Broadcast                                          <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.000 0000 0000 0000 = Reserved flags: 0x0000                                             <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Client IP address: 0.0.0.0                                                                   <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Your (client) IP address: 172.30.1.26                                                        <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Next server IP address: 0.0.0.0                                                              <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Relay agent IP address: 0.0.0.0                                                              <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Client MAC address: ca:07:06:8d:00:08 (ca:07:06:8d:00:08)                                    <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Client hardware address padding: 00000000000000000000                                        <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Server host name not given                                                                   <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Boot file name not given                                                                     <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Magic cookie: DHCP                                                                           <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Option: (53) DHCP Message Type (ACK)                                                         <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Length: 1&nbsp;&nbsp;&nbsp;&nbsp;                                                                            <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;DHCP: ACK (5)                                                                            <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Option: (54) DHCP Server Identifier (172.30.1.1)                                             <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Length: 4&nbsp;&nbsp;&nbsp;&nbsp;                                                                            <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;DHCP Server Identifier: 172.30.1.1                                                       <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Option: (51) IP Address Lease Time                                                           <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Length: 4&nbsp;&nbsp;&nbsp;&nbsp;                                                                            <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;IP Address Lease Time: (86340s) 23 hours, 59 minutes                                     <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Option: (58) Renewal Time Value                                                              <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Length: 4&nbsp;&nbsp;&nbsp;&nbsp;                                                                            <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Renewal Time Value: (43170s) 11 hours, 59 minutes, 30 seconds                            <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Option: (59) Rebinding Time Value                                                            <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Length: 4&nbsp;&nbsp;&nbsp;&nbsp;                                                                            <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Rebinding Time Value: (75544s) 20 hours, 59 minutes, 4 seconds                           <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Option: (1) Subnet Mask (255.255.255.0)                                                      <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Length: 4&nbsp;&nbsp;&nbsp;&nbsp;                                                                            <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Subnet Mask: 255.255.255.0                                                               <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Option: (3) Router                                                                           <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Length: 4&nbsp;&nbsp;&nbsp;&nbsp;                                                                            <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Router: 172.30.1.1                                                                       <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Option: (150) TFTP Server Address                                                            <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Length: 4&nbsp;&nbsp;&nbsp;&nbsp;                                                                            <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;TFTP Server Address: 172.30.1.10                                                         <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Option: (6) Domain Name Server                                                               <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Length: 8&nbsp;&nbsp;&nbsp;&nbsp;                                                                            <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Domain Name Server: 172.30.1.1                                                           <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Domain Name Server: 172.30.5.10                                                          <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Option: (15) Domain Name                                                                     <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Length: 25&nbsp;&nbsp;                                                                             <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Domain Name: emmanueltoko.blogspot.com                                                   <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Option: (255) End                                                                            <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Option End: 255                                                                          <br>
+                                                                                                 <br>
+</code></div>
 </p>
 
 <h2>DHCP Relay</h2>
 <p>
-Routers block broadcast messages. So these messages do not get sent to a remote 
+By default, routers block broadcast messages. So these messages do not get sent to a remote 
 DHCP server unless a DHCP relay has been configured. The DHCP relay takes the 
-DHCP Discover broadcast and sends a unicast DHCP Discover to the DHCP server.
+DHCPDISCOVER broadcast message and sends a unicast DHCPDISCOVER meesage to the 
+DHCP server.
 </p>
 <p>
 The network that the DHCP relay (and client) reside in (DHCP scope) should be 
-configured on the DHCP server. Otherwise the DHCP server will not have a route 
+konwn to the DHCP server or its default router. Otherwise the DHCP server will not have a route 
 to replay to the DHCP Discover message. The DHCP relay should have IP reachability 
 to the network of the remote DHCP server.
 </p>
@@ -158,39 +435,8 @@ The command to configure the DHCP relay is <code><b>ip helper-address 10.10.10.1
 
 <h2>DHCP Messages</h2>
 <p>
-DHCP messages include:
-<ul>
- <li> DHCPDISCOVER</li>
- <li> DHCPOFFER</li>
- <li> DHCPREQUEST</li>
- <li> DHCPACK</li>
- <li> DHCPDECLINE</li>
- <li> DHCPNAK</li>
- <li> DHCPRELEASE</li>
- <li> DHCPINFORM</li>
-</ul>
-</p>
-
-<h2>DHCPDISCOVER</h2>
-<p>
-client sends this message to locate a DHCP server. port number is UDP 67.
-</p>
-
-<h2>DHCPOFFER</h2>
-<p>
-DHCP server sends the DHCPOffer in response to the discover message. The source 
-port is 68.
-</p>
-
-<h2>DHCPREQUEST</h2>
-<p>
-This broadcast message is a request from the client to the DHCP server for the 
-IP addressing information and options that were received in the offer message.
-</p>
-
-<h2>DHCPACK</h2>
-<p>
-Server sends this message to a client that includes IP configuration paramters.
+DHCP messages include: DHCPDISCOVER, DHCPOFFER, DHCPREQUEST, DHCPACK, DHCPDECLINE,
+DHCPNAK, DHCPRELEASE, DHCPINFORM.
 </p>
 
 <h2>DHCPDECLINE</h2>
@@ -201,28 +447,28 @@ in use on the network.
 
 <h2>DHCPNAK</h2>
 <p>
-server sends this message to a client and informs that the server declines to 
+Server sends this message to a client and informs that the server declines to 
 provide the client the requested IP configuration information.
 </p>
 
 <h2>DHCPRELEASE</h2>
 <p>
-Clinet sends this message to a server informing it that the client has released 
-its DHCP lease, this allowwing the DHCP server to reassign the client IP address 
+Client sends this message to a server informing it that the client has released 
+its DHCP lease, this allowing the DHCP server to reassign the IP address 
 to another client.
 </p>
 
 <h2>DHCPINFORM</h2>
 <p>
-client sends this message to a server requesting IP configuration parameters. Such 
+Client sends this message to a server requesting IP configuration parameters. Such 
 a message might be sent from an access server requesting IP configuration 
 information for a remote client attaching to the access server.
 </p>
 
 <h2>DHCP Options</h2>
 <p>
-The DHCP server sends IP configuration parameters to the clients. DHCP Options 
-are defined by the numeric variable and value. There are up to 255 DHCP options 
+The DHCP server and client exchange IP configuration parameters using DHCP options. 
+DHCP options are defined by a numeric variable and value. There are up to 255 DHCP options 
 available (from 0 to 254). These options can be categorized into options for:
 <ul>
   <li>IP Layer parameters per host such as policy filters, maximum datagrame reassembly 
@@ -232,7 +478,7 @@ available (from 0 to 254). These options can be categorized into options for:
   <li>TCP parameters suchas TCP keepalive interval, TCP keepalive garbage option</li>
   <li>Application and service parameters</li>
 </ul>
-Some DHCP options are configured on the server. Others are included in DHCP messages 
+Some DHCP options are configured on the server, others are included in DHCP messages 
 sent by the client.
 
 Some frequently used DHCP options are listed in the 
@@ -248,11 +494,20 @@ following table;
 </thead>
 <tbody>
 <tr>
+    <td style="border-bottom: 1px solid">1</td>
+    <td style="border-bottom: 1px solid">Subnet mask</td>
+    <td style="border-bottom: 1px solid"> The subnet mask option specifies the 
+    client's subnet mask.
+    If both the subnet mask and the router option are specified in a DHCP
+   reply, the subnet mask option MUST be first.
+    </td>
+  </tr>
+<tr>
     <td style="border-bottom: 1px solid">3 </td>
     <td style="border-bottom: 1px solid">Router</td>
     <td style="border-bottom: 1px solid">The router option specifies a list of 
     IP addresses for routers on the client's subnet.  Routers SHOULD be listed
-    in order of preference..</td>
+    in order of preference.</td>
   </tr>
   <tr>
     <td style="border-bottom: 1px solid">6 </td>
@@ -261,7 +516,14 @@ following table;
     a list of Domain Name System name servers available to the client.  Servers
    SHOULD be listed in order of preference.</td>
   </tr>
- 
+ <tr>
+    <td style="border-bottom: 1px solid">12</td>
+    <td style="border-bottom: 1px solid">Host name</td>
+    <td style="border-bottom: 1px solid">
+    This option specifies the name of the client.  The name may or may
+   not be qualified with the local domain name.
+    </td>
+  </tr>
   <tr>
     <td style="border-bottom: 1px solid">15 </td>
     <td style="border-bottom: 1px solid">Domain Name </td>
@@ -312,9 +574,8 @@ following table;
     <td style="border-bottom: 1px solid">54 </td>
     <td style="border-bottom: 1px solid">Server Identifier </td>
     <td style="border-bottom: 1px solid">Used in DHCPOFFER and DHCPREQUEST messages 
-    to alow the client to distinguish between lease offers received from 
-    different DHCP servers. 
-    DHCP clients use the
+    to allow the client to distinguish between lease offers received from 
+    different DHCP servers. DHCP clients use the
    contents of the 'server identifier' field as the destination address
    for any DHCP messages unicast to the DHCP server.  DHCP clients also
    indicate which of several lease offers is being accepted by including
@@ -375,15 +636,15 @@ following table;
    meet this requirement for uniqueness.
    </td>
   </tr>
-   <tr>
+  <tr>
     <td style="border-bottom: 1px solid">66 </td>
-    <td style="border-bottom: 1px solid">TFTP server </td>
-    <td style="border-bottom: 1px solid">This option is used to identify a TFTP server when the 'sname' field
-   in the DHCP header has been used for DHCP options. This option is usually used 
-   by IP Phones to locate the TFTP server from which they can download configurations 
-   or update their firmware.
-   </td>
+    <td style="border-bottom: 1px solid">TFTP Server Name</td>
+    <td style="border-bottom: 1px solid">
+    This option is used to identify a TFTP server when the 'sname' field
+   in the DHCP header has been used for DHCP options.
+    </td>
   </tr>
+
   <tr>
     <td style="border-bottom: 1px solid">69 </td>
     <td style="border-bottom: 1px solid">SMTP</td>
@@ -401,43 +662,23 @@ following table;
   </tr>
  
    
-  <tr>
-    <td style="border-bottom: 1px solid">61</td>
-    <td style="border-bottom: 1px solid">Client-identifier</td>
-    <td style="border-bottom: 1px solid">
-   This option is used by DHCP clients to specify their unique
-   identifier.  DHCP servers use this value to index their database of
-   address bindings.  This value is expected to be unique for all
-   clients in an administrative domain.
-
-   Identifiers SHOULD be treated as opaque objects by DHCP servers.
-
-   The client identifier MAY consist of type-value pairs.
-   For instance, it MAY consist
-   of a hardware type and hardware address. In this case the type field
-   SHOULD be one of the ARP hardware types defined in STD2 [22].  A
-   hardware type of 0 (zero) should be used when the value field
-   contains an identifier other than a hardware address (e.g. a fully
-   qualified domain name).
-
-   For correct identification of clients, each client's client-
-   identifier MUST be unique among the client-identifiers used on the
-   subnet to which the client is attached.  Vendors and system
-   administrators are responsible for choosing client-identifiers that
-   meet this requirement for uniqueness.
-    </td>
-  </tr>
  
+    <tr>
+    <td style="border-bottom: 1px solid">150 </td>
+    <td style="border-bottom: 1px solid">TFTP server </td>
+    <td style="border-bottom: 1px solid">This option is used to identify a TFTP server when the 'sname' field
+   in the DHCP header has been used for DHCP options. This option is usually used 
+   by IP Phones to locate the TFTP server from which they can download configurations 
+   or update their firmware.
+   </td>
+  </tr>
 </tbody>
 </table>
 </p>
-
-You can configure a domain name using the DHCP options;
-
-DHCP_SERVER(dhcp-config)#option 15 ascii emmanueltoko.blogspot.com
-
+<p>
 The entire list of DHCP options can be obtained from the RFC document defining DHCP.
 </p>
+
 
 <h1>Configuration</h1>
 <p>
@@ -539,6 +780,17 @@ DHCP_SERVER(config)#<b>ip dhcp pool DHCP_POOL_10.3.1.0/24</b>                   
 DHCP_SERVER(dhcp-config)#<b>network 10.3.1.0 255.255.255.0</b>                      <br>
 DHCP_SERVER(dhcp-config)#<b>default-router 10.3.1.1 10.3.1.2</b>                    <br>
 DHCP_SERVER(dhcp-config)#<b>lease 1 12 0</b>                                        <br>
+</code></div></p>
+</li>
+<li>Configure any DHCP options using the command <code><b>option &lt;option-code&gt; 
+&lt;ascii | hex | instance | ip&gt; &lt;value&gt;</b></code>.
+
+
+</p>
+</p>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code style="font-size:130%">
 DHCP_SERVER(dhcp-config)#<b>option 15 ? </b>                                        <br>
 &nbsp;&nbsp;ascii&nbsp;&nbsp;&nbsp;&nbsp; Data is an NVT ASCII string                                      <br>
 &nbsp;&nbsp;hex&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Data is a hexadecimal string                                     <br>
@@ -566,6 +818,17 @@ DHCP_SERVER(config)#
 </ul>
 </p>
   </li>
+  <li>
+     <b>Manually Assigned Addresses:</b> can be issused to specified clients 
+     by mapping a particular address to the client identifier which, by default, 
+     is the MAC address.
+     <p>
+     <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code style="font-size:130%">
+  DHCP_SERVER(dhcp-config)#<b>address 10.3.1.2 hardware-address 0000.deaf.beaf</b>
+  </code></div>
+     </p>
+  </li>
 </ol>
 </p>
 
@@ -579,7 +842,7 @@ using the command;
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
   <code style="font-size:130%">
-DHCP_SERVER(config)#ip dhcp ping packets 5
+DHCP_SERVER(config)#<b>ip dhcp ping packets 5</b>
 </code></div>
 </p>
 <p>
@@ -610,13 +873,13 @@ DHCP_SERVER#
 
 <h3>Ping Timeout</h3>
 <p>
-The default timeout of these DHCP servers is 500ms (milliseconds). To change 
+The default timeout of DHCP servers is 500ms (milliseconds). To change 
 this value, issue the following command in global configuration mode;
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
   <code style="font-size:130%">
-DHCP_SERVER(config)#ip dhcp ping timeout 200
+DHCP_SERVER(config)<b>#ip dhcp ping timeout 200</b>
 </code></div>
 </p>
 <p>
@@ -628,7 +891,9 @@ the amount of time that a client takes to receive an IP address through DHCP.
 <h2>Relay</h2>
 <p>
 Relay agents are used to forward requests and replies between clients and servers 
-when they are not in the same subnet. Relay agent supports the use of unnumbered 
+when they are not in the same subnet. 
+DHCP messages exchanged between the DHCP relay and the DHCP server are unicast.
+Relay agent supports the use of unnumbered 
 interfaces through adding a static host route.
 To configure a local router as a DHCP relay, use the following command;
 <p>
@@ -648,12 +913,12 @@ the DHCPDiscover messages from the clients.
 <p>
 A database agent is any host for example a (T)FTP server, RCP (Remote Copy Protocol)
 server that stores the DHCP bindings database. It could also be a storage media 
-device or partition on the DHCP server.y
+device or partition on the DHCP server.
 It is recommended by Cisco for a DHCP database agent to be configured. The purpose
-of the DHCP database agent is to store the recording od DHCP address conflicts. 
-So that if the Cisco IOS device (router or switch) reboots, the conflict loggings
+of the DHCP database agent is to store the recording of DHCP address conflicts 
+so that if the Cisco IOS device (router or switch) reboots, the DHCP conflict logs 
 cannot be lost. If these are lost, some addresses run the risk of being removed
-from the pool and yet are not assigned to a client. This leads to wastage of addresses.
+from the pool and yet are not assigned to a client. This leads to waste of addresses.
 To entirely disable a DHCP address conflict logging, run the command;
 </p>
 <p>
@@ -709,7 +974,7 @@ DHCP_SERVER(dhcp-config)#<b>import all</b>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
   <code style="font-size:130%">
-Router#<b>clear ip dhco binding &lt;ip-address | *&gt;</b><br>
+Router#<b>clear ip dhcp binding &lt;ip-address | *&gt;</b><br>
 Router#<b>clear ip dhcp conflict </b><br>
 Router#<b>clear ip dhcp server statistics</b><br>
 </code></div>
