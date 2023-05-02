@@ -106,6 +106,9 @@ and forward it to the remote DHCP server.
 </ul>
 </p>
 <p>
+If a response to the DHCPDISCOVER message is not received in a specified period 
+of time, the client broadcasts another DHCPDISCOVER message.
+
 The following is a Wireshark packet capture of a DHCPDISCOVER message:
 </p>
 <p>
@@ -662,9 +665,15 @@ following table;
    client.  Servers SHOULD be listed in order of preference.
     </td>
   </tr>
- 
-   
- 
+ <tr>
+    <td style="border-bottom: 1px solid">82</td>
+    <td style="border-bottom: 1px solid">Relay Agent</td>
+    <td style="border-bottom: 1px solid">
+    Option 82 feature provides the Cisco IOS Dynamic Host Configuration Protocol 
+  (DHCP) server the ability to allocate dynamic IP addresses based on the relay
+  information option (option 82) information sent by the relay agent..
+    </td>
+  </tr>
     <tr>
     <td style="border-bottom: 1px solid">150 </td>
     <td style="border-bottom: 1px solid">TFTP server </td>
@@ -722,7 +731,9 @@ Features include:
   <li><b>Excluded Addresses:</b> 
   Before configuring the DHCP features, it is best to first configure addresses to
 be excluded from being assigned to clients. These are usually addresses reserved 
-for hosts to receive addresses through static configuration. To exclude a range 
+for hosts to receive addresses through static configuration such as network devices, 
+servers. 
+To exclude a range 
 addresses from being assigned to clients, use the command <code><b>
 ip dhcp excluded-address &lt;low-ip-address&gt; &lt;high-ip-address&gt;</b></code>.
 
@@ -732,7 +743,8 @@ DHCP_SERVER(config)#ip dhcp excluded-address 192.168.1.2 192.168.1.20
   
   <p>
 Note that a router cannot issue an IP address for one of its interfaces even 
-if that address is not included in the range of the excluded addresses.
+if that address is not included in the range of the excluded addresses. This 
+command can be entered multiple times.
 </p>
   </li>
   <li>
@@ -792,6 +804,8 @@ DHCP_SERVER(dhcp-config)#<b>lease 1 12 0</b>                                    
  than one default gateway can be defined. Here, it is 10.3.1.1 and 10.3.1.2</li>
  <li><b>lease:</b> Defines the lease. By default it is set to 1 day (24 hours). 
  Here, it is configured for one day and twelve hours and zero minutes (36 hours)</li>
+ <li><b>dns-server:</b> the list of DNS servers with most preferred servers listed 
+ first.</li>
 </ul>
 </p>
 </li>

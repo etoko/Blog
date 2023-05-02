@@ -106,6 +106,9 @@ and forward it to the remote DHCP server.
 </ul>
 </p>
 <p>
+If a response to the DHCPDISCOVER message is not received in a specified period 
+of time, the client broadcasts another DHCPDISCOVER message.
+
 The following is a Wireshark packet capture of a DHCPDISCOVER message:
 </p>
 <p>
@@ -693,10 +696,6 @@ The entire list of DHCP options can be obtained from the RFC document defining D
 To enable DHCP servers on a router or switch, the DHCP needs to be enabled. This 
 is done using the command <code><b>service dhcp</b></code>.
 </p>
-<h2>Client</h2>
-<p>
-<code><b>ip address dhcp</b></code>
-</p>
 
 <h2>Server</h2>
 <p>
@@ -728,7 +727,9 @@ Features include:
   <li><b>Excluded Addresses:</b> 
   Before configuring the DHCP features, it is best to first configure addresses to
 be excluded from being assigned to clients. These are usually addresses reserved 
-for hosts to receive addresses through static configuration. To exclude a range 
+for hosts to receive addresses through static configuration such as network devices, 
+servers. 
+To exclude a range 
 addresses from being assigned to clients, use the command <code><b>
 ip dhcp excluded-address &lt;low-ip-address&gt; &lt;high-ip-address&gt;</b></code>.
 
@@ -738,7 +739,8 @@ DHCP_SERVER(config)#ip dhcp excluded-address 192.168.1.2 192.168.1.20
   
   <p>
 Note that a router cannot issue an IP address for one of its interfaces even 
-if that address is not included in the range of the excluded addresses.
+if that address is not included in the range of the excluded addresses. This 
+command can be entered multiple times.
 </p>
   </li>
   <li>
@@ -798,6 +800,8 @@ DHCP_SERVER(dhcp-config)#<b>lease 1 12 0</b>                                    
  than one default gateway can be defined. Here, it is 10.3.1.1 and 10.3.1.2</li>
  <li><b>lease:</b> Defines the lease. By default it is set to 1 day (24 hours). 
  Here, it is configured for one day and twelve hours and zero minutes (36 hours)</li>
+ <li><b>dns-server:</b> the list of DNS servers with most preferred servers listed 
+ first.</li>
 </ul>
 </p>
 </li>
@@ -894,6 +898,30 @@ DHCP_SERVER(config)<b>#ip dhcp ping timeout 200</b>
 <p>
 Note that setting a higher value for ping timeout and number of packets increases
 the amount of time that a client takes to receive an IP address through DHCP.
+</p>
+
+<h2>Client</h2>
+<p>
+By default, most host devices such as computers, and phones are set to receive 
+network configuration parameters through DHCP. 
+</p>
+<p>
+Usually, network devices such as routers, switches and servers have their network 
+configuration done manually. However, if circumstances require that a router 
+or switch receive network configuration parameters through DHCP, the following 
+command makes this possible:
+</p>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code style="font-size:130%">
+Router(config)#<b>interface gigabitEthernet0/0</b><br>
+Router(config-if)<b>ip address dhcp</b>
+</code></div>
+</p>
+<p>
+After receiving network configuration information, DHCP installs a static 
+default route in the routing table. This route has a default administrative 
+distance of 254 which is the worst acceptable administrative distance.
 </p>
 
 
