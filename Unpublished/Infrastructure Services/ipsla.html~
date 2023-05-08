@@ -1,445 +1,776 @@
 <h1>Introduction and Overview</h1>
+<p>
+Allows tracking of IP service levels by using active traffic monitoring. The 
+router generates packets to check service levels.
+</p>
+<p>
+IP SLAs are used to measure and verify network performance such as QoS and influence 
+routing decisions such as static routing, policy-based routing(PBR). 
+IP SLAs operate in real-time by sending network traffic such as VoIP, ICMP (echo,
+jitter, path echo, path jitter), TCP Connection, UDP (echo, jitter, jitter for VoIP), 
+DNS, DHCP, HTTP, FTP. Network performance can then be determined by the statistics 
+generated from the network response to the IP SLA traffic. Statistics include; delay 
+(round-trip and one-way), packet loss, jitter, voice quality.
+</p>
+<p>
+IP SLAs can perform a specific operation from a specific source to a specific 
+destination like ICMP, HTTP, TCP, UDP etc.IP SLA logs statistics about failures 
+and successes of that operation.
 
-IP SLAs are used to measure network performance and influence routing decisions. IP SLAs operate in real-time by sending network traffic such as VoIP, ICMP (echo, jitter, path echo, path jitter), TCP Connection, UDP (echo, jitter, jitter for VoIP), DNS, DHCP, HTTP, FTP. Network performance can then be determined by the statistics generated from the network response to the IP SLA traffic. Statistics include; delay (round-trip and one-way), packet loss, jitter, voice quality.
-
-IP SLAs can perform a specific operation from a specific source to a specific destination like ICMP, HTTP, TCP, UDP etc.IP SLA logs statistics about failures and successes of that operation.
-
-IP SLA can be used with HSRP, static routes, policy maps to influence routing. After configuring, IP SLA, it will not operate until it is activated by enhanced object tracking. When the IP SLA fails, object tracking can be configured to implement an action.
-
+IP SLA collects data that can be used by enhanced object tracking to take action 
+for example, the SLA can be used to view the status of HSRP, static routes, policy-based routing to influence 
+routing. When the IP SLA fails, object tracking can be configured to implement an action.
+</p>
+<p>
 IP SLA consists of two parts; a probe and schedule.
-
-    Probe: consists of the operation that will be carried out on the network for example reachability test, measurement of delay, measurement of delay variation (jitter) which can be measured using ICMP ping or UDP. Actual operations of network services can be measured such as application behaviour of DNS, HTTP, DHCP.
-
-    Schedule: deals with when, how long and recurrence of this operation.
-
+<ol>
+    <li><b>Probe:</b> consists of the operation that will be carried out on the network for
+    example reachability test, measurement of delay, measurement of delay 
+    variation (jitter) which can be measured using ICMP ping or UDP. Actual 
+    operations of network services can be measured such as application behaviour 
+    of DNS, HTTP, DHCP. Different types of probes used depend on the application 
+    being monitored; the main types are ICMP, TCP and UDP.</li>
+    <li><b>Schedule:</b> deals with when, how long and recurrence of this operation.</li>
+  </ol>
+</p>
+<p>
 When scheduling an IP SLA, default life of a probe is 3600 seconds (1 hour).
-Configuration
+</p>
 
+<h2>Types of SLA Traffic</h2>
+<p>
+IP SLA simulate network traffic(real-traffic) and measures performance. 
+IP SLAs are used to collect information about: reachability, response times (to 
+requests from HTTP, TCP, DHCP Discover), one-way latency, jitter(inter-packet variation), 
+voice quality scoring, etc. Can match against:
+<ul>
+  <li>Delay (one-way or round-trip)</li>
+  <li>Jitter(direction)</li> 
+  <li>packet loss(direction)</li> 
+  <li>Sequencing (packet order)</li>
+  <li>path(per hop)</li> 
+  <li>connectivity(directional)</li> 
+  <li>server load times</li> 
+  <li>voice quality scores(MOS)</li>
+</ul>
+</p>
+<p>
+  <ul>
+    <li>ICMP (echo, jitter)</li>
+    <li>UDP(echo, jitter)</li>
+    <li>TCP connection: can be used to test the availability and response times 
+    of an application rather than just reachability.</li>
+    <li>DNS</li>
+    <li>FTP</li>
+    <li>DHCP</li>
+    <li>HTTP</li>
+  </ul>
+</p>
+<p>
+IP SLAs that are based on connectivity tests do not require a responder. However, 
+for IP SLA operations that do require a responder, this should be configured 
+first before scheduling the IP SLA operation.
+</p>
+
+
+<h1>Configuration</h1>
+<p>
+<ol>
+  <li>Enable the IP SLA responder. Not always needed but depends on the probe.</li>
+  <li>Configure IP SLA operation</li>
+  <li>Configure the options for that specific probe(IP SLA operation)</li>
+  <li>Configure threshold conditions</li>
+  <li>Schedule the IP SLA probe operation to run</li>
+  <li>Verify the results of the operation</li>
+</ol>
+</p>
+<h2>An IP SLA responder and SLA Control Protocol</h2>
+<p>
+An active device in the network specifically programmed to interprete and respond 
+to specific probes. 
+</p>
+<p>
+Responders have types of timers: TS3, TS4 timers(Timestamp).
+T1 timer on the source router: this is the exit timer on the source router.
+T2 timer, timer on the target router.
+T3: responder timer
+T4: time packet arrives at the source router.
+</p>
+<p>
 To implement IP SLA network performance measurement, the following tasks are to be followed;
+<ol>
+ <li>Create the IP SLA</li>
+ <li>Configure the IP SLA operation type</li>
+ <li>Configure the options required for the specified operation type in Step 2.</li>
+ <li>Configure threshold values: threshold values to be monitored include; 
+ connection loss, latency (one-way), jitter (one-way), round-trip time (RTT), 
+ timeouts, packet loss. An IP SLA violation can send SNMP traps and trigger 
+ another IP SLA operation such as increasing the monitoring frequency, or ICMP 
+ path jitter and echo probes. The threshold value depends on the type of service
+ which the network is to support.</li>
+ <li>Schedule the IP SLA start-time and operating period.</li>
+ <li>(Optional) on the remote device, configure the IP SLA responder and appropriate 
+ ports. This is not required for some IP SLA operation types.</li>
+</ol>
+</p>
+    
+<h2>ICMP Echo Operation</h2>
+<p>
+ICMP echo operations are useful for testing network connectivity and end-to-end 
+response time. In IOS, using icmp-echo to measure an echo may experience some 
+delays at the destination due to processing delays of ICMP packets. Some systems 
+may not prioritize the processing of ICMP packets causing these delays. A better
+method to measure network performance is through UDP traffic.
 
-    Create the IP SLA
-
-    Configure the IP SLA operation type
-
-    Configure the options required for the specified operation type in Step 2.
-
-    Configure threshold values: threshold values to be monitored include; connection loss, latency (one-way), jitter (one-way), round-trip time (RTT), timeouts, packet loss. An IP SLA violation can send SNMP traps and trigger another IP SLA operation such as increasing the monitoring frequency, or ICMP path jitter and echo probes. The threshold value depends on the type of service which the network is to support.
-
-    Schedule the IP SLA start-time and operating period.
-
-    (Optional) on the remote device, configure the IP SLA responder and appropriate ports. This is not required for some IP SLA operation types.
-
-ICMP Echo Operation
-
-ICMP echo operations are useful for testing network connectivity and end-to-end response time. In IOS, using icmp-echo to measure an echo may experience some delays at the destination due to processing delays of ICMP packets. Some systems may not prioritize the processing of ICMP packets causing these delays. A better method to measure network performance is through UDP traffic.
-
-Any network device that supports ICMP echo protocol can be used as a destination. No IP SLA responder configuration is needed to be done on the destination device.
-
-
-Step 1: Create the IP SLA with an operation number using the global configuration command ip sla operation_number
-
+Any network device that supports ICMP echo protocol can be used as a destination. 
+No IP SLA responder configuration is needed to be done on the destination device.
+</p>
+<p>
+<ol>
+<li>Create the IP SLA with an operation number using the global configuration 
+command <code><b>ip sla &lt;sla-number&gt;</b></code>.
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code style="font-size:130%">
 R1(config)#ip sla 100
+</code></div>
+</p>
+</li>
+<li>Define the ICMP echo operation using the IP SLA mode configuration command 
+<code><b>icmp-echo destination_IP_address [source-ip &lt;ip-address&gt; | 
+source-interface &lt;interface-name&gt;]</b></code>.
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code style="font-size:130%">
+R1(config-ip-sla)#<b>icmp-echo 3.3.3.3 source-interface loopback 0</b>
+</code></div>
+</p>
+</li>
+<li>Define the rate at which the ICMP echo packets are sent in seconds using the 
+IP SLA ICMP-echo submode command <code><b>frequency &lt;seconds&gt;</b></code>;
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code style="font-size:130%">
+R1(config-ip-sla-echo)#<b>frequency 10</b>
+</code></div>
+</p>
+</li>
+<li><b>Threshold:</b> Define the threshold using the IP SLA ICMP echo sub mode command <code><b>threshold 
+milliseconds</b></code>. This optional step defines the upper value for the threshold for
+calculating network monitoring statistics. Threshold is the boundary value that gets
+measured over the operation result; this is the value that is collected during the 
+actual operation. If, for instance, we would like to test for delay, we can set a 
+threshold of, say, 30ms. If the delay result(for icmp-echo) is greater than this 
+threshold, we can consider the test to be a failure. 
 
-Step 2: Define the ICMP echo operation using the IP SLA mode configuration command icmp-echo destination_IP_address <source-ip ip_address | source-interface interface_name>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code style="font-size:130%">
+R1(config-ip-sla-echo)#<b>threshold 100</b>
+</code></div>
+</p>
+<p>
+The threshold parameter can be used to trigger other IP SLA operations.
+</p>
 
-R1(config-ip-sla)#icmp-echo 3.3.3.3 source-interface loopback 0
+</li>
+<li><b>Timeout:</b> Define a timeout value using IP SLA ICMP echo sub mode command <code><b>timeout 
+&lt;value&gt;</b></code> where value is in milliseconds. This optional step 
+defines the maximum amount of time an IP SLA operation waits for a response from its 
+request packet. It is the timeout waiting period for the probe response. The 
+timeout value cannot be greater than the frequency value.
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code style="font-size:130%">
+R1(config-ip-sla-echo)#<b>timeout 1000</b>
+</code></div>
+</p>
+<p>
+The frequency is greater than the timeout which is greater than the threshold.
+</p>
+</li>
+<li><b>TOS:</b> (Optional) Configure the <code><b>tos</b></code> value. This is the 
+type of service value. Packets may be treated differently if the TOS value varies 
+for instance such as VOIP traffic, 
 
-Step 3: Define the rate at which the ICMP echo packets are sent in seconds using the IP SLA ICMP-echo submode command frequency seconds;
+</li>
+<li>Schedule the IP SLA operation using the global configuration command 
+<code><b>ip sla schedule &lt;operation-number&gt; life [forever | seconds]  
+start-time [&lt;hh:mm:ss&gt; &lt;month&gt; &lt;day&gt; | pending | after &lt;hh:mm:ss&gt;]</b></code>.
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code style="font-size:130%">
+R1(config)#<b>ip sla schedule 100 start-time now life forever</b>
+</code></div>
+</p>
+</li>
 
-R1(config-ip-sla-echo)#frequency 10
+<h3>Verification</h3>
 
-Step 4: Define the threshold using the IP SLA ICMP echo sub mode command threshold milliseconds. This optional step defines the upper value for the threshold for calculating network monitoring statistics.
+<h4><code>show ip sla summary</code></h4>
+<p>
 
-R1(config-ip-sla-echo)#threshold 100
+</p>
 
-Step 5: Define a timeout value using IP SLA ICMP echo sub mode command timeout milliseconds. This optional step defines the amount of time an IP SLA operation waits for a response from its request packet. The timeout value cannot be greater than the frequency value.
-
-R1(config-ip-sla-echo)#timeout 1000
-
-Step 6: Schedule the IP SLA operation using the global configuration command ip sla schedule operation_number <life forever | seconds > <start-time hh:mm:ss <month day> | pending | after hh:mm:ss>
-
-R1(config)#ip sla schedule 100 start-time now life forever
-
-Verification
-
-#show ip sla statistics
-
-Shows the number of successes and failures and operation time to live. It shows unknown if probe is not wrong.
-
-R1(config)#do-exec show ip sla statistics
-IPSLAs Latest Operation Statistics
-
-IPSLA operation id: 100
-        Latest RTT: 388 milliseconds
-Latest operation start time: 15:10:54 UTC Sat Mar 13 2021
-Latest operation return code: OK
-Number of successes: 30
-Number of failures: 1
+<h4><code>show ip sla statistics</code></h4>
+<p>
+Shows the number of successes and failures and operation time to live. It shows 
+unknown if probe is not wrong.
+</p>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code style="font-size:130%">
+R1(config)#<b>do-exec show ip sla statistics</b><br>
+IPSLAs Latest Operation Statistics                          <br>
+                                                            <br>
+IPSLA operation id: 100&nbsp;&nbsp;                                   <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Latest RTT: 388 milliseconds                        <br>
+Latest operation start time: 15:10:54 UTC Sat Mar 13 2021   <br>
+Latest operation return code: OK                            <br>
+Number of successes: 30&nbsp;&nbsp;                                   <br>
+Number of failures: 1&nbsp;&nbsp;&nbsp;&nbsp;                                   <br>
 Operation time to live: Forever
+</code></div>
+</p>
 
-#show ip sla configuration
+<h4><code>show ip sla configuration</code></h4>
+<p>
+A source address of 0.0.0.0 implies that the IP SLA probe will use whichever
+interface is closest to the destination.
+</p>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code style="font-size:130%">
+R1(config)#<b>do-exec show ip sla configuration</b> <br>
+IP SLAs Infrastructure Engine-III                   <br>
+Entry number: 100                                   <br>
+Owner:&nbsp;&nbsp;&nbsp;&nbsp;                                          <br>
+Tag:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                          <br>
+Operation timeout (milliseconds): 10000             <br>
+Type of operation to perform: icmp-echo             <br>
+Target address/Source interface: 4.4.4.4/Loopback1  <br>
+Type Of Service parameter: 0x0                      <br>
+Request size (ARR data portion): 28                 <br>
+Verify data: No                                     <br>
+Vrf Name:                                           <br>
+Schedule:                                           <br>
+&nbsp;&nbsp; Operation frequency (seconds): 10  (not considered if randomly scheduled)<br>
+&nbsp;&nbsp; Next Scheduled Start Time: Start Time already passed <br>
+&nbsp;&nbsp; Group Scheduled : FALSE                              <br>
+&nbsp;&nbsp; Randomly Scheduled : FALSE                           <br>
+&nbsp;&nbsp; Life (seconds): Forever                              <br>
+&nbsp;&nbsp; Entry Ageout (seconds): never                        <br>
+&nbsp;&nbsp; Recurring (Starting Everyday): FALSE                 <br>
+&nbsp;&nbsp; Status of entry (SNMP RowStatus): Active             <br>
+Threshold (milliseconds): 5000                          <br>
+Distribution Statistics:                                <br>
+&nbsp;&nbsp; Number of statistic hours kept: 2                    <br>
+&nbsp;&nbsp; Number of statistic distribution buckets kept: 1     <br>
+&nbsp;&nbsp; Statistic distribution interval (milliseconds): 20   <br>
+Enhanced History:                                       <br>
+History Statistics:                                     <br>
+&nbsp;&nbsp; Number of history Lives kept: 0                      <br>
+&nbsp;&nbsp; Number of history Buckets kept: 15                   <br>
+&nbsp;&nbsp; History Filter Type: None
+</code></div>
+</p>
 
-A source address of 0.0.0.0 implies that the IP SLA probe will use whichever interface is closest to the destination.
 
-R1(config)#do-exec show ip sla configuration
-IP SLAs Infrastructure Engine-III
-Entry number: 100
-Owner:
-Tag:
-Operation timeout (milliseconds): 10000
-Type of operation to perform: icmp-echo
-Target address/Source interface: 4.4.4.4/Loopback1
-Type Of Service parameter: 0x0
-Request size (ARR data portion): 28
-Verify data: No
-Vrf Name:
-Schedule:
-   Operation frequency (seconds): 10  (not considered if randomly scheduled)
-   Next Scheduled Start Time: Start Time already passed
-   Group Scheduled : FALSE
-   Randomly Scheduled : FALSE
-   Life (seconds): Forever
-   Entry Ageout (seconds): never
-   Recurring (Starting Everyday): FALSE
-   Status of entry (SNMP RowStatus): Active
-Threshold (milliseconds): 5000
-Distribution Statistics:
-   Number of statistic hours kept: 2
-   Number of statistic distribution buckets kept: 1
-   Statistic distribution interval (milliseconds): 20
-Enhanced History:
-History Statistics:
-   Number of history Lives kept: 0
-   Number of history Buckets kept: 15
-   History Filter Type: None
+<h2>ICMP Path Echo Operations</h2>
+<p>
+An ICMP path echo operation measures the end-to-end and hop-by-hop response time
+between a Cisco device and other devices. In ICMP path-echo operation, a source 
+device uses traceroute to discover the path to the destination device. A ping is 
+then used to measure the response time between the source IP SLA device and each 
+subsequent hop in the path to the destination device.
+</p>
+<p>
+Configuration of the ICMP Path-Echo operation is similar to that of the ICMP echo 
+operation.
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code style="font-size:130%">
+R1(config)#<b>ip sla 200                                      </b> <br>
+R1(config-ip-sla)#<b>path-echo 4.4.4.4 source-ip 1.1.1.1      </b> <br>
+R1(config-ip-sla-path-echo)#<b>frequency 15                   </b> <br>
+R1(config-ip-sla-path-echo)#<b>exit                           </b> <br>
+R1(config)#<b>ip sla schedule 200 start-time now life forever </b> <br>
+</code></div>
+</p>
 
 
-R1(config)#
-
-ICMP Path Echo Operations
-
-An ICMP path echo operation measures the end-to-end and hop-by-hop response time between a Cisco device and other devices. In ICMP path-echo operation, a source device uses traceroute to discover the path to the destination device. A ping is then used to measure the response time between the source IP SLA device and each subsequent hop in the path to the destination device.
-
-R1(config)#ip sla 200
-R1(config-ip-sla)#path-echo 4.4.4.4 source-ip 1.1.1.1
-R1(config-ip-sla-path-echo)#frequency 15
-R1(config-ip-sla-path-echo)#exit
-R1(config)#ip sla schedule 200 start-time now life forever
-
+<h3>Verification</h3>
+<p>
 To verify ICMP Path Echo operation;
+</p>
+<h4><code>show ip sla statistics</code></h4>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code style="font-size:130%">
+R1#<b>show ip sla statistics 200 details</b>              <br>                                           
+IPSLAs Latest Operation Statistics                        <br>                                    
+                                                          <br>                                    
+IPSLA operation id: 200                                   <br>                                    
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Latest RTT: 232 milliseconds                      <br>                                    
+Latest operation start time: 15:53:39 UTC Sat Mar 13 2021 <br>                                    
+Latest operation return code: OK                          <br>                                    
+Over thresholds occurred: FALSE                           <br>                                    
+Number of successes: 5                                    <br>                                    
+Number of failures: 0                                     <br>                                    
+Operation time to live: Forever                           <br>                                    
+Operational state of entry: Active                        <br>                                    
+Last time this entry was reset: Never                     <br>                                    
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                            <br>                                    
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                            <br>                                    
+R1#show ip sla configuration 200                          <br>                                    
+IP SLAs Infrastructure Engine-III                         <br>                                    
+Entry number: 200                                         <br>                                    
+Owner:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                            <br>                                    
+Tag:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                            <br>                                    
+Operation timeout (milliseconds): 5000                    <br>                                    
+Type of operation to perform: path-echo                   <br>                                    
+Target address/Source address: 4.4.4.4/1.1.1.1            <br>                                    
+Type Of Service parameters: 0x0                           <br>                                    
+Request size (ARR data portion): 28                       <br>                                    
+Verify data: No                                           <br>                                    
+Loose Source Routing: Disabled                            <br>                                    
+Vrf Name:&nbsp;&nbsp;&nbsp;&nbsp;                                             <br>                                    
+LSR Path:&nbsp;&nbsp;&nbsp;&nbsp;                                             <br>                                    
+Schedule:&nbsp;&nbsp;&nbsp;&nbsp;                                             <br>                                    
+&nbsp;&nbsp; Operation frequency (seconds): 15  (not considered if randomly scheduled)<br>                   
+&nbsp;&nbsp; Next Scheduled Start Time: Start Time already passed   <br>                                    
+&nbsp;&nbsp; Group Scheduled : FALSE                                <br>                                    
+&nbsp;&nbsp; Randomly Scheduled : FALSE                             <br>                                    
+&nbsp;&nbsp; Life (seconds): Forever                                <br>                                    
+&nbsp;&nbsp; Entry Ageout (seconds): never                          <br>                                    
+&nbsp;&nbsp; Recurring (Starting Everyday): FALSE                   <br>                                    
+&nbsp;&nbsp; Status of entry (SNMP RowStatus): Active               <br>                                    
+Threshold (milliseconds): 5000                            <br>                                    
+Distribution Statistics:                                  <br>                                    
+&nbsp;&nbsp; Number of statistic hours kept: 2                      <br>                                    
+&nbsp;&nbsp; Number of statistic paths kept: 5                      <br>                                    
+&nbsp;&nbsp; Number of statistic hops kept: 16                      <br>                                    
+&nbsp;&nbsp; Number of statistic distribution buckets kept: 1       <br>                                    
+&nbsp;&nbsp; Statistic distribution interval (milliseconds): 20     <br>                                    
+History Statistics:                                       <br>                                    
+&nbsp;&nbsp; Number of history Lives kept: 0                        <br>                                    
+&nbsp;&nbsp; Number of history Buckets kept: 15                     <br>                                    
+&nbsp;&nbsp; Number of history Samples kept: 16                     <br>                                    
+&nbsp;&nbsp; History Filter Type: None                              <br>                                    
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                            <br>                                    
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                            <br>                                    
+R1#                                                       <br>                                    
+</code></div>
+</p>
 
-R1#show ip sla statistics 200 details                                                          
-IPSLAs Latest Operation Statistics                                                             
-                                                                                               
-IPSLA operation id: 200                                                                        
-        Latest RTT: 232 milliseconds                                                           
-Latest operation start time: 15:53:39 UTC Sat Mar 13 2021                                      
-Latest operation return code: OK                                                               
-Over thresholds occurred: FALSE                                                                
-Number of successes: 5                                                                         
-Number of failures: 0                                                                          
-Operation time to live: Forever                                                                
-Operational state of entry: Active                                                             
-Last time this entry was reset: Never                                                          
-                                                                                               
-                                                                                               
-R1#show ip sla configuration 200                                                               
-IP SLAs Infrastructure Engine-III                                                              
-Entry number: 200                                                                              
-Owner:                                                                                         
-Tag:                                                                                           
-Operation timeout (milliseconds): 5000                                                         
-Type of operation to perform: path-echo                                                        
-Target address/Source address: 4.4.4.4/1.1.1.1                                                 
-Type Of Service parameters: 0x0                                                                
-Request size (ARR data portion): 28                                                            
-Verify data: No                                                                                
-Loose Source Routing: Disabled                                                                 
-Vrf Name:                                                                                      
-LSR Path:                                                                                      
-Schedule:                                                                                      
-   Operation frequency (seconds): 15  (not considered if randomly scheduled)                   
-   Next Scheduled Start Time: Start Time already passed                                        
-   Group Scheduled : FALSE                                                                     
-   Randomly Scheduled : FALSE                                                                  
-   Life (seconds): Forever                                                                     
-   Entry Ageout (seconds): never                                                               
-   Recurring (Starting Everyday): FALSE                                                        
-   Status of entry (SNMP RowStatus): Active                                                    
-Threshold (milliseconds): 5000                                                                 
-Distribution Statistics:                                                                       
-   Number of statistic hours kept: 2                                                           
-   Number of statistic paths kept: 5                                                           
-   Number of statistic hops kept: 16                                                           
-   Number of statistic distribution buckets kept: 1                                            
-   Statistic distribution interval (milliseconds): 20                                          
-History Statistics:                                                                            
-   Number of history Lives kept: 0                                                             
-   Number of history Buckets kept: 15                                                          
-   Number of history Samples kept: 16                                                          
-   History Filter Type: None                                                                   
-                                                                                               
-                                                                                               
-R1#                                                                                            
-
-ICMP Path Jitter Operations
-
-IP SLA ICMP Path Jitter provides hop-by-hop jitter, packet loss and delay measurement statistics in network. ICMP path jitter can be used to supplement standard UDP jitter operations. For example, high jitter values from a UDP jitter operation could be used to trigger an ICMP path jitter opreation that could be used to troubleshoot the network path and determine if traffic is bottlenecking in a particular segment along the path. ICMP Path Jitter default values include; number of echo probes; 10, time between echo problems (milliseconds): 20, frequency (seconds) 60.
+<h2>ICMP Path Jitter Operations</h2>
+<p>
+IP SLA ICMP Path Jitter provides hop-by-hop jitter, packet loss and delay 
+measurement statistics in network. ICMP path jitter can be used to supplement 
+standard UDP jitter operations. For example, high jitter values from a UDP jitter
+operation could be used to trigger an ICMP path jitter opreation that could be 
+used to troubleshoot the network path and determine if traffic is bottlenecking 
+in a particular segment along the path. ICMP Path Jitter default values include; 
+number of echo probes; 10, time between echo problems (milliseconds): 20, 
+frequency (seconds) 60.
 
 No IP SLA responder is required to be configured on the destination or intermediate devices.
-ICMP Path Jitter Restrictions
+</p>
 
-    Jitter values obtained by ICMP Path Jitter are approximate values because ICMP does not provide the capability to embed processing times of devices along the path in the packet. If the destination device does not prioritize ICMP packets, the delay values may be higher.
+<h3>ICMP Path Jitter Restrictions</h3>
+<p>
+  <ul>
+   <li>Jitter values obtained by ICMP Path Jitter are approximate values because 
+   ICMP does not provide the capability to embed processing times of devices 
+   along the path in the packet. If the destination device does not prioritize 
+   ICMP packets, the delay values may be higher.</li>
+   <li>ICMP Path Jitter is not supported in RTTMON MIB for SNMP operation. So, 
+   cli commands have be be used.</li>
+   <li>ICMP Path Jitter does not support hourly statistics and hop information, 
+   IP SLA History feature because of the large data volume generated during 
+   jitter operations.</li>
+  </ul>
+  </p>
+  
+  <p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code style="font-size:130%">
+R1(config)#<b>ip sla 300</b><br>
+R1(config-ip-sla)#<b>path-jitter 4.4.4.4 source-ip 1.1.1.1 num-packets 15 interval 20</b><br>
+R1(config-ip-sla-path-jitter)#<b>frequency 10</b><br>
+R1(config)#<b>ip sla schedule 300 start-time now life forever</b>
+</code></div>
+</p>
 
-    ICMP Path Jitter is not supported in RTTMON MIB for SNMP operation. So, cli commands have be be used.
+<p>
+The optional <code><b>targetOnly</b></code> keyword to the <code><b>path-jitter
+</b></code> command is used to bypass the hop-by-hop measurements; echo probes 
+are sent to the destination device only.
+</p>
 
-    ICMP Path Jitter does not support hourly statistics and hop information, IP SLA History feature because of the large data volume generated during jitter operations.
+<h3>Verification</h3>
 
-R1(config)#ip sla 300
-R1(config-ip-sla)#path-jitter 4.4.4.4 source-ip 1.1.1.1 num-packets 15 interval 20
-R1(config-ip-sla-path-jitter)#frequency 10
-R1(config)#ip sla schedule 300 start-time now life forever
+<h4><code>show ip sla statistics</code></h4>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code style="font-size:130%">
+R1#<b>show ip sla statistics 300</b>                       <br>
+IPSLAs Latest Operation Statistics                         <br>
+                                                           <br>
+IPSLA operation id: 300                                    <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Latest RTT: 142 milliseconds                       <br>
+Latest operation start time: 16:19:58 UTC Sat Mar 13 2021  <br>
+Latest operation return code: OK                           <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                             <br>
+---- Path Jitter Statistics ----                           <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                             <br>
+Hop IP 192.168.12.2:                                       <br>
+Round Trip Time milliseconds:                              <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Latest RTT: 56 ms                                  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Number of RTT: 15                                  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;RTT Min/Avg/Max: 8/56/128 ms                       <br>
+Jitter time milliseconds:                                  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Number of jitter: 14                               <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Jitter Min/Avg/Max: 4/31/116 ms                    <br>
+Packet Values:                                             <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Packet Loss (Timeouts): 0                          <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Out of Sequence: 0                                 <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Discarded Samples: 0                               <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                             <br>
+Hop IP 192.168.23.2:                                       <br>
+Round Trip Time milliseconds:                              <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Latest RTT: 148 ms                                 <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Number of RTT: 15                                  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;RTT Min/Avg/Max: 16/148/268 ms                     <br>
+Jitter time milliseconds:                                  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Number of jitter: 14                               <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Jitter Min/Avg/Max: 4/48/252 ms                    <br>
+Packet Values:                                             <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Packet Loss (Timeouts): 0                          <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Out of Sequence: 0                                 <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Discarded Samples: 0                               <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                             <br>
+Hop IP 192.168.34.2:                                       <br>
+Round Trip Time milliseconds:                              <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Latest RTT: 142 ms                                 <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Number of RTT: 15                                  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;RTT Min/Avg/Max: 16/142/272 ms                     <br>
+Jitter time milliseconds:                                  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Number of jitter: 14                               <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Jitter Min/Avg/Max: 8/34/188 ms                    <br>
+Packet Values:                                             <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Packet Loss (Timeouts): 0                          <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Out of Sequence: 0                                 <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Discarded Samples: 0                               <br>
+Operation time to live: Forever                            <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                             <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                             <br>
+R1#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                              <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                             <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                             <br>
+R1#show ip sla configuration 300                           <br>
+IP SLAs Infrastructure Engine-III                          <br>
+Entry number: 300                                          <br>
+Owner:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                             <br>
+Tag:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                             <br>
+Operation timeout (milliseconds): 5000                     <br>
+Type of operation to perform: path-jitter                  <br>
+Target address/Source address: 4.4.4.4/1.1.1.1             <br>
+Packet Interval (milliseconds)/Number of packets: 20/15    <br>
+Target Only: Disabled                                      <br>
+Request size (ARR data portion): 28                        <br>
+Oper timeout (milliseconds): 5000                          <br>
+Type Of Service parameters: 0x0                            <br>
+Verify data: No                                            <br>
+Loose Source Routing: Disabled                             <br>
+Vrf Name:&nbsp;&nbsp;&nbsp;&nbsp;                                              <br>
+LSR Path:&nbsp;&nbsp;&nbsp;&nbsp;                                              <br>
+Schedule:&nbsp;&nbsp;&nbsp;&nbsp;                                              <br>
+&nbsp;&nbsp; Operation frequency (seconds): 10  (not considered if randomly scheduled)<br>
+&nbsp;&nbsp; Next Scheduled Start Time: Start Time already passed       <br>
+&nbsp;&nbsp; Group Scheduled : FALSE                                    <br>
+&nbsp;&nbsp; Randomly Scheduled : FALSE                                 <br>
+&nbsp;&nbsp; Life (seconds): Forever                                    <br>
+&nbsp;&nbsp; Entry Ageout (seconds): never                              <br>
+&nbsp;&nbsp; Recurring (Starting Everyday): FALSE                       <br>
+&nbsp;&nbsp; Status of entry (SNMP RowStatus): Active                   <br>
+Threshold (milliseconds): 5000                                <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                <br>
+R1#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                 <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                <br>
+</code></div></p>
 
-The optional targetOnly keyword to the path-jitter command is used to bypass the hop-by-hop measurements; echo probes are sent to the destination device only.
+<h2>UDP Echo Operation</h2>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code style="font-size:130%">
+R4(config)#<b>ip sla 1</b>                                           <br>                                                                                                                                                                            
+R4(config-ip-sla)#<b>udp-echo 1.1.1.1 18427 source-ip 4.4.4.4 </b>   <br>                                                         
+R4(config-ip-sla-udp)#<b>frequency 10                          </b>  <br>                                                         
+R4(config-ip-sla-udp)#                                        <br>                                                         
+R4(config-ip-sla-udp)#<b>exit                                 </b>   <br>                                                         
+R4(config)#<b>ip sla schedule 1 start-time now life forever    </b>  <br>                                                         
+R4(config)#&nbsp;&nbsp;                                                                                                            
+</code></div>
+</p>
+<p>
+If the source port is not configured, the router automatically selected one 
+randomly. UDP echo operations require the configuration of an IP SLA responder. 
+In its most basic configuration ip sla responder global config command is all 
+that is needed. UDP echo operations send initial control packets before the IP 
+SLA UDP echo packets are sent. The control packets inform the responder on the 
+planned port to be used. To eliminate the sending of control packets in UDP echo
+operations;
+</p>
 
-Verification
+<h3>Verification</h3>
 
-R1#show ip sla statistics 300
-IPSLAs Latest Operation Statistics
+<h4><code>show ip sla statistics</code></h4>
 
-IPSLA operation id: 300
-        Latest RTT: 142 milliseconds
-Latest operation start time: 16:19:58 UTC Sat Mar 13 2021
-Latest operation return code: OK
-
----- Path Jitter Statistics ----
-
-Hop IP 192.168.12.2:
-Round Trip Time milliseconds:
-        Latest RTT: 56 ms
-        Number of RTT: 15
-        RTT Min/Avg/Max: 8/56/128 ms
-Jitter time milliseconds:
-        Number of jitter: 14
-        Jitter Min/Avg/Max: 4/31/116 ms
-Packet Values:
-        Packet Loss (Timeouts): 0
-        Out of Sequence: 0
-        Discarded Samples: 0
-
-Hop IP 192.168.23.2:
-Round Trip Time milliseconds:
-        Latest RTT: 148 ms
-        Number of RTT: 15
-        RTT Min/Avg/Max: 16/148/268 ms
-Jitter time milliseconds:
-        Number of jitter: 14
-        Jitter Min/Avg/Max: 4/48/252 ms
-Packet Values:
-        Packet Loss (Timeouts): 0
-        Out of Sequence: 0
-        Discarded Samples: 0
-
-Hop IP 192.168.34.2:
-Round Trip Time milliseconds:
-        Latest RTT: 142 ms
-        Number of RTT: 15
-        RTT Min/Avg/Max: 16/142/272 ms
-Jitter time milliseconds:
-        Number of jitter: 14
-        Jitter Min/Avg/Max: 8/34/188 ms
-Packet Values:
-        Packet Loss (Timeouts): 0
-        Out of Sequence: 0
-        Discarded Samples: 0
-Operation time to live: Forever
+<h2>UDP Jitter</h2>
+<p>
+Can be used to test jitter experienced by VOIP traffic and see if this delay is 
+within expected threshold.
+</p>
+<p>
+<code><b>udp-jitter &lt;ip-address&gt; &lt;port&gt; source-ip &lt;ip-address&gt; 
+num-packets &lt;num&gt; interval &lt;interval&gt;</b></code>
+</p>
 
 
-R1#
+<h2>TCP</h2>
+<p>
+Just because we have local link reachability does not mean that we have upper layer 
+connectivity.
+</p>
+
+<h2>DHCP</h2>
+<p>
+Standby DHCP router can start issuing IP addresses after detection of failure of 
+main DHCP server.
+<ol>
+  <li>Configure the DHCP server</li>
+  <li>Configure IP SLA for DHCP
+  <p>
+  <div><code>
+   dhcp &lt;server-ip&gt;
+  </code></div>
+  </p>
+  </li>
+</ol>
+</p>
+
+<h3>Verification</h3>
+<h4><code>show ip dhcp bind</code></h4>
 
 
-R1#show ip sla configuration 300
-IP SLAs Infrastructure Engine-III
-Entry number: 300
-Owner:
-Tag:
-Operation timeout (milliseconds): 5000
-Type of operation to perform: path-jitter
-Target address/Source address: 4.4.4.4/1.1.1.1
-Packet Interval (milliseconds)/Number of packets: 20/15
-Target Only: Disabled
-Request size (ARR data portion): 28
-Oper timeout (milliseconds): 5000
-Type Of Service parameters: 0x0
-Verify data: No
-Loose Source Routing: Disabled
-Vrf Name:
-LSR Path:
-Schedule:
-   Operation frequency (seconds): 10  (not considered if randomly scheduled)
-   Next Scheduled Start Time: Start Time already passed
-   Group Scheduled : FALSE
-   Randomly Scheduled : FALSE
-   Life (seconds): Forever
-   Entry Ageout (seconds): never
-   Recurring (Starting Everyday): FALSE
-   Status of entry (SNMP RowStatus): Active
-Threshold (milliseconds): 5000
+<h2>HTTP</h2>
+<p>
+Can verify that the web server is operational and the latency experienced.
+</p>
 
-
-R1#
-
-UDP Echo Operation
-
-R4(config)#ip sla 1                                                                                                                                                                                                                         
-R4(config-ip-sla)#udp-echo 1.1.1.1 18427 source-ip 4.4.4.4                                                               
-R4(config-ip-sla-udp)#frequency 10                                                                                       
-R4(config-ip-sla-udp)#                                                                                                   
-R4(config-ip-sla-udp)#exit                                                                                               
-R4(config)#ip sla schedule 1 start-time now life forever                                                                 
-R4(config)#                                                                                                              
-
-If the source port is not configured, the router automatically selected one randomly. UDP echo operations require the configuration of an IP SLA responder. In its most basic configuration ip sla responder global config command is all that is needed. UDP echo operations send initial control packets before the IP SLA UDP echo packets are sent. The control packets inform the responder on the planned port to be used. To eliminate the sending of control packets in UDP echo operations;
-Enhanced Object Tracking (SLA Track)
-
+<h1>Enhanced Object Tracking (SLA Track)</h1>
+<p>
+Object tracking allows you to track specific objects on the device, such as the 
+interface line protocol state, IP routing, route reachability, and to take action 
+when the tracked object's state changes. This feature allows you to increase the 
+availability of the network and shorten recovery time if an object state goes 
+down.
+</p>
+<p>
+An object tracks the IP SLA instance and creates a status based on the status 
+of the probe. This can be used for HSRP, VRRP to change priority levels.
+</p>
+<p>
 Monitors the statistics of IP SLA and performs an action based on the statistics output.
+</p>
+<p>
+To configure a tracking object:
+<ol>
+  <li>Reference the IP SLA that will be tracked by the tracking object using 
+  the command <code><b>track &lt;ob-num&gt; ip sla &lt;sla-num&gt; [state | reachability]</b></code>.
+  When configuring a tracking object, a boolean operation AND or OR can be specified 
+  where the results of a series of tracking objects can be compared 
+  </li>
+  <li>Configure  a delay on the object to regulate the flapping of the object using 
+  the command <code><b>delay [down &lt;seconds&gt; | up &lt;seconds&gt;]</b></code>.
+</ol>
+</p>
+<p>
+To configure a tracking object:
+<ol>
+  <li>Create an IP SLA probe</li>
+  <li>Set up a tracking object based on that probe.</li>
+  <li>Apply the tracking object to an application such as static routing or PBR.</li>
+</ol>
+</p>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code style="font-size:130%">
+R1(config)#<b>track 100 ip sla 100</b><br>
+R1(config-track)#<br>
+*Mar 13 05:51:36.431: %DUAL-5-NBRCHANGE: EIGRP-IPv4 100: Neighbor 192.168.12.2 (GigabitEthernet0/0) is down: holding time expired<br>
+R1(config-track)#<b>delay</b><br>
+*Mar 13 05:51:38.043: %TRACKING-5-STATE: 100 ip sla 100 state Up->Down<br>
+R1(config-track)#<b>delay down</b><br>
+*Mar 13 05:51:43.047: %TRACKING-5-STATE: 100 ip sla 100 state Down->Up<br>
+R1(config-track)#<b>delay down 3</b><br>
+*Mar 13 05:51:51.547: %DUAL-5-NBRCHANGE: EIGRP-IPv4 100: Neighbor 192.168.12.2 (GigabitEthernet0/0) is up: new adjacency<br>
+R1(config-track)#<b>delay down 3 up 0</b><br>
+</code></div>
 
-R1(config)#track 100 ip sla 100
-R1(config-track)#
-*Mar 13 05:51:36.431: %DUAL-5-NBRCHANGE: EIGRP-IPv4 100: Neighbor 192.168.12.2 (GigabitEthernet0/0) is down: holding time expired
-R1(config-track)#delay
-*Mar 13 05:51:38.043: %TRACKING-5-STATE: 100 ip sla 100 state Up->Down
-R1(config-track)#delay down
-*Mar 13 05:51:43.047: %TRACKING-5-STATE: 100 ip sla 100 state Down->Up
-R1(config-track)#delay down 3
-*Mar 13 05:51:51.547: %DUAL-5-NBRCHANGE: EIGRP-IPv4 100: Neighbor 192.168.12.2 (GigabitEthernet0/0) is up: new adjacency
-R1(config-track)#delay down 3 up 0
+<h2>Static Routes</h2>
+<p>
+IP SLAs can be used in combination with static routes. IP SLA can be used to 
+install or remove a static route from the Routing Information Base (RIB) only if 
+certain conditions are met.
 
-Static Routes
+A tracking object needs to be defined to track the results of the probe and 
+implement an action. It can also track other operations such as the state of an interface.
+</p>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code style="font-size:130%">
+R1(config)#<b>track 100 ip sla 100</b><br>
+R1(config-track)#<b>delay down 3 up 0</b><br>
+R1(config)#<b>ip route 4.4.4.4 255.255.255.255 192.168.13.2 track 100</b><br>
+</code></div></p>
 
-IP SLAs can be used in combination with static routes. IP SLA can be used to install or remove a static route from the Routing Information Base (RIB) only if certain conditions are met.
+<h3>Verification</h3>
 
-A tracking object needs to be defined to track the results of the probe and implement an action. It can also track other operations such as the state of an interface.
+<h4><code>show track &lt;obj-num&gt;</code></h4>
+<p>
+Verify a tracked object.
+</p>
 
-R1(config)#track 100 ip sla 100
-R1(config-track)#
-R1(config-track)#delay down 3 up 0
-R1(config-track)#do wr
-
-R1(config)#ip route 4.4.4.4 255.255.255.255 192.168.13.2 track 100
-
-Verification
-
-R1(config-track)#
-*Mar 13 10:29:22.858: %TRACKING-5-STATE: 100 ip sla 100 state Up-Down
-R1(config)#ip route 4.4.4.4 255.255.255.255 192.168.13.2 track 100
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code style="font-size:130%">
+R1(config-track)#                                                            <br>
+*Mar 13 10:29:22.858: %TRACKING-5-STATE: 100 ip sla 100 state Up-Down        <br>
+R1(config)#ip route 4.4.4.4 255.255.255.255 192.168.13.2 track 100           <br>
+R1(config)#                                                                  <br>
+R1(config)#<b>do show ip route 4.4.4.4</b>                                          <br>
+Routing entry for 4.4.4.4/32                                                 <br>
+&nbsp;&nbsp;Known via "eigrp 100", distance 90, metric 2580480, type internal          <br>
+&nbsp;&nbsp;Redistributing via eigrp 100                                               <br>
+&nbsp;&nbsp;Last update from 192.168.12.2 on GigabitEthernet0/0, 00:02:23 ago          <br>
+&nbsp;&nbsp;Routing Descriptor Blocks:                                                 <br>
+&nbsp;&nbsp;* 192.168.12.2, from 192.168.12.2, 00:02:23 ago, via GigabitEthernet0/0    <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Route metric is 2580480, traffic share count is 1                      <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Total delay is 5030 microseconds, minimum bandwidth is 1000000 Kbit    <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Reliability 255/255, minimum MTU 1500 bytes                            <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Loading 1/255, Hops 3                                                  <br>
 R1(config)#
-R1(config)#do show ip route 4.4.4.4
-Routing entry for 4.4.4.4/32
-  Known via "eigrp 100", distance 90, metric 2580480, type internal
-  Redistributing via eigrp 100
-  Last update from 192.168.12.2 on GigabitEthernet0/0, 00:02:23 ago
-  Routing Descriptor Blocks:
-  * 192.168.12.2, from 192.168.12.2, 00:02:23 ago, via GigabitEthernet0/0
-      Route metric is 2580480, traffic share count is 1
-      Total delay is 5030 microseconds, minimum bandwidth is 1000000 Kbit
-      Reliability 255/255, minimum MTU 1500 bytes
-      Loading 1/255, Hops 3
-R1(config)#
+</code></div></p>
+<p>
+Caution: When installing a tracked static route, install the tracked static route 
+after configuring the non-tracked static route.
+</p>
 
-Caution: When installing a tracked static route, install the tracked static route after configuring the non-tracked static route.
-Troubleshooting
+<h4><code>debug track &lt;all&gt;</code></h4>
 
+
+<h1>Troubleshooting</h1>
+<p>
 When troubleshooting Cisco IOS IP SLA, consider the following:
+<ul>
+   <li>The correct operation needs to be chosen based on the metrics you intend to measure.</li>
+   <li>The destination IP address needs to be reachable and correctly defined.</li>
+   <li>The source IP address needs to be reachable from the destination and correctly defined.</li>
+   <li>Any necessary port numbers need to be correctly identified.</li>
+   <li>The SLA instance needs to be started for it to work.</li>
+   <li>If the operation needs an IP SLA responder, one must be configured and reachable.</li>
+</ul>
+</p>
+<p>
+To verify which operations are supported on the platform in addition to how many 
+operations are configured and how many are currently active, use the 
+<code><b>show ip sla application</b></code> command.
+</p>
 
-    The correct operation needs to be chosen based on the metrics you intend to measure.
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code style="font-size:130%">
+R1#<b>show ip sla application</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                         <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;IP Service Level Agreements&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                         <br>
+Version: Round Trip Time MIB 2.2.0, Infrastructure Engine-III             <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                        <br>
+Supported Operation Types:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                        <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;icmpEcho, path-echo, path-jitter, udpEcho, tcpConnect, http       <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;dns, udpJitter, dhcp, ftp, VoIP, rtp, lsp Group, icmpJitter       <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;lspPing, lspTrace, 802.1agEcho VLAN, Port                         <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;802.1agJitter VLAN, Port, pseudowirePing, udpApp, wspApp          <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mcast, generic&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                        <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                        <br>
+Supported Features:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                         <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;IPSLAs Event Publisher&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                        <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                        <br>
+IP SLAs low memory water mark: 75481422&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                         <br>
+Estimated system max number of entries: 55284&nbsp;&nbsp;&nbsp;&nbsp;                         <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                        <br>
+Estimated number of configurable operations: 54925                        <br>
+Number of Entries configured&nbsp;&nbsp;: 1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                         <br>
+Number of active Entries&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: 1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                         <br>
+Number of pending Entries&nbsp;&nbsp;&nbsp;&nbsp; : 0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                         <br>
+Number of inactive Entries&nbsp;&nbsp;&nbsp;&nbsp;: 0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                         <br>
+Time of last change in whole IP SLAs: *15:05:44.253 UTC Sat Mar 13 2021   <br>
+                                                                          <br>
+R1#
+</code></div></p>
+<p>
+Use <code><b>debug ip sla trace</b></code> and <code><b>debug ip sla error</b></code> 
+to help troubleshoot IP SLA operation issues.
 
-    The destination IP address needs to be reachable and correctly defined.
-
-    The source IP address needs to be reachable from the destination and correctly defined.
-
-    Any necessary port numbers need to be correctly identified.
-
-    The SLA instance needs to be started for it to work.
-
-    If the operation needs an IP SLA responder, one must be configured and reachable.
-
-To verify which operations are supported on the platform in addition to how many operations are configured and how many are currently active, use the show ip sla application command.
-
-R1#show ip sla application
-        IP Service Level Agreements
-Version: Round Trip Time MIB 2.2.0, Infrastructure Engine-III
-
-Supported Operation Types:
-        icmpEcho, path-echo, path-jitter, udpEcho, tcpConnect, http
-        dns, udpJitter, dhcp, ftp, VoIP, rtp, lsp Group, icmpJitter
-        lspPing, lspTrace, 802.1agEcho VLAN, Port
-        802.1agJitter VLAN, Port, pseudowirePing, udpApp, wspApp
-        mcast, generic
-
-Supported Features:
-        IPSLAs Event Publisher
-
-IP SLAs low memory water mark: 75481422
-Estimated system max number of entries: 55284
-
-Estimated number of configurable operations: 54925
-Number of Entries configured  : 1
-Number of active Entries      : 1
-Number of pending Entries     : 0
-Number of inactive Entries    : 0
-Time of last change in whole IP SLAs: *15:05:44.253 UTC Sat Mar 13 2021
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code style="font-size:130%">
+R1#<b>debug ip sla trace 100</b>                                                                                 <br>
+R1#                                                                                                              <br>
+*Mar 13 15:34:34.261: IPSLA-INFRA_TRACE:OPER:100 slaSchedulerEventWakeup                                         <br>
+                                                                                                                 <br>
+*Mar 13 15:34:34.265: IPSLA-INFRA_TRACE:OPER:100 Starting an operation                                           <br>
+                                                                                                                 <br>
+*Mar 13 15:34:34.265: IPSLA-OPER_TRACE:OPER:100 source IP:1.1.1.1                                                <br>
+                                                                                                                 <br>
+*Mar 13 15:34:34.269: IPSLA-OPER_TRACE:OPER:100 Starting icmpecho operation - destAddr=4.4.4.4, sAddr=1.1.1.1    <br>
+                                                                                                                 <br>
+*Mar 13 15:34:34.269: IPSLA-OPER_TRACE:OPER:100 Sending ID: 6865                                                 <br>
+                                                                                                                 <br>
+*Mar 13 15:34:34.429: IPSLA-OPER_TRACE:OPER:100 ID:6865, RTT=156                                                 <br>
+                                                                                                                 <br>
+*Mar 13 15:34:34.437: IPSLA-INFRA_TRACE:OPER:100 Updating result                                                 <br>
+                                                                                                                 <br>
+R1#                                                                                                              <br>
+*Mar 13 15:34:44.265: IPSLA-INFRA_TRACE:OPER:100 slaSchedulerEventWakeup                                         <br>
+                                                                                                                 <br>
+*Mar 13 15:34:44.265: IPSLA-INFRA_TRACE:OPER:100 Starting an operation                                           <br>
+                                                                                                                 <br>
+*Mar 13 15:34:44.265: IPSLA-OPER_TRACE:OPER:100 source IP:1.1.1.1                                                <br>
+                                                                                                                 <br>
+*Mar 13 15:34:44.265: IPSLA-OPER_TRACE:OPER:100 Starting icmpecho operation - destAddr=4.4.4.4, sAddr=1.1.1.1    <br>
+                                                                                                                 <br>
+*Mar 13 15:34:44.265: IPSLA-OPER_TRACE:OPER:100 Sending ID: 6866                                                 <br>
+                                                                                                                 <br>
+*Mar 13 15:34:44.425: IPSLA-OPER_TRACE:OPER:100 ID:6866, RTT=160                                                 <br>
+                                                                                                                 <br>
+*Mar 13 15:34:44.433: IPSLA-INFRA_TRACE:OPER:100 Updating result                                                 <br>
+                                                                                                                 <br>
+R1#                                                                                                              <br>
+*Mar 13 15:34:54.261: IPSLA-INFRA_TRACE:OPER:100 slaSchedulerEventWakeup                                         <br>
+                                                                                                                 <br>
+*Mar 13 15:34:54.265: IPSLA-INFRA_TRACE:OPER:100 Starting an operation                                           <br>
+                                                                                                                 <br>
+*Mar 13 15:34:54.265: IPSLA-OPER_TRACE:OPER:100 source IP:1.1.1.1                                                <br>
+                                                                                                                 <br>
+*Mar 13 15:34:54.269: IPSLA-OPER_TRACE:OPER:100 Starting icmpecho operation - destAddr=4.4.4.4, sAddr=1.1.1.1    <br>
+                                                                                                                 <br>
+*Mar 13 15:34:54.269: IPSLA-OPER_TRACE:OPER:100 Sending ID: 6867                                                 <br>
+                                                                                                                 <br>
+*Mar 13 15:34:54.485: IPSLA-OPER_TRACE:OPER:100 ID:6867, RTT=212                                                 <br>
+                                                                                                                 <br>
+*Mar 13 15:34:54.493: IPSLA-INFRA_TRACE:OPER:100 Updating result                                                 <br>
 
 R1#
-
-
-Use debug ip sla trace and debug ip sla error to help troubleshoot IP SLA operation issues.
-
-
-R1#debug ip sla trace 100
-R1#
-*Mar 13 15:34:34.261: IPSLA-INFRA_TRACE:OPER:100 slaSchedulerEventWakeup
-
-*Mar 13 15:34:34.265: IPSLA-INFRA_TRACE:OPER:100 Starting an operation
-
-*Mar 13 15:34:34.265: IPSLA-OPER_TRACE:OPER:100 source IP:1.1.1.1
-
-*Mar 13 15:34:34.269: IPSLA-OPER_TRACE:OPER:100 Starting icmpecho operation - destAddr=4.4.4.4, sAddr=1.1.1.1
-
-*Mar 13 15:34:34.269: IPSLA-OPER_TRACE:OPER:100 Sending ID: 6865
-
-*Mar 13 15:34:34.429: IPSLA-OPER_TRACE:OPER:100 ID:6865, RTT=156
-
-*Mar 13 15:34:34.437: IPSLA-INFRA_TRACE:OPER:100 Updating result
-
-R1#
-*Mar 13 15:34:44.265: IPSLA-INFRA_TRACE:OPER:100 slaSchedulerEventWakeup
-
-*Mar 13 15:34:44.265: IPSLA-INFRA_TRACE:OPER:100 Starting an operation
-
-*Mar 13 15:34:44.265: IPSLA-OPER_TRACE:OPER:100 source IP:1.1.1.1
-
-*Mar 13 15:34:44.265: IPSLA-OPER_TRACE:OPER:100 Starting icmpecho operation - destAddr=4.4.4.4, sAddr=1.1.1.1
-
-*Mar 13 15:34:44.265: IPSLA-OPER_TRACE:OPER:100 Sending ID: 6866
-
-*Mar 13 15:34:44.425: IPSLA-OPER_TRACE:OPER:100 ID:6866, RTT=160
-
-*Mar 13 15:34:44.433: IPSLA-INFRA_TRACE:OPER:100 Updating result
-
-R1#
-*Mar 13 15:34:54.261: IPSLA-INFRA_TRACE:OPER:100 slaSchedulerEventWakeup
-
-*Mar 13 15:34:54.265: IPSLA-INFRA_TRACE:OPER:100 Starting an operation
-
-*Mar 13 15:34:54.265: IPSLA-OPER_TRACE:OPER:100 source IP:1.1.1.1
-
-*Mar 13 15:34:54.269: IPSLA-OPER_TRACE:OPER:100 Starting icmpecho operation - destAddr=4.4.4.4, sAddr=1.1.1.1
-
-*Mar 13 15:34:54.269: IPSLA-OPER_TRACE:OPER:100 Sending ID: 6867
-
-*Mar 13 15:34:54.485: IPSLA-OPER_TRACE:OPER:100 ID:6867, RTT=212
-
-*Mar 13 15:34:54.493: IPSLA-INFRA_TRACE:OPER:100 Updating result
-
-R1#
+</code></div></p>
