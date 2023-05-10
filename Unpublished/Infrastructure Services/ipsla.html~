@@ -1,25 +1,22 @@
 <h1>Introduction and Overview</h1>
 <p>
-Allows tracking of IP service levels by using active traffic monitoring. The 
-router generates packets to check service levels.
-</p>
-<p>
-IP SLAs are used to measure and verify network performance such as QoS and influence 
-routing decisions such as static routing, policy-based routing(PBR). 
+IP SLAs are used to measure and verify network performance and influence 
+routing decisions such as static routing and, policy-based routing(PBR). 
 IP SLAs operate in real-time by sending network traffic such as VoIP, ICMP (echo,
 jitter, path echo, path jitter), TCP Connection, UDP (echo, jitter, jitter for VoIP), 
 DNS, DHCP, HTTP, FTP. Network performance can then be determined by the statistics 
-generated from the network response to the IP SLA traffic. Statistics include; delay 
-(round-trip and one-way), packet loss, jitter, voice quality.
+generated from the network in response to the IP SLA traffic. Statistics generated 
+include; delay(round-trip and one-way), packet loss, jitter, voice quality.
 </p>
 <p>
-IP SLAs can perform a specific operation from a specific source to a specific 
-destination like ICMP, HTTP, TCP, UDP etc.IP SLA logs statistics about failures 
-and successes of that operation.
-
-IP SLA collects data that can be used by enhanced object tracking to take action 
-for example, the SLA can be used to view the status of HSRP, static routes, policy-based routing to influence 
-routing. When the IP SLA fails, object tracking can be configured to implement an action.
+IP SLA stores this information into CLI and SNMP MIBs.
+IP SLA collects data that can then be used by enhanced object tracking to take 
+a defined action. When the IP SLA is configured, 
+object tracking can reference the IP SLA to implement an action based on the outcome
+of the IP SLA operation.
+IP SLAs are used to collect information about: reachability, response times (to 
+requests from HTTP, TCP, DHCP Discover), one-way latency, jitter(inter-packet variation), 
+voice quality scoring, etc.
 </p>
 <p>
 IP SLA consists of two parts; a probe and schedule.
@@ -39,22 +36,20 @@ When scheduling an IP SLA, default life of a probe is 3600 seconds (1 hour).
 
 <h2>Types of SLA Traffic</h2>
 <p>
-IP SLA simulate network traffic(real-traffic) and measures performance. 
-IP SLAs are used to collect information about: reachability, response times (to 
-requests from HTTP, TCP, DHCP Discover), one-way latency, jitter(inter-packet variation), 
-voice quality scoring, etc. Can match against:
+ IP SLA operations measure the following network parameters:
 <ul>
   <li>Delay (one-way or round-trip)</li>
   <li>Jitter(direction)</li> 
-  <li>packet loss(direction)</li> 
+  <li>Packet loss(direction)</li> 
   <li>Sequencing (packet order)</li>
-  <li>path(per hop)</li> 
-  <li>connectivity(directional)</li> 
-  <li>server load times</li> 
-  <li>voice quality scores(MOS)</li>
+  <li>Path(per hop)</li> 
+  <li>Connectivity(directional)</li> 
+  <li>Server load times</li> 
+  <li>Voice quality scores(MOS)</li>
 </ul>
 </p>
 <p>
+These aforementioned parameters are measured using the following categories of IP SLA operations:
   <ul>
     <li>ICMP (echo, jitter)</li>
     <li>UDP(echo, jitter)</li>
@@ -73,51 +68,83 @@ first before scheduling the IP SLA operation.
 </p>
 
 
-<h1>Configuration</h1>
-<p>
-<ol>
-  <li>Enable the IP SLA responder. Not always needed but depends on the probe.</li>
-  <li>Configure IP SLA operation</li>
-  <li>Configure the options for that specific probe(IP SLA operation)</li>
-  <li>Configure threshold conditions</li>
-  <li>Schedule the IP SLA probe operation to run</li>
-  <li>Verify the results of the operation</li>
-</ol>
-</p>
 <h2>An IP SLA responder and SLA Control Protocol</h2>
 <p>
-An active device in the network specifically programmed to interprete and respond 
-to specific probes. 
+An IP SLA responder is an active device in the network specifically configured  
+to interprete and respond to specific probes. Cisco devices have a special control 
+protocol that allows the system to anticipate and respond to IP SLA request 
+packets. This provides it with greater accuracy in measurements not available 
+to standard ICMP-based probes. The IP SLA responder listens on a specific port for
+control protocol messages sent by an IP SLA operation. Upon receipt of the control 
+message, the responder will enable the specified UDP or TCP port for the specified 
+duration. During this time, the responder accepts the requests and sends responses.
+The responder disables the port after it responds to the IP SLA request or when 
+the specified time expires.
 </p>
 <p>
-Responders have types of timers: TS3, TS4 timers(Timestamp).
-T1 timer on the source router: this is the exit timer on the source router.
-T2 timer, timer on the target router.
-T3: responder timer
-T4: time packet arrives at the source router.
+Some IPSLA operations do not require the configuration of an IPSLA responder. These 
+include HTTP, DHCP where the application itself acts as a responder to requests.
 </p>
+<p>
+MD5 authentication of control messages can be configured to increase security.
+</p>
+
+
+<h2>Response Time Computation</h2>
+<p>
+Devices may take tens of milliseconds to process incoming packets due to other 
+higher-priority processes. Under these conditions, the response times do not 
+accurately represent the true network delays. IP SLA minimizes these processing 
+delays on the source and target device when trying to determine accurate round-trip 
+times.
+</p>
+<p>
+IP SLA test packets use time stamping to minimize the processing delays.
+Responders have different types of timers:
+<ul>
+<li>T1 timer: this is the exit timer on request generated by the source router.</li>
+<li>T2 timer: timer on the target router that the request is received.</li>
+<li>T3: responder timer</li>
+<li>T4: time packet arrives at the source router.</li>
+</ul>
+</p>
+<p>
+When processing round-trip time, all four timers are utilized. At the target device, 
+with the responder functionality enabled, time stamp 2(TS2) is subtracted from 
+TS3 to produce the time spent processing the test packet as represented by delta.
+The source device calculates the round-trip time by subtracting TS1 from TS4.
+</p>
+
+<h2>Implementing IP SLA</h2>
+
 <p>
 To implement IP SLA network performance measurement, the following tasks are to be followed;
 <ol>
- <li>Create the IP SLA</li>
+<li>(Optional) on the remote device, configure the IP SLA responder and appropriate 
+ ports. This is not required for some IP SLA operation types.</li>
+ <li>Create the IP SLA
+ <ol type="a">
  <li>Configure the IP SLA operation type</li>
- <li>Configure the options required for the specified operation type in Step 2.</li>
  <li>Configure threshold values: threshold values to be monitored include; 
  connection loss, latency (one-way), jitter (one-way), round-trip time (RTT), 
  timeouts, packet loss. An IP SLA violation can send SNMP traps and trigger 
  another IP SLA operation such as increasing the monitoring frequency, or ICMP 
  path jitter and echo probes. The threshold value depends on the type of service
  which the network is to support.</li>
+ </ol>
+ </li>
  <li>Schedule the IP SLA start-time and operating period.</li>
- <li>(Optional) on the remote device, configure the IP SLA responder and appropriate 
- ports. This is not required for some IP SLA operation types.</li>
+ 
 </ol>
 </p>
     
-<h2>ICMP Echo Operation</h2>
+<h3>ICMP Echo Operation</h3>
 <p>
 ICMP echo operations are useful for testing network connectivity and end-to-end 
-response time. In IOS, using icmp-echo to measure an echo may experience some 
+response time. 
+The response time is determined by measuring the time taken between sending an
+ICMP-Echo Request packet to a target device and receiving the ICMP-Echo reply.
+In IOS, using <code><b>icmp-echo</b></code> to measure an echo may experience some 
 delays at the destination due to processing delays of ICMP packets. Some systems 
 may not prioritize the processing of ICMP packets causing these delays. A better
 method to measure network performance is through UDP traffic.
@@ -142,12 +169,13 @@ source-interface &lt;interface-name&gt;]</b></code>.
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
   <code style="font-size:130%">
-R1(config-ip-sla)#<b>icmp-echo 3.3.3.3 source-interface loopback 0</b>
+R1(config-ip-sla)#<b>icmp-echo 4.4.4.4 source-ip 1.1.1.1</b>
 </code></div>
 </p>
 </li>
 <li>Define the rate at which the ICMP echo packets are sent in seconds using the 
-IP SLA ICMP-echo submode command <code><b>frequency &lt;seconds&gt;</b></code>;
+IP SLA ICMP-echo submode command <code><b>frequency &lt;1-604800&gt;</b></code>; 
+the frequency value is in seconds:
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
   <code style="font-size:130%">
@@ -155,8 +183,27 @@ R1(config-ip-sla-echo)#<b>frequency 10</b>
 </code></div>
 </p>
 </li>
+
+</li>
+<li><b>Timeout:</b> Define a timeout value using ICMP echo mode command <code><b>timeout 
+&lt;0-604800000&gt;</b></code> where the value is in milliseconds. This optional step 
+defines the maximum amount of time an IP SLA operation waits for a response from its 
+request packet. It is the timeout waiting period for the probe response. The 
+timeout value cannot be greater than the frequency value.
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code style="font-size:130%">
+R1(config-ip-sla-echo)#<b>timeout 10000</b>
+</code></div>
+</p>
+<p>
+The frequency is greater than the timeout which is greater than the threshold.
+</p>
+</li>
+
 <li><b>Threshold:</b> Define the threshold using the IP SLA ICMP echo sub mode command <code><b>threshold 
-milliseconds</b></code>. This optional step defines the upper value for the threshold for
+&lt;0-60000&gt;</b></code>; where the threshold value is in milliseconds. 
+This optional step defines the upper value for the threshold for
 calculating network monitoring statistics. Threshold is the boundary value that gets
 measured over the operation result; this is the value that is collected during the 
 actual operation. If, for instance, we would like to test for delay, we can set a 
@@ -166,29 +213,14 @@ threshold, we can consider the test to be a failure.
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
   <code style="font-size:130%">
-R1(config-ip-sla-echo)#<b>threshold 100</b>
+R1(config-ip-sla-echo)#<b>threshold 9000</b>
 </code></div>
 </p>
 <p>
-The threshold parameter can be used to trigger other IP SLA operations.
+The threshold parameter can be used to trigger other IP SLA operations. Additionally, 
+the threshold value should be equal to or less than the timeout value.
 </p>
 
-</li>
-<li><b>Timeout:</b> Define a timeout value using IP SLA ICMP echo sub mode command <code><b>timeout 
-&lt;value&gt;</b></code> where value is in milliseconds. This optional step 
-defines the maximum amount of time an IP SLA operation waits for a response from its 
-request packet. It is the timeout waiting period for the probe response. The 
-timeout value cannot be greater than the frequency value.
-<p>
-<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-  <code style="font-size:130%">
-R1(config-ip-sla-echo)#<b>timeout 1000</b>
-</code></div>
-</p>
-<p>
-The frequency is greater than the timeout which is greater than the threshold.
-</p>
-</li>
 <li><b>TOS:</b> (Optional) Configure the <code><b>tos</b></code> value. This is the 
 type of service value. Packets may be treated differently if the TOS value varies 
 for instance such as VOIP traffic, 
@@ -204,12 +236,23 @@ R1(config)#<b>ip sla schedule 100 start-time now life forever</b>
 </code></div>
 </p>
 </li>
+</ol>
 
 <h3>Verification</h3>
 
 <h4><code>show ip sla summary</code></h4>
 <p>
-
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code style="font-size:130%">
+R1#<b>show ip sla summary</b>                                                     <br>
+IPSLAs Latest Operation Summary&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                           <br>
+Codes: * active, ^ inactive, ~ pending                                            <br>
+                                                                                  <br>
+ID&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Type&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Destination&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Stats&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Return&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Last           <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (ms)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Code&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Run            <br>
+-----------------------------------------------------------------------           <br>
+*100&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; icmp-echo&nbsp;&nbsp; 4.4.4.4&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; RTT=60&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;OK&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;8 seconds ago  <br>
+</code></div>
 </p>
 
 <h4><code>show ip sla statistics</code></h4>
@@ -248,7 +291,7 @@ Owner:&nbsp;&nbsp;&nbsp;&nbsp;                                          <br>
 Tag:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                          <br>
 Operation timeout (milliseconds): 10000             <br>
 Type of operation to perform: icmp-echo             <br>
-Target address/Source interface: 4.4.4.4/Loopback1  <br>
+Target address/Source interface: 4.4.4.4/1.1.1.1  <br>
 Type Of Service parameter: 0x0                      <br>
 Request size (ARR data portion): 28                 <br>
 Verify data: No                                     <br>
@@ -279,10 +322,17 @@ History Statistics:                                     <br>
 <h2>ICMP Path Echo Operations</h2>
 <p>
 An ICMP path echo operation measures the end-to-end and hop-by-hop response time
-between a Cisco device and other devices. In ICMP path-echo operation, a source 
+between a Cisco device and other devices. 
+device and other devices using IP. ICMP Path Echo is useful for determining network availability and for
+troubleshooting network connectivity issues. 
+In ICMP path-echo operation, a source 
 device uses traceroute to discover the path to the destination device. A ping is 
 then used to measure the response time between the source IP SLA device and each 
 subsequent hop in the path to the destination device.
+The IP SLAs ICMP Path Echo operation records statistics for each hop along the path that the IP SLAs
+operation takes to reach its destination. The ICMP Path Echo operation determines this hop-by-hop response
+time between a Cisco device and any IP device on the network by discovering the path using the traceroute
+facility
 </p>
 <p>
 Configuration of the ICMP Path-Echo operation is similar to that of the ICMP echo 
@@ -774,3 +824,8 @@ R1#                                                                             
 
 R1#
 </code></div></p>
+
+
+<h2>References</h2>
+<ol><a href="https://www.cisco.com/c/en/us/td/docs/ios-xml/ios/ipsla/configuration/xe-16/sla-xe-16-book/sla-overview.html?ysclid=lhheppfa70211374257#GUID-C2E58A98-D907-4EF2-949B-0AD59FD3D4D4">
+Cisco IP SLA</ol>
