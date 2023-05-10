@@ -82,6 +82,15 @@ The responder disables the port after it responds to the IP SLA request or when
 the specified time expires.
 </p>
 <p>
+Time synchronization is required between the source and target device to prove accurate 
+measurements. NTP may be required to be configured on the source and target device 
+to ensure that two devices have the same time.
+</p>
+<p>
+Use the command <code><b>show ip sla application</b></code> to verify the  
+IP SLA operations supported by the IOS image.
+</p>
+<p>
 Some IPSLA operations do not require the configuration of an IPSLA responder. These 
 include HTTP, DHCP where the application itself acts as a responder to requests.
 </p>
@@ -164,7 +173,7 @@ R1(config)#ip sla 100
 </p>
 </li>
 <li>Define the ICMP echo operation using the IP SLA mode configuration command 
-<code><b>icmp-echo destination_IP_address [source-ip &lt;ip-address&gt; | 
+<code><b>icmp-echo &lt;destination-ip-address&gt; [source-ip &lt;ip-address&gt; | 
 source-interface &lt;interface-name&gt;]</b></code>.
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
@@ -324,7 +333,8 @@ History Statistics:                                     <br>
 An ICMP path echo operation measures the end-to-end and hop-by-hop response time
 between a Cisco device and other devices. 
 ICMP Path Echo is useful for determining network availability and for
-troubleshooting network connectivity issues. 
+troubleshooting network connectivity issues between a device and the destination 
+or target of the icmp-path echo operation. 
 In ICMP path-echo operation, a source 
 device uses traceroute to discover the path to the destination device. A ping is 
 then used to measure the response time between the source IP SLA device and each 
@@ -420,10 +430,12 @@ measurement statistics in network. ICMP path jitter can be used to supplement
 standard UDP jitter operations. For example, high jitter values from a UDP jitter
 operation could be used to trigger an ICMP path jitter opreation that could be 
 used to troubleshoot the network path and determine if traffic is bottlenecking 
-in a particular segment along the path. ICMP Path Jitter default values include; 
-number of echo probes; 10, time between echo problems (milliseconds): 20, 
-frequency (seconds) 60.
-
+in a particular segment along the path. ICMP Path Jitter default values include;
+<ul>
+<li>number of echo probes: 10</li>
+<li>time between echo probes (in milliseconds): 20</li> 
+<li>frequency (seconds): 60</li>
+</ul>
 No IP SLA responder is required to be configured on the destination or intermediate devices.
 </p>
 
@@ -518,7 +530,7 @@ Operation time to live: Forever                            <br>
 R1#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                              <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                             <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                             <br>
-R1#show ip sla configuration 300                           <br>
+R1#<b>show ip sla configuration 300</b>                           <br>
 IP SLAs Infrastructure Engine-III                          <br>
 Entry number: 300                                          <br>
 Owner:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                             <br>
@@ -553,25 +565,87 @@ R1#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                 
 
 <h2>UDP Echo Operation</h2>
 <p>
-<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-  <code style="font-size:130%">
-R4(config)#<b>ip sla 1</b>                                           <br>                                                                                                                                                                            
-R4(config-ip-sla)#<b>udp-echo 1.1.1.1 18427 source-ip 4.4.4.4 </b>   <br>                                                         
-R4(config-ip-sla-udp)#<b>frequency 10                          </b>  <br>                                                         
-R4(config-ip-sla-udp)#                                        <br>                                                         
-R4(config-ip-sla-udp)#<b>exit                                 </b>   <br>                                                         
-R4(config)#<b>ip sla schedule 1 start-time now life forever    </b>  <br>                                                         
-R4(config)#&nbsp;&nbsp;                                                                                                            
-</code></div>
+UPD echo operation is used to monitor the end-to-end response time between a Cisco 
+device and devices using IPv4 or IPv6. It is also used to test end-to-end connectivity. 
+UDP echo accuracy is enhanced by using the 
+IP SLA responder at the destination. The designation device is any device that 
+supports RFC 862 Echo operation.
 </p>
 <p>
-If the source port is not configured, the router automatically selected one 
-randomly. UDP echo operations require the configuration of an IP SLA responder. 
-In its most basic configuration ip sla responder global config command is all 
-that is needed. UDP echo operations send initial control packets before the IP 
+Response time (round-trip time) is computed by measuring the time taken between sending a UDP echo
+request message from source device to the destination device and receiving a UDP echo reply from
+the destination device. UDP echo accuracy is enhanced by using the IP SLAs Responder at the destination. 
+If the destination device is a Cisco device, then IP SLAs sends a UDP datagram to any port
+number that you specified. Using the IP SLAs Responder is optional for a UDP echo operation when using
+Cisco devices. The IP SLAs Responder cannot be configured on non-Cisco devices.
+The results of a UDP echo operation can be useful in troubleshooting issues with business-critical applications
+by determining the round-trip delay times and testing connectivity to both Cisco and non-Cisco devices.
+</p>
+
+<h3>Responder</h3>
+<p>
+Configuring UDP-echo on the responder may require configuration of the UDP port 
+number on which to listen:
+<ul>
+  <li>Configure the responder without specifying the UDP port using the command <code><b>ip sla responder</b></code>
+    
+  </li>
+  <li>Configure the responder specifying the UDP port using the command 
+  <code><b>ip sla responder udp-echo ipaddress &lt;ip-address&gt; port &lt;port&gt; 
+  vrf &lt;vrf&gt;</b></code>
+    <p>
+    The UDP port may be required if SLA control protocol is disabled on the 
+    source. IP SLA can be configured for a specific VRF as indicated by the VRF 
+    option.
+    </p>
+  </li>
+</ul>
+</p>
+
+<h3>Source Device</h3>
+<p>
+<ol>
+
+<li><b>Define the IP SLA:</b>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code style="font-size:130%">
+R4(config)#<b>ip sla 1</b>                                           <br>      
+</code></div>
+</p>
+</li>
+
+<li><b>Define the udp-echo operation:</b> the udp-echo operation is enabled using 
+the command <code><b>udp-echo &lt;destination-ip-address|hostname&gt; &lt;destination-port&gt; 
+source-ip &lt;[ip-address | hostname]&gt; source-port &lt;port&gt; control [enable|disable]</b></code>.
+The UDP 
+port is optional as well as the disabling of control protocol.
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code style="font-size:130%">
+R4(config-ip-sla)#<b>udp-echo 1.1.1.1 18427 source-ip 4.4.4.4 </b>   <br>                                                         
+R4(config-ip-sla-udp)#<b>frequency 10                          </b>  <br>                                                         
+R4(config-ip-sla-udp)#                                        <br> 
+</code></div></p>
+<p>
+If the UDP port is not configured, the router automatically selected one 
+randomly. 
+In its most basic configuration <code><b>ip sla responder</b></code> global 
+config command is all that is needed.
+UDP echo operations send initial control packets before the IP 
 SLA UDP echo packets are sent. The control packets inform the responder on the 
 planned port to be used. To eliminate the sending of control packets in UDP echo
-operations;
+operations add the <code><b>control disable</b></code> keywords.
+</p>
+</li>
+<li><b>Schedule the IP SLA operation:</b>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code style="font-size:130%">
+R4(config)#<b>ip sla schedule 1 start-time now life forever    </b>  <br>                                                         
+</code></div>
+</p>
+</ol>
 </p>
 
 <h3>Verification</h3>
@@ -580,34 +654,163 @@ operations;
 
 <h2>UDP Jitter</h2>
 <p>
-Can be used to test jitter experienced by VOIP traffic and see if this delay is 
-within expected threshold.
+UDP itter operation diagonses network suitability for real-time traffic applications 
+such as VoIP, video over IP or real-time conferencing. These paramters can be 
+monitored to assess whether they are within acceptable thresholds.
+If multiple 
+packets are sent consecutively from a source to a
+destination, for example, 10 ms apart, and if the network is behaving ideally, the destination should receive
+the packets 10 ms apart. But if there are delays in the network (like queuing, arriving through alternate routes,
+and so on) the arrival delay between packets might be greater than or less than 10 ms. Using this example, a
+positive jitter value indicates that packets arrived greater than 10 ms apart. If packets arrive 12 ms apart, then
+positive jitter is 2 ms; if packets arrive 8 ms apart, negative jitter is 2 ms. For delay-sensitive networks like
+VoIP, positive jitter values are undesirable, and a jitter value of 0 is ideal.
 </p>
 <p>
+ The UDP jitter operation includes data returned by the IP SLAs UDP operation 
+ therefore it can be used as a multipurpose data gathering operation.
+ UDP jitter operations are capable of measuring the following:
+ <ul>
+  <li>Per-direction jitter (source to destination and destination to source)</li>
+  <li>Per-direction packet loss</li>
+  <li>Per-direction delay (one-way delay)</li>
+  <li>Round-trip delay (average round-trip time)</li>
+</ul>
+As paths for sending and receiving data may be different (asymmetric), the per-direction data allows you to
+more readily identify where congestion or other problems are occurring in the network.
+The UDP jitter operation functions by generating synthetic (simulated) UDP traffic. Asymmetric probes
+support custom-defined packet sizes per direction with which different packet sizes can be sent in request
+packets (from the source device to the destination device) and in response packets (from the destination device
+to the source device).
+</p>
+
+<h3>UDP-Jitter Responder</h3>
+<p>
+The IP SLA responder can be enabled with or without specifying the UDP port using 
+commands <code><b>ip sla responder</b></code> or <code><b>ip sla responder udp-echo 
+ipaddress &lt;ip-address&gt; port &lt;port&gt; vrf &lt;vrf&gt;</b></code> respectively.
+</p>
+
+<h3>UDP-Jitter Source</h3>
+<p>
+UDP-jitter is configured using the command 
 <code><b>udp-jitter &lt;ip-address&gt; &lt;port&gt; source-ip &lt;ip-address&gt; 
-num-packets &lt;num&gt; interval &lt;interval&gt;</b></code>
+num-packets &lt;num&gt; interval &lt;interval&gt; request-data-size &lt;size&gt; 
+response-data-size &lt;size&gt;</b></code> where:
+<ul>
+  <li><b>num-packets:</b> number of packets sent in the request</li>
+  <li><b>request-data-size:</b> payload size per request packet</li>
+  <li><b>response-data-size:</b> payload size per response packet. This value 
+  is the same as the request-data-size if it is not configured. However, it may 
+  vary depending on the type of operation configured.</li>
+  <li><b>interval:</b> time between packets(in milliseconds).</li>
+  <li><b>frequency:</b> elapsed time before the operation repeats</li>
+</ul>
 </p>
 
-
-<h2>TCP</h2>
+<h3>Verification of UDP-Jitter Operations</h3>
 <p>
+
+</p>
+<h4><code>show ip sla configuration</code></h4>
+<h4><code>show ip sla group schedule</code></h4>
+<h4><code>show ip sla statistics</code></h4>
+<h4><code>show ip sla statistics 2 details</code></h4>
+
+<h2>TCP Connect Operations</h2>
+<p>
+The TCP Connect operation is to measure the response time taken to perform a TCP 
+Connect operation between a Cisco router and IP/IPv6 device. The destination of 
+the TCP Connect operation can be any device using IP/IPv6 or an IP SLA responder.
+The response time is determined by measuring the time taken between sending a TCP 
+request message and receiving a response from the target device.
+</p>
+<p>
+ If the destination device is a Cisco device, then IP SLAs makes a TCP connection 
+ to any port number specified. If the destination is not a Cisco IP host, then 
+  a known destination port number such as 21 for FTP, 23 for Telnet, or 80 for 
+  an HTTP server must be specified.
+Using the IP SLAs Responder is optional for a TCP Connect operation when using 
+Cisco devices.
+TCP Connect is used to test virtual circuit availability or application availability. 
+Server and application connection performance can be tested by simulating Telnet, 
+SQL, and other types of connection to help you verify your IP service levels.
 Just because we have local link reachability does not mean that we have upper layer 
 connectivity.
 </p>
 
-<h2>DHCP</h2>
+<h3>Responder</h3>
+<p>
+The IP SLA responder for the TCP Connect operation is configured using the command: 
+<ul>
+  <li><code><b>ip sla responder</b></code> without the TCP port specified. 
+  In this configuration, the device determines the port using control messages from
+  the source.
+  </li>
+  <li>For TCP port specified, the command is <code><b>ip sla responder tcp-connect ipaddress 
+  &lt;ip-address&gt; port &lt;port&gt; vrf &lt;vrf&gt;</b></code>.</li>
+</ul>
+</p>
+
+<h3>Source</h3>
+<p>
+<ol>
+  <li>Configure the TCP Connect operation using the command <code><b>
+  tcp-connect &lt;destination-ip-address|destination-hostname&gt; &lt;destination
+  -port&gt; [source-ip &lt;ip-address|hostname&gt;] source-port &lt;port&gt; 
+  [control {enable|disable}]</b></code>.
+  
+  </li>
+  <li>Configure the frequency: <code><b>frequency &lt;value&gt;</b></code> 
+  where value is in seconds.
+  
+  </li>
+  <li>
+  <p>
+  Optional parameters include:
+  <ul>
+    <li><code><b>history lives-kept &lt;value&gt;</b></code>: sets the number of 
+    lives maintained in the history table for an IP SLA operation</li>
+    <li><code><b>history buckets-kept &lt;value&gt;</b></code>: Number 
+    of history buckets that are kept during the lifetime of an IP SLAs operation.</li>
+    <li><code><b>history hours-of-statistics-kept &lt;value&gt;</b></code>: Number 
+    of hours for which statistics are maintained for an IP SLA operation.</li>
+  </ul>
+  </p>
+  </li>
+  <li>Schedule the IP SLA TCP Connect operation</li>
+</ol>
+</p>
+
+<h2>DHCP Operation</h2>
+<p>
+IP SLA DHCP operation is used to measure the response time of a DHCP server in issuing 
+IP configuration parameters. It measures the round-trip time(RTT) taken to discover 
+a DHCP server and obtain a leased IP address from it. IP SLA releases the leased 
+IP address after the operation. The RTT information can be used to determine 
+DHCP performance levels. With DHCP operation, there is no need to configure the 
+responder on the destination device as the DHCP server is the responder.
+</p>
 <p>
 Standby DHCP router can start issuing IP addresses after detection of failure of 
 main DHCP server.
+</p>
+<p>
+The DHCP operation can be configured as follows:
 <ol>
   <li>Configure the DHCP server</li>
-  <li>Configure IP SLA for DHCP
+  <li>Configure the DHCP operation using the command <code><b>dhcp 
+  &lt;destination-ip-address|destination-hostname&gt; [source-ip &lt;ip-address|hostname&gt;] 
+  </b></code>
   <p>
   <div><code>
    dhcp &lt;server-ip&gt;
   </code></div>
   </p>
   </li>
+  <li>Configure frequency</li>
+  <li>Configure other optional features</li>
+  <li>Schedule the DHCP operation</li>
 </ol>
 </p>
 
@@ -827,5 +1030,9 @@ R1#
 
 
 <h2>References</h2>
-<ol><a href="https://www.cisco.com/c/en/us/td/docs/ios-xml/ios/ipsla/configuration/xe-16/sla-xe-16-book/sla-overview.html?ysclid=lhheppfa70211374257#GUID-C2E58A98-D907-4EF2-949B-0AD59FD3D4D4">
-Cisco IP SLA</ol>
+<ol>
+<li><a href="https://www.cisco.com/c/en/us/td/docs/ios-xml/ios/ipsla/configuration/xe-16/sla-xe-16-book/sla-overview.html?ysclid=lhheppfa70211374257#GUID-C2E58A98-D907-4EF2-949B-0AD59FD3D4D4">
+Cisco IP SLA</a></li>
+<li>https://www.cisco.com/c/en/us/td/docs/ios-xml/ios/ipsla/configuration/xe-16/sla-xe-16-book.pdf</li>
+
+</ol>
