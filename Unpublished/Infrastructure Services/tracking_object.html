@@ -1,0 +1,247 @@
+<h1>Enhanced Object Tracking (SLA Track)</h1>
+
+<p>
+Enhanced Object tracking allows you to track specific objects on the device, such as the 
+interface line protocol state, IP routing, route reachability, and to take action 
+when the tracked object's state changes. This feature allows you to increase the 
+availability of the network and shorten recovery time if an object state goes 
+down.
+</p>
+<p>
+The Enhanced Object Tracking feature provides complete separation between the objects to be tracked and
+the action to be taken by a client when a tracked object changes. Thus, several clients such as HSRP, VRRP,
+or GLPB can register their interest with the tracking process, track the same object.
+Each client is notified when the tracking object changes state, and each can 
+take different action when the object changes.
+Each tracked object is identified by a unique number that is specified on the tracking CLI. Client processes
+use this number to track a specific object.
+The tracking process periodically polls the tracked objects and notes any change of value. The changes in the
+tracked object are communicated to interested client processes, either immediately or after a specified delay.
+The object values are reported as either up or down
+</p>
+
+<p>
+An object monitors the statistics and state of the IP SLA instance and performs an 
+action based on the status of the probe. This can be used for HSRP, VRRP to 
+change priority levels.
+</p>
+
+<p>
+You can configure a combination of tracked objects in a list and a flexible method for combining objects
+using Boolean logic. This functionality includes the following capabilities:
+<ul>
+<li><b>Threshold:</b> The tracked list can be configured to use a weight or percentage threshold to measure the
+state of the list. Each object in a tracked list can be assigned a threshold weight. The state of the tracked
+list is determined by whether the threshold has been met.</li>
+<li>
+<b>Boolean "and" function:</b> When a tracked list has been assigned a Boolean "and" function, each object
+defined within a subset must be in an up state so that the tracked object can become up.
+</li>
+<li>
+<b>Boolean "or" function:</b> When the tracked list has been assigned a Boolean "or" function, at least one
+object defined within a subset must be in an up state so that the tracked object can become up.
+</li>
+</ul>
+</p>
+
+<h2>IP SLA Tracking</h2>
+<p>
+Enhanced Object Tracking can be used to track the status of an IP SLA; state or 
+reachability.
+To configure a tracking object:
+<ol>
+<li>Create an IP SLA probe</li>
+  <li>Set up a tracking object based on that probe:
+  Reference the IP SLA that will be tracked by the tracking object using 
+  the command <code><b>track &lt;obj-num&gt; ip sla &lt;sla-num&gt; [state | reachability]</b></code>.
+  When configuring a tracking object, a boolean operation AND or OR can be specified 
+  where the results of a series of tracking objects can be compared 
+  </li>
+  <li>Configure  a delay on the object to regulate the flapping of the object using 
+  the command <code><b>delay [down &lt;seconds&gt; | up &lt;seconds&gt;]</b></code>.</li>
+  <li>Associate the obhect with a client process.</li>
+</ol>
+</p>
+
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code style="font-size:130%">
+R1(config)#<b>track 100 ip sla 100</b><br>
+R1(config-track)#<br>
+*Mar 13 05:51:36.431: %DUAL-5-NBRCHANGE: EIGRP-IPv4 100: Neighbor 192.168.12.2 (GigabitEthernet0/0) is down: holding time expired<br>
+*Mar 13 05:51:38.043: %TRACKING-5-STATE: 100 ip sla 100 state Up->Down<br>
+*Mar 13 05:51:43.047: %TRACKING-5-STATE: 100 ip sla 100 state Down->Up<br>
+*Mar 13 05:51:51.547: %DUAL-5-NBRCHANGE: EIGRP-IPv4 100: Neighbor 192.168.12.2 (GigabitEthernet0/0) is up: new adjacency<br>
+R1(config-track)#<b>delay down 3 up 0</b><br>
+</code></div>
+
+<p>
+Enhanced Tracking Object can be used to track a variety of objects including:
+ETO can be used to track a variety of objects, including:
+    Interface line-protocol state
+    IP address
+    MAC address
+    Hostname
+    SNMP OID
+
+ETO can be used to improve the performance and reliability of a variety of Cisco IOS features, including:
+
+    HSRP
+    VRRP
+    GLPB
+    PIM
+    OSPF
+    BGP
+
+
+</p>
+
+<h2>Static Route Tracking</h2>
+<p>
+IP SLAs can be used in combination with static routes. IP SLA can be used to 
+install or remove a static route from the Routing Information Base (RIB) only if 
+certain conditions are met.
+
+A tracking object needs to be defined to track the results of the probe and 
+implement an action. It can also track other operations such as the state of an interface.
+</p>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code style="font-size:130%">
+R1(config)#<b>track 100 ip sla 100</b><br>
+R1(config-track)#<b>delay down 3 up 0</b><br>
+R1(config)#<b>ip route 4.4.4.4 255.255.255.255 192.168.13.2 track 100</b><br>
+</code></div></p>
+
+<h3>Verification</h3>
+
+<h4><code>show track &lt;obj-num&gt;</code></h4>
+<p>
+Verify a tracked object.
+</p>
+
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code style="font-size:130%">
+R1(config-track)#                                                            <br>
+*Mar 13 10:29:22.858: %TRACKING-5-STATE: 100 ip sla 100 state Up-Down        <br>
+R1(config)#ip route 4.4.4.4 255.255.255.255 192.168.13.2 track 100           <br>
+R1(config)#                                                                  <br>
+R1(config)#<b>do show ip route 4.4.4.4</b>                                          <br>
+Routing entry for 4.4.4.4/32                                                 <br>
+&nbsp;&nbsp;Known via "eigrp 100", distance 90, metric 2580480, type internal          <br>
+&nbsp;&nbsp;Redistributing via eigrp 100                                               <br>
+&nbsp;&nbsp;Last update from 192.168.12.2 on GigabitEthernet0/0, 00:02:23 ago          <br>
+&nbsp;&nbsp;Routing Descriptor Blocks:                                                 <br>
+&nbsp;&nbsp;* 192.168.12.2, from 192.168.12.2, 00:02:23 ago, via GigabitEthernet0/0    <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Route metric is 2580480, traffic share count is 1                      <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Total delay is 5030 microseconds, minimum bandwidth is 1000000 Kbit    <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Reliability 255/255, minimum MTU 1500 bytes                            <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Loading 1/255, Hops 3                                                  <br>
+R1(config)#
+</code></div></p>
+<p>
+Caution: When installing a tracked static route, install the tracked static route 
+after configuring the non-tracked static route.
+</p>
+
+<h4><code>debug track &lt;all&gt;</code></h4>
+
+<h2>Interface State Tracking</h2>
+<p>
+Enhanced tracking objects can be used to monitor the state of an interface. This 
+is implemented using the command <code><b>track interface ip routing</b></code>.
+This enables the tracking of the following states on an interface:
+<ul>
+  <li>line protocol: </li>
+  <li>IP address</li>
+  <li>IP routing: ability of an interface to route packets</li>
+</ul>
+If the line protocols is down, interface has no IP address, or IP routing is 
+disabled, then the tracking object will consider the interface state to be down.
+The enhanced object track supports the assignment of an IP address to an interface 
+through any of the following methods:
+<ul>
+  <li>PPP/IPCP</li>
+  <li>DHCP</li>
+  <li>Conventional IP address configuration</li>
+  <li>Unnumbered interface</li>
+</ul>
+</p>
+<p>
+Enhanced object tracking of the state of an interface can be enabled by the 
+following steps:
+<ol>
+  <li>Create a tracking list to track the state of the interface:
+  <ul>
+    <li><b>line-protocol:</b> using the command 
+  <code><b>track &lt;obj-num&gt; interface &lt;interface-id&gt; line-protocol</b></code>.</li>
+    <li><b>ip routing:</b> tracks an IP route in the routing table and the ability
+    of an interface to route IP packets.
+     <code><b>track &lt;obj-num&gt; interface &lt;interface-id&gt; ip routing</b></code>.</li>
+  </ul>
+  </li>
+  <li>Configure the delay period using command <code><b>delay up &lt;1-180&gt; 
+  down &lt;1-180&gt;</b></code>. The delay value is in seconds.</li>
+  <li>(Optional) Let the tracking object consider the carrier delay timer when 
+  tracking the interface status: <code><b>carrier delay</b></code>.</li>
+  <li>(Optional) Configure the interval in which the tracking process polls the 
+  tracked object using the command <code><b>track timer interface [&lt;seconds &gt; | msec &lt;milliseconds&gt;]
+  </b></code>. The default interval is 1 second. The msec keyword sets the interval 
+  down to milliseconds.</li>
+</ol>
+</p>
+
+<h2>Tracking IP Route Reachability</h2>
+<p>
+Tracks the reachability of an IP route. A tracked object is considered up when a
+routing table entry exists for the route and the route is accessible.
+</p>
+<p>
+<ol>
+  <li><b>Configure the tracking object:</b> 
+  <code><b>track &lt;obj-num&gt; ip route &lt;ip-address/prefix-length&gt; reachability</b></code>.
+  </li>
+  <li>Specify the delay values <code><b>delay up &lt;seconds&gt; down &lt;seconds&gt;</b></code></li>
+  <li>(Optional) Specify the VRF: <code><b>ip vrf &lt;vrf&gt;</b></code>.</li>
+</ol>
+</p>
+
+<h1>Verification</h1>
+<p>
+
+</p>
+
+<h2><code>show ip route track table</code></h2>
+<p>
+Displays information about the IP route track table.
+</p>
+
+<h2><code>show track [object-number ]</code></h2>
+<p>
+Displays information about the all tracking lists or the specified list.
+</p>
+
+<h2><code>show track brief</code></h2>
+<p>
+Displays a single line of tracking information output.
+</p>
+<h2><code>show track interface [brief ]</code></h2>
+<p>
+Displays information about tracked interface objects.
+</p>
+
+<h2><code>show track ip [object-number ] [brief ] route</code></h2>
+<p>
+Displays information about tracked IP-route objects.
+</p>
+
+<h2><code>show track resolution</code></h2>
+<p>
+Displays the resolution of tracked parameters.
+</p>
+
+<h2><code>show track timers</code></h2>
+<p>
+Displays tracked polling interval timers.
+</p>
