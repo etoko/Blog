@@ -1,37 +1,32 @@
 <h1>Introduction and Overview</h1>
 <p>
-IP SLAs are used to measure and verify network performance and influence 
-routing decisions such as static routing and, policy-based routing(PBR). 
-IP SLAs operate in real-time by sending network traffic such as VoIP, ICMP (echo,
+IP SLAs are used to measure and verify network performance. These measurements can 
+be leaveraged to influence routing decisions such as static routing, policy-based routing(PBR). 
+IP SLAs operate in real-time by generating simulated network traffic such as VoIP, ICMP (echo,
 jitter, path echo, path jitter), TCP Connection, UDP (echo, jitter, jitter for VoIP), 
 DNS, DHCP, HTTP, FTP. Network performance can then be determined by the statistics 
 generated from the network in response to the IP SLA traffic. Statistics generated 
-include; delay(round-trip and one-way), packet loss, jitter, voice quality.
-</p>
-<p>
-IP SLA stores this information into CLI and SNMP MIBs.
+include; delay(round-trip and one-way), packet loss, jitter, voice quality scores etc.
+
+IP SLA stores this information in the CLI and SNMP MIBs.
 IP SLA collects data that can then be used by enhanced object tracking to take 
-a defined action. When the IP SLA is configured, 
-object tracking can reference the IP SLA to implement an action based on the outcome
-of the IP SLA operation.
-IP SLAs are used to collect information about: reachability, response times (to 
-requests from HTTP, TCP, DHCP Discover), one-way latency, jitter(inter-packet variation), 
-voice quality scoring, etc.
+a defined action. When the IP SLA is configured, object tracking can reference 
+the IP SLA to implement an action based on the outcome or status of the IP SLA operation.
+IP SLAs are used to collect information about: reachability, response times to 
+probes, one-way latency, jitter(inter-packet variation), voice quality scoring, etc.
 </p>
 <p>
-IP SLA consists of two parts; a probe and schedule.
+IP SLA consists of two distinct parts; a probe and schedule.
 <ol>
     <li><b>Probe:</b> consists of the operation that will be carried out on the network for
     example reachability test, measurement of delay, measurement of delay 
-    variation (jitter) which can be measured using ICMP ping or UDP. Actual 
-    operations of network services can be measured such as application behaviour 
+    variation (jitter). Response times of network services can be measured such as application behaviour 
     of DNS, HTTP, DHCP. Different types of probes used depend on the application 
     being monitored; the main types are ICMP, TCP and UDP.</li>
-    <li><b>Schedule:</b> deals with when, how long and recurrence of this operation.</li>
+    <li><b>Schedule:</b> deals with when, how long and recurrence of this operation.
+    When scheduling an IP SLA, default life of a probe is 3600 seconds (1 hour).
+    </li>
   </ol>
-</p>
-<p>
-When scheduling an IP SLA, default life of a probe is 3600 seconds (1 hour).
 </p>
 
 <h2>Types of SLA Traffic</h2>
@@ -62,6 +57,10 @@ These aforementioned parameters are measured using the following categories of I
   </ul>
 </p>
 <p>
+Use the command <code><b>show ip sla application</b></code> to verify the  
+IP SLA operations supported by the IOS image.
+</p>
+<p>
 IP SLAs that are based on connectivity tests do not require a responder. However, 
 for IP SLA operations that do require a responder, this should be configured 
 first before scheduling the IP SLA operation.
@@ -71,27 +70,26 @@ first before scheduling the IP SLA operation.
 <h2>An IP SLA responder and SLA Control Protocol</h2>
 <p>
 An IP SLA responder is an active device in the network specifically configured  
-to interprete and respond to specific probes. Cisco devices have a special control 
-protocol that allows the system to anticipate and respond to IP SLA request 
-packets. This provides it with greater accuracy in measurements not available 
-to standard ICMP-based probes. The IP SLA responder listens on a specific port for
-control protocol messages sent by an IP SLA operation. Upon receipt of the control 
-message, the responder will enable the specified UDP or TCP port for the specified 
-duration. During this time, the responder accepts the requests and sends responses.
+to interprete and respond to specific probes. Cisco devices configured as responders 
+use the IP SLA control protocol. It that allows the responder and sender to agree on various parameters such 
+as port number and respond to IP SLA request packets. This results in IP SLA operations 
+having greater accuracy in measurements not available to standard ICMP-based probes. 
+The IP SLA responder listens on UDP port 1967 for control protocol messages
+sent by an IP SLA operation. Upon receipt of the control message, the responder 
+will enable the specified UDP or TCP port for the specified duration. During this 
+time, the responder accepts the requests and sends responses.
 The responder disables the port after it responds to the IP SLA request or when 
 the specified time expires.
 </p>
+
 <p>
 Time synchronization is required between the source and target device to prove accurate 
 measurements. NTP may be required to be configured on the source and target device 
 to ensure that two devices have the same time.
 </p>
+
 <p>
-Use the command <code><b>show ip sla application</b></code> to verify the  
-IP SLA operations supported by the IOS image.
-</p>
-<p>
-Some IPSLA operations do not require the configuration of an IPSLA responder. These 
+Some IP SLA operations do not require the configuration of an IPSLA responder. These 
 include HTTP, DHCP where the application itself acts as a responder to requests.
 </p>
 <p>
@@ -105,10 +103,10 @@ Devices may take tens of milliseconds to process incoming packets due to other
 higher-priority processes. Under these conditions, the response times do not 
 accurately represent the true network delays. IP SLA minimizes these processing 
 delays on the source and target device when trying to determine accurate round-trip 
-times.
+times by using UDP instead of ICMP to test latency and jitter.
 </p>
 <p>
-IP SLA test packets use time stamping to minimize the processing delays.
+IP SLA test packets use time stamping to more precisely calculate the processing delays.
 Responders have different types of timers:
 <ul>
 <li>T1 timer: this is the exit timer on request generated by the source router.</li>
@@ -127,19 +125,18 @@ The source device calculates the round-trip time by subtracting TS1 from TS4.
 <h2>Implementing IP SLA</h2>
 
 <p>
-To implement IP SLA network performance measurement, the following tasks are to be followed;
+To implement IP SLA network performance measurement, the following steps
+should be completed;
 <ol>
-<li>(Optional) on the remote device, configure the IP SLA responder and appropriate 
- ports. This is not required for some IP SLA operation types.</li>
+<li>On the target device, configure the IP SLA responder. This may not be 
+required for some IP SLA operations.</li>
  <li>Create the IP SLA
  <ol type="a">
  <li>Configure the IP SLA operation type</li>
- <li>Configure threshold values: threshold values to be monitored include; 
- connection loss, latency (one-way), jitter (one-way), round-trip time (RTT), 
- timeouts, packet loss. An IP SLA violation can send SNMP traps and trigger 
- another IP SLA operation such as increasing the monitoring frequency, or ICMP 
- path jitter and echo probes. The threshold value depends on the type of service
- which the network is to support.</li>
+ <li>Specify IP SLA operation parameter values: these include threshold, timeout.
+ IP SLA can be configured to send SNMP traps if the configured parameters are exceeded.
+ Exceeding these parameters can also trigger another IP SLA operation such as 
+ increasing the monitoring frequency, or ICMP path jitter and echo probes.</li>
  </ol>
  </li>
  <li>Schedule the IP SLA start-time and operating period.</li>
@@ -153,13 +150,15 @@ ICMP echo operations are useful for testing network connectivity and end-to-end
 response time. 
 The response time is determined by measuring the time taken between sending an
 ICMP-Echo Request packet to a target device and receiving the ICMP-Echo reply.
-In IOS, using <code><b>icmp-echo</b></code> to measure an echo may experience some 
-delays at the destination due to processing delays of ICMP packets. Some systems 
-may not prioritize the processing of ICMP packets causing these delays. A better
-method to measure network performance is through UDP traffic.
-
+The response time calculated from the <code><b>icmp-echo</b></code> operation 
+provides a general picture of the response time. However, its results may not 
+necessarily be accurate because some systems may not prioritize the processing of 
+ICMP packets causing these delays. A better method to measure network performance 
+is through UDP traffic.
+</p>
+<p>
 Any network device that supports ICMP echo protocol can be used as a destination. 
-No IP SLA responder configuration is needed to be done on the destination device.
+No IP SLA responder configuration is needed on the target device.
 </p>
 <p>
 <ol>
@@ -168,10 +167,10 @@ command <code><b>ip sla &lt;sla-number&gt;</b></code>.
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
   <code style="font-size:130%">
-R1(config)#ip sla 100
+R1(config)#<b>ip sla 100</b>
 </code></div>
 </p>
-</li>
+  <ol type="a">
 <li>Define the ICMP echo operation using the IP SLA mode configuration command 
 <code><b>icmp-echo &lt;destination-ip-address&gt; [source-ip &lt;ip-address&gt; | 
 source-interface &lt;interface-name&gt;]</b></code>.
@@ -232,9 +231,11 @@ the threshold value should be equal to or less than the timeout value.
 
 <li><b>TOS:</b> (Optional) Configure the <code><b>tos</b></code> value. This is the 
 type of service value. Packets may be treated differently if the TOS value varies 
-for instance such as VOIP traffic, 
-
+for instance such as VOIP traffic.
 </li>
+</ol>
+</li>
+
 <li>Schedule the IP SLA operation using the global configuration command 
 <code><b>ip sla schedule &lt;operation-number&gt; life [forever | seconds]  
 start-time [&lt;hh:mm:ss&gt; &lt;month&gt; &lt;day&gt; | pending | after &lt;hh:mm:ss&gt;]</b></code>.
@@ -382,7 +383,13 @@ Operational state of entry: Active                        <br>
 Last time this entry was reset: Never                     <br>                                    
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                            <br>                                    
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                            <br>                                    
-R1#show ip sla configuration 200                          <br>                                    
+</code></div></p>
+
+<h4><code>show ip sla configuration</code></h4>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code style="font-size:130%">
+R1#<b>show ip sla configuration 200</b>                          <br>                                    
 IP SLAs Infrastructure Engine-III                         <br>                                    
 Entry number: 200                                         <br>                                    
 Owner:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                            <br>                                    
@@ -428,12 +435,12 @@ R1#                                                       <br>
 IP SLA ICMP Path Jitter provides hop-by-hop jitter, packet loss and delay 
 measurement statistics in network. ICMP path jitter can be used to supplement 
 standard UDP jitter operations. For example, high jitter values from a UDP jitter
-operation could be used to trigger an ICMP path jitter opreation that could be 
+operation could be used to trigger an ICMP path jitter operation that could be 
 used to troubleshoot the network path and determine if traffic is bottlenecking 
 in a particular segment along the path. ICMP Path Jitter default values include;
 <ul>
 <li>number of echo probes: 10</li>
-<li>time between echo probes (in milliseconds): 20</li> 
+<li>Interval (time between echo probes (in milliseconds)): 20</li> 
 <li>frequency (seconds): 60</li>
 </ul>
 No IP SLA responder is required to be configured on the destination or intermediate devices.
@@ -528,8 +535,13 @@ Operation time to live: Forever                            <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                             <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                             <br>
 R1#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                              <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                             <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                             <br>
+</code></div>
+</p>
+
+<h4><code>show ip sla configuration</code></h4>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code style="font-size:130%">
 R1#<b>show ip sla configuration 300</b>                           <br>
 IP SLAs Infrastructure Engine-III                          <br>
 Entry number: 300                                          <br>
@@ -560,16 +572,13 @@ Threshold (milliseconds): 5000                                <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                <br>
 R1#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                 <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                <br>
 </code></div></p>
 
 <h2>UDP Echo Operation</h2>
 <p>
-UPD echo operation is used to monitor the end-to-end response time between a Cisco 
+UDP echo operation is used to monitor the end-to-end response time between a Cisco 
 device and devices using IPv4 or IPv6. It is also used to test end-to-end connectivity. 
-UDP echo accuracy is enhanced by using the 
-IP SLA responder at the destination. The designation device is any device that 
-supports RFC 862 Echo operation.
+The destination device is any device that supports RFC 862 Echo operation.
 </p>
 <p>
 Response time (round-trip time) is computed by measuring the time taken between sending a UDP echo
@@ -581,23 +590,32 @@ Cisco devices. The IP SLAs Responder cannot be configured on non-Cisco devices.
 The results of a UDP echo operation can be useful in troubleshooting issues with business-critical applications
 by determining the round-trip delay times and testing connectivity to both Cisco and non-Cisco devices.
 </p>
+<p>
+
+</p>
 
 <h3>Responder</h3>
 <p>
 Configuring UDP-echo on the responder may require configuration of the UDP port 
 number on which to listen:
 <ul>
-  <li>Configure the responder without specifying the UDP port using the command <code><b>ip sla responder</b></code>
-    
+  <li>Configure the responder without specifying the UDP port using the 
+  command <code><b>ip sla responder</b></code>. This command should be used 
+  if the control protocol is enabled at the source.
+   
   </li>
   <li>Configure the responder specifying the UDP port using the command 
   <code><b>ip sla responder udp-echo ipaddress &lt;ip-address&gt; port &lt;port&gt; 
-  vrf &lt;vrf&gt;</b></code>
-    <p>
-    The UDP port may be required if SLA control protocol is disabled on the 
+  vrf &lt;vrf&gt;</b></code>. 
+  <p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code style="font-size:130%">
+  R4(config)#<b>ip sla responder udp-echo ipaddress 192.168.34.2 port 8080</b>
+  </code></div></p>
+  The UDP port may be required if SLA control protocol is disabled on the 
     source. IP SLA can be configured for a specific VRF as indicated by the VRF 
     option.
-    </p>
+   
   </li>
 </ul>
 </p>
@@ -610,7 +628,7 @@ number on which to listen:
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
   <code style="font-size:130%">
-R4(config)#<b>ip sla 1</b>                                           <br>      
+R1(config)#<b>ip sla 400</b>                                           <br>      
 </code></div>
 </p>
 </li>
@@ -618,18 +636,19 @@ R4(config)#<b>ip sla 1</b>                                           <br>
 <li><b>Define the udp-echo operation:</b> the udp-echo operation is enabled using 
 the command <code><b>udp-echo &lt;destination-ip-address|hostname&gt; &lt;destination-port&gt; 
 source-ip &lt;[ip-address | hostname]&gt; source-port &lt;port&gt; control [enable|disable]</b></code>.
-The UDP 
-port is optional as well as the disabling of control protocol.
+<ul>
+<li>
+The UDP port is optional if the control protocol is enabled.
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
   <code style="font-size:130%">
-R4(config-ip-sla)#<b>udp-echo 1.1.1.1 18427 source-ip 4.4.4.4 </b>   <br>                                                         
-R4(config-ip-sla-udp)#<b>frequency 10                          </b>  <br>                                                         
-R4(config-ip-sla-udp)#                                        <br> 
+R1(config-ip-sla)#<b>udp-echo 1.1.1.1 8080 source-ip 4.4.4.4 control enable</b>   <br>                                                         
+R1(config-ip-sla-udp)#<b>frequency 60                          </b>  <br>                                                         
+R1(config-ip-sla-udp)#                                        <br> 
 </code></div></p>
 <p>
-If the UDP port is not configured, the router automatically selected one 
-randomly. 
+The control protocol message exchanges between the IP SLA operation and the responder 
+dynamically determine the port numbers. 
 In its most basic configuration <code><b>ip sla responder</b></code> global 
 config command is all that is needed.
 UDP echo operations send initial control packets before the IP 
@@ -638,11 +657,24 @@ planned port to be used. To eliminate the sending of control packets in UDP echo
 operations add the <code><b>control disable</b></code> keywords.
 </p>
 </li>
+<li>
+If the control protocol is disabled, the UDP port number must be configured on the 
+operation as well as on the responder:
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code style="font-size:130%">
+  R1(config-ip-sla)#<b>udp-echo 1.1.1.1 8080 source-ip 4.4.4.4 control disable</b>   <br>                                                         
+R1(config-ip-sla-udp)#<b>frequency 60                          </b>  <br> 
+  </code></div></p>
+</li>
+</ul>
+
+</li>
 <li><b>Schedule the IP SLA operation:</b>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
   <code style="font-size:130%">
-R4(config)#<b>ip sla schedule 1 start-time now life forever    </b>  <br>                                                         
+R1(config)#<b>ip sla schedule 1 start-time now life forever    </b>  <br>                                                         
 </code></div>
 </p>
 </ol>
@@ -651,10 +683,154 @@ R4(config)#<b>ip sla schedule 1 start-time now life forever    </b>  <br>
 <h3>Verification</h3>
 
 <h4><code>show ip sla statistics</code></h4>
+<p>
+The following output shows the difference in RTT values as processed by ICMP-Echo 
+(IPSLA 100)operation and UDP-Echo operation(IPSLA 400).
+</p>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code style="font-size:130%">
+R1#<b>show ip sla statistics details</b>                   <br>
+IPSLAs Latest Operation Statistics                         <br>
+                                                           <br>
+IPSLA operation id: 100&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Latest RTT: 88 milliseconds&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+Latest operation start time: 02:42:38 UTC Thu May 11 2023  <br>
+Latest operation return code: OK                           <br>
+Over thresholds occurred: FALSE                            <br>
+Number of successes: 5                                     <br>
+Number of failures: 0                                      <br>
+Operation time to live: Forever                            <br>
+Operational state of entry: Active                         <br>
+Last time this entry was reset: Never                      <br>
+                                                           <br>
+                                                           <br>
+                                                           <br>
+IPSLA operation id: 400                                    <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Latest RTT: 25 milliseconds                        <br>
+Latest operation start time: 02:42:08 UTC Thu May 11 2023  <br>
+Latest operation return code: OK                           <br>
+Over thresholds occurred: FALSE                            <br>
+Number of successes: 14                                    <br>
+Number of failures: 3                                      <br>
+Operation time to live: Forever                            <br>
+Operational state of entry: Active                         <br>
+Last time this entry was reset: Never                      <br>
+                                                           <br>
+                                                           <br>
+R1#
+</code></div>
+</p>
+
+<h4><code>show ip sla responder</code></h4>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code style="font-size:130%">
+R4#<b>show ip sla responder</b>                           <br>        
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;General IP SLA Responder on Control port 1967     <br> 
+General IP SLA Responder is: Enabled                      <br> 
+Number of control message received: 18 Number of errors: 0<br> 
+Recent sources:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                               <br> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;192.168.12.1 [02:36:08.095 UTC Thu May 11 2023]   <br> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;192.168.12.1 [02:35:08.095 UTC Thu May 11 2023]   <br> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;192.168.12.1 [02:34:08.139 UTC Thu May 11 2023]   <br> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;192.168.12.1 [02:33:08.087 UTC Thu May 11 2023]   <br> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;192.168.12.1 [02:32:08.107 UTC Thu May 11 2023]   <br> 
+Recent error sources:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                               <br> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                              <br> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Permanent Port IP SLA Responder                   <br> 
+Permanent Port IP SLA Responder is: Enabled               <br> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                              <br> 
+udpEcho Responder:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                              <br> 
+&nbsp;&nbsp;IP Address&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Port                             <br> 
+&nbsp;&nbsp;4.4.4.4&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;8080                             <br> 
+&nbsp;&nbsp;192.168.34.2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 8080                             <br> 
+R4#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                
+</code></div>
+</p>
+
+
+<h4><code>show ip sla configuration</code></h4>
+<p>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code style="font-size:130%">
+R1#<b>show ip sla configuration</b>                                           <br>
+IP SLAs Infrastructure Engine-III                                             <br>
+Entry number: 100                                                             <br>
+Owner:                                                                        <br>
+Tag:                                                                          <br>
+Operation timeout (milliseconds): 5000                                        <br>
+Type of operation to perform: icmp-echo                                       <br>
+Target address/Source address: 192.168.34.2/0.0.0.0                           <br>
+Type Of Service parameter: 0x0                                                <br>
+Request size (ARR data portion): 28                                           <br>
+Verify data: No                                                               <br>
+Vrf Name:                                                                     <br>
+Schedule:                                                                     <br>
+&nbsp;&nbsp; Operation frequency (seconds): 60  (not considered if randomly scheduled)  <br>
+&nbsp;&nbsp; Next Scheduled Start Time: Start Time already passed                       <br>
+&nbsp;&nbsp; Group Scheduled : FALSE                                                    <br>
+&nbsp;&nbsp; Randomly Scheduled : FALSE                                                 <br>
+&nbsp;&nbsp; Life (seconds): Forever                                                    <br>
+&nbsp;&nbsp; Entry Ageout (seconds): never                                              <br>
+&nbsp;&nbsp; Recurring (Starting Everyday): FALSE                                       <br>
+&nbsp;&nbsp; Status of entry (SNMP RowStatus): Active                                   <br>
+Threshold (milliseconds): 5000                                                <br>
+Distribution Statistics:                                                      <br>
+&nbsp;&nbsp; Number of statistic hours kept: 2                                          <br>
+&nbsp;&nbsp; Number of statistic distribution buckets kept: 1                           <br>
+&nbsp;&nbsp; Statistic distribution interval (milliseconds): 20                         <br>
+Enhanced History:                                                             <br>
+History Statistics:                                                           <br>
+&nbsp;&nbsp; Number of history Lives kept: 0                                            <br>
+&nbsp;&nbsp; Number of history Buckets kept: 15                                         <br>
+&nbsp;&nbsp; History Filter Type: None                                                  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;                                                                          <br>
+Entry number: 400                                                             <br>
+Owner:                                                                        <br>
+Tag:                                                                          <br>
+Operation timeout (milliseconds): 5000                                        <br>
+Type of operation to perform: udp-echo                                        <br>
+Target address/Source address: 192.168.34.2/0.0.0.0                           <br>
+Target port/Source port: 8080/0                                               <br>
+Type Of Service parameter: 0x0                                                <br>
+Request size (ARR data portion): 16                                           <br>
+Verify data: No                                                               <br>
+Data pattern:                                                                 <br>
+Vrf Name:                                                                     <br>
+Control Packets: enabled                                                      <br>
+Schedule:                                                                     <br>
+&nbsp;&nbsp; Operation frequency (seconds): 60  (not considered if randomly scheduled)  <br>
+&nbsp;&nbsp; Next Scheduled Start Time: Start Time already passed                       <br>
+&nbsp;&nbsp; Group Scheduled : FALSE                                                    <br>
+&nbsp;&nbsp; Randomly Scheduled : FALSE                                                 <br>
+&nbsp;&nbsp; Life (seconds): Forever                                                    <br>
+&nbsp;&nbsp; Entry Ageout (seconds): never                                              <br>
+&nbsp;&nbsp; Recurring (Starting Everyday): FALSE                                       <br>
+&nbsp;&nbsp; Status of entry (SNMP RowStatus): Active                                   <br>
+Threshold (milliseconds): 5000                                                <br>
+Distribution Statistics:                                                      <br>
+&nbsp;&nbsp; Number of statistic hours kept: 2                                          <br>
+&nbsp;&nbsp; Number of statistic distribution buckets kept: 1                           <br>
+&nbsp;&nbsp; Statistic distribution interval (milliseconds): 20                         <br>
+Enhanced History:                                                             <br>
+History Statistics:                                                           <br>
+&nbsp;&nbsp; Number of history Lives kept: 0                                            <br>
+&nbsp;&nbsp; Number of history Buckets kept: 15                                         <br>
+&nbsp;&nbsp; History Filter Type: None                                                  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;                                                                          <br>
+&nbsp;&nbsp;&nbsp;&nbsp;                                                                          <br>
+R1#
+</code></div>
+</p>
+
 
 <h2>UDP Jitter</h2>
 <p>
-UDP itter operation diagonses network suitability for real-time traffic applications 
+The UDP Jitter operation is used to measure the jitter experienced by traffic 
+between the source device and the target.
+UDP Jitter operation diagnoses network suitability for real-time traffic applications 
 such as VoIP, video over IP or real-time conferencing. These paramters can be 
 monitored to assess whether they are within acceptable thresholds.
 If multiple 
@@ -690,6 +866,14 @@ The IP SLA responder can be enabled with or without specifying the UDP port usin
 commands <code><b>ip sla responder</b></code> or <code><b>ip sla responder udp-echo 
 ipaddress &lt;ip-address&gt; port &lt;port&gt; vrf &lt;vrf&gt;</b></code> respectively.
 </p>
+</p>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code style="font-size:130%">
+R4(config)#<b>ip sla responder</b>
+</code></div>
+</p>
+
 
 <h3>UDP-Jitter Source</h3>
 <p>
@@ -707,15 +891,206 @@ response-data-size &lt;size&gt;</b></code> where:
   <li><b>frequency:</b> elapsed time before the operation repeats</li>
 </ul>
 </p>
-
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code style="font-size:130%">
+  R1(config)#<b>ip sla 500</b><br>
+  R1(config-ip-sla)#<b>udp-jitter 192.168.32.2 32767 interval 20 num-packets 10 control enable</b><br>
+  R1(config-ip-sla-jitter)#<b>frequency 60</b><br>
+  R1(config-ip-sla-jitter)#<b>ip sla schedule 500 start-time now life forever</b>
+  </code></div>
+  </p>
 <h3>Verification of UDP-Jitter Operations</h3>
 <p>
 
 </p>
 <h4><code>show ip sla configuration</code></h4>
-<h4><code>show ip sla group schedule</code></h4>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code style="font-size:130%">
+R1#<b>show ip sla configuration</b>                                            <br>
+IP SLAs Infrastructure Engine-III                                              <br>
+Entry number: 500                                                              <br>
+Owner:                                                                         <br>
+Tag:                                                                           <br>
+Operation timeout (milliseconds): 5000                                         <br>
+Type of operation to perform: udp-jitter                                       <br>
+Target address/Source address: 192.168.34.2/0.0.0.0                            <br>
+Target port/Source port: 32767/0                                               <br>
+Type Of Service parameter: 0x0                                                 <br>
+Request size (ARR data portion): 32                                            <br>
+Packet Interval (milliseconds)/Number of packets: 20/10                        <br>
+Verify data: No                                                                <br>
+Vrf Name:                                                                      <br>
+Control Packets: enabled                                                       <br>
+Schedule:                                                                      <br>
+&nbsp;&nbsp; Operation frequency (seconds): 60  (not considered if randomly scheduled)   <br>
+&nbsp;&nbsp; Next Scheduled Start Time: Start Time already passed                        <br>
+&nbsp;&nbsp; Group Scheduled : FALSE                                                     <br>
+&nbsp;&nbsp; Randomly Scheduled : FALSE                                                  <br>
+&nbsp;&nbsp; Life (seconds): Forever                                                     <br>
+&nbsp;&nbsp; Entry Ageout (seconds): never                                               <br>
+&nbsp;&nbsp; Recurring (Starting Everyday): FALSE                                        <br>
+&nbsp;&nbsp; Status of entry (SNMP RowStatus): Active                                    <br>
+Threshold (milliseconds): 5000                                                 <br>
+Distribution Statistics:                                                       <br>
+&nbsp;&nbsp; Number of statistic hours kept: 2                                           <br>
+&nbsp;&nbsp; Number of statistic distribution buckets kept: 1                            <br>
+&nbsp;&nbsp; Statistic distribution interval (milliseconds): 20                          <br>
+Enhanced History:                                                              <br>
+                                                                               <br>
+                                                                               <br>
+R1#
+</code></div>
+</p>
+
+
 <h4><code>show ip sla statistics</code></h4>
-<h4><code>show ip sla statistics 2 details</code></h4>
+<p>
+Unlike path-jitter, UDP jitter does not include the following statistics:
+<ul>
+  <li>Packet late arrival</li>
+  <li>Out of sequence packets</li>
+</ul>
+However, it includes detailed information such as:
+<ul>
+  <li>Packet loss (source-to-destination and destination-to-source).</li>
+  <li>One way latency (source-to-destination and destination-to-source).</li>
+  <li>Jitter  (source-to-destination and destination-to-source).</li>
+  <li>Voice score values: calculated planning impairment factor (ICPIF), mean 
+  opinion score (MOS)</li>
+</ul>
+
+The following output shows RTT values for udp-jitter and icmp-jitter operations
+for purposes of comparison:
+</p>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code style="font-size:130%">
+R1#<b>show ip sla statistics details</b>                                        <br>
+IPSLAs Latest Operation Statistics                                              <br>
+                                                                                <br>
+IPSLA operation id: 100                                                         <br>
+Type of operation: icmp-jitter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Latest RTT: 35 milliseconds&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   <br>
+Latest operation start time: 03:47:53 UTC Thu May 11 2023&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   <br>
+Latest operation return code: OK&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  <br>
+Over thresholds occurred: FALSE&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   <br>
+RTT Values:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Number Of RTT: 8&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;RTT Min/Avg/Max: 14/35/57 milliseconds  <br>
+Latency one-way time:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Number of Latency one-way Samples: 0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Source to Destination Latency one way Min/Avg/Max: 0/0/0 milliseconds   <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Destination to Source Latency one way Min/Avg/Max: 0/0/0 milliseconds   <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Source to Destination Latency one way Sum/Sum2: 0/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Destination to Source Latency one way Sum/Sum2: 0/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   <br>
+Jitter Time:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Number of SD Jitter Samples: 5&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Number of DS Jitter Samples: 5&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Source to Destination Jitter Min/Avg/Max: 4/20/32 milliseconds&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Destination to Source Jitter Min/Avg/Max: 6/8/11 milliseconds&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Source to destination positive jitter Min/Avg/Max: 13/25/32 milliseconds<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Source to destination positive jitter Number/Sum/Sum2: 3/77/2217&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Source to destination negative jitter Min/Avg/Max: 4/10/16 milliseconds <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Source to destination negative jitter Number/Sum/Sum2: 2/20/272&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Destination to Source positive jitter Min/Avg/Max: 6/6/8 milliseconds   <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Destination to Source positive jitter Number/Sum/Sum2: 4/27/185&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Destination to Source negative jitter Min/Avg/Max: 11/11/11 milliseconds<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Destination to Source negative jitter Number/Sum/Sum2: 1/11/121&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Interarrival jitterout: 0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Interarrival jitterin: 0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Jitter AVG: 14&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  <br>
+Packet Late Arrival: 0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  <br>
+Out Of Sequence: 0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Source to Destination: 0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Destination to Source 0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;In both Directions: 0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   <br>
+Packet Skipped: 0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Packet Unprocessed: 0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   <br>
+Packet Loss: 2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Loss Periods Number: 2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Loss Period Length Min/Max: 1/1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Inter Loss Period Length Min/Max: 2/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   <br>
+Number of successes: 19&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   <br>
+Number of failures: 0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   <br>
+Operation time to live: Forever&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   <br>
+Operational state of entry: Active&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  <br>
+Last time this entry was reset: Never&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  <br>
+IPSLA operation id: 500&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   <br>
+Type of operation: udp-jitter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Latest RTT: 64 milliseconds&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   <br>
+Latest operation start time: 03:47:17 UTC Thu May 11 2023&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   <br>
+Latest operation return code: OK&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  <br>
+Over thresholds occurred: FALSE&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   <br>
+RTT Values:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Number Of RTT: 10&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; RTT Min/Avg/Max: 52/64/84 milliseconds  <br>
+Latency one-way time:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Number of Latency one-way Samples: 0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Source to Destination Latency one way Min/Avg/Max: 0/0/0 milliseconds   <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Destination to Source Latency one way Min/Avg/Max: 0/0/0 milliseconds   <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Source to Destination Latency one way Sum/Sum2: 0/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Destination to Source Latency one way Sum/Sum2: 0/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   <br>
+Jitter Time:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Number of SD Jitter Samples: 9&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Number of DS Jitter Samples: 9&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Source to Destination Jitter Min/Avg/Max: 0/17/31 milliseconds&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Destination to Source Jitter Min/Avg/Max: 0/8/29 milliseconds&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Source to destination positive jitter Min/Avg/Max: 11/21/31 milliseconds<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Source to destination positive jitter Number/Sum/Sum2: 4/86/2058&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Source to destination negative jitter Min/Avg/Max: 5/15/20 milliseconds <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Source to destination negative jitter Number/Sum/Sum2: 4/63/1147&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Destination to Source positive jitter Min/Avg/Max: 7/18/29 milliseconds <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Destination to Source positive jitter Number/Sum/Sum2: 2/36/890&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Destination to Source negative jitter Min/Avg/Max: 3/7/19 milliseconds  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Destination to Source negative jitter Number/Sum/Sum2: 5/35/427&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Interarrival jitterout: 0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Interarrival jitterin: 0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Jitter AVG: 13&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  <br>
+Packet Loss Values:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Loss Source to Destination: 0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Source to Destination Loss Periods Number: 0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Source to Destination Loss Period Length Min/Max: 0/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Source to Destination Inter Loss Period Length Min/Max: 0/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Loss Destination to Source: 0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Destination to Source Loss Periods Number: 0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Destination to Source Loss Period Length Min/Max: 0/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Destination to Source Inter Loss Period Length Min/Max: 0/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Out Of Sequence: 0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Tail Drop: 0&nbsp;&nbsp;&nbsp;&nbsp;Packet Late Arrival: 0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  <br>
+Packet Skipped: 0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   <br>
+Voice Score Values:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Calculated Planning Impairment Factor (ICPIF): 0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Mean Opinion Score (MOS): 0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   <br>
+Number of successes: 21&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   <br>
+Number of failures: 0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   <br>
+Operation time to live: Forever&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   <br>
+Operational state of entry: Active&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  <br>
+Last time this entry was reset: Never&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   <br>
+                                                                                <br>
+                                                                                <br>
+R1#                                                                             <br>
+</code></div>
+</p>
+
+<h4><code>show ip sla responder</code></h4>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code style="font-size:130%">
+R4><b>show ip sla responder</b><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;General IP SLA Responder on Control port 1967      <br>
+General IP SLA Responder is: Enabled                       <br>
+Number of control message received: 64 Number of errors: 0 <br>
+Recent sources:&nbsp;&nbsp;                                          <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;192.168.12.1 [03:54:53.903 UTC Thu May 11 2023]    <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;192.168.12.1 [03:53:37.447 UTC Thu May 11 2023]    <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;192.168.12.1 [03:52:22.055 UTC Thu May 11 2023]    <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;192.168.12.1 [03:51:07.019 UTC Thu May 11 2023]    <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;192.168.12.1 [03:49:51.259 UTC Thu May 11 2023]    <br>
+Recent error sources:                                      <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                           <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Permanent Port IP SLA Responder                    <br>
+Permanent Port IP SLA Responder is: Disabled               <br>
+</code></div>
+</p>
+
 
 <h2>TCP Connect Operations</h2>
 <p>
@@ -785,20 +1160,23 @@ The IP SLA responder for the TCP Connect operation is configured using the comma
 <h2>DHCP Operation</h2>
 <p>
 IP SLA DHCP operation is used to measure the response time of a DHCP server in issuing 
-IP configuration parameters. It measures the round-trip time(RTT) taken to discover 
-a DHCP server and obtain a leased IP address from it. IP SLA releases the leased 
-IP address after the operation. The RTT information can be used to determine 
+IP configuration parameters. The IP SLA acts as a DHCP client and requests for 
+an IP address from available DHCP servers. It measures the round-trip time(RTT) 
+taken to discover a DHCP server and obtain a leased IP address from it. 
+IP SLA releases the leased IP address after the operation. The IP SLA waits till 
+its next iteration and requests for a DHCP server again.
+The RTT information can be used to determine 
 DHCP performance levels. With DHCP operation, there is no need to configure the 
 responder on the destination device as the DHCP server is the responder.
 </p>
 <p>
-Standby DHCP router can start issuing IP addresses after detection of failure of 
-main DHCP server.
+If tracking is enabled, a standby DHCP router can start issuing IP addresses if the 
+primary DHCP server fails to respond within a configured period.
 </p>
 <p>
 The DHCP operation can be configured as follows:
 <ol>
-  <li>Configure the DHCP server</li>
+	<li>Ensure IP access to an existing DHCP server.</li>
   <li>Configure the DHCP operation using the command <code><b>dhcp 
   &lt;destination-ip-address|destination-hostname&gt; [source-ip &lt;ip-address|hostname&gt;] 
   </b></code>
@@ -809,121 +1187,85 @@ The DHCP operation can be configured as follows:
   </p>
   </li>
   <li>Configure frequency</li>
-  <li>Configure other optional features</li>
+  <li>Configure other optional features
+  <p>
+    <ul>
+      <li><b>tag</b>: Creates a user-specified identifier for an IP SLA operation.</li>
+      <li><b>threshold</b>: Sets the upper threshold value for calculating network 
+      monitoring statistics created by an IP SLA operation.</li>
+      <li><b>timeout</b>: Sets the amound of time an IP SLA operation waits 
+      for a response from its request packet.</li>
+      <li><b>history filter {none | all | overThreshold | failures}</b>: Defines 
+      the type of information kept in the history table for an IP SLA operation.</li>
+    </ul>
+  </p>
+  </li>
   <li>Schedule the DHCP operation</li>
 </ol>
 </p>
 
 <h3>Verification</h3>
 <h4><code>show ip dhcp bind</code></h4>
-
-
-<h2>HTTP</h2>
 <p>
-Can verify that the web server is operational and the latency experienced.
+
 </p>
 
-<h1>Enhanced Object Tracking (SLA Track)</h1>
+<h4><code>show ip sla schedule</code></h4>
 <p>
-Object tracking allows you to track specific objects on the device, such as the 
-interface line protocol state, IP routing, route reachability, and to take action 
-when the tracked object's state changes. This feature allows you to increase the 
-availability of the network and shorten recovery time if an object state goes 
-down.
+
 </p>
+
+<h4><code>show ip sla configuration</code></h4>
 <p>
-An object tracks the IP SLA instance and creates a status based on the status 
-of the probe. This can be used for HSRP, VRRP to change priority levels.
+
 </p>
+
+<h2>HTTPS Operations</h2>
 <p>
-Monitors the statistics of IP SLA and performs an action based on the statistics output.
-</p>
-<p>
-To configure a tracking object:
-<ol>
-  <li>Reference the IP SLA that will be tracked by the tracking object using 
-  the command <code><b>track &lt;ob-num&gt; ip sla &lt;sla-num&gt; [state | reachability]</b></code>.
-  When configuring a tracking object, a boolean operation AND or OR can be specified 
-  where the results of a series of tracking objects can be compared 
+IP SLA HTTPS operation can be used to monitor the response time between a Cisco 
+device and an HTTPS server to retrieve a web page. The IP SLA HTTPS operation 
+supports both the normal GET and RAW requests. 
+HTTPS server response time measurements consist of three types:
+<ul>
+  <li>The HTTPS operation measures the RTT between a Cisco device and an HTTPS 
+  server to retrieve a web page.</li>
+  <li>The IP SLA HTTPS operation uses the Cisco IOS XE HTTPS secure client to 
+  send the HTTPS request, process the response from the HTTPS server and pass 
+  the response back to the IP SLA.</li>
+  <li>The HTTPS server response time measurements consist of two types:
+    <ol>
+      <li><b>DNS look:</b> RTT taken to perform domain name lookup.</li>
+      <li><b>HTTPS Transaction time:</b> RTT taken by IOS HTTP secure client 
+      to send HTTPS request to the HTTPS server, get the response from the server.
+      This RTT includes the time taken for the SSL handshaken, TCP connection 
+      to the server and HTTPS transactions.
+      </li>
+    </ol>
+    The total RTT is a sum of the DNS RTT and the HTTPS transaction RTT.
   </li>
-  <li>Configure  a delay on the object to regulate the flapping of the object using 
-  the command <code><b>delay [down &lt;seconds&gt; | up &lt;seconds&gt;]</b></code>.
-</ol>
-</p>
-<p>
-To configure a tracking object:
-<ol>
-  <li>Create an IP SLA probe</li>
-  <li>Set up a tracking object based on that probe.</li>
-  <li>Apply the tracking object to an application such as static routing or PBR.</li>
-</ol>
-</p>
-<p>
-<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-  <code style="font-size:130%">
-R1(config)#<b>track 100 ip sla 100</b><br>
-R1(config-track)#<br>
-*Mar 13 05:51:36.431: %DUAL-5-NBRCHANGE: EIGRP-IPv4 100: Neighbor 192.168.12.2 (GigabitEthernet0/0) is down: holding time expired<br>
-R1(config-track)#<b>delay</b><br>
-*Mar 13 05:51:38.043: %TRACKING-5-STATE: 100 ip sla 100 state Up->Down<br>
-R1(config-track)#<b>delay down</b><br>
-*Mar 13 05:51:43.047: %TRACKING-5-STATE: 100 ip sla 100 state Down->Up<br>
-R1(config-track)#<b>delay down 3</b><br>
-*Mar 13 05:51:51.547: %DUAL-5-NBRCHANGE: EIGRP-IPv4 100: Neighbor 192.168.12.2 (GigabitEthernet0/0) is up: new adjacency<br>
-R1(config-track)#<b>delay down 3 up 0</b><br>
-</code></div>
-
-<h2>Static Routes</h2>
-<p>
-IP SLAs can be used in combination with static routes. IP SLA can be used to 
-install or remove a static route from the Routing Information Base (RIB) only if 
-certain conditions are met.
-
-A tracking object needs to be defined to track the results of the probe and 
-implement an action. It can also track other operations such as the state of an interface.
-</p>
-<p>
-<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-  <code style="font-size:130%">
-R1(config)#<b>track 100 ip sla 100</b><br>
-R1(config-track)#<b>delay down 3 up 0</b><br>
-R1(config)#<b>ip route 4.4.4.4 255.255.255.255 192.168.13.2 track 100</b><br>
-</code></div></p>
-
-<h3>Verification</h3>
-
-<h4><code>show track &lt;obj-num&gt;</code></h4>
-<p>
-Verify a tracked object.
+</ul>
+ 
+The results of the HTTPS operation can be displayed and analyzed to determine 
+how an HTTPS server is performing. The configuration of an IP SLA responder for 
+this operation is not required.
 </p>
 
+<h3>HTTPS Operation Configuration</h3>
 <p>
-<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-  <code style="font-size:130%">
-R1(config-track)#                                                            <br>
-*Mar 13 10:29:22.858: %TRACKING-5-STATE: 100 ip sla 100 state Up-Down        <br>
-R1(config)#ip route 4.4.4.4 255.255.255.255 192.168.13.2 track 100           <br>
-R1(config)#                                                                  <br>
-R1(config)#<b>do show ip route 4.4.4.4</b>                                          <br>
-Routing entry for 4.4.4.4/32                                                 <br>
-&nbsp;&nbsp;Known via "eigrp 100", distance 90, metric 2580480, type internal          <br>
-&nbsp;&nbsp;Redistributing via eigrp 100                                               <br>
-&nbsp;&nbsp;Last update from 192.168.12.2 on GigabitEthernet0/0, 00:02:23 ago          <br>
-&nbsp;&nbsp;Routing Descriptor Blocks:                                                 <br>
-&nbsp;&nbsp;* 192.168.12.2, from 192.168.12.2, 00:02:23 ago, via GigabitEthernet0/0    <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Route metric is 2580480, traffic share count is 1                      <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Total delay is 5030 microseconds, minimum bandwidth is 1000000 Kbit    <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Reliability 255/255, minimum MTU 1500 bytes                            <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Loading 1/255, Hops 3                                                  <br>
-R1(config)#
-</code></div></p>
-<p>
-Caution: When installing a tracked static route, install the tracked static route 
-after configuring the non-tracked static route.
+Use the command <code><b>http secure [get|head|raw] &lt;url&gt; name-server &lt;ip-address&gt; 
+version &lt;ip-address&gt; source-ip &lt;interface-name&gt;</b></code>.
 </p>
-
-<h4><code>debug track &lt;all&gt;</code></h4>
-
+<p>
+If a proxy server is used, the HTTP RAW Operation through the proxy server can be 
+configured as follows:
+<code><b>http raw url http://www.proxy.cisco.com<br>
+http-raw-request</b>
+GET http://www.yahoo.com HTTP/1.0\r\n<br>
+\r\n<br>
+end<br>
+ip sla schedule 9 life forever start-time now
+</code>
+</p>
 
 <h1>Troubleshooting</h1>
 <p>
