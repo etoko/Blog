@@ -86,7 +86,7 @@ following ways:
 </ul>
 </p>
 
-<h1>Router Discovery Attacks</h1>
+<h1 id="RAGUARD">RA Guard</h1>
 
 <p>
 Router discovery is a means for hosts to locate routers that reside on a local 
@@ -159,7 +159,7 @@ Defining a policy for hosts:
     <li><b>Define the RA guard policy:</b> <code><b>ipv6 nd raguard policy &lt;policy-name&gt;</b></code>
     <p>
     <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
- <code style="font-size:110%">
+ <code>
     SW1(config)#<b>ipv6 nd raguard policy HOSTS</b>
  </code></div>
  </p>
@@ -168,7 +168,7 @@ Defining a policy for hosts:
     <code><b>device-role host</b></code>.
     <p>
     <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
- <code style="font-size:110%">
+ <code>
  SW1(config-nd-raguard)#<b>device-role host</b>
  </code></div>
  </p>
@@ -181,7 +181,7 @@ Creating a second policy for routers:
    <li><b>Define the RA guard policy:</b> <code><b>ipv6 nd raguard policy &lt;policy-name&gt;</b></code>
     <p>
     <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
- <code style="font-size:110%">
+ <code>
     SW1(config)#<b>ipv6 nd raguard policy ROUTERS</b>
  </code></div>
  </p>
@@ -191,7 +191,7 @@ Creating a second policy for routers:
     <code><b>device-role host</b></code>.
     <p>
     <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
- <code style="font-size:110%">
+ <code>
  SW1(config-nd-raguard)#<b>device-role host</b>
  </code></div>
  </p>
@@ -200,7 +200,7 @@ Creating a second policy for routers:
   <li><b>Configure the port as trusted:</b> <code><b>trusted-port</b></code>
       <p>
     <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
- <code style="font-size:110%">
+ <code>
  SW1(config-nd-raguard)#<b>trusted-port</b>
  </code></div>
  </p>
@@ -210,7 +210,7 @@ Creating a second policy for routers:
   another source such as a DHCP or DNS server.
   <p>
     <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
- <code style="font-size:110%">
+ <code>
  SW1(config-nd-raguard)#<b>other-config-flag on</b>
  </code></div>
  </p>
@@ -240,7 +240,7 @@ Creating a second policy for routers:
   <li><b>VLAN:</b>
   <p>
   <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-  <code style="font-size:110%">
+  <code>
  SW1(config)#<b>vlan configuration 1</b><br>
  SW1(config-vlan-config)#<b>ipv6 nd raguard attach-policy HOSTS</b><br>
  </code></div>
@@ -252,7 +252,7 @@ Creating a second policy for routers:
   <code><b>ipv6 nd raguard attach-policy &lt;policy-name&gt; [vlan &lt;add|except|none|remove|all&gt; vlan &lt;vlan1, vlan2 … vlan n&gt;]</b></code>
   <p>
   <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-  <code style="font-size:110%">
+  <code>
  SW1(config)#<b>interface g0/0</b><br>
  SW1(config-if)#<b>ipv6 nd raguard attach-policy ROUTERS</b><br>
  </code></div>
@@ -316,6 +316,307 @@ with R1 still being retained as the default gateway. R1 may block Host A’s netwo
 traffic due to the fact that it is from an unknown network.</li>
 <li>R1 may drop Host A’s traffic resulting in black-holing all network traffic from Host A.</li>
 </ol>
+</p>
+
+
+
+<h1>DHCPv6 Guard</h1>
+<p>
+DHCPv6 assigns hosts IPv6 prefixes and other configuration options. DHCPv6 is 
+both a stateful and stateless protocol. A rogue DHCPv6 server could be inserted 
+into a network. The attackers can then deploy man-in-the-middle attacks ,traffic
+interception or blackhole traffic.
+</p>
+
+<h2>DHCPV6 Attacks</h2>
+<p>
+DHCPv6 does not assign a default router like DHCP in IPv4 environments. Th default 
+router is learned through SLAAC from RA messages.
+</p>
+<p>
+DHCPv6 Guard prevents the spoofing of the DHCPv6 server by blocking DHCPv6 messages
+that come from unauthorized / rogue 
+DHCPv6 servers and relay agents. Client messages or messages sent by replay agents 
+from clients are not blocked.
+When implementing DHCPv6 Guard, devices are categorized as server and client.
+DHCPv6 server messages are only processed if the device role is set to server.
+</p>
+
+<h2>Configuration</h2>
+<p>
+The configuration of the DHCPv6 Guard is similar to that of the RA Guard. A 
+DHCPv6 Guard policy is configured for the DHCPv6 clients and a separate policy for the 
+servers. The policy is then applied to a VLAN or interface.
+</p>
+<p>
+<ol>
+  <li><b>Configure the DHCPv6 policy:</b>
+     <p>
+     Policy for servers:
+     <ol type="a">
+       <li>
+         <p>
+          <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+  SW1(config)#<b>ipv6 dhcp guard policy SERVERS</b><br>
+  SW1(config)#<b>device-role server</b><br>
+  SW1(config)#<b>trusted-port</b>
+  </code></div>
+         </p>
+         <p>
+         Additional configuration options exist for attached DHCPv6 servers:
+         <ul>
+           <li><b>Authorized DHCPv6 servers:</b>
+             DHCPv6 messages can be permitted to be transmitted if they originate 
+             from authorized DHCPv6 servers. To enable this feature:
+             <ol type="i">
+               <li>Configure an IPv6 access control list with the IPv6 addresses 
+               of the authorized DHCPv6 servers: <code><b>ipv6 access-list &lt;acl-name&gt; permit host &lt;ipv6-address&gt; 128</b></code>.</li>
+              <li> 
+              Enable verification of the advertised DHCP server and relay address 
+				in inspected messages from the configured authorized server ACL. An empty ACL is treated as a permit.
+				<code><b>match server access-list &lt;acl-name&gt;</b></code>.
+              </li>
+             </ol>
+           </li>
+           <li><b>IPv6 Addresses in Authorized Range:</b>
+           DHCPv6 Guard can be configured to permit DHCPv6 advertised prefixes 
+           are in the permitted IPv6 range:
+           	<ol type="i">
+           		<li>Create an entry in an IPv6 prefix-list; 
+           		<code><b>ipv6 prefix-list &lt;prefix_list_name&gt; permit &lt;ipv6_prefix&gt; 128</b></code>.
+           		</li>
+           		<li>
+					Enable verification of advertised prefixes in DHCP reply 
+					messages from the configured authorized prefix-list. An empty ACL is treated as a permit.
+				</li>
+           	</ol>
+           </li>
+         </ul>
+         </p>
+       </li>
+     </ol>
+     </p>
+     <p>
+     Policy for clients:
+     <ol type="a">
+       <li>
+         <p>
+          <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+  SW1(config)#<b>ipv6 dhcp guard policy CLIENTS</b><br>
+  SW1(config)#<b>device-role client</b>
+  </code></div>
+         </p>
+       </li>
+     </ol>
+     </p>
+     <p>
+     Other optional DHCPv6 features include:
+     <ul>
+     <li><code><b>preference min limit</b></code> : Enable verification that the advertised preference (in preference option) 
+is greater than the specified limit</li>
+<li><code><b>preference max limit</b></code> : Enable verification that the advertised
+preference is less than the specified limit</li> 
+     </ul>
+     </p>
+  </li>
+  <li><b>Apply the DHCPv6 Guard policy:</b>
+    <ol type="a">
+      <li>Interface: 
+      <p>
+      <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+  SW1(config)#<b>interface g0/0</b><br>
+  SW1(config-if)#<b>ipv6 dhcp guard attach-policy SERVERS</b><br>
+  </code>
+  </div></p>
+      </li>
+      <li>VLAN:
+      <p>
+      <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+  SW1(config)#<b>vlan configuration 1</b><br>
+  SW1(config-vlan-config)#<b>ipv6 dhcp guard attach-policy CLIENTS</b>
+  </code></div>
+      </p>
+      </li>
+    </ol>
+  </b>
+</ol>
+
+</p>
+
+<h3>Verification</h3>
+<p>
+The operational state of DHCPv6 Guard can be verified using these commands:
+<ul>
+	<li><code><b>show ipv6 dhcp guard policy &lt;policy-name&gt;</b></code>.</li>
+	<li><code><b>show ipv6 snooping policies</b></code>.</li>
+</ul>
+</p>
+
+<h3>Restrictions</h3>
+<p>
+DHCPv6Guard is not supported on etherchannel ports.
+</p>
+
+
+<h1>Binding Table</h1>
+<p>
+The binding table is a database of IPv6 neighbors connected to a device and is 
+created from informational sources such as ND snooping, DHCP gleaning. 
+It contains information such as the link-layer address, the IPv4 or IPv6 address, 
+and the prefix binding i.e., it can be considered to be a mapping of layer 2 
+addresses to IPv6 addresses. 
+It is used by various IPv6 guard features to prevent spoofing and redirect attacks.
+</p>
+<p>
+The binding table supports features that can be leveraged to provide first hop 
+security:
+<ul>
+  <li>Limits can be set for the number of IPv6 addresses that a MAC address can have.</li>
+  <li>The binding table introduces the capacity to provide a prefix-list that is matched 
+before the recovery is attempted for both DHCP and NDP.
+If an address does not match the prefix-list associated with the protocol, the
+recovery of the binding table entry will not be attempted with that protocol.
+</li>
+ <li>The binding table recovery mechanism feature enables the binding table to recover
+in the event of a device reboot. The recovery mechanism will block any data traffic sourced from an unknown source
+(a source that is not in the binding table).
+
+
+</ul>
+</p>
+
+
+<h1>IPv6 Snooping</h1>
+<p>
+IPv6 snooping bundles several IPv6 first-hop security features such as ND inspection, 
+IPv6 device tracking, IPv6 address glean, IPv6 binding table recovery.
+
+IPv6 ND inspection operates at Layer 2 or between Layer 2 and Layer 3.
+
+IPv6 snooping mitigates vulnerabilities in the ICMPv6 ND mechanisms for example attacks on 
+DAD, address resolution, device discovery and neighbor cache/table.
+IPv6 snooping learns and secures binding for SLAAC addresses in Layer 2 neighbor
+tables and analyses ND messages in order to build a trust binding table. An ND 
+message is considered trustworthy if its IPv6-to-MAC mapping is verifiable. The 
+IPv6 first-hop security binding table recovery mechanism enables the binding table
+to recover in the event of a device reboot.
+</p>
+<p>
+The binding table is a database of IPv6 neighbors connected to the device and is 
+created from sources such as ND snooping. It is used by various IPv6 guard features
+to validate link-layer addresses, IPv4 or IPv6 addresses prefix-binding of neighbors 
+to prevent spoofing and redirect attacks.
+</p>
+
+
+<h3>Configuration</h3>
+<p>
+To configure an IPv6 snooping policy;
+<ol>
+  <li>Configure the snooping policy:
+    <p>
+    <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+    	<code>
+    		SW(config)#<b>ipv6 snooping policy SNOOP_POLICY</b><br>
+  		</code>
+  	</div>
+    </p>
+    </li>
+    <li>Attach the snooping policy to an interface:
+ <p>
+    <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+    	<code>
+    		SW(config)#<b>interface g0/0</b><br>
+    		SW(config-if)#<b>ipv6 snooping attach-policy SNOOP_POLICY</b><br>
+  		</code>
+  	</div>
+    </p>
+    </li>
+</ol>
+</p>
+
+<h3>Verification</h3>
+<p>
+<ul>
+  <li><code><b>show ipv6 snooping capture-policy interface &lt;interface_number&gt;</b></code>:     
+To display snooping ND messages and capture policies
+</li>
+<li><code><b>show ipv6 snooping counter interface &lt;interface_name_number&gt;</b></code> : 
+To display information about the packets counted by the interface counter
+</li>
+<li><code><b>show ipv6 snooping features</b></code> : 
+To display information about snooping features configured on a device
+</li>
+<li><code><b>show ipv6 snooping policies</b></code> : 
+To display information about configured policies and interfaces that they are attached to
+</li>
+<li><code><b>debug ipv6 snooping</b></code> : 
+Debugging of IPv6 snooping information
+</li>
+</ul>
+</p>
+
+<h3>Restriction</h3>
+IPv6 snooping is not supported on etherchannels.
+</>
+
+<h1>Source Guard</h1>
+<p>
+If a device starts transmitted on a network segment without IPv6 host discovery 
+messages such as NS, NA, DHCPv6 message exchange, source guard enables the switch  
+to drop such traffic from an unfamiliar IPv6 source address.</p>
+<p>
+IPv6 source guard relies on IPv6 snooping cache to create the IPv6 neighbor 
+binding table. It creates an automatic IPv6 port ACL(PACL) to filter sources 
+based on neighbor binding table. 
+</p>
+
+<h2>Configuration</h2>
+<p>
+<ol>
+  <li>Configure the source guard policy:
+  <p>
+  <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+  SW(config)#<b>ipv6 source-guard policy SG_POLICY</b><br>
+  SW(config-sisf-sourceguard)#<b>permit link-local</b><br>
+  SW(config-sisf-sourceguard)#<b>deny global-autoconf</b><br>
+  SW(config-sisf-sourceguard)#<b>trusted</b>
+  </code></div>
+  </p>
+  </li>
+  <li>Apply the configured source guard policy to the VLAN or interface:
+   <ul>
+     <li>On the VLAN:
+  <p>
+  <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code style="font-s ize:110%">
+  SW(config)#<b>vlan configuration 1</b><br>
+  SW(config-vlan-config)#<b>ipv6 source-guard attach-policy SG_POLICY</b>
+  </code></div>
+  </p>
+  </li> 
+   <li>On the interface:
+    <p>
+  <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+  SW(config)#<b>interface g0/0</b><br>
+  SW(config-if)#<b>ipv6 source-guard attach-policy SG_POLICY</b>
+  </code></div>
+  </p>
+  </ul>
+  </li>
+</ol>
+</p>
+
+<h2>Verification of Source Guard</h2>
+<p>
+The following command is used to verify IPv6 source guard:
+<code><b>show ipv6 snooping policies</b></code>.
 </p>
 
 <h1>Neighbor Discovery Attacks</h1>
@@ -395,209 +696,3 @@ However, if Host X sends many such packets fast, it could fill up the R1 neighbo
 table resulting in a DoS condition.
 </p>
 
-<h1>DHCPv6 Attacks</h1>
-<p>
-DHCPv6 assigns hosts IPv6 prefixes and other configuration options. DHCPv6 is 
-both a stateful and stateless protocol. A rogue DHCPv6 server could be inserted 
-into a network. The attackers can then deploy man-in-the-middle attacks ,traffic
-interception or blackhole traffic.
-</p>
-
-<h2>DHCPV6 Guard</h2>
-<p>
-DHCPv6 Guard blocks reply and advertisements that come from unauthorized / rogue 
-DHCPv6 servers and relay agents. Client messages or messages sent by replay agents 
-from clients are not blocked.
-
-DHCPv6 server messages are only processed if the device role is set to server.
-</p>
-
-<h3>Restrictions</h3>
-<p>
-DHCPv6Guard is not supported on etherchannel ports.
-</p>
-<h3>Configuration</h3>
-<p>
-The configuration of the DHCPv6 Guard is similar to that of the RA Guard. A 
-DHCPv6 Guard policy is configured for the DHCPv6 clients and a separate policy for the 
-servers. The policy is then applied to a VLAN or interface.
-</p>
-<p>
-<ol>
-  <li><b>Configure the DHCPv6 policy:</b>
-     <p>
-     Policy for servers:
-     <ol type="a">
-       <li>
-         <p>
-          <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-  <code style="font-size:110%">
-  SW1(config)#<b>ipv6 dhcp guard policy SERVERS</b><br>
-  SW1(config)#<b>trusted-port</b>
-  </code></div>
-         </p>
-       </li>
-     </ol>
-     </p>
-     <p>
-     Policy for clients:
-     <ol type="a">
-       <li>
-         <p>
-          <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-  <code style="font-size:110%">
-  SW1(config)#<b>ipv6 dhcp guard policy CLIENTS</b><br>
-  SW1(config)#<b>device-role client</b>
-  </code></div>
-         </p>
-       </li>
-     </ol>
-     </p>
-  </li>
-  <li><b>Apply the DHCPv6 Guard policy:</b>
-    <ol type="a">
-      <li>Interface: 
-      <p>
-      <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-  <code style="font-size:110%">
-  SW1(config)#<b>interface g0/0</b><br>
-  SW1(config-if)#<b>ipv6 dhcp guard attach-policy SERVERS</b><br>
-  </code>
-  </div></p>
-      </li>
-      <li>VLAN:
-      <p>
-      <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-  <code style="font-size:110%">
-  SW1(config)#<b>vlan configuration 1</b><br>
-  SW1(config-vlan-config)#<b>ipv6 dhcp guard attach-policy CLIENTS</b>
-  </code></div>
-      </p>
-      </li>
-    </ol>
-  </b>
-</ol>
-
-
-</p>
-
-
-<p>
-<ol>
-<li>
-Step 1: Define an IPv6 ACL;
-#ipv6 access-list acl_name
-#permit host ip_address any
-<li>Step 2: Create an entry in an IPv6 prefix-list;
-#ipv6 prefix-list prefix_list_name permit ipv6_prefix 128
-<li>Step 3: Define the DHCPv6 Guard policy name;
-#ipv6 dhcp guard policy policy_name
-
-<li>Step 4: Specify the device role of the device attached to the target (interface or VLAN);
-#device-role < client | server >
-
-<li>Step 5: Enable verification of the advertised DHCP server and relay address in inspected messages from the configured authorized server ACL. An empty ACL is treated as a permit.
-#match server access-list acl
-
-<li>Step 6: (Optional) Enable verification of advertised prefixes in DHCP reply messages from the configured authorized prefix-list. An empty ACL is treated as a permit.
-
-<li>Step 7: (Optional) Enable verification that the advertised preference (in preference option) is greater than the specified limit; #preference min limit
-
-<li>Step 8: (Optional) Enable verification that the advertised preference is less than the specified limit #preference max limit
-
-<li>Step 9: (Optional) Specify that this policy is being applied to trusted ports. All DHCPv6 guard policing will be disabled; #trusted-port
-
-<ii>Step 10: put an interface into Layer 2 mode;
-
-#interface gigabitethernet0/0
-
-#switchport
-</ol>
-</p>
-<h3>Verification</h3>
-<p>
-#show ipv6 dhcp guard policy policy_name
-</p>
-
-<h2>IPv6 Snooping</h2>
-<p>
-IPv6 snooping bundles several IPv6 first-hop security features such as ND inspection, 
-IPv6 device tracking, IPv6 address glean, IPv6 binding table recovery.
-
-IPv6 ND inspection operates at Layer 2 or between Layer 2 and Layer 3.
-
-IPv6 mitigates vulnerabilities in the ICMPv6 ND mechanisms for example attacks on 
-DAD, address resolution, device discovery and neighbor cache/table.
-IPv6 snooping learns and secures binding for SLAAC addresses in Layer 2 neighbor
-tables and analyses ND messages in order to build a trust binding table. An ND 
-message is considered trustworthy if its IPv6-to-MAC mapping is verifiable. The 
-IPv6 first-hop security binding table recovery mechanism enables the binding table
-to recover in the event of a device reboot.
-</p>
-<p>
-The binding table is a database of IPv6 neighbors connected to the device and is 
-created from sources such as ND snooping. It is used by various IPv6 guard features
-to validate link-layer addresses, IPv4 or IPv6 addresses prefix-binding of neighbors 
-to prevent spoofing and redirect attacks.
-</p>
-
-<h3>Restriction</h3>
-IPv6 snooping is not supported on etherchannels.
-</>
-<h3>Configuration</h3>
-<p>
-To configure an IPv6 snooping policy;
-
-#ipv6 snooping policy policy-name
-
-#Attach the snooping policy to an interface
-
-#interface interface_name_number
-
-#ipv6 snooping attach-policy policy-name
-</p>
-
-<h3>Verification</h3>
-<p>
-Display snooping ND messages and capture policies
-
-#show ipv6 snooping capture-policy interface interface_number
-
-To display information about the packets counted by the interface counter;
-
-#show ipv6 snooping counter interface interface_name_number
-
-To display information about snooping features configured on a device;
-
-#show ipv6 snooping features
-
-To display information about configured policies and interfaces that they are attached to;
-
-#show ipv6 snooping policies
-
-Debugging of IPv6 snooping information;
-
-#debug ipv6 snooping
-</p>
-
-<h1>IPv6 First Hop Security Binding Table</h1>
-<p>
-The binding table recovery mechanism feature enables the binding table to recover
-in the event of a device reboot. The binding table is a database of IPv6 neighbors
-connected to the device and is created from informational sources such as ND snooping,
-DHCP gleaning. It is used by various IPv6 guard features to prevent spoofing and redirect attacks.
-</p>
-<p>
-The recovery mechanism will block any data traffic sourced from an unknown source
-(a source that is not in the binding table).
-
-The binding table introduces the capacity to provide a prefix-list that is matched 
-before the recovery is attempted for both DHCP and NDP.
-
-If an address does not match the prefix-list associated with the protocol, the
-recovery of the binding table entry will not be attempted with that protocol.
-</p>
-<p>
-A binding table is a mapping of layer 2 addresses to IPv6 addresses. Limits can 
-be set for the number of IPv6 addresses that a MAC address can have.
-</p>
