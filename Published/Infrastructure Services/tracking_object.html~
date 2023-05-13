@@ -1,7 +1,7 @@
 <h1>Enhanced Object Tracking (SLA Track)</h1>
 
 <p>
-Enhanced Object tracking allows you to track specific objects on the device, such as the 
+Object tracking allows you to track specific objects on the device, such as the 
 interface line protocol state, IP routing, route reachability, and to take action 
 when the tracked object's state changes. This feature allows you to increase the 
 availability of the network and shorten recovery time if an object state goes 
@@ -21,7 +21,7 @@ The object values are reported as either up or down
 </p>
 
 <p>
-An object monitors the statistics and state of the IP SLA instance and performs an 
+An object monitors the statistics and state the IP SLA instance and performs an 
 action based on the status of the probe. This can be used for HSRP, VRRP to 
 change priority levels.
 </p>
@@ -30,15 +30,15 @@ change priority levels.
 You can configure a combination of tracked objects in a list and a flexible method for combining objects
 using Boolean logic. This functionality includes the following capabilities:
 <ul>
-<li><b>Threshold:</b> The tracked list can be configured to use a weight or percentage threshold to measure the
+<li>Threshold––The tracked list can be configured to use a weight or percentage threshold to measure the
 state of the list. Each object in a tracked list can be assigned a threshold weight. The state of the tracked
 list is determined by whether the threshold has been met.</li>
 <li>
-<b>Boolean "and" function:</b> When a tracked list has been assigned a Boolean "and" function, each object
+Boolean "and" function––When a tracked list has been assigned a Boolean "and" function, each object
 defined within a subset must be in an up state so that the tracked object can become up.
 </li>
 <li>
-<b>Boolean "or" function:</b> When the tracked list has been assigned a Boolean "or" function, at least one
+Boolean "or" function––When the tracked list has been assigned a Boolean "or" function, at least one
 object defined within a subset must be in an up state so that the tracked object can become up.
 </li>
 </ul>
@@ -46,14 +46,12 @@ object defined within a subset must be in an up state so that the tracked object
 
 <h2>IP SLA Tracking</h2>
 <p>
-Enhanced Object Tracking can be used to track the status of an IP SLA; state or 
-reachability.
 To configure a tracking object:
 <ol>
 <li>Create an IP SLA probe</li>
   <li>Set up a tracking object based on that probe:
   Reference the IP SLA that will be tracked by the tracking object using 
-  the command <code><b>track &lt;obj-num&gt; ip sla &lt;sla-num&gt; [state | reachability]</b></code>.
+  the command <code><b>track &lt;ob-num&gt; ip sla &lt;sla-num&gt; [state | reachability]</b></code>.
   When configuring a tracking object, a boolean operation AND or OR can be specified 
   where the results of a series of tracking objects can be compared 
   </li>

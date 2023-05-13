@@ -397,20 +397,62 @@ The public address uses a randomized Interface ID instead of EUI-64. Temporary
 addresses are generated and use only a randomized Interface ID.
 </p>
 
-<h5>Windows Hosts</h5>
+<h3>Configuration</h4>
+
+<h4>Servers</h4>
 <p>
-The temporary addresses are created using the following command:
+To configure SLAAC:
+<ol>
+  <li><b>Enable IPv6 routing:</b>
+  <p>
+  <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+  R1(config)#<b>ipv6 unicast-routing</b>
+  </code></div>
+  </p>
+  <li> <b>Configure a GUA on the interface:</b> By default, the A-flag 
+is set to 1. If it is disabled, enable it using the following command 
+<code><b>ipv6 address &lt;prefix&gt;/&lt;prefix-length&gt;</b></code>
+:
+   <p>
+  <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+  R1(config)#<b>interface gigabitethernet0/0</b><br>
+  R1(config-if)#<b>ipv6 address 2001:db8:cafe:1::1:1/64</b>
+  </code></div>
+  </li>
+</ol>
 </p>
+
+<h4>Clients</h4>
+<ul>
+<li><b>IOS Devices</b>
+<p>
+If an IOS device is a DHCPv6 client, then the following configuration is required
+on the interface:
+</p>
+ <p>
+  <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+  R7(config-if)#<b>ipv6 address autoconfig</b>
+  </code></div>
+  </p>
+</li>
+<li><b>Windows Hosts:</b>
+<ul>
+  <li>The temporary addresses are created using the following command:
+
 <p>
 <div><code>
 netsh interface ipv6 set privacy state=enabled store=active<br>
 netsh interface ipv6 set privacy state=enabled store=persistent
 </code></div>
 </p>
-<p>
+</li>
+
+<li>
 Creation of temporary addresses can be disabled by using the <code><b>disabled</b></code> 
 keyword.
-</p>
 
 <p>
 On Windows hosts, to enable the use of the randomized identifier:
@@ -421,37 +463,33 @@ netsh interface ipv6 set global randomizeidentifiers=enabled store=active<br>
 netsh interface ipv6 set global randomizeidentifiers=enabled store=persistent
 </code></div>
 </p>
-<p>
+</li>
+<li>
 To disable the use of the random interface ID i.e., enable EUI-64:
-</p>
 <p>
 <div><code>
 netsh interface ipv6 set global randomizeidentifiers=disabled store=active<br>
 netsh interface ipv6 set global randomizeidentifiers=disabled store=persistent
 </code></div>
 </p>
+</li>
+</ul>
+</li>
+</ul>
 
-<h5>Linux and MacOS</h5>
-<p>
+
+<li><b>Linux and MacOS:</b>
+
 The use of privacy extensions with Linux and MacOS varies with OS version.
 Generally, the most common command is:
 <ul>
-  <li><b>Linux:</b> 
-<p>
-<div><code>
-sysctl net.ip6.conf.if.use_tempaddr=2
-</code></div>
-</p>
-</li>
-<li><b>MacOS:</b>
-  <p>
-<div><code>
-sysctl net.inet6.ip6.use_tempaddr=1
-</code></div>
+  <li><b>Linux:</b> <code>sysctl net.ip6.conf.if.use_tempaddr=2</code></li>
+  <li><b>MacOS:</b> <code>sysctl net.inet6.ip6.use_tempaddr=1</code></li>
+</ul>
 </p>
 </li>
 </ul>
-</p>
+
 
 <h4>SLAAC Address Lifecycle</h4>
 <p>
@@ -508,6 +546,33 @@ and invalid.
 </p>
 
 <h4>Verification</h4>
+
+<h5><code>show ipv6 interface &lt;inteface-id&gt;</code></h5>
+<p>
+  <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+R7#<b>show ipv6 interface g0/0</b><br>                          <br>                              
+GigabitEthernet0/0 is up, line protocol is up                   <br>                   
+&nbsp;&nbsp;IPv6 is enabled, link-local address is FE80::C807:6FF:FE8D:8  <br>                   
+&nbsp;&nbsp;No Virtual link-local address(es):                            <br>                   
+&nbsp;&nbsp;Stateless address autoconfig enabled                          <br>                   
+&nbsp;&nbsp;Global unicast address(es):                                   <br>                   
+&nbsp;&nbsp;&nbsp;&nbsp;2001:DB8:CAFE:1:C807:6FF:FE8D:8, subnet is 2001:DB8:CAFE:1::/64 [EUI/CAL/PRE] <br> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;valid lifetime 2591941 preferred lifetime 604741          <br>                  
+&nbsp;&nbsp;Joined group address(es):                                     <br>                  
+&nbsp;&nbsp;&nbsp;&nbsp;FF02::1                                                     <br>                  
+&nbsp;&nbsp;&nbsp;&nbsp;FF02::1:FF8D:8                                              <br>                  
+&nbsp;&nbsp;MTU is 1500 bytes                                             <br>                  
+&nbsp;&nbsp;ICMP error messages limited to one every 100 milliseconds     <br>                  
+&nbsp;&nbsp;ICMP redirects are enabled                                    <br>                  
+&nbsp;&nbsp;ICMP unreachables are sent                                    <br>                  
+&nbsp;&nbsp;ND DAD is enabled, number of DAD attempts: 1                  <br>                  
+&nbsp;&nbsp;ND reachable time is 30000 milliseconds (using 30000)         <br>                  
+&nbsp;&nbsp;ND NS retransmit interval is 1000 milliseconds                <br>                  
+&nbsp;&nbsp;Default router is FE80::C801:5FF:FECA:8 on GigabitEthernet0/0 <br>                  
+</code></div>
+</p>
+
 <p>
 On the router, the command <code><b>show ipv6 interface g0/0</b></code> shows 
 that:
@@ -742,30 +807,50 @@ To disable the O flag, use the command <code><b>no ipv6 nd other-config-flag</b>
 <p>
 There are five steps to configure and verify a router as a stateless DHCPv6 server:
 <ol>
-  <li><b>Enable IPv6 routing:</b> using <code><b>ipv6 unicast-routing</b></code></li>
+  <li><b>Enable IPv6 routing:</b> using <code><b>ipv6 unicast-routing</b></code>.
+  </li>
   <li><b>Define a DHCPv6 pool name:</b> using the <code><b>ipv6 dhcp pool &lt;pool-name&gt;</b></code> 
-  global config command.</li>
-  <li><b>Configure the DHCPv6 pool with options:</b> common options include:
-  <ul>
-    <li><code><b>dns-server x:x:x:x:x:x:x:x</b></code></li>
-    <li><code><b>domain-name &lt;name&gt;</b></code></li>
-  </ul>
+  global config command.
+  <p>
+  <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+  R1(config)#<b>ipv6 dhcp pool POOL_2001:DB8:CAFE:2</b>
+  </code></div>
+  </p>
+  </li>
+  
+  <li><b>Configure the DHCPv6 pool with options:</b> common options include DNS 
+  servers, domain name:
+  <p>
+  <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+R1(config-dhcpv6)#<b>dns-server 2001:db8:cafe:a:1::1</b><br>
+R1(config-dhcpv6)#<b>domain-name emmanueltoko.blogspot.com</b>
+</code></div>
+  </p>
   </li>
   <li><b>Bind the interface to the pool:</b> using the <code><b>ipv6 dhcp server 
     &lt;pool-name&gt;</b></code> interface config command.
     <p>
+     <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+    R1(config)#<b>interface g2/0</b><br>
+    R1(config-if)#<b>ipv6 address 2001:db8:cafe:2::1/64</b><br>
+    R1(config-if)#<b>ipv6 dhcp server POOL_2001:DB8:CAFE:2</b>
+  </code></div>
+    </p>
+    
+    <p>
     Manually change the O flag from 0 to 1 using the <code><b>ipv6 nd other-config-flag</b></code> 
     interface command. RA messages sent to this interface indicate that 
     </p>
-    <code><b>
-    ipv6 address fe80::1 link-local<br>
-    ipv6 address 2001:db8:acad:1::1/64<br>
-    ipv6 nd other-config-flag<br>
-    ipv6 dhcp server IPV6-STATELESS
-    </b></code>
+     <p>
+     <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+    R1(config-if)#<b>ipv6 nd other-config-flag</b>
+   </code></div>
+   </p>
     </li>
-    <li><b>Verify that the hosts have received IPv6 addressing:</b> information using the 
-    ipconfig /all command.</li>
 </ol>
 </p>
 
@@ -775,16 +860,77 @@ A router can also be a DHCPv6 client and receiev IPv6 network configuration para
 from a DHCPv6 server:
 <ol>
   <li><b>Enable IPv6 routing:</b> using <code><b>ipv6 unicast-routing</b></code>.</li>
+  
   <li><b>Configure the client router to create a link-local address:</b> an IPv6 
   link-local address is created on a router interface when a global unicast address 
-  is configured, or without a GUA using teh IPv6 enable interface configuration 
-  command. Cisco IOS uses EUI-64 to create the interface ID.</li>
+  is configured, or without a GUA using the IPv6 enable interface configuration 
+  command. Cisco IOS uses EUI-64 to create the interface ID.
+  
+  </li>
+  
   <li><b>Configure the client router to use SLAAC:</b> using <code><b>ipv6 address
-  autoconfig</b></code> command.</li>
-  <li><b>Verify that the client is assigned a GUA:</b> using <code><b>show ipv6 interface brief</b></code> command.</li>
-  <li><b>Verify tha tthe client router received other necessary DHCPv6 information:</b> 
+  autoconfig</b></code> command.
+  <p>
+     <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+  R5(config)#<b>interface g0/0</b><br>
+  R5(config-if)#<b>ipv6 address autoconfig</b>
+  </code></div>
+  </p>
+  </li>
+  
+  <li><b>Verify that the client is assigned a GUA:</b> using 
+  <code><b>show ipv6 interface &lt;interface-id&gt;</b></code> command.
+   <p>
+     <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+  R5#<b>show ipv6 interface g0/0</b><br>
+GigabitEthernet0/0 is up, line protocol is up                  <br>
+&nbsp;&nbsp;IPv6 is enabled, link-local address is FE80::C805:6FF:FE6F:8 <br>
+&nbsp;&nbsp;No Virtual link-local address(es):                           <br>
+&nbsp;&nbsp;Stateless address autoconfig enabled                         <br>
+&nbsp;&nbsp;Global unicast address(es):                                  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;2001:DB8:CAFE:2:C805:6FF:FE6F:8, subnet is 2001:DB8:CAFE:2::/64 [EUI/CAL/PRE]<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;valid lifetime 2591984 preferred lifetime 604784          <br>
+&nbsp;&nbsp;Joined group address(es):                                     <br>
+&nbsp;&nbsp;&nbsp;&nbsp;FF02::1                                                     <br>
+&nbsp;&nbsp;&nbsp;&nbsp;FF02::1:FF6F:8                                              <br>
+&nbsp;&nbsp;MTU is 1500 bytes                                             <br>
+&nbsp;&nbsp;ICMP error messages limited to one every 100 milliseconds     <br>
+&nbsp;&nbsp;ICMP redirects are enabled                                    <br>
+&nbsp;&nbsp;ICMP unreachables are sent                                    <br>
+&nbsp;&nbsp;ND DAD is enabled, number of DAD attempts: 1                  <br>
+&nbsp;&nbsp;ND reachable time is 30000 milliseconds (using 30000)         <br>
+&nbsp;&nbsp;ND NS retransmit interval is 1000 milliseconds                <br>
+&nbsp;&nbsp;Default router is FE80::C801:5FF:FECA:38 on GigabitEthernet0/0<br>
+  </code></div>
+  </p>
+  </li>
+  
+  <li><b>Verify that the client router received other necessary DHCPv6 information:</b> 
   The show <code><b>ipv6 dhcp interface g0/0</b></code> confirms DHCP option information,
-  such as DNS server and domain name have been received by the client.</li>
+  such as DNS server and domain name have been received by the client.
+  <p>
+     <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+  R5#<b>show ipv6 dhcp interface g0/0</b><br>                     
+GigabitEthernet0/0 is in client mode             <br>    
+&nbsp;&nbsp;Prefix State is IDLE (1)                       <br>    
+&nbsp;&nbsp;Information refresh timer expires in 23:44:04  <br>    
+&nbsp;&nbsp;Address State is IDLE                          <br>    
+&nbsp;&nbsp;List of known servers:                         <br>    
+&nbsp;&nbsp;&nbsp;&nbsp;Reachable via address: FE80::C801:5FF:FECA:38<br>    
+&nbsp;&nbsp;&nbsp;&nbsp;DUID: 00030001CA0105CA0006                   <br>    
+&nbsp;&nbsp;&nbsp;&nbsp;Preference: 0                                <br>    
+&nbsp;&nbsp;&nbsp;&nbsp;Configuration parameters:                    <br>    
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;DNS server: 2001:DB8:CAFE:A:1::1           <br>    
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Domain name: emmanueltoko.blogspot.com     <br>    
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Information refresh time: 0                <br>    
+&nbsp;&nbsp;Prefix Rapid-Commit: disabled                  <br>    
+&nbsp;&nbsp;Address Rapid-Commit: disabled                 <br>    
+  </code></div>
+  </p>
+  </li>
 </ol>
 </p>
 
