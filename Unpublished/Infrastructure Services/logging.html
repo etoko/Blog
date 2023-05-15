@@ -1,0 +1,73 @@
+
+<p>
+Logging can be used for fault identification, security auditing and network 
+forensics. Cisco log messages include syslog, local logging, debugs, conditional 
+debugs and timestamps.
+</p>
+
+
+<h1>Local Logging</h1>
+<p>
+By default, all logging is displayed on the console. This can be turned off with 
+the <code><b>no logging</b></code> command. To enable console logging and control 
+its options, use the command <code><b>logging console &lt;level&gt;</b></code>
+</p>
+<p>
+For SSH/Telnet, the logging session settings can be configured using the command 
+<code><b>terminal monitor</b></code>
+</p>
+<p>
+For local logging, Cisco IOS can save syslog messages to an internal buffer. You 
+can display these messages by using the <code><b>show logging</b></code> command. 
+You can enable internal logging and the size of the buffer with this command:
+<code><b>logging buffered &lt;size&gt;</b></code>.
+</p>
+
+<h1>Syslog</h1>
+<p>
+Syslog is the standard for computer message logging. It allows the separation of 
+software which generates messages from he systems that store it and the software 
+that analyzes and reports it. It can be used for the security auditing and system 
+management, debugging messages and analysis. The syslog is supported by a wide 
+range of devices, including routers and receivers over multiple platforms. The 
+syslog is used to intergrate the log data from many various types of systems 
+into the central repository. The format of the syslog packe is HEADER MSG.
+</p>
+<p>
+Syslog messages can be output to the console, local buffer or remote syslog server.
+The messages follow this format:
+%FACILITY-SUBFACILITY-SEVERITY-MNEMONIC: message text
+</p>
+<p>
+<ul>
+  <li><b>FACILITY-SUBFACILITY:</b> Reports the protocol, module or process that 
+  generated the message.</li>
+  <li><b>SEVERITY:</b> This is a level from 0 - 7 that specifies how important 
+  the message is. When you enable logging for a specific level, it also enables 
+  all levels above it. For example, if you enable level 5 logging, it also will 
+  enable levels 0 - 4. 
+    <ol start="0">
+      <li><b>Emergency:</b> System is unusable.</li>
+      <li><b>Alert:</b> Action must be taken immediately</li>
+      <li><b>Error:</b> Error conditions</li>
+      <li><b>Warning:</b> Warning conditions</li>
+      <li><b>Notice:</b> Normal but significant conditions</li>
+      <li><b>Informational:</b> informational messages</li>
+      <li><b>Debugging:</b> debug-level messages</li>
+    </ol>
+  </li>
+  <li><b>MNEMONIC:</b> a code that identifies the action reported</li>
+  <li><b>Message text:</b> A plain text description of the event</li>
+</ul>
+</p>
+<p>
+The severity of logging messages displayed/stored can be modified using the 
+command <code><b>logging monitor &lt;0-7&gt; where 0-7 is the severity level.
+</p>
+<p>
+Rate-limit: used to limit the rate of messages per second.
+</p>
+<h2><code>logging synchronous</code></h2>
+<p>
+Used to prevent logging messages from interrupting the typing at a login session.
+</p>
