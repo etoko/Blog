@@ -4,7 +4,12 @@ Logging can be used for fault identification, security auditing and network
 forensics. Cisco log messages include syslog, local logging, debugs, conditional 
 debugs and timestamps.
 </p>
-
+<p>
+By default, output from system messages and debug commands is sent to a logging 
+process. The logging process controls the distribution of logging messages to various 
+destinations, such as the logging buffer, terminal lines, syslog server.
+Messages are also sent to the console.
+</p>
 
 <h1>Local Logging</h1>
 <p>
@@ -23,7 +28,85 @@ You can enable internal logging and the size of the buffer with this command:
 <code><b>logging buffered &lt;size&gt;</b></code>.
 </p>
 
+
+<h1>Debug</h1>
+<p>
+Debugging is a powerful tool for troubleshooting complex network issues. Use 
+debug with caution as it is a resource intensive tool and may impact operations.
+Debugging can disrupt operations under high-CPU load conditions as debugging 
+is processed by the CPU.
+</p>
+<p>
+Best practices when using debugging include the following:
+<ul>
+  <li><code><b>show process cpu sorted</b></code>: helps understand current CPU 
+  utilization. If the router is already loaded, debugging may impact the router.</li>
+  <li>Consider output volume and time before enabling debug. If output is 
+  voluminous, this may impact router performance.</li>
+  <li>Excessive console logging can cause the router to hand as router prioritizes 
+  this output. Use vty <code><b>terminal monitor</b></code> or logging buffered 
+  instead.</li>
+  <li>Disable debug commands after troubleshooting using <code><b>no debug all</b></code> 
+  or <code><b>undebug all</b></code>.</li>
+</ul>
+</p>
+<p>
+Debugging can be enabled using the command <code><b>debug &lt;command&gt;</b></code>.
+The debugging messages can then be sent to a logging service, in this case the 
+console using the command <code><b>logging console</b></code>.
+</p>
+<p>
+The following is an example of the debugging of OSPF: <code><b>debug ip ospf 
+adj</b></code>.
+</p>
+<h2>Verification</h2>
+<h3><code>show debug</code></h3>
+<p>
+Enabled debugging can be viewed using this command.
+</p>
+
+<h1>Conditional Debugs</h1>
+<p>
+Limit the number of packets punted to the CPU. It allows debugging information 
+that matches a configured criteria such as matching a specific interface, username,
+MAC address, VLAN, etc.
+</p>
+<p>
+An example of a conditional debug 
+involves the use of an access control list. For example:
+</p>
+<p>
+<div><code>
+<b>access-list 100 permit ip any 192.168.1.1 0.0.0.0</b><br>
+<b>debug ip packet 100</b>
+</code></div>
+</p>
+<p>
+Any debugs that do not match the access control list are not logged.
+</p>
+<p>
+To log debug messages for packets matching an ACL and specific interface: 
+<code><b>debug interface &lt;interface-id&gt;</b></code>. Verify with <code><b>
+show debug</b></code>.
+</p>
+<p>
+With conditional debugs, you can attach an access-list to filter debug traffic to 
+permitted traffic in the acces-list.
+</p>
+<h3>Verification</h3>
+<p>
+show debug
+</p>
+
 <h1>Syslog</h1>
+<p>
+Network devices generate large amounts of information. This information can be 
+sent to the console(default). Because the console is limited, new messages arriving 
+results in older messages getting deleted. These logs can be sent to a logging 
+buffer whose size can be modified, and an off-box syslog collector. Syslog listens 
+for log messages on UDP port 514. Configure the NTP to provide accurate datetime values. Troubleshooting 
+can be difficult if you cannot correlate timestamps across devices.
+</p>
 <p>
 Syslog is the standard for computer message logging. It allows the separation of 
 software which generates messages from he systems that store it and the software 
@@ -45,16 +128,70 @@ The messages follow this format:
   <li><b>SEVERITY:</b> This is a level from 0 - 7 that specifies how important 
   the message is. When you enable logging for a specific level, it also enables 
   all levels above it. For example, if you enable level 5 logging, it also will 
-  enable levels 0 - 4. 
-    <ol start="0">
-      <li><b>Emergency:</b> System is unusable.</li>
-      <li><b>Alert:</b> Action must be taken immediately</li>
-      <li><b>Error:</b> Error conditions</li>
-      <li><b>Warning:</b> Warning conditions</li>
-      <li><b>Notice:</b> Normal but significant conditions</li>
-      <li><b>Informational:</b> informational messages</li>
-      <li><b>Debugging:</b> debug-level messages</li>
-    </ol>
+  enable levels 0 - 4.
+  <p>
+    <table cellspacing="0" width="100%">
+      <thead style="background: #d3d3d3; font-weight:bold;">
+        <tr>
+          <td style="border-bottom:1px solid; border-top: 1px solid;">Level Number</td>
+          <td style="border-bottom:1px solid; border-top: 1px solid;">Severity</td>
+          <td style="border-bottom:1px solid; border-top: 1px solid;">Description</td>
+          <td style="border-bottom:1px solid; border-top: 1px solid;">Syslog Definition</td>
+        </tr>
+      </thead>
+      <tbody>
+ 
+        <tr> 
+          <td style="border-bottom: 1px solid;">0</td>
+          <td style="border-bottom: 1px solid;">Emergencies</td>
+          <td style="border-bottom: 1px solid;">System is unusable</td>
+          <td style="border-bottom: 1px solid;">LOG_EMERG</td>
+        </tr>
+        <tr> 
+          <td style="border-bottom: 1px solid;">1</td>
+          <td style="border-bottom: 1px solid;">Alerts</td>
+          <td style="border-bottom: 1px solid;">Action must be taken immediately</td>
+          <td style="border-bottom: 1px solid;">LOG_ALERT</td>
+        </tr>
+        <tr> 
+          <td style="border-bottom: 1px solid;">2</td>
+          <td style="border-bottom: 1px solid;">Critical</td>
+          <td style="border-bottom: 1px solid;">Critical conditions</td>
+          <td style="border-bottom: 1px solid;">LOG_CRIT</td>
+        </tr>
+        <tr> 
+          <td style="border-bottom: 1px solid;">2</td>
+          <td style="border-bottom: 1px solid;">Errors</td>
+          <td style="border-bottom: 1px solid;">Error conditions</td>
+          <td style="border-bottom: 1px solid;">LOG_ERR</td>
+        </tr>
+        <tr> 
+          <td style="border-bottom: 1px solid;">3</td>
+          <td style="border-bottom: 1px solid;">Warnings</td>
+          <td style="border-bottom: 1px solid;">Warning conditions</td>
+          <td style="border-bottom: 1px solid;">LOG_WARNING</td>
+        </tr>
+        <tr> 
+          <td style="border-bottom: 1px solid;">5</td>
+          <td style="border-bottom: 1px solid;">Notifications</td>
+          <td style="border-bottom: 1px solid;">Normal but significant conditions</td>
+          <td style="border-bottom: 1px solid;">LOG_NOTICE</td>
+        </tr>
+        <tr> 
+          <td style="border-bottom: 1px solid;">6</td>
+          <td style="border-bottom: 1px solid;">Informational</td>
+          <td style="border-bottom: 1px solid;">informational messages</td>
+          <td style="border-bottom: 1px solid;">LOG_INFO</td>
+        </tr>
+        <tr> 
+          <td style="border-bottom: 1px solid;">7</td>
+          <td style="border-bottom: 1px solid;">Debugging</td>
+          <td style="border-bottom: 1px solid;">debug-level messages</td>
+          <td style="border-bottom: 1px solid;">LOG_DEBUG</td>
+        </tr>
+      </tbody>
+    </table>
+    </p>
   </li>
   <li><b>MNEMONIC:</b> a code that identifies the action reported</li>
   <li><b>Message text:</b> A plain text description of the event</li>
@@ -62,12 +199,111 @@ The messages follow this format:
 </p>
 <p>
 The severity of logging messages displayed/stored can be modified using the 
-command <code><b>logging monitor &lt;0-7&gt; where 0-7 is the severity level.
+command <code><b>logging monitor &lt;0-7&gt;</b></code> where 0-7 is the severity level.
 </p>
 <p>
 Rate-limit: used to limit the rate of messages per second.
 </p>
+<p>
+The syslogs can be forwarded to a syslog server using the following process
+<ol>
+  <li><b>Specify the syslog server:</b> <code><b>
+logging host &lt;ip-address&gt;</b></code>.</li>
+<li><b>Specify the type of messages:</b> the message type to be logged is specified 
+using the command <code><b>logging trap &lt;severity&gt;</b></code>.
+</ol> 
+</p>
 <h2><code>logging synchronous</code></h2>
 <p>
 Used to prevent logging messages from interrupting the typing at a login session.
+</p>
+
+<h2>Logging Discriminator</h2>
+<p>
+To create a syslog message discriminator, use the command <code><b>logging 
+discriminator &lt;discriminator-name&gt; &lt;facility&gt; &lt;mnemonics&gt; 
+message-body&gt; &lt;includes&gt; &lt;severity&gt; rate-limit&gt; </b></code> 
+where:
+<ul>
+<li><b>facility:</b> (Optional) Message subfilter for the facility pattern in an event message.</li>
+<li><b>mnemonics:</b> (Optional) Message subfilter for the mnemonic pattern in an event message.</li>
+<li><b>msg-body:</b> (Optional) Message subfilter for the msg-body pattern in an event message.</li>
+<li><b>drops:</b> Drops messages that match the pattern, including the specified regular expression.</li>
+<li><b>includes:</b> Delivers messages that match the pattern, including the specified regular expression string.</li>
+<li><b>string:</b> (Optional) Expression used for message filtering.</li>
+<li><b>severity:</b> (Optional) Message subfilter by severity level or group.</li>
+<li><b>sev-num:</b> (Optional) Integer that identifies the severity level or multiple levels. Multiple levels must be separated with a comma (,)/</li>
+<li><b>rate-limit:</b> (Optional) Specifies a number of messages to be processed within a unit of time.</li>
+<li><b>msglimit:</b> (Optional) Integer in the range of 1 to 10000 that identifies the number of messages not to be exceeded.</li> 
+</ul>
+</p>
+<p>
+If a logging discriminator with the same name already 
+exists, the new entry is treated as a modification to the discriminator.
+</p>
+<h3>Application</h3>
+<p>
+To apply the logging discriminator to the console, use the command <code><b>
+logging console discriminator &lt;discriminator-name&gt;</b></code>
+</p>
+<p>
+To apply the logging discriminator to the monitor, use the command <code><b>
+logging monitor discriminator &lt;discriminator&gt;</b></code>.
+</p>
+<h1>Verification</h1>
+<p>
+Configured logging settings can be viewed using the command <code><b>show logging</b></code>.
+</p>
+
+<h1>System Time</h1>
+<p>
+UTC is the primary standard by which the world regulates clocks and time. Routers 
+have two sources of timing:
+<ol>
+  <li><b>Hardware clock:</b> powered by the battery when the device is powered off.</li>
+  <li><b>Software clock:</b> derives time from the hardware clock at boot time.</li>
+</ol>
+</p>
+<p>
+The command <code><b>show clock</b></code> displays the following output: 
+<code><b>*13:26:22.675 UTC Fri Jan 1 2010</b></code>. The leading asterisk indicates 
+that the time is not authoritative(potentially not accurate). Adding the <code><b>
+detail</b></code> keyword displays the source of the time. Show clock displays the 
+software clock. It can be modified using the command <code><b>clock set &lt;hh:mm:ss&gt; &lt;day&gt; &lt;month&gt; 
+&lt;year&gt;</b></code>. This is entered in the privileged mode. Manually configuring 
+the software clock like this makes the time source to be authoritative. This 
+can be verified using the command <code><b>show clock detail</b></code> with the 
+leading asterisk missing.
+</p>
+<p>
+The command to set the software clock does not chanage the time on the hardware 
+clock. The hardware clock can be viewed with the command <code><b>show calendar</b></code>.
+Rebooting a device whose software clock has been set/corrected results in the loss 
+of the correct time value. To update the hardware clock from the software clock, 
+use the command <code><b>clock update-calendar</b></code>. This updates the 
+hardware clock from the software clock. This correct time is maintained across
+device reboots.
+</p>
+<h2>Time-zone</h2>
+<p>
+To adjust for the correct time zone settings, in configuration mode, use the command 
+<code><b>clock timezone &lt;timezone&gt; &lt;offset&gt;</b></code>.
+</p>
+
+<h1>Timestamps</h1>
+<p>
+Timestamps are controlled by the <code><b>service timestamps</b></code> command.
+
+</p>
+<p>
+Having logs and debug messages timestamped is extremely important when troubleshooting
+particularly across different devices. To enable timestamps on logging and debug 
+messages:
+<ul>
+  <li><code><b>service timestamps debug datetime msec</b></code>: Adds timestamps 
+  to debug messages including milliseconds. The datetime option includes the 
+  date and the time.</li>
+  <li><code><b>service timestamps log datetime msec</b></code>: Adds the timestamps 
+  to logging messages.</li>
+</ul>
 </p>
