@@ -1,0 +1,331 @@
+<h1>Netflow: Overview and Introduction</h1>
+<p>
+Netflow is a Cisco application that collects statistics on packets flowing through 
+a router i.e., as it enters or exits an interface. By analyzing the data provided by NetFlow, a 
+network administrator can determine things such as source and destination of traffic, 
+class of service, and the causes of congestion. 
+Netflow is used for network and application monitoring, capacity planning, security 
+analysis, accounting etc.
+Most NetFlow devices support export  
+versions 1, 5, and 9. Version 1 is used by default. the traffic in and out of a network 
+device. Netflow provides insights into the network traffic patterns.
+</p>
+<p>
+NetFlow provides insights into the state of network traffic and this information 
+can be utilized in network and security monitoring, network planning, traffic 
+analysis, and IP accounting.
+</p>
+<p>
+Netflow provides the ability to view the network traffic grouped by protocol. With 
+this feature, using netflow a baseline of network traffic can be performed before 
+the introduction of a new network service or implementation of traffic shaping.
+</p>
+<p>
+For Internet-facing routers that run NAT, it is recommended that Netflow be 
+configured on the router interface connecting to the local network i.e. before 
+NAT translations. If Netflow is configured on the Internet-facing interface, 
+NAT will have been implemented and it becomes difficult to understand traffic 
+flow patterns of local devices as their local/internal IP addresses will already 
+have been translated by NAT.
+</p>
+<h2>Components</h2>
+<p>
+A typical flow monitoring setup (using NetFlow) consists of three main components:
+<ul>
+  <li><b>Flow exporter:</b> aggregates packets into flows and exports flow records 
+  towards one or more flow collectors. This is usually the router.</li>
+  <li><b>Flow collector:</b> responsible for reception, storage and pre-processing 
+  of flow data received from a flow exporter.</li>
+  <li><b>Analysis application:</b> analyzes received flow data in the contect of 
+  intrusion detection or traffic profiling, for example.</li>
+  <li><b>NetFlow cache(optional):</b> the record for each active flow is maintained 
+  in the cache.
+</ul>
+</p>
+<h2>Requirements</h2>
+<p>
+A network flow is a unidirectional stream of packets between a given source and 
+destination. Netflow captures statistics on IP flows through a device. It is used 
+on top of an existing switching path such a CEF. NetFlow uses the following fields
+to identify a unique flow:
+<ul>
+  <li>Source IP address</li>
+  <li>Source port number</li>
+  <li>Destination IP address</li>
+  <li>Destination port number</li>
+  <li>Layer 3 protocol type</li>
+  <li>Type of service</li>
+  <li>Logical input interface</li>
+</ul>
+</p>
+
+<p>
+Traffic monitored by Netflow can be classified into the following categories:
+<ul>
+  <li><b>Device:</b> flow count, traffic and volume</li>
+  <li><b>Interface:</b> bandwidth utilization, traffic, packets, and volume.</li>
+  <li><b>Application:</b> traffic with port and protocol details.</li>
+  <li><b>Conversation:</b> source, destination, application, and traffic</li>
+  <li><b>Quality of Server(QoS):</b> DSCP and traffic.</li>
+</ul>
+</p>
+
+<h2>Version 5</h2>
+<p>
+Fixed format that cannot be added or extended. IPv4 support only. Added BGP support.
+Export data from main cache only. No real concept of ingress and egress flows.
+</p>
+<h2>Version 9</h2>
+<p>
+A flexible and extensive format, which provides the versatility needed for support 
+of new fields and record types. It provides support for new NetFlow-supported 
+technologies such as multicast, Multiprotocol Label Switching(MPLS), BGP next hop.
+NetFlow version 9 is template-based. Templates provide a means of extending the 
+record format, a feature that should allow future 
+</p>
+<p>
+Support IPv6.
+Not backwards compatible with any previous version
+Added additional information to flows and templated-based.
+Exports data from main and aggregate cache
+Support for MPLS.
+</p>
+<h1>Configuration</h1>
+<p>
+Netflow traffic is unidirectional i.e., can be ingress or egress traffic.
+In interface configuration mode: 
+<ul>
+  <li><code><b>ip flow ingress</b></code>: enables netflow for outbound traffic on 
+  an interface</li>
+  <li><code><b>ip flow egress</b></code>: enables Netflow for inbound traffic on 
+  an interface.</li>
+</ul>
+</p>
+
+<h1>Local Retrieval</h1>
+<p>
+Local retrieval is also known as stand-aline mode where netflow records are stored 
+in the local router memory. This information can be accessed using the CLI.
+
+You can view Netflow information from either the collector or the CLI. You first 
+must enable NetFlow locally:
+<code><b>
+ip flow-top-talkers<br>
+top 10<br>
+sort-by [packets | bytes]<br>
+cache-timeout 30000 (value is in milliseconds)<br>
+</b></code>
+</p>
+<p>
+To view the flows, use the command <code><b>show ip flow top-talkers</b></code>.
+</p>
+<p>
+Netflow is a heavy resource hungry feature. It is recommended not to enable 
+netflow on a router that is experiencing heavy resource constraints.
+</p>
+
+<h1>Export (Configuration Only)</h1>
+<p>
+The Netflow record is traditionally exported by using UDP and collected by the 
+Netflow collector. An IP address of a Netflow collector and a destination UDP port 
+has to be configured on the flow exporter. A router(netflow exporter) will maintain 
+a track of flow record which is already exported, hence if the Netflow packets are 
+dropped in the event of packet corruption or network congestion. So that the 
+modern Netfloww implementation uses the SCTP(stream control transmission protocol) 
+to export the packets to offer protection against the loss of packets and also 
+assures that the Netflow v9 template is received before exporting the related 
+record. The Netflow export only uses the network backbone link, packet loss can 
+be negligible. 
+</p>
+<p>
+The netflow collector listens for Netflow records on UDP or SCTP. However, 
+the port is not explicitly defined. The administrator can configure a UDP port 
+of choice; the commonly configured port number is 9995, 9996 or 9999. It is 
+important to note that when configuring a Netflow collector 
+to collect netflow records from more than one netflow exporter, each netflow 
+exporter should be configured to export flow records to a different port number.
+Otherwise the netflow collector will aggregate the flow records. So it is 
+recommended to configure one port for one netflow expoter.
+</p>
+<p>
+<ul>
+  <li><code><b>ip flow-export destination &lt;ip-address&gt; &lt;port&gt; [sctp|udp]</b></code>
+  : specifies the IP address and destination port for exported Netflow records.</li>
+  <li><code><b>ip flow-export version [5|9]</b></code>: specifies the format of 
+  exported Netflow records.</li>
+  <li><b>Specify the source IP address:</b> the source IP address can be configured 
+  using the command <code><b>ip flow-export source &lt;interface&gt;</b></code>.
+  This is particularly important in scenarios where, with multipathing, netflow 
+  records may be different source IP addresses due to the different egress 
+  interfaces that the netflow traffic may have used. This command ensures that the 
+  source IP address is consistent.</li>
+</p>
+</ul>
+</p>
+
+<h1>Verification</h1>
+
+<h2><code>show ip cache [verbose] flow</code></h2>
+<p>
+Displays basic Netflow statistics for netflow records that are stored locally in 
+the router's local cache. 
+</p>
+<p>
+The section "IP packet size distribution" displays the different packet sizes an 
+the percentage of network traffic that had be given size. A value of .334 is 
+equivalent to 34.4 percent.
+</p>
+<p>
+The port numbers are displayed in hexadecimal values.
+</p>
+
+<h2><code>show ip flow export</code></h2>
+<p>
+Displays the Netflow data export configuration and statistics of netflow records 
+that are being exported.
+</p>
+
+<h2><code>show ip flow export template</code></h2>
+<p>
+
+</p>
+
+<h2><code>show ip flow interface</code></h2>
+<p>
+Displays the Netflow configuration for each interface
+</p>
+
+<h2><code>show ip flow top-talkers</code></h2>
+<p>
+This table displays real-time values for the top devices transmitting and receiving 
+traffic.
+
+</p>
+
+<h2><code>clear ip flow stats</code></h2>
+<p>
+Clearing statistics to observer Netflow operations.
+</p>
+
+<h2><code>show run</code></h2>
+<p>
+Displays the active configuraiton file.
+</p>
+
+<h1>Flexible Netflow</h1>
+<p>
+Flexible NetFlow improves on original NetFlow by adding the capability to customize 
+the traffic analysis parameters for your specific requirements. Flexible NetFlow 
+facilitates the creation of more complex configurations for traffic analysis and 
+data export through the use of templates which are reusable conifguration 
+components.
+</p>
+<p>
+When configuring flexible NetFlow, consider the following:
+<ul>
+  <li>Ensure that the source interface is a loopback interface. This is because 
+  this interface does not do down resulting in predictable source IP addresses
+  in the NetFlow records.</li>
+  <li>Set the active timeout to 1 minute using the command <code><b>ip flow-cache 
+  timeout active</b></code>.
+</ul>
+</p>
+<p>
+It supports the ability to configure different destinations(collectors) for 
+different categories of traffic.
+</p>
+<p>
+To configure flexible netflow:
+<ol>
+  <li><b>Define the Record:</b> using the command <code><b>flow record &lt;flow-name</b></code></li>
+  <li><b>Match the traffic category:</b> using the command 
+  <code><b>match [ipv4|ipv6|interface|flow|datalink|application|routing|transport]</b></code>. 
+  The following command matches all traffic based on the type of service value(TOS) 
+  <code><b>match ipv4 tos</b></code>.
+  <p>
+  <div>
+  <code>
+  flow record FLOW-RECORD-1<BR>
+  description Netflow record format to send to NetFlow collector<br>
+  match ipv4 ttl<br>
+  match ipv4 tos<br>
+  
+  </code></div>
+  </p>
+  </li>
+  <li><b>Define what information should be collected:</b> using the command 
+  <code><b>collect datalink mac [destination|source]</b></code>. The following 
+  example collects the count of traffic in bytes: <code><b>collect counter bytes</b></code>.
+  <p>
+  Other examples include:
+  collect interface output
+  collect counter packets long
+  collect counter bytes long
+  collect timestamp absolute first
+  collect timestamp absolute last
+  
+  </p>
+  </li>
+  <li><b>Create Flow Export configuration</b>
+  <p>
+  <div><code>
+  flow exporter NETFLOW-COLLECTOR-1<br>
+  description  Export NetFlow to collector<br>
+  destination 1.2.3.4<br>
+  source g0/0<br>
+  transport udp 9999<br>
+  export-protocol ipfix<br>
+  </div></code>
+  </p>
+  </li>
+  <li><b>Configure a flow monitor:</b> the flow monitor ties the flow record to 
+  the flow exporter.
+  <p>
+  <div>
+  <code>
+  flow monitor FLOW-MONITOR-1<br>
+    record FLOW-MONITOR-1 (note: netflow-original is predefined flow record)<br>
+    exporter NETFLOW-COLLECTOR-1<br>
+    cache timeout active 60<br>
+  </code></div>
+  </p>
+  </li>
+  <li>
+</ol>
+</p>
+<p>
+The netflow monitor aggregates the flow exporter and flow record data.
+</p>
+
+<h1>Troubleshooting</h1>
+
+<p>
+<ul>
+<li>
+Consider the unidirectional nature of netflow traffic. Verify using the following 
+commands:
+<ul>
+  <li><code><b>ip flow ingress</b></code></li>
+  <li><code><b>ip flow outbound</b></code></li>
+  <li><code><b>show ip flow interface</b></code></li>
+</ul>
+</li>
+<li>
+Consider the appropriate interface. Verify configured interfaces using <code><b>show ip flow 
+interface</b></code>.
+</li>
+<li>
+Consider exporting to a collector: verify configured settings using <code><b>
+show ip flow export</b></code>. 
+</li>
+<li>Consider the source of netflow export packets; verify with the commands:
+<ul>
+  <li><code><b>ip flow-export source &lt;interface</b></code></li>
+  <li><code><b>show ip flow export</b></code></li> 
+</ul>
+</li>
+<li>Consider versions 5 and 9, with version 9 being the more popular choice. Verify 
+using the command <code><b>ip flow-export version[5|9]</b></code> and 
+<code><b>show ip flow-export</b></code>.
+</ul>
+</p>
