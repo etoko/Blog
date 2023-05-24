@@ -70,27 +70,45 @@ Traffic monitored by Netflow can be classified into the following categories:
 </ul>
 </p>
 
-<h2>Version 5</h2>
+<h2>NetFlow Cache</h2>
 <p>
-Fixed format that cannot be added or extended. IPv4 support only. Added BGP support.
+Creates a cache entry(flow record) for every active flow. Flow records store IP 
+flow information. Flow entries are deleted from the cache when they expire. 
+Rules for expiring NetFlow cache entries include:
+<ul>
+  <li>Idle flows(15s by default)</li>
+  <li>Long lived flows(30min max be default). Flows that are continuous, such as 
+  routing protocol message exchanges, they can be categorized as long lived flows.</li>
+  <li>Full cache, deletes oldest flows</li>
+  <li>TCP connections that are ending(FIN) or have been reset(RST)</li>
+</ul>
+</p>
+
+<h2>Collection Engine</h2>
+<p>
+Sends netflow data to a management collector with 1.5% export data overhead. 
+Expired flows are exported from the device into export datagrams in UDP format.
+Consist of up to 30 flow records (v5/v9).
+</p>
+
+<h2>NetFlow Collector</h2>
+<p>
+Netflow Collector = Netflow server. NetFlow export, unlike SNMP polling, pushes 
+information periodically to the collector. Flows that have terminated or expired
+(based on the NetFlow cache) are exported as well. Flows are terminated when the 
+network communication is ended. A maximum of two export destinations is allowed.
+</p>
+
+
+<h1>NetFlow Version 5</h1>
+<p>
+NetFlow version 5 has a fixed packet format that cannot be added or extended. 
+It support IPv4 only. Support for BGP is included.
 Export data from main cache only. No real concept of ingress and egress flows.
 </p>
-<h2>Version 9</h2>
-<p>
-A flexible and extensive format, which provides the versatility needed for support 
-of new fields and record types. It provides support for new NetFlow-supported 
-technologies such as multicast, Multiprotocol Label Switching(MPLS), BGP next hop.
-NetFlow version 9 is template-based. Templates provide a means of extending the 
-record format, a feature that should allow future 
-</p>
-<p>
-Support IPv6.
-Not backwards compatible with any previous version
-Added additional information to flows and templated-based.
-Exports data from main and aggregate cache
-Support for MPLS.
-</p>
-<h1>Configuration</h1>
+
+
+<h2>Configuration</h2>
 <p>
 Netflow traffic is unidirectional i.e., can be ingress or egress traffic.
 In interface configuration mode: 
@@ -101,8 +119,12 @@ In interface configuration mode:
   an interface.</li>
 </ul>
 </p>
+<p>
+The legacy interface command <code><b>ip route-cache flow</b></code> can also be used. It 
+enables NetFlow on an interface as well as any sub-interfaces.
+</p>
 
-<h1>Local Retrieval</h1>
+<h3>Local Retrieval</h3>
 <p>
 Local retrieval is also known as stand-aline mode where netflow records are stored 
 in the local router memory. This information can be accessed using the CLI.
@@ -124,7 +146,7 @@ Netflow is a heavy resource hungry feature. It is recommended not to enable
 netflow on a router that is experiencing heavy resource constraints.
 </p>
 
-<h1>Export (Configuration Only)</h1>
+<h3>Export (Configuration Only)</h3>
 <p>
 The Netflow record is traditionally exported by using UDP and collected by the 
 Netflow collector. An IP address of a Netflow collector and a destination UDP port 
@@ -152,7 +174,8 @@ recommended to configure one port for one netflow expoter.
   <li><code><b>ip flow-export destination &lt;ip-address&gt; &lt;port&gt; [sctp|udp]</b></code>
   : specifies the IP address and destination port for exported Netflow records.</li>
   <li><code><b>ip flow-export version [5|9]</b></code>: specifies the format of 
-  exported Netflow records.</li>
+  exported Netflow records. It is possible to configure NetFlow version 5 and export 
+  Flow records in version 9.</li>
   <li><b>Specify the source IP address:</b> the source IP address can be configured 
   using the command <code><b>ip flow-export source &lt;interface&gt;</b></code>.
   This is particularly important in scenarios where, with multipathing, netflow 
@@ -163,7 +186,7 @@ recommended to configure one port for one netflow expoter.
 </ul>
 </p>
 
-<h1>Verification</h1>
+<h2>Verification</h2>
 
 <h2><code>show ip cache [verbose] flow</code></h2>
 <p>
@@ -212,13 +235,59 @@ Clearing statistics to observer Netflow operations.
 Displays the active configuraiton file.
 </p>
 
+<h1>Version 9</h1>
+<p>
+A flexible and extensive format, which provides the versatility needed for support 
+of new fields and record types. It provides support for new NetFlow-supported 
+technologies such as IPv6, multicast, Multiprotocol Label Switching(MPLS), BGP next hop.
+NetFlow version 9 is template-based. Templates provide a means of extending the 
+record format, and ensures that NetFlow can be adapted to provide support for 
+new protocols.
+</p>
+<p>
+Support IPv6.
+Not backwards compatible with any previous version
+Added additional information to flows and templated-based.
+Exports data from main and aggregation cache
+Support for MPLS.
+</p>
+<p>
+Netflow v9 is modular supporting the creation of flow records and flow monitors.
+The monitor is applied to an interface indicating the type of statistics that the 
+device should compile.
+</p>
+
+<h2>Configuration</h2>
+<p>
+Set the template timeout to one minute: <code><b>ip flow-export template timeout-rate 1</b></code>.
+This ensures that there are no data gaps if the network service or server restarts.
+The default setting for long active flows(long-lived flows) is 30 minutes. This 
+can cause high peaks wellabove circuit speeds. By breaking the cached flows into 
+one-minute fragments, we can avoid the high peaks by normalizing the data.
+</p>
+<p>
+To ensure that finished flows are periodically exported, configure the inactive 
+timeout <code><b>ip flow-cache timeout inactive 15</b></code>. The value is in 
+seconds.
+</p>
+<p>
+To ensure that the ifindex persists during device reboots, <code><b>snmp-server 
+ifindex persist</b></code>.
+</p>
+
+
 <h1>Flexible Netflow</h1>
 <p>
 Flexible NetFlow improves on original NetFlow by adding the capability to customize 
-the traffic analysis parameters for your specific requirements. Flexible NetFlow 
-facilitates the creation of more complex configurations for traffic analysis and 
+the traffic analysis parameters for your specific requirements. 
+Flexible NetFlow is an extension of NetFlow v9. It provides additional functionality 
+that allows you to export more information using the same NetFlow v9 datagram. 
+Flexible NetFlow facilitates the creation of more complex configurations for traffic analysis and 
 data export through the use of templates which are reusable conifguration 
-components.
+components.  
+</p>
+<p>
+
 </p>
 <p>
 When configuring flexible NetFlow, consider the following:
@@ -234,10 +303,26 @@ When configuring flexible NetFlow, consider the following:
 It supports the ability to configure different destinations(collectors) for 
 different categories of traffic.
 </p>
+<h2>IPFIX</h2>
+<p>
+IPFIX(IP Flow Information eXport) is the standards-based method for exporting 
+the flow information to a collector that was published by IETF. It is intended 
+to serve as a universal protocol for exporting flow information. IPFIX has extensive 
+flexibility in its configurations.
+</p>
+<p>
+When configuring the exporter, the format can be selected which can be v9 or 
+IPFIX(sometimes referred to as NetFlow version 10).
+</p>
+
+<h2>Configuration of Flexible NetFlow</h2>
 <p>
 To configure flexible netflow:
 <ol>
-  <li><b>Define the Record:</b> using the command <code><b>flow record &lt;flow-name</b></code></li>
+  <li><b>Create a flow record:</b> A flow record explicitly specifies what exactly 
+  we are sampling.
+  <ol type="a">
+    <li><b>Define the flow record:</b> using the command <code><b>flow record &lt;flow-name&gt;</b></code>
   <li><b>Match the traffic category:</b> using the command 
   <code><b>match [ipv4|ipv6|interface|flow|datalink|application|routing|transport]</b></code>. 
   The following command matches all traffic based on the type of service value(TOS) 
@@ -257,16 +342,20 @@ To configure flexible netflow:
   <code><b>collect datalink mac [destination|source]</b></code>. The following 
   example collects the count of traffic in bytes: <code><b>collect counter bytes</b></code>.
   <p>
-  Other examples include:
-  collect interface output
-  collect counter packets long
-  collect counter bytes long
-  collect timestamp absolute first
-  collect timestamp absolute last
-  
+    Other examples include:
+  <div><code>
+ <b>collect interface output         </b>   <br>
+ <b>collect counter packets long     </b>   <br>
+ <b>collect counter bytes long       </b>   <br>
+ <b>collect timestamp absolute first </b>   <br>
+ <b>collect timestamp absolute last  </b>   <br>
+  </code></div>
   </p>
   </li>
-  <li><b>Create Flow Export configuration</b>
+  </ol>
+  </li>
+  <li><b>Create Flow Export configuration</b> Configures the external server where 
+  the flow records are exported for analysis.
   <p>
   <div><code>
   flow exporter NETFLOW-COLLECTOR-1<br>
@@ -279,7 +368,7 @@ To configure flexible netflow:
   </p>
   </li>
   <li><b>Configure a flow monitor:</b> the flow monitor ties the flow record to 
-  the flow exporter.
+  the flow exporter. The flow monitor calls the flow record.
   <p>
   <div>
   <code>
@@ -290,11 +379,17 @@ To configure flexible netflow:
   </code></div>
   </p>
   </li>
-  <li>
+  <li><b>Apply the flow monitor to a link:</b> </li>
 </ol>
 </p>
 <p>
 The netflow monitor aggregates the flow exporter and flow record data.
+</p>
+
+<h2>Verification</h2>
+<h3><code>show flow monitor &lt;FLOW-MONITOR-1&gt; cache</code></h3>
+<p>
+
 </p>
 
 <h1>Troubleshooting</h1>
@@ -327,5 +422,9 @@ show ip flow export</b></code>.
 <li>Consider versions 5 and 9, with version 9 being the more popular choice. Verify 
 using the command <code><b>ip flow-export version[5|9]</b></code> and 
 <code><b>show ip flow-export</b></code>.
+</li>
+<li><b>Avoid duplication:</b> When monitoring only one interface, configure <code><b>ip flow ingress</b></code>
+and <code><b>ip flow egress</b></code>. If monitoring more than one interface, 
+configure <code><b>ip flow ingress</b></code> only.
 </ul>
 </p>
