@@ -159,6 +159,14 @@ In interface configuration mode:
 </ul>
 </p>
 <p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+R1(config-if)#<b>interface g1/0</b><br>
+R1(config-if)#<b>ip flow ingress</b><br>
+R1(config-if)#<b>ip flow egress</b>
+</code></div>
+</p>
+<p>
 The legacy interface command <code><b>ip route-cache flow</b></code> can also be 
 used as an alternative to the above commands on platforms that still support it. 
 It enables NetFlow on an interface as well as any configured sub-interfaces.
@@ -174,12 +182,12 @@ Local retrieval is also known as stand-alone mode where netflow records are stor
 in the local router memory. This information can be accessed using the CLI.
 The following commands enable monitoring of bandwidth based on bytes or packet count:
 <p>
-<code><b>
-ip flow-top-talkers<br>
-top 10<br>
-sort-by [packets | bytes]<br>
-cache-timeout 30000 (value is in milliseconds)<br>
-</b></code>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+R1(config)#<b>ip flow-top-talkers</b><br>
+R1(config-flow-top-talkers)#<b>top 10</b><br>
+R1(config-flow-top-talkers)#<b>sort-by bytes</b><br>
+</code></div>
 </p>
 <p>
 To view the flows, use the command <code><b>show ip flow top-talkers</b></code>.
@@ -192,7 +200,17 @@ netflow on a router that is experiencing heavy resource constraints.
 <li>
 <b>Export (Configuration Only):</b>
 <ul>
-  <li><b>Define the export destination:</b> using the command <code><b>ip flow-export destination &lt;ip-address&gt; &lt;port&gt; [sctp|udp]</b></code>.
+  <li><b>Define the export destination:</b> using the command 
+  <code><b>ip flow-export destination &lt;ip-address&gt; &lt;port&gt; [sctp|udp]</b></code>.
+  <p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+  R1(config)#<b>no ip flow-export destination 192.168.34.2 ?</b><br>
+&nbsp;&nbsp;&lt;1-65535&gt;  UDP/SCTP port number<br>
+<br>
+R1(config)#<b>ip flow-export destination 192.168.14.2 9999</b>
+  </code></div>
+  </p>
 <p>
 The Netflow records are exported by the Netflow exporter to the 
 collector using UDP. An IP address of a Netflow collector and a destination UDP port 
@@ -219,13 +237,36 @@ recommended to configure one port for one netflow exporter.
 </li>
   <li><code><b>ip flow-export version [5|9]</b></code>: specifies the format of 
   exported Netflow records. It is possible to configure NetFlow version 5 and export 
-  Flow records in version 9.</li>
+  Flow records in version 9.
+  <p>
+  <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+  R1(config)#<b>ip flow-export version 5 ?</b>                        <br>
+&nbsp;&nbsp;bgp-nexthop&nbsp;&nbsp;record BGP NextHop                 <br>
+&nbsp;&nbsp;origin-as&nbsp;&nbsp;&nbsp;&nbsp;record origin AS         <br>
+&nbsp;&nbsp;peer-as&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;record peer AS <br>
+&nbsp;&nbsp;                                                          <br>
+&nbsp;&nbsp;&lt;cr&gt;&nbsp;&nbsp;                                    <br>
+                                                                      <br>
+R1(config)#<b>ip flow-export version 5</b>
+</code></div>
+  </p>
+  </li>
   <li><b>Specify the source IP address:</b> the source IP address can be configured 
   using the command <code><b>ip flow-export source &lt;interface&gt;</b></code>.
+  <p>
+  <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+  R1(config)#<b>ip flow-export source lo0</b>
+  </code></div>
+  </p>
+  <p>
   This is particularly important in scenarios where, with multipathing, netflow 
   records from one device may have different source IP addresses due to the different egress 
   interfaces that the netflow traffic may have used. This command ensures that the 
-  source IP address is consistent for all flow records from a device.</li>
+  source IP address is consistent for all flow records from a device.
+  </p>
+  </li>
 </p>
 </ul>
 </p></li>
@@ -244,8 +285,46 @@ the router's local cache.
 </p>
 <p>
 The section "IP packet size distribution" displays the different packet sizes an 
-the percentage of network traffic that had be given size. A value of .334 is 
-equivalent to 34.4 percent.
+the percentage of network traffic that had be given size. A value of .855 is 
+equivalent to 85.5 percent of traffic has a packet size of 128 bytes.
+</p>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+R1#<b>show ip cache flow</b>                                                           <br>
+IP packet size distribution (9364 total packets):&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   <br>
+&nbsp;&nbsp; 1-32&nbsp;&nbsp; 64&nbsp;&nbsp; 96&nbsp;&nbsp;128&nbsp;&nbsp;160&nbsp;&nbsp;192&nbsp;&nbsp;224&nbsp;&nbsp;256&nbsp;&nbsp;288&nbsp;&nbsp;320&nbsp;&nbsp;352&nbsp;&nbsp;384&nbsp;&nbsp;416&nbsp;&nbsp;448&nbsp;&nbsp;480   <br>
+&nbsp;&nbsp; .000 .010 .132 .855 .000 .000 .000 .000 .000 .000 .000 .000 .000 .000 .000   <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;512&nbsp;&nbsp;544&nbsp;&nbsp;576 1024 1536 2048 2560 3072 3584 4096 4608&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   <br>
+&nbsp;&nbsp; .000 .000 .000 .000 .000 .000 .000 .000 .000 .000 .000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  <br>
+IP Flow Switching Cache, 4456704 bytes&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  <br>
+&nbsp;&nbsp;5 active, 65531 inactive, 122 added&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   <br>
+&nbsp;&nbsp;12987 ager polls, 0 flow alloc failures&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   <br>
+&nbsp;&nbsp;Active flows timeout in 30 minutes&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  <br>
+&nbsp;&nbsp;Inactive flows timeout in 15 seconds&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  <br>
+IP Sub Flow Cache, 533256 bytes&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   <br>
+&nbsp;&nbsp;5 active, 16379 inactive, 105 added, 105 added to flow&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  <br>
+&nbsp;&nbsp;0 alloc failures, 0 force free&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  <br>
+&nbsp;&nbsp;1 chunk, 2 chunks added&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   <br>
+&nbsp;&nbsp;last clearing of statistics never&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   <br>
+Protocol&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Total&nbsp;&nbsp;&nbsp;&nbsp;Flows&nbsp;&nbsp; Packets Bytes&nbsp;&nbsp;Packets Active(Sec) Idle(Sec)  <br>
+--------&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Flows&nbsp;&nbsp;&nbsp;&nbsp; /Sec&nbsp;&nbsp;&nbsp;&nbsp; /Flow&nbsp;&nbsp;/Pkt&nbsp;&nbsp;&nbsp;&nbsp; /Sec&nbsp;&nbsp;&nbsp;&nbsp; /Flow&nbsp;&nbsp;&nbsp;&nbsp; /Flow&nbsp;&nbsp;  <br>
+ICMP&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;81&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;99&nbsp;&nbsp;&nbsp;&nbsp;99&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1.6&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 4.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;15.8&nbsp;&nbsp;  <br>
+IP-other&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;36&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;25&nbsp;&nbsp;&nbsp;&nbsp;80&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.1&nbsp;&nbsp;&nbsp;&nbsp; 212.2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;13.8&nbsp;&nbsp;  <br>
+Total:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 117&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;76&nbsp;&nbsp;&nbsp;&nbsp;97&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1.8&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;68.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;15.2&nbsp;&nbsp;  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  <br>
+SrcIf&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; SrcIPaddress&nbsp;&nbsp;&nbsp;&nbsp;DstIf&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; DstIPaddress&nbsp;&nbsp;&nbsp;&nbsp;Pr SrcP DstP&nbsp;&nbsp;Pkts  <br>
+Gi2/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 192.168.14.2&nbsp;&nbsp;&nbsp;&nbsp;Local&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 1.1.1.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 01 0000 0303&nbsp;&nbsp;&nbsp;&nbsp; 1  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  <br>
+SrcIf&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; SrcIPaddress&nbsp;&nbsp;&nbsp;&nbsp;DstIf&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; DstIPaddress&nbsp;&nbsp;&nbsp;&nbsp;Pr SrcP DstP&nbsp;&nbsp;Pkts  <br>
+Gi3/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 192.168.13.2&nbsp;&nbsp;&nbsp;&nbsp;Null&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;224.0.0.5&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 59 0000 0000&nbsp;&nbsp;&nbsp;&nbsp;74  <br>
+Gi0/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 192.168.12.2&nbsp;&nbsp;&nbsp;&nbsp;Null&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;224.0.0.5&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 59 0000 0000&nbsp;&nbsp; 132  <br>
+Gi1/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 192.168.15.2&nbsp;&nbsp;&nbsp;&nbsp;Null&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;224.0.0.5&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 59 0000 0000&nbsp;&nbsp;&nbsp;&nbsp;97  <br>
+Gi2/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 192.168.14.2&nbsp;&nbsp;&nbsp;&nbsp;Null&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;224.0.0.5&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 59 0000 0000&nbsp;&nbsp;&nbsp;&nbsp;53  <br>
+R1#
+</code></div>
 </p>
 <p>
 The port numbers are displayed in hexadecimal values.
@@ -254,38 +333,150 @@ The port numbers are displayed in hexadecimal values.
 From the output, under the Destination interface column(DstIf), ingress interfaces 
 have a * appended to the interface name.
 </p>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+R1#<b>show ip cache verbose flow</b>                                            <br>
+IP packet size distribution (9530 total packets):&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   <br>
+&nbsp;&nbsp; 1-32&nbsp;&nbsp; 64&nbsp;&nbsp; 96&nbsp;&nbsp;128&nbsp;&nbsp;160&nbsp;&nbsp;192&nbsp;&nbsp;224&nbsp;&nbsp;256&nbsp;&nbsp;288&nbsp;&nbsp;320&nbsp;&nbsp;352&nbsp;&nbsp;384&nbsp;&nbsp;416&nbsp;&nbsp;448&nbsp;&nbsp;480   <br>
+&nbsp;&nbsp; .000 .011 .146 .841 .000 .000 .000 .000 .000 .000 .000 .000 .000 .000 .000   <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    <br>
+&nbsp;&nbsp;&nbsp;&nbsp;512&nbsp;&nbsp;544&nbsp;&nbsp;576 1024 1536 2048 2560 3072 3584 4096 4608&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   <br>
+&nbsp;&nbsp; .000 .000 .000 .000 .000 .000 .000 .000 .000 .000 .000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    <br>
+IP Flow Switching Cache, 4456704 bytes&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    <br>
+&nbsp;&nbsp;5 active, 65531 inactive, 135 added&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   <br>
+&nbsp;&nbsp;14644 ager polls, 0 flow alloc failures&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   <br>
+&nbsp;&nbsp;Active flows timeout in 30 minutes&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    <br>
+&nbsp;&nbsp;Inactive flows timeout in 15 seconds&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    <br>
+IP Sub Flow Cache, 533256 bytes&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   <br>
+&nbsp;&nbsp;5 active, 16379 inactive, 118 added, 118 added to flow&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    <br>
+&nbsp;&nbsp;0 alloc failures, 0 force free&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    <br>
+&nbsp;&nbsp;1 chunk, 2 chunks added&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   <br>
+&nbsp;&nbsp;last clearing of statistics never&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <br>
+Protocol&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Total&nbsp;&nbsp;&nbsp;&nbsp;Flows&nbsp;&nbsp; Packets Bytes&nbsp;&nbsp;Packets Active(Sec) Idle(Sec)  <br>
+--------&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Flows&nbsp;&nbsp;&nbsp;&nbsp; /Sec&nbsp;&nbsp;&nbsp;&nbsp; /Flow&nbsp;&nbsp;/Pkt&nbsp;&nbsp;&nbsp;&nbsp; /Sec&nbsp;&nbsp;&nbsp;&nbsp; /Flow&nbsp;&nbsp;&nbsp;&nbsp; /Flow&nbsp;&nbsp;  <br>
+ICMP&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;94&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;86&nbsp;&nbsp;&nbsp;&nbsp;99&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1.5&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 3.5&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;15.9&nbsp;&nbsp;  <br>
+IP-other&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;36&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;25&nbsp;&nbsp;&nbsp;&nbsp;80&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.1&nbsp;&nbsp;&nbsp;&nbsp; 212.2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;13.8&nbsp;&nbsp;  <br>
+Total:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 130&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;69&nbsp;&nbsp;&nbsp;&nbsp;97&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1.7&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;61.3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;15.3&nbsp;&nbsp;  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  <br>
+SrcIf&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SrcIPaddress&nbsp;&nbsp;&nbsp;&nbsp;DstIf&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;DstIPaddress&nbsp;&nbsp;&nbsp;&nbsp;Pr TOS Flgs&nbsp;&nbsp;Pkts <br>
+Port Msk AS&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Port Msk AS&nbsp;&nbsp;&nbsp;&nbsp;NextHop&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;B/Pk&nbsp;&nbsp;Active <br>
+SrcIf&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SrcIPaddress&nbsp;&nbsp;&nbsp;&nbsp;DstIf&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;DstIPaddress&nbsp;&nbsp;&nbsp;&nbsp;Pr TOS Flgs&nbsp;&nbsp;Pkts <br>
+Port Msk AS&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Port Msk AS&nbsp;&nbsp;&nbsp;&nbsp;NextHop&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;B/Pk&nbsp;&nbsp;Active <br>
+Gi2/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;192.168.14.2&nbsp;&nbsp;&nbsp;&nbsp;Local&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1.1.1.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 01 C0&nbsp;&nbsp;10&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 1 <br>
+0000 /30 0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0303 /32 0&nbsp;&nbsp;&nbsp;&nbsp; 0.0.0.0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;56&nbsp;&nbsp;&nbsp;&nbsp; 0.0 <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  <br>
+Gi3/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;192.168.13.2&nbsp;&nbsp;&nbsp;&nbsp;Null&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 224.0.0.5&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 59 C0&nbsp;&nbsp;10&nbsp;&nbsp;&nbsp;&nbsp; 112 <br>
+0000 /30 0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0000 /0&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp; 0.0.0.0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;80&nbsp;&nbsp;1023.4 <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  <br>
+Gi0/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;192.168.12.2&nbsp;&nbsp;&nbsp;&nbsp;Null&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 224.0.0.5&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 59 C0&nbsp;&nbsp;10&nbsp;&nbsp;&nbsp;&nbsp; 171 <br>
+0000 /30 0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0000 /0&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp; 0.0.0.0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;80&nbsp;&nbsp;1557.9 <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  <br>
+Gi1/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;192.168.15.2&nbsp;&nbsp;&nbsp;&nbsp;Null&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 224.0.0.5&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 59 C0&nbsp;&nbsp;10&nbsp;&nbsp;&nbsp;&nbsp; 135 <br>
+0000 /30 0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0000 /0&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp; 0.0.0.0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;80&nbsp;&nbsp;1221.8 <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  <br>
+Gi2/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;192.168.14.2&nbsp;&nbsp;&nbsp;&nbsp;Null&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 224.0.0.5&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 59 C0&nbsp;&nbsp;10&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;91 <br>
+0000 /30 0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0000 /0&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp; 0.0.0.0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;80&nbsp;&nbsp; 825.3 <br>
+
+</code></div>
+</p>
+
 
 <h2><code>show ip flow export</code></h2>
 <p>
 Displays the Netflow data export configuration and statistics of netflow records 
 that are being exported.
 </p>
-
-<h2><code>show ip flow export template</code></h2>
 <p>
-
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+R1#<b>show ip flow export</b>                                       <br>   
+Flow export v5 is enabled for main cache                            <br>
+&nbsp;&nbsp;Export source and destination details :                           <br>
+&nbsp;&nbsp;VRF ID : Default&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                            <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Source(1)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 1.1.1.1 (Loopback0)                             <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Destination(1)&nbsp;&nbsp;192.168.14.2 (9999)                             <br>
+&nbsp;&nbsp;Version 5 flow records                                            <br>
+&nbsp;&nbsp;159 flows exported in 143 udp datagrams                           <br>
+&nbsp;&nbsp;0 flows failed due to lack of export packet                       <br>
+&nbsp;&nbsp;0 export packets were sent up to process level                    <br>
+&nbsp;&nbsp;27 export packets were dropped due to no fib                      <br>
+&nbsp;&nbsp;0 export packets were dropped due to adjacency issues             <br>
+&nbsp;&nbsp;0 export packets were dropped due to fragmentation failures       <br>
+&nbsp;&nbsp;0 export packets were dropped due to encapsulation fixup failures <br>
+R1#             
+</code></div>
 </p>
 
 <h2><code>show ip flow interface</code></h2>
 <p>
 Displays the Netflow configuration for each interface
 </p>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+R1#<b>show ip flow interface</b> <br>       
+GigabitEthernet0/0               <br>
+&nbsp;&nbsp;ip route-cache flow  <br>          
+&nbsp;&nbsp;ip flow ingress      <br>          
+&nbsp;&nbsp;ip flow egress       <br>          
+GigabitEthernet1/0               <br>
+&nbsp;&nbsp;ip flow ingress      <br>          
+&nbsp;&nbsp;ip flow egress       <br>          
+GigabitEthernet2/0               <br>
+&nbsp;&nbsp;ip flow ingress      <br>          
+&nbsp;&nbsp;ip flow egress       <br>          
+GigabitEthernet3/0               <br>
+&nbsp;&nbsp;ip flow ingress      <br>          
+&nbsp;&nbsp;ip flow egress       <br>
+</code></div>  
+</p>
+
 
 <h2><code>show ip flow top-talkers</code></h2>
 <p>
 This table displays real-time values for the top devices transmitting and receiving 
 traffic.
-
 </p>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+R1#<b>show ip flow top-talkers</b><br>                                                                     
+<br>                                                                                                
+SrcIf&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; SrcIPaddress&nbsp;&nbsp;&nbsp;&nbsp;DstIf&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; DstIPaddress&nbsp;&nbsp;&nbsp;&nbsp;Pr SrcP DstP Bytes <br>                 
+Gi0/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 192.168.12.2&nbsp;&nbsp;&nbsp;&nbsp;Null&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;224.0.0.5&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 59 0000 0000&nbsp;&nbsp;8248 <br>                 
+Gi1/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 192.168.15.2&nbsp;&nbsp;&nbsp;&nbsp;Null&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;224.0.0.5&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 59 0000 0000&nbsp;&nbsp;5448 <br>                 
+Gi3/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 192.168.13.2&nbsp;&nbsp;&nbsp;&nbsp;Null&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;224.0.0.5&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 59 0000 0000&nbsp;&nbsp;3608 <br>                 
+Gi2/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 192.168.14.2&nbsp;&nbsp;&nbsp;&nbsp;Null&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;224.0.0.5&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 59 0000 0000&nbsp;&nbsp;1840 <br>                 
+4 of 10 top talkers shown. 4 flows processed.                                  <br>                 
+                                                                               <br>                 
+R1#<b>show ip flow top-talkers verbose</b>                                            <br>                 
+                                                                               <br>                 
+SrcIf&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SrcIPaddress&nbsp;&nbsp;&nbsp;&nbsp;DstIf&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;DstIPaddress&nbsp;&nbsp;&nbsp;&nbsp;Pr TOS Flgs Bytes<br>                 
+Port Msk AS&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Port Msk AS&nbsp;&nbsp;&nbsp;&nbsp;NextHop&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;B/Pk&nbsp;&nbsp;Active<br>                 
+Gi0/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;192.168.12.2&nbsp;&nbsp;&nbsp;&nbsp;Null&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 224.0.0.5&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 59 C0&nbsp;&nbsp;10&nbsp;&nbsp;&nbsp;&nbsp;8248<br>                 
+0000 /30 0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0000 /0&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp; 0.0.0.0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;80&nbsp;&nbsp; 938.2<br>                 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <br>                 
+Gi1/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;192.168.15.2&nbsp;&nbsp;&nbsp;&nbsp;Null&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 224.0.0.5&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 59 C0&nbsp;&nbsp;10&nbsp;&nbsp;&nbsp;&nbsp;5448<br>                 
+0000 /30 0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0000 /0&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp; 0.0.0.0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;80&nbsp;&nbsp; 606.4<br>                 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <br>                 
+Gi3/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;192.168.13.2&nbsp;&nbsp;&nbsp;&nbsp;Null&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 224.0.0.5&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 59 C0&nbsp;&nbsp;10&nbsp;&nbsp;&nbsp;&nbsp;3608<br>                 
+0000 /30 0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0000 /0&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp; 0.0.0.0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;80&nbsp;&nbsp; 402.1<br>                 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <br>                 
+Gi2/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;192.168.14.2&nbsp;&nbsp;&nbsp;&nbsp;Null&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 224.0.0.5&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 59 C0&nbsp;&nbsp;10&nbsp;&nbsp;&nbsp;&nbsp;1840<br>                 
+0000 /30 0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0000 /0&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp; 0.0.0.0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;80&nbsp;&nbsp; 210.5<br>                 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <br>                 
+4 of 10 top talkers shown. 4 flows processed.                                                   
+</code></div>                                                                                                
+</p>
+
+
 
 <h2><code>clear ip flow stats</code></h2>
 <p>
 Clearing statistics to observer Netflow operations.
-</p>
-
-<h2><code>show run</code></h2>
-<p>
-Displays the active configuraiton file.
 </p>
 
 <h1>NetFlow Version 9</h1>
@@ -350,14 +541,23 @@ configurations follow.  Some template-defined parameters include the following:
   <table width="100%" cellspacing="0">
     <thead style="background-color:#d3d3d3;">
     <tr>
-      <td style="border-top: 1px solid black; border-bottom: 1px solid black;">Command</td>
+      <td style="border-top: 1px solid black; border-bottom: 1px solid black;"
+      width="25%">Command</td>
       <td style="border-top: 1px solid black; border-bottom: 1px solid black;">Description</td>
     </tr>
     </thead>
     <tbody>
       <tr>
         <td style="border-bottom: 1px solid black;"><code><b>ip flow-export template timeout-rate &lt;minutes&gt;</b></code></td>
-        <td  style="border-bottom: 1px solid black;"> </td>
+        <td  style="border-bottom: 1px solid black;"> 
+        <p>
+Set the template timeout to one minute: <code><b>ip flow-export template timeout-rate 1</b></code>.
+This ensures that there are no data gaps if the network service or server restarts.
+The default setting for long active flows(long-lived flows) is 30 minutes. This 
+can cause high peaks wellabove circuit speeds. By breaking the cached flows into 
+one-minute fragments, we can avoid the high peaks by normalizing the data.
+</p>
+        </td>
       </tr>
       <tr>
         <td  style="border-bottom: 1px solid black;"><code><b>ip flow-export template options export-stats</b></code></td>
@@ -374,44 +574,72 @@ The default is 20.
         <td style="border-bottom: 1px solid black;"><code><b>ip flow-export template options timeout-rate &lt;minutes&gt;</b></code></td>
         <td style="border-bottom: 1px solid black;"> Specifies time elapsed before templates are resent. The default is 30 minutes </td>
       </tr>
+	  <tr>
+		<td style="border-bottom: 1px solid black;"><code><b>ip flow-capture fragment-offset  </b></code>  </td>
+		<td style="border-bottom: 1px solid black;">Caotyre the fragment offset  </td>
+	  </tr>
+	  <tr>
+		<td style="border-bottom: 1px solid black;"><code><b>ip flow-capture packet-length    </b></code>  </td>
+		<td style="border-bottom: 1px solid black;">Capture the max and min packet length  </td>
+	  </tr>
+	  <tr>
+		<td style="border-bottom: 1px solid black;"> <code><b>ip flow-capture ttl              </b></code> </td>
+		<td style="border-bottom: 1px solid black;">Capture the TTL  </td>
+	  </tr>
+
+	  <tr>
+		<td style="border-bottom: 1px solid black;"> <code><b>ip flow-capture vlan-id          </b></code> </td>
+		<td style="border-bottom: 1px solid black;">Capture the VLAN id  </td>
+	  </tr>
+	  <tr>
+		<td style="border-bottom: 1px solid black;"> <code><b>ip flow-capture icmp             </b></code> </td>
+		<td style="border-bottom: 1px solid black;">Capture the ICMP type and code </td>
+	  </tr>
+	  <tr>
+		<td style="border-bottom: 1px solid black;"> <code><b>ip flow-capture ip-id            </b></code> </td>
+		<td style="border-bottom: 1px solid black;">Capture the IP id  </td>
+	  </tr>
+	  <tr>
+		<td style="border-bottom: 1px solid black;">  <code><b>ip flow-capture mac-addresses    </b></code
+ </td>
+		<td style="border-bottom: 1px solid black;"> Capture the source and destination 
+		MAC addresses.</td>
+	  </tr>
+	  <tr>
+		<td style="border-bottom: 1px solid black;"> 	   <code><b>ip flow-cache timeout inactive &lt;10-600&gt;</b></code>    
+ </td>
+		<td style="border-bottom: 1px solid black;"> Capture the inactive timeout value in seconds. 
+		
+		</td>
+	  </tr>
+	  <tr>
+		<td style="border-bottom: 1px solid black;">  <code><b>ip flow-cache timeout active 1   </b></code> </td>
+		<td style="border-bottom: 1px solid black;">  </td>
+	  </tr>
+	  
+	  <!--
+	  <tr>
+		<td style="border-bottom: 1px solid black;">  </td>
+		<td style="border-bottom: 1px solid black;">  </td>
+	  </tr>
+	  -->
     </tbody>
   </table>
 </p>
-<ul>
-  <li><b><code>Timeout-rate</code></b>:
-  <p>
-Set the template timeout to one minute: <code><b>ip flow-export template timeout-rate 1</b></code>.
-This ensures that there are no data gaps if the network service or server restarts.
-The default setting for long active flows(long-lived flows) is 30 minutes. This 
-can cause high peaks wellabove circuit speeds. By breaking the cached flows into 
-one-minute fragments, we can avoid the high peaks by normalizing the data.
-</p>
-  </li>
-  <li>
-  
-<p><code><b>Timeout-inactive</b></code>:
-To ensure that finished flows are periodically exported, configure the inactive 
-timeout <code><b>ip flow-cache timeout inactive 15</b></code>. The value is in 
-seconds.
-</p>
-</li>
-<li><code><b>snmp-server ifindex persist</b></code>
 <p>
-To ensure that the ifindex persists during device reboots, <code><b>snmp-server 
-ifindex persist</b></code>.
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+R1(config)#<b>ip flow-capture packet-length   </b><br>
+R1(config)#<b>ip flow-capture ttl             </b><br>
+R1(config)#<b>ip flow-capture fragment-offset </b><br>
+R1(config)#<b>ip flow-capture mac-addresses   </b><br>
+R1(config)#<b>ip flow-capture ip-id           </b><br>
+</code></div>
 </p>
-  </li>
-  <li>ip flow-cache timeout inactive 60</li>     
-  <li>ip flow-cache timeout active 1   </li>
-  <li>ip flow-capture fragment-offset  </li>
-  <li>ip flow-capture packet-length    </li>
-  <li>ip flow-capture ttl              </li>
-  <li>ip flow-capture vlan-id          </li>
-  <li>ip flow-capture icmp             </li>
-  <li>ip flow-capture ip-id            </li>
-  <li>ip flow-capture mac-addresses    </li>
-</ul>
-
+</li>  
+<li><b>IfIndex Persistance:</b> 
+To ensure that the interface indices persists across device reboots, <code><b>snmp-server 
+ifindex persist</b></code>.
 </li>
 
 </ol>
@@ -429,21 +657,31 @@ sampler can be configured as follows:
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
   <code>
-  flow-sampler-map RANDOM<BR>
-    mode RANDOM one-out-of-10<br>
+    R1(config)#<b>flow-sampler-map ONE_TEN</b> <br>
+    R1(config-sampler)#mode random one-out-of 10
+    
+  </code></div>
+  </p>
   
-  </code>
-  </div>
-</p>
 <p>
 The flow sampler can then be applied to the interface using the interface command <code>
-<b>flow-sampler RAMDOM</b></code>.
+<b>flow-sampler ONE_TEN</b></code>.
 </p>
 <p>
 If ingress flow is configured on an interface and a flow sampler is applied to 
 the interface, an error message is generated <code><b>Warning: ingress netflow 
 will override the sampler</b></code>. The ingress flow command will have to be 
 removed. 
+</p>
+<p>
+ <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+  R1(config-if)#<b>flow-sampler ONE_TEN ?</b><br>
+R1(config-if)#<b>flow-sampler ONE_TEN</b><br>
+*May 29 22:43:54.035: Warning: ingress netflow will override the sampler.<br>
+R1(config-if)#<b>no ip flow ingress</b><br>
+*May 29 22:44:06.223: Warning: ingress sampler re-enabled.<br>
+</code></div>
 </p>
 
 <h4>Flow sampler with Class Map and Policy Map</h4>
@@ -453,27 +691,32 @@ traffic statistics. This can be accomplished using the following commands:
 <ol>
   <li><b>Configure the flow sampler:</b> 
   <p>
+ <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
   <code>
-    flow-sampler-map ONE_ONE <br>
-  mode random one-out-of-1<br>
-  </code>
+    R1(config)#<b>flow-sampler-map ONE_ONE</b> <br>
+  R1(config-sampler)#<b>mode random one-out-of 1 </b>
+</code></div>
   </p>
   </li>
   <li><b>Configure the class-map:</b>
   <p>
-    <code>
-     class-map match-all ICMP<br>
-       match protocol icmp<br>  
-   </code></p>
+    <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+    R1(config)#<b>class-map match-all ICMP</b><br>
+    R1(config-cmap)#<b>match protocol icmp</b>  
+  </code></div>  
+    </p>
    </li>
    <li><b>Configure the policy map:</b>
-   <p><code>
-     policy-map SAMPLER<br>
-       class ICMP<br>
-         netflow-sampler RANDOM<br>
-       class class-default<br>
-         netflow-sampler ONE_ONE<br>
-    </code>
+   <p> 
+   <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+   R1(config)#<b>policy-map PM_SAMPLER</b><br>
+   R1(config-pmap)#<b>class ICMP</b><br>
+   R1(config-pmap-c)#<b>netflow-sampler ONE_TEN</b><br>
+   R1(config-pmap)#<b>class class-default</b><br>
+   R1(config-pmap-c)#<b>netflow-sampler ONE_ONE</b>
+    </code></div>
   </p> 
   <p>
    The default class-map captures statistics on all other traffic i.e., traffic 
@@ -482,10 +725,11 @@ traffic statistics. This can be accomplished using the following commands:
   </li>
   <li><b>Apply the service policy to the interface:</b> 
   <p>
-    <code>
-      interface g1/0<br>
-      service-policy input SAMPLER<br>
-    </code>
+    <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+    R1(config)#<b>interface g0/0</b><br>
+    R1(config-if)#<b>service-policy input PM_SAMPLER</b>
+    </code></div>
   </p>
 </ol>
 </p>
@@ -493,7 +737,37 @@ traffic statistics. This can be accomplished using the following commands:
 To verify the traffic statistics, use the command <code><b>show policy-map interface</b></code>.
 The other netflow verification commands still apply.
 </p>
-
+<p>
+On a remote device simulate ICMP traffic:
+</p>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+R2#<b>ping 192.168.15.2 repeat 1000</b>
+</code></div>
+</p>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+R1#<b>show policy-map interface g0/0 input</b><br>
+ GigabitEthernet0/0               <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                          <br>
+&nbsp;&nbsp;Service-policy input: PM_SAMPLER<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                          <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Class-map: ICMP (match-all)   <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1000 packets, 114000 bytes  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;5 minute offered rate 00<br>00 bps, drop rate 0000 bps<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Match: protocol icmp    <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;netflow-sampler: ONE_TEN<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                      <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Class-map: class-default (match-any)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;25 packets, 2350 bytes<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;5 minute offered rate 0000 bps, drop rate 0000 bps<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Match: any<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;netflow-sampler: ONE_ONE<br>
+R1#
+</code></div>
+</p>
 <h2>Verification</h2>
 
 <h3><code>show ip flow export</code></h3>
@@ -501,11 +775,68 @@ The other netflow verification commands still apply.
 Displays the statistics of the NetFlow export for the main cache and other enabled 
 caches.
 </p>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+R1#<b>show ip flow export</b>                                                <br>
+Flow export v9 is enabled for main cache                              <br>
+&nbsp;&nbsp;Export source and destination details :                             <br>
+&nbsp;&nbsp;VRF ID : Default&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                              <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Source(1)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 1.1.1.1 (Loopback0)                               <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Destination(1)&nbsp;&nbsp;192.168.14.2 (9999)                               <br>
+&nbsp;&nbsp;Version 9 flow records                                              <br>
+&nbsp;&nbsp;388 flows exported in 311 udp datagrams                             <br>
+&nbsp;&nbsp;0 flows failed due to lack of export packet                         <br>
+&nbsp;&nbsp;0 export packets were sent up to process level                      <br>
+&nbsp;&nbsp;27 export packets were dropped due to no fib                        <br>
+&nbsp;&nbsp;0 export packets were dropped due to adjacency issues               <br>
+&nbsp;&nbsp;0 export packets were dropped due to fragmentation failures         <br>
+&nbsp;&nbsp;0 export packets were dropped due to encapsulation fixup failures   <br>
+R1#<b>show ip flow export verbose</b>                                        <br>
+Flow export v9 is enabled for main cache                              <br>
+&nbsp;&nbsp;Export source and destination details :                             <br>
+&nbsp;&nbsp;VRF ID : Default&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                              <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Source(1)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 1.1.1.1 (Loopback0)                               <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Destination(1)&nbsp;&nbsp;192.168.14.2 (9999)                               <br>
+&nbsp;&nbsp;Version 9 flow records                                              <br>
+&nbsp;&nbsp;388 flows exported in 311 udp datagrams                             <br>
+&nbsp;&nbsp;0 flows failed due to lack of export packet                         <br>
+&nbsp;&nbsp;0 export packets were sent up to process level                      <br>
+&nbsp;&nbsp;27 export packets were dropped due to no fib                        <br>
+&nbsp;&nbsp;0 export packets were dropped due to adjacency issues               <br>
+&nbsp;&nbsp;0 export packets were dropped due to fragmentation failures         <br>
+&nbsp;&nbsp;0 export packets were dropped due to encapsulation fixup failures   
+</code></div>
+</p>
 
 <h3><code>show ip flow export template</code></h3>
 <p>
 Displays statistics for the NetFlow data export for template specific configurations.
 </p>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+  R1#<b>show ip flow export template</b>       <br>      
+&nbsp;&nbsp; Template Options Flag = 0            <br>    
+&nbsp;&nbsp; Total number of Templates added = 4  <br>    
+&nbsp;&nbsp; Total active Templates = 4           <br>    
+&nbsp;&nbsp; Flow Templates active = 4            <br>    
+&nbsp;&nbsp; Flow Templates added = 4             <br>    
+&nbsp;&nbsp; Option Templates active = 0          <br>    
+&nbsp;&nbsp; Option  Templates added = 0          <br>    
+&nbsp;&nbsp; Template ager polls = 9546           <br>    
+&nbsp;&nbsp; Option Template ager polls = 0       <br>    
+Main cache version 9 export is enabled  <br>    
+ Template export information            <br>    
+&nbsp;&nbsp; Template timeout = 30                <br>    
+&nbsp;&nbsp; Template refresh rate = 20           <br>    
+ Option export information              <br>    
+&nbsp;&nbsp; Option timeout = 30                  <br>    
+&nbsp;&nbsp; Option refresh rate = 20             <br>    
+R1#                                         
+  
+  </code></div>
+</p>  
 
 <h2>Clearing NetFlow Stats on a Router</h2>
 <p>

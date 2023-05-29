@@ -288,11 +288,11 @@ Clearing statistics to observer Netflow operations.
 Displays the active configuraiton file.
 </p>
 
-<h1>Version 9</h1>
+<h1>NetFlow Version 9</h1>
 <p>
 NetFlow version 9 is a flexible format, which provides the versatility needed for support 
 of new fields and record types. It provides support for export of packet data from 
-IPv6, multicast, Multiprotocol Label Switching(MPLS), BGP next hop and so on.
+IPv6, multicast, Multiprotocol Label Switching(MPLS), BGP next hop etc.
 NetFlow version 9 is template-based. Templates provide a means of extending the 
 record format, and ensures that NetFlow can be adapted to provide support for 
 new protocols. A template describes a NetFlow record format and attributes of the 
@@ -301,7 +301,15 @@ to the Collection Engine along with the template description. The template ID
 is used for all further communication from the router to the Collection Engine.
 However, NetFlow records generated with version 9 are not backwards compatible 
 with previous versions of NetFlow.
-Unlink version 5 which exports records only from the main cache, NetFlow 9 supports 
+</p>
+<p>
+With NetFlow v9, templates used are preconfigured on the IOS.
+These cannot be easily modified. However, with flexible NetFlow, these templates 
+can be manually configured. In version 9, the command <code><b> flow-capture</b></code> 
+can be used to add fields of the packet in NetFlow records.
+</p>
+<p>
+Unlike version 5 which exports records only from the main cache, NetFlow 9 supports 
 the export of data from main cache and aggregation cache.
 </p>
 <!--
@@ -316,33 +324,10 @@ NetFlow v9 introduces the concept of "egress" flows. Traffic statistics on ingre
 flows are calculated before compression. This may be a problem if WAN links are 
 using compression of packets. Egress flow statistics are calculated after compression.
 </p>
-<p>
-With NetFlow v9, templates used are preconfigured on the IOS.
-These cannot be easily modified. However, with flexible NetFlow, these templates 
-can be manually configured. In version 9, the command <code><b> flow-capture</b></code> 
-can be used to add fields of the packet in NetFlow records.
-</p>
+
 
 
 <h2>Configuration</h2>
-<p>
-Set the template timeout to one minute: <code><b>ip flow-export template timeout-rate 1</b></code>.
-This ensures that there are no data gaps if the network service or server restarts.
-The default setting for long active flows(long-lived flows) is 30 minutes. This 
-can cause high peaks wellabove circuit speeds. By breaking the cached flows into 
-one-minute fragments, we can avoid the high peaks by normalizing the data.
-</p>
-<p>
-To ensure that finished flows are periodically exported, configure the inactive 
-timeout <code><b>ip flow-cache timeout inactive 15</b></code>. The value is in 
-seconds.
-</p>
-<p>
-To ensure that the ifindex persists during device reboots, <code><b>snmp-server 
-ifindex persist</b></code>.
-</p>
-
-
 <ol>
 <li><b>Enable flows on the interface:</b>
 In interface configuration mode: 
@@ -353,51 +338,89 @@ In interface configuration mode:
 <li><b>Configure the flow export destination:</b> Define the export destination 
 using the command <code><b>ip flow-export destination &lt;ip-address&gt; &lt;port&gt; [sctp|udp]</b></code>.
 </li>
-<li>
 <li>Define the source IP address:</li> using the command <code><b>ip flow-export 
 source  &lt;interface&gt;</b></code>.
 </li>
 <li><b>Configure the export version:</b> <code><b>ip flow-export version 9</b></code>.
 </li>
-<li>ip flow-export template refresh-rate &lt;1-600&gt;. The template keyword 
-specifies template specific configurations. Refresh-rate &lt;packets&gt; keyword-argument 
-pair specifies the number of packets exported before the templates are resent. 
-The default is 20. Other templates include the following:
+<li>The characteristics of the packets to be included in the Netflow records are 
+defined using the template keyword which specifies that template specific 
+configurations follow.  Some template-defined parameters include the following:
 <p>
-  <table width="100%">
-    <thead>
+  <table width="100%" cellspacing="0">
+    <thead style="background-color:#d3d3d3;">
     <tr>
-      <td>Command</td>
-      <td>Description</td>
+      <td style="border-top: 1px solid black; border-bottom: 1px solid black;">Command</td>
+      <td style="border-top: 1px solid black; border-bottom: 1px solid black;">Description</td>
     </tr>
     </thead>
     <tbody>
       <tr>
-        <td><code><b>ip flow-export template timeout-rate &lt;minutes&gt;</b></code></td>
-        <td> </td>
+        <td style="border-bottom: 1px solid black;"><code><b>ip flow-export template timeout-rate &lt;minutes&gt;</b></code></td>
+        <td  style="border-bottom: 1px solid black;"> </td>
       </tr>
       <tr>
-        <td><code><b>ip flow-export template options export-stats</b></code></td>
-        <td> </td>
+        <td  style="border-bottom: 1px solid black;"><code><b>ip flow-export template options export-stats</b></code></td>
+        <td  style="border-bottom: 1px solid black;"> </td>
       </tr>
       <tr>
-        <td><code><b>ip flow-export template options refresh-rate &lt;packets&gt;</b></code></td>
-        <td> </td>
+        <td  style="border-bottom: 1px solid black;"><code><b>ip flow-export template options refresh-rate &lt;1-600&gt;</b></code></td>
+        <td  style="border-bottom: 1px solid black;"> 
+        Specifies the number of packets exported before the templates are resent. 
+The default is 20.
+        </td>
       </tr>
       <tr>
-        <td><code><b>ip flow-export template options timeout-rate &lt;minutes&gt;</b></code></td>
-        <td> Specifies time elapsed before templates are resent. The default is 30 minutes </td>
+        <td style="border-bottom: 1px solid black;"><code><b>ip flow-export template options timeout-rate &lt;minutes&gt;</b></code></td>
+        <td style="border-bottom: 1px solid black;"> Specifies time elapsed before templates are resent. The default is 30 minutes </td>
       </tr>
     </tbody>
   </table>
 </p>
+<ul>
+  <li><b><code>Timeout-rate</code></b>:
+  <p>
+Set the template timeout to one minute: <code><b>ip flow-export template timeout-rate 1</b></code>.
+This ensures that there are no data gaps if the network service or server restarts.
+The default setting for long active flows(long-lived flows) is 30 minutes. This 
+can cause high peaks wellabove circuit speeds. By breaking the cached flows into 
+one-minute fragments, we can avoid the high peaks by normalizing the data.
+</p>
+  </li>
+  <li>
+  
+<p><code><b>Timeout-inactive</b></code>:
+To ensure that finished flows are periodically exported, configure the inactive 
+timeout <code><b>ip flow-cache timeout inactive 15</b></code>. The value is in 
+seconds.
+</p>
+</li>
+<li><code><b>snmp-server ifindex persist</b></code>
+<p>
+To ensure that the ifindex persists during device reboots, <code><b>snmp-server 
+ifindex persist</b></code>.
+</p>
+  </li>
+  <li>ip flow-cache timeout inactive 60</li>     
+  <li>ip flow-cache timeout active 1   </li>
+  <li>ip flow-capture fragment-offset  </li>
+  <li>ip flow-capture packet-length    </li>
+  <li>ip flow-capture ttl              </li>
+  <li>ip flow-capture vlan-id          </li>
+  <li>ip flow-capture icmp             </li>
+  <li>ip flow-capture ip-id            </li>
+  <li>ip flow-capture mac-addresses    </li>
+</ul>
+
+</li>
+
 </ol>
 
 
 <h3>Flow Sampler</h3>
 <p>
-A flow sampler is used to configure define a subset of packets whose statistics 
-are of interest rather than all packets going through the interface. 
+A flow sampler is used to define a subset of packets whose statistics are 
+representative of the traffic transiting an interface rather than all packets going through the interface. 
 Sampling flow data reduces the load on the CPU and memory. However, with sampling 
 flow data, some packet information may be missed.
 A flow 
