@@ -1,4 +1,4 @@
-<h1>Netflow: Overview and Introduction</h1>
+<!--<h1>Netflow: Overview and Introduction</h1> -->
 <p>
 Netflow is a Cisco application that collects statistics on packets flowing through 
 a router. By analyzing the data provided by NetFlow, a 
@@ -869,7 +869,7 @@ the traffic analysis parameters for your specific requirements.
 Flexible NetFlow is an extension of NetFlow v9. It provides additional functionality 
 that allows you to export more information using the same NetFlow v9 datagram. 
 Flexible NetFlow facilitates the creation of more complex configurations for traffic analysis and 
-data export through the use of templates which are reusable conifguration 
+data export through the use of templates which are reusable configuration 
 components.  
 </p>
 <p>
@@ -895,10 +895,7 @@ IPFIX(IP Flow Information eXport) is the standards-based method for exporting
 the flow information to a collector that was published by IETF. It is intended 
 to serve as a universal protocol for exporting flow information. IPFIX has extensive 
 flexibility in its configurations.
-</p>
-<p>
-When configuring the exporter, the format can be selected which can be v9 or 
-IPFIX(sometimes referred to as NetFlow version 10).
+Cisco configuration commands will consider export format in IPFIX as NetFlow version 10.
 </p>
 
 <h2>Configuration of Flexible NetFlow</h2>
@@ -911,68 +908,238 @@ To configure flexible netflow:
   commands.
   <ol type="a">
     <li><b>Define the flow record:</b> using the command <code><b>flow record &lt;flow-name&gt;</b></code>
-  <li><b>Match the traffic category:</b> using the command 
-  <code><b>match [ipv4|ipv6|interface|flow|datalink|application|routing|transport]</b></code>. 
-  The following command matches all traffic based on the type of service value(TOS) 
-  <code><b>match ipv4 tos</b></code>.
+  <li><b>Match the traffic category:</b> The key fields can be matched using the command 
+  <code><b>match [ipv4|ipv6|interface|flow|datalink|application|routing|transport]</b></code> 
   <p>
+  Where:
   <div>
-  <code>
-  flow record FLOW-RECORD-1<BR>
-  description Netflow record format to send to NetFlow collector<br>
-  match ipv4 ttl<br>
-  match ipv4 tos<br>
+    <table width="100%" cellspacing="0">
+      <thead style="background:#d3d3d3; font-weight:bold;">
+        <tr>
+          <td width="50%" style="border-top: 1px solid; border-bottom: 1px solid;">Parameter</td>
+          <td style="border-top: 1px solid; border-bottom: 1px solid;">Description</td>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="border-bottom:1px solid;">
+          <code><b>transport [destination-port | igmp | icmp | source-port]</b></code></td>
+          <td style="border-bottom:1px solid;">Specifies a match to the transport layer 
+          fields.</td>
+        </tr>
+         <tr>
+          <td style="border-bottom:1px solid;">
+          <code><b>ipv4 [destination | protocol | source | tos | ttl | version]</b></code></td>
+          <td style="border-bottom:1px solid;">Specifies a match to IPv4 fields.</td>
+        </tr>
+         <tr>
+          <td style="border-bottom:1px solid;">
+          <code><b>ipv6 [destination | hop-limit | protocol | source | traffic-class | version]</b></code></td>
+          <td style="border-bottom:1px solid;">Specifies a match to the IPv6  
+          fields.</td>
+        </tr>
+         <tr>
+          <td style="border-bottom:1px solid;">
+          <code><b>interface [input | output]</b></code></td>
+          <td style="border-bottom:1px solid;">Specifies a match to the interface  
+          fields.</td>
+        </tr>
+                <tr>
+          <td style="border-bottom:1px solid;">
+          <code><b>datalink [dot1q | mac | vlan | ethertype]</b></code></td>
+          <td style="border-bottom:1px solid;">Specifies a match to the datalink 
+          or Layer 2 fields.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  </p>
+  <p>
+  At least of these parameters must be configured for a flow record.
+  </p>
   
+  <p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+  R3(config)#<b>flow record FLOW-RECORD-G00</b>
+  R3(config-flow-record)#<b>description NetFlow Record for TTL, TOS, PACKET_LENGTH  </b> <br>
+  R3(config-flow-record)#<b>match interface input                                   </b> <br>
+  R3(config-flow-record)#<b>match interface output                                  </b> <br>
+  R3(config-flow-record)#<b>match ipv4 destination address                          </b> <br>
+  R3(config-flow-record)#<b>match ipv4 destination mask                             </b> <br>
+  R3(config-flow-record)#<b>match ipv4 source address                               </b> <br>
+  R3(config-flow-record)#<b>match ipv4 source mask                                  </b> <br>
+  R3(config-flow-record)#<b>match ipv4 precedence                                   </b> <br>
+  R3(config-flow-record)#<b>match ipv4 protocol                                     </b> <br>
+  R3(config-flow-record)#<b>match ipv4 total-length                                 </b><br>
+  R3(config-flow-record)#<b>match ipv4 ttl</b><br>
+  R3(config-flow-record)#<b>match ipv4 tos</b>
   </code></div>
   </p>
   </li>
-  <li><b>Define what information should be collected:</b> using the command 
-  <code><b>collect datalink mac [destination|source]</b></code>. The following 
+  <li><b>Specify the collection field:</b> using the command 
+  <code><b>collect [ counter | interface | timestamp absolute | transport tcp flags]</b></code>. The following 
   example collects the count of traffic in bytes: <code><b>collect counter bytes</b></code>.
+  
+   <p>
+  Where:
+  <div>
+    <table width="100%" cellspacing="0">
+      <thead style="background:#d3d3d3; font-weight:bold;">
+        <tr>
+          <td width="50%" style="border-top: 1px solid; border-bottom: 1px solid;">Parameter</td>
+          <td style="border-top: 1px solid; border-bottom: 1px solid;">Description</td>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="border-bottom:1px solid;">
+          <code><b>transport tcp flags [ack | cwr | ece | fin | psh | rst | syn 
+          | urg]</b></code></td>
+          <td style="border-bottom:1px solid;">Collects TCP flags. On switches, 
+          all TCP flags will be collected. Only with routers can the TCP flag type 
+          be specified.</td>
+        </tr>
+         <tr>
+          <td style="border-bottom:1px solid;">
+          <code><b>timestamp absolute [first | last]</b></code></td>
+          <td style="border-bottom:1px solid;">Collects the fields for the 
+          absolute time the most recent packet was last seen(in milliseconds).</td>
+        </tr>
+         <tr>
+          <td style="border-bottom:1px solid;">
+          <code><b>interface [input | output]</b></code></td>
+          <td style="border-bottom:1px solid;">Collects fields from the input or 
+          output interface.</td>
+        </tr>
+         <tr>
+          <td style="border-bottom:1px solid;">
+          <code><b>counter [bytes [layer2 [long] | long] | packets [long]]</b></code></td>
+          <td style="border-bottom:1px solid;">Collects the counter fields total 
+          bytes and total packets.</td>
+       
+      </tbody>
+    </table>
+  </div>
+  </p>
   <p>
-    Other examples include:
-  <div><code>
- <b>collect interface output         </b>   <br>
- <b>collect counter packets long     </b>   <br>
- <b>collect counter bytes long       </b>   <br>
- <b>collect timestamp absolute first </b>   <br>
- <b>collect timestamp absolute last  </b>   <br>
+  <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+  R3(config-flow-record)#<b>collect datalink mac source address output </b><br>
+  R3(config-flow-record)#<b>collect counter packets long               </b><br>
+  R3(config-flow-record)#<b>collect counter bytes long                 </b><br>
+  R3(config-flow-record)#<b>collect flow direction                     </b><br>
+  R3(config-flow-record)#<b>collect application name                   </b><br>
+  R3(config-flow-record)#<b>collect transport tcp flags                </b><br>
+  R3(config-flow-record)#<b>collect transport tcp destination-port     </b><br>
+  R3(config-flow-record)#<b>collect timestamp absolute first           </b><br>
+  R3(config-flow-record)#<b>collect timestamp absolute last            </b>
   </code></div>
   </p>
   </li>
   </ol>
+  
   </li>
-  <li><b>Create Flow Export configuration</b> Configures the external server where 
-  the flow records are exported for analysis.
+  <li><b>Create Flow Export:</b> Define export parameters for a flow.
   <p>
-  <div><code>
-  flow exporter NETFLOW-COLLECTOR-1<br>
-  description  Export NetFlow to collector<br>
-  destination 1.2.3.4<br>
-  source g0/0<br>
-  transport udp 9999<br>
-  export-protocol ipfix<br>
-  </div></code>
+    <ol type="a">
+      <li><b>Define the flow export name:</b> <code><b>flow exporter &lt;name&gt;</b></code>
+       <p>
+  <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+      R3(config)#<b>flow export FLOW-EXPORT-G00</b>
+      </code></div></p>
+      </li>
+      <li><b>Specify the destination IPv4 address or hostname:</b> 
+      <code><b>destination &lt;ip-address&gt; vrf &lt;vrf-name&gt;</b></code>
+       <p>
+  <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+  R3(config-flow-exporter)#<b>destination 192.168.15.2</b>
+  </code></div>
   </p>
+      
+      </li>
+      <li>Specify the UDP port: <code><b>transport udp &lt;1-65535&gt;</b></code>
+      <p>
+  <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+  R3(config-flow-exporter)#<b>transport udp 9999</b>
+  </code></div></p>
+      
+      </li>
+      <li>Specify the NetFlow export version: using the command <code><b>
+      export [ipfix | netflow-v5 | netflow-v9]</b></code>.
+      <p>
+      <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+      <code>
+        R3(config-flow-exporter)#<b>export ipfix</b>
+      </code></div></p>
+      </li>
+      <li><b>Define the source interface:</b> 
+      <p>
+      <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+      <code>
+      	R3(config-flow-exporter)#<b>source g0/0</b>
+      </code></div></p>
+      </li>
+    </ol>
+  </p>
+  
   </li>
   <li><b>Configure a flow monitor:</b> the flow monitor ties the flow record to 
   the flow exporter. The flow monitor calls the flow record.
-  <p>
-  <div>
-  <code>
-  flow monitor FLOW-MONITOR-1<br>
-    record FLOW-MONITOR-1 (note: netflow-original is predefined flow record)<br>
-    exporter NETFLOW-COLLECTOR-1<br>
-    cache timeout active 60<br>
-  </code></div>
-  </p>
+    <ol type="a">
+      <li>Define the flow monitor name using the command <code><b>flow monitor &lt;name&gt;</b></code>.
+       <p>
+      <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+      <code>
+      R3(config)#<b>flow monitor FLOW-MONITOR-G00</b>
+      </code></div></p>
+      </li>
+      <li><b>Configure a description:</b> using the command <code><b>
+      description &lt;text&gt;</b></code>.
+       <p>
+      <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+      <code>
+      R3(config-flow-monitor)#<b>description NetFlow monitor for traffic transiting G0/0</b>
+      </code></div></p>
+      </li>
+      <li><b>Specify the configured flow record:</b> using the command <code><b>
+      record &lt;name&gt;</b></code>.
+       <p>
+      <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+      <code>
+      R3(config-flow-monitor)#<b>record FLOW-RECORD-G00</b>
+      </code></div></p>
+      </li>
+      <li><b>Specify the configured flow exporter:</b> using the command <code><b>
+      exporter &lt;name&gt;</b></code>.
+       <p>
+      <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+      <code>
+      R3(config-flow-monitor)#<b>exporter FLOW-EXPORT-G00</b>
+      </code></div></p>
+      </li>
+      <li><b>Specify the active timeout in seconds:</b> using the command 
+      <code><b>cache timeout active &lt;1-604800&gt;</b></code>.
+      <p>
+      <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+      <code>
+      R3(config-flow-monitor)#<b>cache timeout active 60</b>
+      </code></div></p>
+      </li>
+    </ol>
   </li>
-  <li><b>Apply the flow monitor to a link:</b> </li>
+  <li><b>Apply the flow monitor:</b> Associate a flow monitor and optional flow 
+  sampler to a Layer 2, Layer 3 or VLAN interface using the command  
+  <code><b>ip flow monitor &lt;monitor-name&gt; [sampler &lt;sampler-name&gt;] 
+  [input | output]</b></code>.
+  The direction can be input or output.
+  </li>
 </ol>
 </p>
-<p>
-The netflow monitor aggregates the flow exporter and flow record data.
-</p>
+
 
 <h3>Flow Sampler</h3>
 <p>
@@ -995,21 +1162,302 @@ A flow sampler can be added to the configuration as follows:
 To view configured flow records.
 </p>
 
+<p>
+      <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+      <code>
+R3#<b>show flow record</b><br>
+flow record FLOW-RECORD-G00:<br>
+&nbsp;&nbsp;Description:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;NetFlow Record for TTL, TOS, PACKET_LENGTH<br>
+&nbsp;&nbsp;No. of users:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 1    <br>
+&nbsp;&nbsp;Total field space:&nbsp;&nbsp;70 bytes                 <br>
+&nbsp;&nbsp;Fields:                                                <br>
+&nbsp;&nbsp;&nbsp;&nbsp;match ipv4 tos                             <br>
+&nbsp;&nbsp;&nbsp;&nbsp;match ipv4 precedence                      <br>
+&nbsp;&nbsp;&nbsp;&nbsp;match ipv4 total-length                    <br>
+&nbsp;&nbsp;&nbsp;&nbsp;match ipv4 ttl                             <br>
+&nbsp;&nbsp;&nbsp;&nbsp;match ipv4 protocol                        <br>
+&nbsp;&nbsp;&nbsp;&nbsp;match ipv4 source address                  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;match ipv4 source mask                     <br>
+&nbsp;&nbsp;&nbsp;&nbsp;match ipv4 destination address             <br>
+&nbsp;&nbsp;&nbsp;&nbsp;match ipv4 destination mask                <br>
+&nbsp;&nbsp;&nbsp;&nbsp;match interface input                      <br>
+&nbsp;&nbsp;&nbsp;&nbsp;match interface output                     <br>
+&nbsp;&nbsp;&nbsp;&nbsp;collect datalink mac source address output <br>
+&nbsp;&nbsp;&nbsp;&nbsp;collect transport tcp destination-port     <br>
+&nbsp;&nbsp;&nbsp;&nbsp;collect transport tcp flags                <br>
+&nbsp;&nbsp;&nbsp;&nbsp;collect flow direction                     <br>
+&nbsp;&nbsp;&nbsp;&nbsp;collect counter bytes long                 <br>
+&nbsp;&nbsp;&nbsp;&nbsp;collect counter packets long               <br>
+&nbsp;&nbsp;&nbsp;&nbsp;collect timestamp absolute first           <br>
+&nbsp;&nbsp;&nbsp;&nbsp;collect timestamp absolute last            <br>
+&nbsp;&nbsp;&nbsp;&nbsp;collect application name
+</code></div>
+</p>
+
 <h3><code>show flow record netflow ipv4 original-input</code></h3>
 <p>
-Lists the builtin flow records in the IOS.
+Lists the builtin flow records templates in the IOS.
 </p>
-
-<h3><code>show flow monitor &lt;FLOW-MONITOR-1&gt; cache</code></h3>
 <p>
+      <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+      <code>
+R3#<b>show flow record netflow ipv4 original-output </b>              <br>
+flow record netflow ipv4 original-output:                      <br>
+&nbsp;&nbsp;Description:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Traditional IPv4 output NetFlow with ASs <br>
+&nbsp;&nbsp;No. of users:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                  <br>
+&nbsp;&nbsp;Total field space:&nbsp;&nbsp;53 bytes                                 <br>
+&nbsp;&nbsp;Fields:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;match ipv4 tos&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                 <br>
+&nbsp;&nbsp;&nbsp;&nbsp;match ipv4 protocol&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;match ipv4 source address                                  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;match ipv4 destination address                             <br>
+&nbsp;&nbsp;&nbsp;&nbsp;match transport source-port                                <br>
+&nbsp;&nbsp;&nbsp;&nbsp;match transport destination-port                           <br>
+&nbsp;&nbsp;&nbsp;&nbsp;match interface output&nbsp;&nbsp;&nbsp;&nbsp;                                 <br>
+&nbsp;&nbsp;&nbsp;&nbsp;match flow sampler&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                 <br>
+&nbsp;&nbsp;&nbsp;&nbsp;collect routing source as                                  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;collect routing destination as                             <br>
+&nbsp;&nbsp;&nbsp;&nbsp;collect routing next-hop address ipv4                      <br>
+&nbsp;&nbsp;&nbsp;&nbsp;collect ipv4 source mask&nbsp;&nbsp;                                 <br>
+&nbsp;&nbsp;&nbsp;&nbsp;collect ipv4 destination mask                              <br>
+&nbsp;&nbsp;&nbsp;&nbsp;collect transport tcp flags                                <br>
+&nbsp;&nbsp;&nbsp;&nbsp;collect interface input&nbsp;&nbsp;                                  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;collect counter bytes&nbsp;&nbsp;&nbsp;&nbsp;                                  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;collect counter packets&nbsp;&nbsp;                                  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;collect timestamp sys-uptime first                         <br>
+&nbsp;&nbsp;&nbsp;&nbsp;collect timestamp sys-uptime last                          <br>
 
+    </code></div></p>
+
+    <h3><code>show flow record netflow ipv4 prefix</code></h3>
+<p>
+Displays NetFlow record template for collecting IPv4 prefix information from 
+packets. 
 </p>
-
+    
+<p>
+      <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+      <code>
+    R3#<b>show flow record netflow ipv4 prefix</b><br>
+flow record netflow ipv4 prefix:<br>
+&nbsp;&nbsp;Description:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Source and Destination Prefixes aggregation schemes<br>
+&nbsp;&nbsp;No. of users:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0&nbsp;&nbsp;                  <br>
+&nbsp;&nbsp;Total field space:&nbsp;&nbsp;38 bytes             <br>
+&nbsp;&nbsp;Fields:                                  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;match routing source as                <br>
+&nbsp;&nbsp;&nbsp;&nbsp;match routing destination as           <br>
+&nbsp;&nbsp;&nbsp;&nbsp;match ipv4 source prefix               <br>
+&nbsp;&nbsp;&nbsp;&nbsp;match ipv4 source mask                 <br>
+&nbsp;&nbsp;&nbsp;&nbsp;match ipv4 destination prefix          <br>
+&nbsp;&nbsp;&nbsp;&nbsp;match ipv4 destination mask            <br>
+&nbsp;&nbsp;&nbsp;&nbsp;match interface input                  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;match interface output                 <br>
+&nbsp;&nbsp;&nbsp;&nbsp;collect counter bytes                  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;collect counter packets                <br>
+&nbsp;&nbsp;&nbsp;&nbsp;collect timestamp sys-uptime first     <br>
+&nbsp;&nbsp;&nbsp;&nbsp;collect timestamp sys-uptime last
+</code></div></p>    
+    
 <h3><code>show flow exporter</code></h3>
 <p>
+Displays NetFlow exporter configurations. 
+</p>
+<p>
+      <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+      <code>
+R3#<b>show flow exporter</b><br>
+Flow Exporter FLOW-EXPORT-G00:<br>
+&nbsp;&nbsp;Description:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;NetFlow export to destination 192.168.15.2<br>
+&nbsp;&nbsp;Export protocol:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;IPFIX (Version 10)  <br>
+&nbsp;&nbsp;Transport Configuration:&nbsp;&nbsp;&nbsp;&nbsp;                  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Destination IP address: 192.168.15.2        <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Source IP address:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;192.168.13.2        <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Source Interface:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; GigabitEthernet0/0  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Transport Protocol:&nbsp;&nbsp;&nbsp;&nbsp; UDP                 <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Destination Port:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 9999                <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Source Port:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;59235               <br>
+&nbsp;&nbsp;&nbsp;&nbsp;DSCP:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0x0                 <br>
+&nbsp;&nbsp;&nbsp;&nbsp;TTL:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;255                 <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Output Features:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Not Used            <br>
+
+</code></div></p>
+
+<h3><code>show flow exporter templates</code></h3>
+<p>
 
 </p>
+<p>
+      <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+      <code>
+R3#<b>show flow exporter templates</b><br>                                                    
+Flow Exporter FLOW-EXPORT-G00:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  <br>
+&nbsp;&nbsp;Client: Flow Monitor FLOW-MONITOR-G00&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   <br>
+&nbsp;&nbsp;Exporter Format: IPFIX (Version 10)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   <br>
+&nbsp;&nbsp;Template ID&nbsp;&nbsp;&nbsp;&nbsp;: 256&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  <br>
+&nbsp;&nbsp;Source ID&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: 0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  <br>
+&nbsp;&nbsp;Record Size&nbsp;&nbsp;&nbsp;&nbsp;: 70&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   <br>
+&nbsp;&nbsp;Template layout&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   <br>
+&nbsp;&nbsp;_____________________________________________________________________________   <br>
+&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Field&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |&nbsp;&nbsp;&nbsp;&nbsp;ID | Ent.ID | Offset |&nbsp;&nbsp;Size |   <br>
+&nbsp;&nbsp;-----------------------------------------------------------------------------   <br>
+&nbsp;&nbsp;| ipv4 source address&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |&nbsp;&nbsp;&nbsp;&nbsp; 8 |&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 |&nbsp;&nbsp;&nbsp;&nbsp; 4 |   <br>
+&nbsp;&nbsp;| ipv4 destination address&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;12 |&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4 |&nbsp;&nbsp;&nbsp;&nbsp; 4 |   <br>
+&nbsp;&nbsp;| interface input snmp&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;10 |&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;8 |&nbsp;&nbsp;&nbsp;&nbsp; 4 |   <br>
+&nbsp;&nbsp;| interface output snmp&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |&nbsp;&nbsp;&nbsp;&nbsp;14 |&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp; 12 |&nbsp;&nbsp;&nbsp;&nbsp; 4 |   <br>
+&nbsp;&nbsp;| ipv4 total-length&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |&nbsp;&nbsp; 190 |&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp; 16 |&nbsp;&nbsp;&nbsp;&nbsp; 2 |   <br>
+&nbsp;&nbsp;| ipv4 source mask&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp; 9 |&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp; 18 |&nbsp;&nbsp;&nbsp;&nbsp; 1 |   <br>
+&nbsp;&nbsp;| ipv4 destination mask&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |&nbsp;&nbsp;&nbsp;&nbsp;13 |&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp; 19 |&nbsp;&nbsp;&nbsp;&nbsp; 1 |   <br>
+&nbsp;&nbsp;| ip tos&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp; 5 |&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp; 20 |&nbsp;&nbsp;&nbsp;&nbsp; 1 |   <br>
+&nbsp;&nbsp;| ip precedence&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |&nbsp;&nbsp; 196 |&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp; 21 |&nbsp;&nbsp;&nbsp;&nbsp; 1 |   <br>
+&nbsp;&nbsp;| ip protocol&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |&nbsp;&nbsp;&nbsp;&nbsp; 4 |&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp; 22 |&nbsp;&nbsp;&nbsp;&nbsp; 1 |   <br>
+&nbsp;&nbsp;| ip ttl&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp; 192 |&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp; 23 |&nbsp;&nbsp;&nbsp;&nbsp; 1 |   <br>
+&nbsp;&nbsp;| transport tcp flags&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |&nbsp;&nbsp;&nbsp;&nbsp; 6 |&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp; 24 |&nbsp;&nbsp;&nbsp;&nbsp; 1 |   <br>
+&nbsp;&nbsp;| flow direction&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;61 |&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp; 25 |&nbsp;&nbsp;&nbsp;&nbsp; 1 |   <br>
+&nbsp;&nbsp;| datalink mac source address output&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;81 |&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp; 26 |&nbsp;&nbsp;&nbsp;&nbsp; 6 |   <br>
+&nbsp;&nbsp;| transport tcp destination-port&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp; 183 |&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp; 32 |&nbsp;&nbsp;&nbsp;&nbsp; 2 |   <br>
+&nbsp;&nbsp;| application id&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;95 |&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp; 34 |&nbsp;&nbsp;&nbsp;&nbsp; 4 |   <br>
+&nbsp;&nbsp;| counter bytes long&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp; 1 |&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp; 38 |&nbsp;&nbsp;&nbsp;&nbsp; 8 |   <br>
+&nbsp;&nbsp;| counter packets long&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp; 2 |&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp; 46 |&nbsp;&nbsp;&nbsp;&nbsp; 8 |   <br>
+&nbsp;&nbsp;| timestamp absolute first&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp; 152 |&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp; 54 |&nbsp;&nbsp;&nbsp;&nbsp; 8 |   <br>
+&nbsp;&nbsp;| timestamp absolute last&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |&nbsp;&nbsp; 153 |&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp; 62 |&nbsp;&nbsp;&nbsp;&nbsp; 8 |   <br>
+&nbsp;&nbsp;-----------------------------------------------------------------------------   <br>
+</code></div></p>
 
+<h3><code>show flow exporter statistics</code></h3>
+<p>
+Displays details of NetFlow exporter statistics such as bytes sent, number of records 
+added and sent.
+</p>
+<p>
+      <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+      <code>
+R3#<b>show flow exporter statistics</b><br>
+Flow Exporter FLOW-EXPORT-G00:                                      <br>
+&nbsp;&nbsp;Packet send statistics (last cleared 02:08:51 ago):               <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Successfully sent:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 155&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (20566 bytes)  <br>
+                                                                    <br>
+&nbsp;&nbsp;Client send statistics:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                     <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Client: Flow Monitor FLOW-MONITOR-G00                           <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Records added:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 175                                  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- sent:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;175                                  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Bytes added:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 12250                                <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- sent:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;12250                                <br>
+        
+</code></div></p>
+
+<h3><code>show flow monitor &lt;flow-monitor-name&gt;</code></h3>
+<p>
+Displays Flow monitor information.
+</p>
+<p>
+      <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+      <code>
+R3#<b>show flow monitor</b>                                              <br>
+Flow Monitor FLOW-MONITOR-G00:                                    <br>
+&nbsp;&nbsp;Description:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; NetFlow monitor for traffic transiting G0/0  <br>
+&nbsp;&nbsp;Flow Record:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; FLOW-RECORD-G00                              <br>
+&nbsp;&nbsp;Flow Exporter:&nbsp;&nbsp;&nbsp;&nbsp; FLOW-EXPORT-G00                              <br>
+&nbsp;&nbsp;Cache:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                        <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Type:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;normal                                     <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Status:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;allocated                                  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Size:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4096 entries / 442396 bytes                <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Inactive Timeout:&nbsp;&nbsp;15 secs                                    <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Active Timeout:&nbsp;&nbsp;&nbsp;&nbsp;60 secs                                    <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Update Timeout:&nbsp;&nbsp;&nbsp;&nbsp;1800 secs                                  <br>
+</code></div></p>
+
+
+<h3><code>show flow monitor &lt;flow-monitor-name&gt; cache</code></h3>
+<p>
+Display Flow monitor cache contents.
+</p>
+<p>
+      <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+      <code>
+R3#<b>show flow monitor FLOW-MONITOR-G00 cache</b>              <br>                     
+&nbsp;&nbsp;Cache type:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Normal        <br>                     
+&nbsp;&nbsp;Cache size:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 4096        <br>                     
+&nbsp;&nbsp;Current entries:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2        <br>                     
+&nbsp;&nbsp;High Watermark:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;5        <br>                     
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;          <br>                     
+&nbsp;&nbsp;Flows added:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 319        <br>                     
+&nbsp;&nbsp;Flows aged:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;317        <br>                     
+&nbsp;&nbsp;&nbsp;&nbsp;- Active timeout&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(&nbsp;&nbsp;&nbsp;&nbsp;60 secs)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 68        <br>                     
+&nbsp;&nbsp;&nbsp;&nbsp;- Inactive timeout&nbsp;&nbsp;&nbsp;&nbsp;(&nbsp;&nbsp;&nbsp;&nbsp;15 secs)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;249        <br>                     
+&nbsp;&nbsp;&nbsp;&nbsp;- Event aged&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0        <br>                     
+&nbsp;&nbsp;&nbsp;&nbsp;- Watermark aged&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0        <br>                     
+&nbsp;&nbsp;&nbsp;&nbsp;- Emergency aged&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0        <br>                     
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;          <br>                     
+IPV4 TOTAL LENGTH:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 56&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;         <br>                     
+IPV4 SOURCE ADDRESS:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 192.168.15.2         <br>                     
+IPV4 SOURCE MASK:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/30&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;          <br>                     
+IPV4 DESTINATION ADDRESS:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;192.168.13.2         <br>                     
+IPV4 DESTINATION MASK:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; /0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;         <br>                     
+INTERFACE INPUT:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Gi0/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;          <br>                     
+INTERFACE OUTPUT:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Null&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;         <br>                     
+IP TOS:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0xC0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;         <br>                     
+IP PRECEDENCE:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 6&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;          <br>                     
+IP PROTOCOL:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;          <br>                     
+IP TTL:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;253&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;          <br>                     
+datalink mac source address output:&nbsp;&nbsp;0000.0000.0000       <br>                     
+tcp destination port:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;          <br>                     
+tcp flags:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0x00&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;         <br>                     
+flow direction:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Input&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;          <br>                     
+counter bytes long:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;56&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;         <br>                     
+counter packets long:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;          <br>                     
+timestamp abs first:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 00:13:44.970         <br>                     
+timestamp abs last:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;00:13:44.970         <br>                     
+application name:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;prot icmp&nbsp;&nbsp;          <br>                     
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;          <br>                     
+IPV4 TOTAL LENGTH:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 80&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;         <br>                     
+IPV4 SOURCE ADDRESS:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 192.168.13.1         <br>                     
+IPV4 SOURCE MASK:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/30&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;          <br>                     
+IPV4 DESTINATION ADDRESS:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;224.0.0.5&nbsp;&nbsp;          <br>                     
+IPV4 DESTINATION MASK:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; /0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;         <br>                     
+INTERFACE INPUT:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Gi0/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;          <br>                     
+INTERFACE OUTPUT:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Null&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;         <br>                     
+IP TOS:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0xC0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;         <br>                     
+IP PRECEDENCE:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 6&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;          <br>                     
+IP PROTOCOL:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 89&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;         <br>                     
+IP TTL:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;          <br>                     
+datalink mac source address output:&nbsp;&nbsp;0000.0000.0000       <br>                     
+tcp destination port:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;          <br>                     
+tcp flags:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0x00&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;         <br>                     
+flow direction:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Input&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;          <br>                     
+counter bytes long:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;80&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;         <br>                     
+counter packets long:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;          <br>                     
+timestamp abs first:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 00:13:49.766         <br>                     
+timestamp abs last:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;00:13:49.766         <br>                     
+application name:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;cisco unclassified   <br>                     
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;          <br>                     
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;          <br>                     
+</code></div></p>
+
+<h3><code>show flow monitor &lt;flow-monitor-name&gt; statistics</code></h3>
+
+<p>
+Displays Flow monitor statistics.
+</p>
+<p>
+      <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+      <code>
+R3#<b>show flow monitor FLOW-MONITOR-G00 statistics</b>          <br>                     
+&nbsp;&nbsp;Cache type:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Normal        <br>                     
+&nbsp;&nbsp;Cache size:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 4096        <br>                     
+&nbsp;&nbsp;Current entries:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2        <br>                     
+&nbsp;&nbsp;High Watermark:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;5        <br>                     
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;          <br>                     
+&nbsp;&nbsp;Flows added:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 320        <br>                     
+&nbsp;&nbsp;Flows aged:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;318        <br>                     
+&nbsp;&nbsp;&nbsp;&nbsp;- Active timeout&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(&nbsp;&nbsp;&nbsp;&nbsp;60 secs)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 68        <br>                     
+&nbsp;&nbsp;&nbsp;&nbsp;- Inactive timeout&nbsp;&nbsp;&nbsp;&nbsp;(&nbsp;&nbsp;&nbsp;&nbsp;15 secs)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;250        <br>                     
+&nbsp;&nbsp;&nbsp;&nbsp;- Event aged&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0        <br>                     
+&nbsp;&nbsp;&nbsp;&nbsp;- Watermark aged&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0        <br>                     
+&nbsp;&nbsp;&nbsp;&nbsp;- Emergency aged&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0        <br>                     
+                                                          <br>                     
+                                                          <br>                     
+R3#                                                                            
+</code></div></p>
 
 <h1>Troubleshooting</h1>
 <p>
