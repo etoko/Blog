@@ -13,9 +13,9 @@ switches, servers, workstations, printers etc.
 SNMP components include; SNMP manager (NMS), SNMP agent and SNMP MIB.
 <ul>
   <li><b>SNMP manager:</b> controls and monitors the operation of network hosts using 
-  SNMP. The manager received unsolicited notifications as well as polls agents 
-  on the network devices and correlates and displays 
-  information from the various devices. The manager runs as software on a computer/server.</li>
+  SNMP. The manager receives unsolicited notifications from agents running on 
+  monitored devices. Additionally, the manager polls SNMP agents running on the 
+  network devices for information. The manager runs as software on a computer/server.</li>
   <li><b>SNMP Agent:</b> is a software component that runs on the managed device. 
   It collects and stores information on the device. The agent responds to 
   manager requests for information. The agent can send the manager unsolicited 
@@ -31,7 +31,8 @@ SNMP components include; SNMP manager (NMS), SNMP agent and SNMP MIB.
 </ul>
 <p>
 SNMP operations involve SNMP agents running on the managed devices sending 
-monitoring data to the SNMP manager and consist of the actions:
+monitoring data to the SNMP manager. SNMP uses the following operations to retrieve 
+and modify objects on managed/monitored devices:
 <ul>
   <li><b>SNMP Get:</b> A Get operation is performed by the SNMP manager to retrieve SNMP object 
   variables from the agent. There are three types of GET operations;
@@ -52,16 +53,16 @@ monitoring data to the SNMP manager and consist of the actions:
 
 <h1>Traps, Informs, and Polls</h1>
 <p>
-Traps are messages alerting the NMS to a condition on the managed device. Traps are discarded 
-as soon as they are sent.
-Traps are sent once and do not require acknowledgement.
+Traps are unsolicited messages alerting the NMS to a condition on the managed device.
+Traps are discarded as soon as they are sent. Traps are sent once and do not 
+require acknowledgement by the manager.
 </p>
 <p>
 Informs are traps that include a request for confirmation of receipt from the SNMP 
 manager. The SNMP manager sends a confirmation using SNMP response PDU. If the 
 Agent did not receive a response for an inform, the inform can be sent again.
 Informs may be sent many times hence traps are usually preferred.
-An inform is held in memory until a response is received or times-out.
+An inform is held in memory until a response is received or times out.
 Traps are usually preferred because they consume less resources than informs 
 which are held in memory until a response is received.
 </p>
@@ -73,11 +74,12 @@ UDP port 161 and the SNMP GetResponse(trap) sent using UDP port 162.
 
 <h1>SNMP Versions</h1>
 <p>
-SNMP comes in three major version; SNMPv1, 2c and 3. In SNMP v1, security is 
+SNMP comes in three major versions: SNMPv1, v2c and v3. In SNMP v1, security is 
 based on community strings. SNMPv1 is not recommended to be used in today's 
-networks and many network device vendors do no support it.
+networks and many network device vendors do not support it.
 In SNMP v2c, security is also based on community 
-strings. In SNMPv3, security is based on message integrity, authentication, encryption.
+strings. In SNMPv3, security is based on message integrity, authentication, encryption
+algorithms.
 </p>
 
 <p>
@@ -99,10 +101,10 @@ SNMPv2c is defined by <a href="https://www.ietf.org/rfc/rfc1441.txt" target="_bl
 and RFC 1452 with improvements to SNMPv1 in areas 
 of performance, security and manager to device communications. It introduced 
 GetBulkRequest, an alternative to iterative GetNextRequests for retrieving large 
-amounts of management data in a single request and Inform. SNMPv2c sends the community strings in clear text.
-SNMPv2c includes a detailed error reporting minimising the number of round trips. 
+amounts of management data in a single request. SNMPv2c sends the community strings in clear text.
+SNMPv2c includes detailed error reporting; this minimizes the number of round trips. 
 It includes expanded error codes that distinguish different types of errors. 
-SNMPv2c uses communities for security.
+SNMPv2c uses community strings for security.
 
 
 An agent can communicate with multiple managers using the appropriate version 
@@ -141,7 +143,8 @@ R1(config)#<b>snmp-server view interfaces ifEntry included</b>
 <li><b>Configure SNMP Community:</b> configure the read-only or 
 read-write community string using the command 
 <code><b>snmp-server community &lt;string&gt;  &lt;ro | rw &gt; 
-&lt;ipv6 nacl&gt; &lt;acl&gt;</b></code>. The ACL is an optional parameter. 
+&lt;ipv6 nacl&gt; &lt;acl&gt;</b></code>. The ACL is an optional parameter but is 
+recommended to be configured as it adds a layer of security to SNMPv2. 
 The community string has to match on both the manager and the agent.
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
@@ -169,16 +172,16 @@ R1(config)#<b>snmp-server enable traps power-ethernet police</b><br>
 </code></div>
 </p>
 <p>
-Link up/down notifications are controlled by snmp trap link-status interface command.
+Link up/down notifications are controlled by <code><b>snmp trap link-status</b></code> interface command.
 
 </p>
 </li>
 
 <li><b>Configure the SNMP manager address:</b> The SNMP manager to which the 
 notifications will be sent is configured using the command 
-<code><b>snmp-server host &lt;ip-address&gt; [traps | informs] version &lt;1 | 2c 
-| 3 &lt;auth | noauth | priv &gt; &lt;community-string&gt; udp-port portn-number&gt; &lt;notification-type&gt;
-</b></code>. By default,traps are sent. With this command, the following confurations are made:
+<code><b>snmp-server host &lt;ip-address&gt; [traps | informs] version [1 | 2c 
+| 3 [auth | noauth | priv]] &lt;community-string&gt; udp-port &lt;port-number&gt; &lt;notification-type&gt;</b></code>. 
+By default,traps are sent. With this command, the following confurations are made:
 <ul>
   <li>the SNMP manager address</li>
   <li>the type of notifications sent i.e., informs or traps.</li>
@@ -212,7 +215,7 @@ location and contact information of the device.
 </ol>
 </p>
 
-<h4>Security</h4>
+<h4>Security using Access Control Lists</h4>
 <p>
 An additional layer of security can be introduced by applying an Access Control List 
 (ACL).
@@ -248,10 +251,9 @@ R1(config)#<b>snmp-server community ciscolab rw ACL_SNMP_MANAGER</b>
 <h3>Index Shuffling</h3>
 <p>
 MIB indexes sometimes experience "index shuffling" where the indexes of router 
-components change during reboots or firmware 
-upgrades. Index shuffling can be stopped using the 
+components change after reboots or firmware upgrades. Index shuffling can be stopped using the 
 command <code><b>snmp-server ifindex persist</b></code>. This command shows up 
-in running configuration as <code><b>snmp ifmib ifindex persist</b></code>. 
+in the running configuration as <code><b>snmp ifmib ifindex persist</b></code>. 
 This command ensures that the mapping between the ifDescr object values and the 
 ifIndex object values (generated from the IF_MIB) will be retained across reboots.
 </p>
@@ -279,7 +281,9 @@ R1#<b>show snmp</b>                                        <br>
 <h3><code>show snmp chassis</code></h3>
 <h3><code>show snmp contact</code></h3>
 <h3><code>show snmp location</code></h3>
+<p>
 
+</p>
 
 <h2>Troubleshooting</h2>
 <p>
@@ -306,8 +310,7 @@ The main improvement of SNMPv3 over SNMPv2c is the added security with
 authentication and encryption.
 
 Poll messages for example GetRequest are sent using UDP161 and traps (GetResponse)
-on port 162. SNMPv3 adds encryption and real authentication. Three security levels 
-are used;
+on port 162. The three security levels used are;
 <ol>
  <li><b>NoAuthNoPriv:</b> no authentication, no privacy. Uses a username for 
  authentication and does not use encryption.</li>
@@ -359,7 +362,7 @@ The order of configuration of SNMPv3:
 SNMP Views can be configured to limit the number of MIB objects that an SNMP 
 manager has access to. SNMP views can be predefined or custom configured.
 Create the view record using the command <code><b>snmp-server view 
-&lt;view-name&lt; &lt;oid-tree&gt; | object-name &lt;included | excluded&gt;</b></code>.<br> 
+&lt;view-name&gt; &lt;oid-tree&gt; | &lt;object-name&gt; &lt;included | excluded&gt;</b></code>.<br> 
 <b>Caution:</b> If an MIB name is defined for a view, MIB names are 
 case-sensitive. Use the SNMP Object Navigator for the correct object names or OID values.
 </p>
@@ -382,7 +385,7 @@ An SNMP group maps users to views.
 Configure the SNMP server group to enable authentication for members permitted by the configured ACL.
 
 <code><b>snmp-server group &lt;group-name&gt; [v1 | v2c | v3] [auth | noauth 
-| priv] &lt;read read-view&gt; &lt;write write-view&gt; &lt;notify notify-view&gt; &lt;access acl&gt;
+| priv] [read &lt;read-view&gt;] [write &lt;write-view&gt;] [notify &lt;notify-view&gt;] [access &lt;acl&gt;]
 </b></code>.
 </p>
 <p>
