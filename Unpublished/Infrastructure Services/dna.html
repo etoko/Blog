@@ -1,0 +1,483 @@
+<h1>Cisco DNA Center Assurance</h1>
+<h1>Introduction and Overview</h1>
+<p>
+Cisco DNA Center is the orchestration platform for designing, provisioning, and 
+implementing policies on the network. It provides visibility into the network 
+and an understanding of the user experience of network services. It collects 
+telemetry from existing multiple devices, applications and users. It applies advanced algorithms to 
+uncover correlated insights and suggest remediation. This helps in minimizing the 
+troubleshooting time by identifying root-cause of problems. Health scores are 
+complied from different metrics.  
+
+With Cisco DNA:
+<ul>
+  <li>Gain full visibility into the network</li>
+  <li>Predict performance and issues</li>
+  <li>Rapidly troubleshoot issues.</li>
+</ul> 
+</p>
+<p>
+All network elements report information back to the console. The console analyses 
+their behaviour and assigns a score depending on the network performance.
+</p>
+<p>
+The DNA Assurance landing page provides summaries of network and client health.
+The network health displays health summaries (in percentages) of switches, routers,
+ wireless LAN controllers, and access points. The client health displays summaries 
+ of wireless and wired clients.
+</p>
+<p>
+Cisco DNA includes guided remediation provides suggestions for correcting a problem 
+
+</p>
+
+<h2>SD-Access</h2>
+<p>
+SD-Access fabric, in a campus network enables the maintenance of network policies
+to a roaming user regardless of their location. SD-Access uses IS-IS as the 
+underlay protocol and LIST-VXLAN+TrustSec in the overlay protocol to allow users 
+with their devices to be onboarded onto the network and maintain their same 
+network configuration anywhere on the network.
+</p>
+<p>
+The SD-fabric is created by DNA center. A guided workflow is used to setup the 
+entire SD-fabric. There are four in total:
+<ol>
+  <li><b>Design:</b> design of the physical layout of the network is developed included the 
+  addresses of the buildings, and geographical locations.</li>
+  <li><b>Policy:</b> identify the end-users and end-point and access authorizations.</li>
+  <li><b>Provision:</b> discover the network devices and onboard them and create the 
+  network access fabric.</li>
+  <li><b>Assurance:</b> monitor and troubleshoot the network.
+</ol>
+</p>
+<h2>Operation</h2>
+<p>
+The DNA center systems connect to the network devices such as APs, switches, 
+routers, firewalls. These devices typically run on IOS-XE such as catalyst 9000 
+series switches, ISR-4400 series routers.  
+</p>
+<p>
+DNA center communicates with these devices using programmability protocols 
+Netconf/Restconf. When DNA Center communicates with devices using Netconf/Restconf, 
+it creates a telemetry subscription through which the devices can stream data 
+such as CPU, memory utilization, interface, ACL counters; basically all output 
+from show commands are streamed to the DNA Center. DNA Center stores this information 
+and logs it into a database with the timestamp of occurrence. This enables understanding 
+these parameters across a time range. This information collected is from network 
+devices as well as client information.
+</p>
+<p>
+DNA Center applies machine learning to this collected telemetry information.
+</p>
+
+<h1>DNA Center Dashboard</h1>
+<p>
+The landing page of DNA Center is the DNA Dashboard. This lists information aggregated 
+over the last 24 hours. 
+</p>
+
+<h1>Network Health</h1>
+<p>
+The Network Health section of the DNA Assurance center displays the health status 
+of network equipment such as routers, switches, wireless LAN controllers(WLC), 
+and access points (AP). It gives a snapshot of the device health of the past 15 minutes 
+and past 24 hours.
+</p>
+
+<p>
+Network devices are categorized based on their role or type i.e., wireless, 
+core, access, distribution, router, switch.
+</p>
+
+<p>
+Network Health can be accessed via the Network Devices section of the DNA 
+Center Assurance. This view provides an aggregated score of the health of monitored 
+devices for the defined time range.
+</p>
+
+<p>
+The procedure to setup DNAC is as follows:
+<ol>
+  <li><b>Install DNAC</b>
+  <li><b>Create a site hierarchy:</b> where the locations, building, floors are 
+  defined.</li>
+  <li><b>Run discovery:</b> using IP range, CDP or LLDP</li>
+  <li><b>Inventory collection:</b> DNA detects the devices</li>
+  <li><b>Device manageability auto push config from DNAC</b></li>
+  <li><b>Provision Devices:</b> Assign devices to site/building/floor previously 
+  defined.</li>
+  <li><b>Devices ready for assurance</b></li>
+</ol>
+</p>
+
+<h2>Device Credentials</h2>
+<p>
+DNAC requires a set of global credentials to use when enrolling the devices into 
+DNAC. These settings are the same as Discovery credential sets:
+<ul>
+  <li><b>CLI credentials:</b> username, password and enable password. This user 
+  should have a privilege level of 15.</li>
+  <li><b>SNMPv2:</b> v2 read/write community string(v3 is optional).</li>
+  <li><b>HTTPS(Optional):</b> read/write string, username, password and port.</li>
+</ul>
+</p>
+<p>
+Credential sets define common global credentials, specified in global container, 
+and instance specific credential sets, specified per container, for network devices 
+in a discovery. Credentials in higher-level containers inherited by lower level 
+containers. DNAC allows multiple credentials to be specified for a defined credential 
+type. Support for exceptions (non-common) credentials can be included in discovery.
+DNAC automation can add missing 
+credential sets to devices upon discovery.
+</p>
+<p>
+If multiple credentials are configured, DNA will start with the first credential, 
+then the second, third ... up to the credential that works. DNA will remember the 
+credential that worked for a given device.</p>
+</p>
+<p>
+Different device types are managed through different credential types:
+<ul>
+  <li><b>SSH:</b> standard Cisco devices.</li>
+  <li><b>CLI:</b> standard Cisco devices.</li>
+  <li><b>SNMP:</b> standard Cisco devices.</li>
+  <li><b>HTTP(S):</b> NFVIS devices</li>
+  <li><b>NETCONF:</b></li>
+</ul>
+</p>
+<p>
+For discovery to work, the required ports include:
+<ul>
+  <li><b>Ping:</b> ICMP echo and reply.</li>
+  <li><b>SSH:</b>TCP port 22</li>
+  <li><b>SNMP Poll:</b> UDP port 161</li>
+  <li><b>SNMP Trap:</b> UDP port 162</li>
+  <li><b>Syslog:</b> UDP port 514</li>
+  <li><b>NetFlow:</b> UDP port 6007 or TCP 443</li>
+</ul>
+</p>
+<p>
+At a minimum, CLI and SNMP details are required for DNAC to discover devices. 
+For SSH/Telnet login with privilege level 15. For SNMPv2c community read-only 
+string is required.
+</p>
+
+<p>
+In DNAC, these credentials can be added from the <b>Design</b> tab, under the 
+"Network Settings" menu and "Device Credentials" menu item. The credentials can 
+be set for the Global area or lower area in the hierarchy. Credentials configured
+ at the global level will be inherited by the areas under the Global location.
+ If a list of credentials is available for a given site, select the appropriate 
+ credential that will be used by clicking the radio button of that corresponding 
+ credential.
+</p>
+
+<h2>Design Network Hierarchy Structure</h2>
+<p>
+Container hierarchy divided into groups:
+<ul>
+  <li><b>Areas</b> high-level logical subdivisions. All areas are children of 
+  the <b>Global</b> area. Areas can contain other areas or buildings.
+  </li>
+  <li><b>Buildings:</b> actual physical locations. Buildings have a geo-location.
+  Buildings can contain floors/floor plans.</li>
+  <li><b>Floors:</b> physical sub-divided space in or out of a building.</li>
+</ul>
+</p>
+
+<h2>Network Discovery</h2>
+<p>
+For devices to be managed, they must first be discovered. The discovery feature:
+  <ul>
+    <li>Scans the network</li>
+    <li>Inventories discovered devices</li>
+    <li>Can configure required network settings (if not already present).</li>
+  </ul> 
+  
+  Before discovery of devices, the device credentials need to be configured where: 
+  <ul>
+    <li>SNMP credential is for DNAC discovery</li>
+    <li>Exec-level privilege SSH credentials for DNAC management.</li>
+  </ul>
+</p>
+<p>
+Under the "Ham" menu, select "Tools" then "Discovery". Select "Add Discovery".
+ Discovery supports the 
+following types of device discovery:
+<ul>
+  <li><b>CDP:</b> connect to a seed device and learn the next hop devices, and 
+  repeat the process with the newly discovered hops.</li>
+  <li><b>IP address or range:</b> scans the designated IP address range with ICMP
+  to identify responding devices.</li>
+  <li><b>LLDP:</b> operates similarly to LLDP.
+  </li>
+</ul>
+</p>
+<p>
+At least one CLI credential and one SNMP credential is required. Netconf is 
+required for 9800 series switches.
+</p>
+<p>
+Select "View Inventory" to view the newly added device. To add the device to a 
+site:
+<ul>
+  <li>Select "Actions", then Provision, then "Assign Device to Site". The serial 
+  number and device type are displayed to you to confirm the device and as well 
+  as the list of all sites.
+</ul>
+</p>
+<p>
+The protocol order of the credentials can be specified. The options include 
+SSH and Telnet. If Telnet is enabled, a warning message gets displayed about the 
+insecure nature of Telnet.
+</p>
+
+<h3>Device Controllability</h3>
+TODO: Add image of Device Controllability
+<p>
+When discovery is run with "Device Controllability" enabled:
+<ul>
+  <li>If DNAC could not connect to the device using any of the SNMP credentials 
+  provided, but could connect using the CLI credentials, then DNAC will configure 
+  the first SNMP credential available in the request.</li>
+  <li>If available, the first SNMPv3 credential will be configured instead of SNMPv2c.</li>
+  <li>If NETCONF support exists in the device and DNAC could not connect to the 
+  device using NETCONF but could connect to the CLI credentials, then DNAC will 
+  configure NETCONF on the first port provided in the request.</li>
+  <li>NETCONF is supported on Polaris images version 16.5 or higher.</li>
+</ul>
+</p>
+
+<h3>Configuration Changes on Wireless LAN Controllers (WLC)</h3>
+<p>
+During the networ discovery process, there are several changes that DNAC 
+automatically makes to WLCs:
+  <ul>
+    <li>Install certificate for streaming telemetry: this certificate secures all 
+    communications between DNAC and the device. This certificate is installed for 
+    all devices i.e., routers, switches, WLCs etc.</li>
+    <li>Configure streaming telemetry service(WSA) </li>
+  </ul>
+</p>
+<p>
+<img alt="WLC Configuration" src="images/wlc_conf.png">
+</p>
+<p>
+DNAC becomes the network assurance service for that WLC from the start.
+</p>
+<p>
+<img alt="" src="images/wlc.png">
+</p>
+
+<h3>Configuration Changes on Switches</h3>
+<p>
+There are several changes that DNAC automatically makes to switches during 
+discovery:
+<div>
+  <ul>
+    <li>PKI</li>
+    <li>IPDT</li>
+    <li>HTTP service source</li>
+    <li>SNMP RO &amp; RW communities (if not configured).</li>
+  </ul>
+  </div>
+  <div>
+    <caption style="font-style:italic;">
+    <img alt="" src="images/dna_switch_conf.png">
+    Example configuration by DNAC on a switch
+    </caption>
+  </div>
+</p>
+<p>
+If an ACL is configured for SNMP community string, DNAC may remove the ACL during 
+discovery. Remember to add the ACL after the DNAC discovery is complete.
+</p>
+
+<h3>Device Controllability in Host Tracking</h3>
+<p>
+When device discovery or add is performed with "Device Controllability" enabled,
+ DNAC will configure IPDT on discovered devices. IP device tracking(IPDT) is 
+ activated on switch ports operating in the switchport access mode.
+ IP Device Tracking keeps track of connected hosts on a switch.
+  IP device controllability sends an ARP probe on that access interface to check that the device is alive.
+  This ARP is not propagated out any other port. This helps in tracking 
+  where clients are connected in the network. If the MAC-address tracking is used, 
+  and the device is connected to the network but is silent(not accessing network 
+  services) MAC addresses timeout in the MAC address cache on the switch. This 
+  will assume that the device is off the network. With IPDT, we allow the MAC 
+  address not to timeout. When the MAC address timer is close to expiry, an ARP 
+  probe is sent out that particular access port that the device is connected to and 
+  when the device responds, the MAC address timer is reset.
+</p>
+
+<h3>Configuration Changes on Routers</h3>
+<p>
+There are several changes that DNAC automatically makes to routers during 
+discovery:
+<ul>
+  <li><b>PKI:</b> certificate to ensure confidentiality between DNAC and the router.</li>
+  <li><b>HTTP server source interface</b></li>
+  <li>SNMP RO &amp; RW communities if not already configured.</li>
+</ul>
+</p>
+<p>
+ <img alt="" src="images/dna_router_conf.png">
+</p>
+
+<h2>Telemetry Profile</h2>
+<h3>Device Provisioning</h3>
+<p>
+Assurance requires devices to be assigned to a site in order to push telemetry 
+configuration.
+It is important to assign a device to a site. This is because network telemetry 
+may not be received for the device if it is not assigned to a site.
+Assigning a device to a site does not push configuration to the device.
+</p>
+<p>
+When device discovery is completed, the device is under the Global site and 
+categorized as under "unassigned devices". Unassigned devices not not have a 
+site allocation.
+</p>
+
+<h3>Telemetry Profiles</h3>
+<p>
+Telemetry profiles can be configured to send Syslog, and NetFlow configs to supported 
+devices. Telemetry profiles include two predefined profiles. Custom telemetry 
+profiles can be added. Three default telemetry profiles exist for use in provisioning assurance 
+configurations. These include: maximal, optimal and disable.
+</p>
+<p>
+<table cellspacing="0" width="75%">
+  <thead style="background: #d3d3d3;">
+    <tr>
+      <td style="border-top: 1px solid; border-bottom: 1px solid;">Profile Name</td>
+      <td style="border-top: 1px solid; border-bottom: 1px solid;">Syslog level</td>
+      <td style="border-top: 1px solid; border-bottom: 1px solid;">NetFlow</td>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="border-bottom: 1px solid;">Maximal</td>
+      <td style="border-bottom: 1px solid;">Informational</td>
+      <td style="border-bottom: 1px solid;">IPFIX</td>
+    </tr>        
+      <tr>       
+      <td style="border-bottom: 1px solid;">Optimal</td>
+      <td style="border-bottom: 1px solid;">Informational</td>
+      <td style="border-bottom: 1px solid;"></td>
+    </tr>        
+      <tr>       
+      <td style="border-bottom: 1px solid;">Disable</td>
+      <td style="border-bottom: 1px solid;"> </td>
+      <td style="border-bottom: 1px solid;"> </td>
+    </tr>
+  </tbody>
+</table>
+</p>
+<p>
+Profiles can be assigned at site or device level. The default assined is Disable
+telemetry. The recommendation is to apply Maximal to routers and Optimal to switches.
+</p>
+<p>
+Custom telemetry profiles can also be created in exception use 
+cases where the best practice telemetry profile settings need to be altered. If 
+custom telemetry profiles are configured and the device does not support the 
+telemetry profile configurations e.g. NetFlow, then DNA will produce a notification 
+message. The supported telemetry configuration will be pushed to DNA and the unsupported
+telemetry will not be pushed.
+</p>
+<p>
+ <img alt="" src="images/custom_telemetry_profile.png">
+</p>
+<p>
+Telemetry profile push is used to assign profiles to specific devices and validate 
+configuration push. If the predefined telemetry profiles are used, telemetry information 
+gets pushed to DNAC immediately after being applied.
+</p>
+<p>
+Verify assurance dashboards are being populated with expected 
+telemetry data. DNA sets itself up as a syslog server to be able to collect data 
+from that device.
+</p>
+<p>
+<img alt="" src="images/telemetry.png">
+</p>
+<p>
+
+</p>
+
+
+<h2>Netflow</h2>
+<p>
+Netflow is required for Application Health data. DNA provisioning of NetfFlow is 
+only supported on routers running IOS v16 or newer. The current behaviour is for 
+NetFlow to be enabled on all interfaces of routers.
+</p>
+<p>
+  <img alt="" src="images/netflow.png">
+</p>
+
+<h2>Device 360</h2>
+<p>
+Gives a full view of the device. You can monitor and preview the health parameters 
+of the network. Device 360 displays the following parameters:
+<ul>
+  <li>The current health score of the devices. If the various parameters of a 
+  device have a score of 10/10 and only one parameter has a score of 2/10, the 
+  overall score of the device is 2/10. These parameters include:
+    <ul>
+      <li>Memory utilization.</li>
+      <li>CPU utilization</li>
+      <li>Data-plane parameters such as noise and air-quality.</li>
+    </ul>
+  </li>
+  <li>The device details such as IP address, Product ID, and software version.</li>
+  <li>The device health score on a 24-hour timeline.</li>
+  <li>List of issues that occurred in the past 24-hours.
+</ul>
+</p>
+<p>
+In the case of APs, the following information is 
+learned:
+<ul>
+  <li>Memory utilization</li>
+  <li>Number of clients connected</li>
+  <li>Noise, air quality, interference</li>
+</ul>
+</p>
+
+<h2>SNMP Collector</h2>
+<p>
+Accessible via: Gears &rarr; Systems Settings &rarr; Data Platform (Tab) &rarr; Collectors.
+Select Collector-SNMP. The defaults are ok. If utilizing SD-WAN, then can make 
+appropriate modifications suitable for SD-WAN.
+</p>
+
+
+<h2>Client Health</h2>
+<p>
+To get a view of the health status of the clients. Client devices are segregated
+between wired clients and wireless clients.
+A broken-down view of every step of the onboarding process is displayed making it 
+possible to determine if the network infrastructure is causing the fault or the 
+network service such as AAA. 
+</p>
+
+<h3>Client 360</h3>
+<p>
+Displays details of a user's network connected devices and their user experience.
+</p>
+
+<h1>Application Health</h1>
+<p>
+Includes vital information such as business-class, traffic class, packet-loss 
+percentage and latency. 
+Can be accessed under DNA Assurance dashboards and under Application Health.
+Some applications on the network can be defined as business relevant.
+</p>
+
+<h1>Wireless</h1>
+<p>
+
+</p>
