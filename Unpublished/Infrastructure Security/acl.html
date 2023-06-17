@@ -1,0 +1,770 @@
+<h1>Access Control Lists</h1>
+
+<p>
+An Access Control List (ACL) is a list of rules, when applied to interfaces, are used to perform a network 
+control service. Each rule in the ACL is known as an Access Control Entry (ACE). 
+ 
+Each ACE can permit or deny specific traffic. Each ACE contains some match criteria 
+such as source and destination IP address, source and destination port numbers.
+In addition to network traffic control, ACLs serve many other purposes such as; 
+<ul>
+  <li>Performing a matching service with Network Address Translation (NAT)</li>
+  <li>Policy Based Routing (PBR)</li> 
+  <li>Object tracking</li>
+  </ul>
+  </p>
+  <p>
+One common application of ACLs is in packet filtering where packets 
+that meet specified criteria will be permitted through the router to their destination 
+or dropped; for instance, a router may simply block Telnet traffic to any part of 
+the network as a security measure. 
+
+A router processing an ACL checks the header 
+of each packet to determine whether it matches the criteria specified in each ACE 
+of an ACL. If any packet matches any of the ACEs, it will examine the action to 
+be taken as specified in the ACE (permit or deny). A permit action allows the 
+packet through. A deny action results in a dropped packet.
+Each ACE is issued with a sequence number. If not specified during configuration, 
+sequence numbers have a default increment of 10; with the first ACE having a sequence 
+number of 10, second 20, third 30 and so on.
+ACL entries are processed in sequence from top to bottom of the list. 
+</p>
+<p>
+By default, ACLs have an implicit deny added to the end of the ACL and these ACLs
+are used for through-the-box access rules. Management ACLs control to-the-box traffic. 
+These ACLs do not have the implicit deny at the end of the ACL. 
+</p>
+<p>
+An ACL can be 
+applied inbound or outbound. 
+If a packet matches any of the ACEs in an ACL, the action (permit or deny) is 
+applied and the router immediately stops processing the ACL. The first match ends 
+the processing of an ACL. Because of this, when configuring ACLs, the ordering 
+of the ACEs is extremely important.
+<p>
+ACLs use wildcard masks and not subnet masks to match traffic. Wild card masks allow for more 
+specific matching of traffic compared to subnet masks. The bits that are set to 
+zero in a wildcard mask must match. For instance;
+172.16.1.1 0.15.255.255 matches addresses in the range 172.16.1.1 172.31.255.255
+</p>
+
+<h1>Types of ACLs</h1>
+<p>
+There are several types of ACLs:
+  <li>Standard</li>
+  <li>Extended ACLs</li>
+  <li>Infrastructure</li>
+  <li>Transit</li>
+  <li>Time-based</li>
+  <li>Dynamic</li>
+  <li>IP Named</li>
+  <li>Reflexive</li>
+  <li>Context-based</li>
+</p>
+
+<h1>Wildcard Masks</h1>
+<p>
+If a bit is set in the wildcard mask, it means, do not care. In this instance, 
+Given three hosts: 
+<ol>
+   <li>A with IP address 150.57.0.9</li>
+   <li>B with IP address 120.37.19.20</li> 
+   <li>C with IP address 8.17.29.100</li>
+ </ol>
+   If an ACL with ACE 
+<code><b>access-list 1 permit 150.75.1.0 255.255.254.254</b></code> is applied 
+to an interface in the ingress direction:
+<ul>
+  <li>The first and second octets of the wildcard mask indicates do not match anything.
+  Therefore, all hosts A, B, and C match this criteria.
+  </li>
+  <li>The third octet of the wildcard mask indicates match an odd number. This 
+  is because it has one bit set but the address it is matching has one(1) in the 
+  third octet. Hosts B, and C match this third octet.</li>
+  <li>The fourth octet of the wildcard mask matches an even number.
+  Hosts B, and C match this third octet.
+  </li>
+</ul>
+Hosts B, and C will be permitted through as their IP addresses match the ACE.
+</p>
+
+<h1>Standard Access Control Lists</h1>
+<p>
+Filters based on source IP address of a packet. It permits or denies an entire TCP/IP suite. 
+The standard ACLs have two ranges i.e. 100-199 and 1300-1999 (expanded).
+
+There are three ways to write access control lists:
+<ul>
+  <li>Modern named</li>
+  <li>Classical numbered</li>
+  <li>Modern numbered</li>
+</ul>
+
+<h2>Modern Named</h2>
+<p>
+#ip access-list standard ACL_NAT_INSIDE
+#permit 192.168.1.0 0.0.0.128
+#permit 192.168.1.128 0.0.0.128
+</p>
+
+<h2>Classical Numbered</h2>
+<p>
+#ip access-list standard 10
+
+#permit any
+</p>
+
+<h2>Modern Numbered</h2>
+<p>
+Any ACL whose number matches can be considered as an ACE that is part of the ACL
+with the specific matching number. Standard ACLs have numbers ranging from 1 – 99
+and the expanded range 1300 – 1999. Extended ACL numbers are 100 - 199 and 2000 – 2699.
+</p>
+<p>
+#access-list 30 deny 192.168.1.10 0.0.0.0`
+
+#permit any
+</p>
+
+<h1>Extended Access Control Lists</h1>
+<p>
+#access-list 100 – 199 action (permit or deny) protocol (tcp, udp, ip) source_network 
+wildcard_mask destination_network wildcard_mask matching_port_number port_number_or_protocol
+
+Matching action:
+<ul>
+  <li>eq: match one specific port</li>
+  <li>range: to match a specified range of ports</li>
+  <li>gt: match ports greater than</li>
+  <li>lt: match ports less than</li>
+</ul>
+</p>
+<p>
+A remark can be added to an ACL to describe the purpose of the ACL.
+
+#access-list 150 deny tcp
+Verification
+
+#show access-lists
+
+#show ip interface: to view ACLs configured on an interface.
+
+<h2>Accessing Layer 3 Options</h2>
+<p>
+Layer-3 options are accessed using the <code><b>ip</b></code> keyword. These 
+options include:
+<ul>
+  <li><b>dscp:</b> matches packets with given dscp value</li>
+  <li><b>fragments:</b> Check non-initial fragments</li>
+  <li><b>log:</b> Log matches against this entry</li>
+  <li><b>options:</b> matches packets with a given IP Options value</li>
+  <li><b>precedence:</b> matches packets with a given precedence value</li>
+</ul>
+</p>
+
+<h2>Accessing Layer4/5 ACL Options</h2>
+<p>
+Extended ACLs provide the ability to match on Layer-4 and/or Layer-5 information 
+using the TCP or UDP keywords as the top-level protocol. The UDP header is very 
+basic and does not have many options. The TCP header is extensive with several 
+options:
+<ul>
+  <li><b>ack:</b> Match the ACK-bit</li>
+  <li><b>established:</b> Match established connections.</li>
+  <li><b>fin:</b> match the FIN bit</li>
+  <li><b>fragments:</b> Check non-initial fragments</li>
+  <li><b>gt:</b> Match only packets with a greater port number</li>
+  <li><b>log:</b>
+</ul>
+</p>
+
+<h3>Matching on TCP/UDP Port Numbers</h3>
+<p>
+Matching on TCP/UDP port numbers also matches Layer-3 (IP) options as well.
+Session-layer(Layer-5) port numbers may be matched in a variety of ways:
+<ul>
+  <li><code><b>eq 23:</b></code> matching on an exact port number that "equals" 
+  the supplied value</li>
+  <li><code><b>lt 1000</b></code> matching on any value less than the supplied 
+  value.</li>
+  <li><code><b>gt 500</b></code> : matching on any value greater than the supplied 
+  value.</li>
+  <li><code><b>neq 20</b></code> : matching on any value not equal to the 
+  supplied value.</li>
+  <li><code><b>range 100-200</b></code> matching on any value in the supplied 
+  range of values.
+</ul>
+</p>
+
+<h3>ACLs and Fragmentation</h3>
+<p>
+When a packet is fragmented by a router, the first fragment of the packet contains 
+the layer-3 and layer 4 header details. With subsequent fragments, the layer 3 
+header is copied from the first fragment; they do not contain the layer 4 header.
+The TCP/UDP header is maintained only in the first fragment.
+</p>
+<p>
+From an ACL perspective, matching on the TCP header fields matches on the first 
+fragment of a packet. Subsequent fragments of the packet are not matched by this.
+If the TCP header has the fragment offset value of 0(zero), then the packet is 
+considered the first fragment or not a fragment at all. If a packet contains a 
+value greater than zero in the fragment offset field, then this can be considered 
+as not being a fragment. If a packet has a non-zero value for fragment offset, 
+the router will permit the packet if the ACL is checking denying packets with 
+specific TCP header values. This can be used in carrying out DoS attacks where 
+fragmented packets are sent without sending the first fragment.
+</p>
+<p>
+The <code><b>fragments</b></code> keyword is a layer 3 feature that can be used 
+to query fragments.</p>
+</p>
+<p>
+The TCP three-way handshake, when initiating a TCP connection, 
+<ul>
+   <li>Sender sets the SYNC flag</li>
+   <li>Receiver sets ACK flag</li>
+   <li>Sender sets ACK</li>
+   </ul>
+All subsequent traffic will contain ACK flags and reset flags set.
+With this in mind, the traffic to a specific network/host can be permit to be 
+initiated from a specific host/network and blocked if it is initiated from a different network/host.
+The two potential solutions include:
+<ol>
+  <li>Matching on the ACK and reset flag.</li>
+  <li>Matching on the established keyword</li>
+</ol>
+The two options do the same thing.
+</p>
+
+<h1>Applying an ACL</h1>
+<h2>Packet Filtering using ACLs</h2>
+<p>
+ACLs are applied to an interface in a given direction; ingress or egress. Ingress 
+is when traffic is entering a router interface and egress is when traffic is exiting the router through an interface.
+
+To apply the ACL to an interface, you need to indicate the direction of traffic flow that the device should implement the ACL.
+
+#ip access-group 1 out | in
+
+Pinging a destination that is blocked by an ACL results in ICMP unreachable output indicated by U.U,U,U
+</p>
+
+<h1>Time-based ACLs</h1>
+<p>
+Time-based ACLs activate ACEs during times you define. Times are defined within 
+a global time-range. Time-range can be periodic or absolute. Ensure that the 
+device has an accurate clock.
+</p>
+<p>
+Time-based ACLs are only active during a specified time range. The time-range 
+configured on a router references the router’s clock. Configure NTP to ensure a 
+correct clock. They are applied to extended ACLs.
+It can be set to be periodic where it becomes active or inactive at specific times 
+of the day or on specific days of the week e.g. every Wednesday from 10am – 2pm or 
+absolute where there is a specific starting and stopping date and time.
+
+You cannot create time-based rules that have the exact same protocol, source, 
+destination, and service criteria of a rule that does not include a time range object. 
+The non-time-based rule always overrides the duplicate time-based rule, as they are redundant.
+</p>
+
+
+<h2>Configuration of Time-based ACLs</h2>
+<p>
+<ol>
+  <li><b>Ensure that the clock is accurate:<</b> 
+    <p>
+    <div><code>
+    clock set hh:mm:ss dd month year
+    </code></div>
+    </p>
+  </li>
+  <li><b>Configure the time-range:</b>
+    <ol type="a">
+      <li><b>Define a global time-range:</b> 
+		<p>
+		<div><code>
+		  time-range &lt;name&gt; <br> 
+		</code></div>
+		</p>
+	  </li>
+	  <li><b>Decide on absolute or periodic type:</b>
+	  <p>
+	  absolute happens only once and does not repeat. Periodic occurs repeatedly 
+	  on the specified days. Time values are defined in 24-hour clock.
+	  <code>
+	  periodic weekdays 7:00 to 18:00
+	  </code>
+	  </li>
+    </ol>
+  </li>
+  <li><b>Apply the time-range to the ACL:</b>
+  <p>
+  <div>
+  <code><b>access-list deny tcp 2.2.0.0 0.0.255.255 any eq www time-range No-Internet</b><br>
+  <b>access-list deny tcp 2.2.0.0 0.0.255.255 any eq 443 time-range No-Internet</b><br>
+  <b>access-list permit ip any any</b>
+  </code></div></p>
+  </li>
+  <li><b>Apply the ACL to the interface:</b> 
+  <p>
+  <code>
+  <b>ip access-group 101 in</b>
+  </code></p>
+  
+  </li>
+</ol>
+To configure a time-based ACL, you must specify the time-range, then apply it to the ACL.
+</p>
+<p>
+#time-range TR_WORK_TIME
+#periodic &lt;monday thru friday | weekend | weeekday&gt; 8:00 to 17:00
+#absolute start hh:mm dd MM yy end hh:mm dd MM yyyy
+#ip access-list extended ACL_FILTER_SOCIAL_MEDIA
+#deny tcp any host 8.8.8.8 eq 80 time-range TR_WORK_TIME
+</p>
+<h2>Verification</h2>
+<p>
+#show time-range command will display ‘inactive’ if the current time is not within 
+the range of the configured time.
+</p>
+
+
+<h1>Infrastructure ACLs</h1>
+<p>
+Is an extended ACL applied to routers residing at the edge of an enterprise network. 
+The primary purpose is to prevent malicious traffic from entering the enterprise. 
+It is usually applied inbound on the interface connecting to the external network.
+</p>
+<p>
+#ip access-list extended INFRASTRUCTURE
+
+#deny &lt;tcp | udp | icmp | ip &gt; any any fragments
+
+#permit bgp | ssh | snmp | icmp …
+</p>
+
+<h1>Reflexive ACLs (IP Session Filtering)</h1>
+<p>
+Reflexive ACLs permit a router to implement security features that firewalls 
+implement where an inside network is labelled and an outside (and considered 
+unsafe) network is identified. Connections initiated by hosts in the inside 
+network and return traffic are permitted; traffic initiated by hosts in the 
+outside network is denied. Reflexive ACLs monitor for permitted, outgoing data 
+of any type. The type of expected traffic is defined e.g., SSH, HTTPS. An ACL is 
+configured to permit the defined traffic types and the keyword reflect is added 
+to this ACL. The reflex keyword causes the router to remember the traffic that 
+matches the permitted traffic such as HTTPS session(source and destination, port
+numbers, IP protocol field), and monitor all return traffic.  The reflexive ACLs 
+create a mirror-image of transmitted traffic which will be permitted upon return; 
+the return traffic is then expected to have the source and destination ports, 
+source and destination IP addresses reversed. What was the source port in the 
+original traffic will be the destination port in the return traffic.
+</p>
+<p>
+Reflexive ACLs have create a mirror-image of transmitted traffic which will be 
+permitted upon return.
+The reflexive ACL creates a dynamic ACL on-the-fly where it is expecting and 
+permitting a return packet. Return traffic is permitted because it matches the 
+return traffic. 
+</p>
+
+<p>
+Traffic that matches the implicit deny statement of the ACL does not trigger the 
+creation of the reflexive ACL. Only permit statements create the reflexive ACLs
+</p>
+
+<p>
+Reflexive ACLs should be applied on the interface connecting to the untrusted 
+network/host.
+</p>
+
+<h2>Timeout Values</h2>
+<p>
+Reflexive entries expire after configurable timeout value. When this happens, that 
+same TCP, UDP traffic will not be allowed on the interface. 
+Reflexive ACLs have a timeout value that expires. This value can be configured.
+After the expiry of the timeout value, the dynamic reflexive entry is removed and 
+that same TCP and UDP information is no longer permitted on the interface.
+</p>
+<p>
+<ol>
+  <li>Graceful TCP close (2 segments seen with FIN flags). Timeout = 5 seconds.</li>
+  <li>TCP reset: timeout is immediate.</li>
+  <li>TCP packets no longer seen: timeout value is 300 seconds.</li>
+  <li>UDP, ICMP and all others: timeout value is 300 seconds after last seen 
+  packet</li>
+</ol>
+</p>
+<p>
+Timeout values for 1 and 2 can not be modified. The timeout values for 3 and 4 
+can be modified.
+</p>
+
+<h2>Configuration</h2>
+<p>
+  <ol>
+    <li><b>Configure a named extended ACL:</b> Can only be used with named 
+    extended ACLs.
+     <p>
+<div>
+<code>
+ip access-list extended ACL_EGRESS<BR>
+permit ip any any reflect MIRROR
+</code>
+</div>
+</p>
+<p>
+The dynamic ACL MIRROR reflects the permitted traffic swapping the source and 
+destination IP addresses, source and destination ports.
+</p>
+
+    </li>
+    <li><b>Create a Named, Extended ACL for Monitoring ingress Traffic from Untrusted Sources:</b>
+    <p>
+      <div><code>
+      ip access-list extended ACL_INGRESS<br>
+      evaluate Mirror
+      </code></div>
+    </p>
+    The name must match the name previously supplied after the "reflect" keyword.
+    </li>
+    
+    <li><b>Apply both ACLs to interface facing untrusted networks:</b> 
+    <p>
+      <div><code>
+       interface ga0/0<br>
+       ip access-group ACL_EGRESS out<br>
+       ip access-group ACL_INGRESS in
+      </code></div>
+    </p>
+    </li>
+    <li><b>Changing the timeout value:</b>
+    The mirror ACL should be active for a defined period of time. If it is indefinite,
+    this could become a security loophole.
+    <ol>
+      <li>Values for 1 and 2 cannot be changed.</li>
+      <li>Vlues for 3 and 4 can be modified per ACE or globally.
+        <ul>
+          <li><b>Globally:</b> <code><b>ip reflexive-list timeout &lt;1-2147483&gt;</b></code>
+          <li><b>Modifying within ACE Entries:</b>
+          <p>
+            <div><code>
+            ip access-list extended ACL_EGRESS<br>
+            permit tcp any any reflect Mirror timeout 30<br>
+            permit udp any any reflect Mirror timeout 45<br>
+            permit ip any any reflect Mirror timeout 120
+            </code></div>
+          </p>
+        </ul>
+      </li>
+    </ol>
+    </li>
+  </ol>
+
+</p>
+
+<h2>Verification</h2>
+<p>
+The dynamic ACL created by the reflexive ACL can be verified using the command 
+<code><b>show ip access-list</b></code>. This is used to determine if the reflexive 
+ACL is in effect or not. 
+Command displays the matched hosts even if the keyword "any" was used in the ACL.
+</p>
+
+<p>
+Using the log keyword when defining the ACL will create Syslog messages that will 
+indicate when the ACL was created.
+</p>
+
+<h2><code>debug ip access-list data-plane</code></h2>
+<p>
+Not recommended as it generates a lot of traffic on the network. To determine 
+the timestamp when the reflexive ACL was created:
+<ol>
+  <li>disable logging to the console <code><b>no logging console</b></code>.</li>
+  <li>Send logs with severity of debugging to the logging buffer using the command
+   <code><b>logging buffer debug</b></code></li>
+   <li>Increase buffer size: <code><b>logging buffer 100000</b></code></li>
+   <li>Debug ACL: <code><code>debug ip access-list data-plabe</code></code></li>
+   <li>To view the ACL creation timestamp: <code><b>show log | in Reflexive</b></code></li>
+ </ol>
+</p>
+
+<h1>Dynamic Access Lists</h1>
+<p>
+Reflexive ACLs do not have absolute timeouts where regardless of activity or inactivity, 
+traffic is denied at the absolute timeout interval. 
+Dynamic ACLs provide support for permitting access based on an authentication 
+server. Every authentication request is offloaded to a central authentication 
+database. Might require manual configuration of each device. The device sends 
+out an authentication request to the host before permitting access, e.g. SSH access 
+to a network device.
+</p>
+<p>
+Dynamic ACL forces the user to first telnet to the router; SSH support can alternatively 
+be enabled. After successful 
+authentication, Telnet session is closed and the dynamic ACL is created on the 
+interface. Dynamic ACL is removed from the interface after configurable absolute-timeout 
+or idle-timeout value expires.
+</p>
+
+
+<h2>Dynamic ACL Rules</h2>
+<p>
+Cannot be used to provide different access rights to different users. 
+Dynamic ACLs may use either an idle-timeout or absolute timeout value.
+Autocommand access-enable may be configured either: at the username level or 
+within the VTY line. Dynamic ACLs are configured with named or numbered extended ACLs only.
+Standard ACLs do not support dynamic ACLs.
+</p>
+
+<h2>Configuration</h2>
+<p>
+The use case for dynamic ACLs, if individuals require temporary access to the 
+network, e.g. provide a user telnet access to a router for a specified period.
+</p>
+<p>
+<ol>
+  <li><b>Create a username:</b> 
+  <code><b>username bob password 0 s3cr3t</b><br>
+  </code>
+  <p> The access can be enabled through the following methods:
+  <ul>
+    <li>
+    <code><b>username bob autocommand access-enable timeout 5</b></code> Command temporarily present 
+     the username and password prompt. 
+		  <ul>
+			<li><b>autocommand:</b> If they authenticate successfully or fail to 
+		  authenticate three times unsuccessfully, close the authentication page.
+			</li>
+			<li><b>access-enable:</b> implement dynamic access list.</li>
+			<li><b>timeout:</b> idle timeout value.</li>
+			</ul>
+     </li>
+     <li>
+       Add the autocommand directly under the VTY lines:
+       <div>
+       <code><b>line vty 0 4<br>
+       autocommand access-enable timeout 5</b></code>
+       </div>
+     </li>
+     </ul>
+    </p>
+    <p>
+    The <code><b>autocommand</b></code> under the VTY line affects all users while 
+    the command under the username applies only to that specific user and not others.
+    </p>
+  </li>
+  <li>
+  <b>Create the access list:</b> This applies to either named or numbered access-lists.
+  <code><b>access-list 101 dynamic Project timeout 15 permit ip any any</b></code>. 
+  The timeout specified here is the absolute timeout value. Both timeout values 
+  can be specified. There is no default timeout value; if none of the timeout 
+  values is not defined, then there is no timeout value for the dynamic ACL and 
+  access is granted in indefinitely.
+  <p>
+  Only one ACE in an ACL can have the <code><b>dynamic</b></code> keyword. Typing 
+  a second one triggers an error message.
+  </p>
+  </li>
+  <li>
+  <b>Create the ACE permitting the traffic to the router:</b> 
+  <code><b>access-list 101 permit tcp any host 1.1.1.1 eq telnet</b></code>.
+  </li>
+  <li>
+  Enable local login: 
+  <div>
+  <code>
+  <b>line vty 0 4</b> <br>
+  login local
+  </code></div>
+  </li>
+  <li>
+  Apply it to the interface pointing to the host that initiates the connection 
+  in the inbound direction: A dynamic ACL is always in the inbound direction.
+  <div><code>
+    interface fastethernet0/0<br>
+    ip access-group 101 in
+  </code></div>
+  </li>
+</ol>
+
+</p>
+
+<h2>Clearing a Dynamic ACL</h2>
+<p>
+If a dynamic ACL is in place and you intend to delete it, use the command 
+<code><b>clear ip access-template &lt;acl-name|acl-number&gt; &lt;dynamic-ACL-name&gt; 
+&lt;source&gt; &lt;destination&gt; </b></code>.
+</p>
+<p>
+If a dynamic ACL is cleared in the when a user has Telnet/SSH access, this 
+access is disabled.
+</p>
+
+<h2>Extending Dynamic ACL Entries</h2>
+<p>
+IOS allows users to extend the life of their dynamic ACE by an additional 6 mminutes.
+ Using the command <code><b>access-list dynamic-extended</b></code>, the user 
+ Telnets back into the router and receives the additional time. The extended 
+ value of 6 minutes is currently fixed and cannot be adjusted.
+</p>
+
+<h2>Monitoring</h2>
+<p>
+
+</p>
+
+<h1>Object Groups</h1>
+<p>
+Object groups is a feature available in extended ACLs. Object group appears in 
+the ACL high-level protocol field, source address field, destination address field.
+Originally designed for ASA firewalls. Command syntax is slightly different on IOS 
+routers than ASA firewalls. Object groups simplify ACL management by grouping 
+similar "objects" together e.g., pubilc_web_servers group. It allows for more 
+modular changes; a change to an object group dynamically affects all ACEs referencing 
+that group.
+
+Not every device supports object groups.
+</p>
+<p>
+Traditionally, when modifying an existing ACL, the port that it is applied to 
+is shutdown, and the ACEs of the ACL are modified. Then the port is re-enabled.
+Usually, this configuration is carried out during out-of-office hours.
+
+With object groups, the ACEs reference the object group. The object group can 
+be modified and after completion, the ACL  gets updated without disabling a 
+port that references the ACL.
+</p>
+<p>
+On Cisco routers, there are two types of object groups: 
+<ol>
+  <li><b>Network group:</b> for defining IP address-related objects for example 
+  host or subnet section of an ACE can be replaced by an object group and the ACE 
+  references the object group.</li>
+  <li><b>Service group:</b> for defining protocols and ports such as high-level 
+  protocol, TCP/UDP port numbers,</li>
+</ol>
+</p>
+
+<h2>Configuration</h2>
+<p>
+<div><code>
+object-group network OUTSIDE_TRUSTED_HOSTS<br>
+  host 200.0.0.1 <br>
+  host 200.0.0.2 <br>
+object-group network PUBLIC_INSIDE_SERVERS<br>
+  host 10.0.0.100 <br>
+  host 10.0.0.101 <br>
+object-group service PUBLIC_INSIDE_SERVER_PORTS<br>
+  tcp eq www <br>
+  tcp eq 443<br>
+  tcp eq smtp<br>
+  
+access-list 101 permit object-group PUBLIC_INSIDE_SERVER_PORTS object-group 
+OUTSIDE_TRUSTED_HOSTS object-group PUBLIC_INSIDE_SERVERS
+</code></div></p>
+
+</p>
+<h3>Object Groups with Dynamic ACLs</h3>
+<p>
+<div><code>
+object-group network SOURCE<br>
+  host 11.11.11.1 <br>
+object-group network DESTINATION<br>
+  host 22.22.22.22 <br>
+  host 2.2.2.2 <br>
+object-group service CONTRACTOR<br>
+  tcp eq telnet  <br>
+  icmp<br>
+ip access-list extended Test <br>
+ dynamic  PROJECT permit object-group CONTRACTOR object-group SOURCE object-group DESTINATION<br>
+ permit tcp host 11.11.11.1 host 1.1.1.1 eq telnet <br>
+ 
+ !Apply to interface:<br>
+ ip access-group TEST in<br>
+  </code></div>
+</p>
+
+<h2>Verification</h2>
+<h3><code>show object-group</code></h3>
+<p>
+Displays the configuration of the object group.
+</p>
+
+
+<h1>Logging</h1>
+<p>
+ACE entries can be appended with logging-related keywords: <code><b>log</b></code> 
+and <code><b>log-input</b></code>. 
+These commands cause log messages to be generated if a packet matches the ACE
+providing hit-counts and evidence of ACL activity. Logging forces packets matching the ACE 
+entries to be process-switched resulting in increased CPU load. Additionally, 
+printing out Syslogs increase the CPU load.
+</p>
+<p>
+With log:
+<ul>
+  <li>Timestamp information is displayed</li>
+  <li>ACL number</li>
+  <li>Protocol</li>
+  <li>Source and destination address</li>
+  <li>Interface ACL is applied to (0/0)</li>
+  <li>Number of packets matched</li>
+</ul>
+
+With <code><b>log-input</b></code>, additional information is displayed particularly 
+the MAC address; this is the most recent MAC address.
+</p>
+<p>
+An additional descriptive text can be added to the ACE to describe the particular 
+role of the ACE e.g. <code><b>access-list 101 permit icmp any host 2.2.2.2 log-input EmailServer</b></code>.
+This tags the ACE for traffic to the email server.
+</p>
+
+<h2>Log Interval</h2>
+<p>
+Individual ACEs can have the "log" or "log-input" keywords. When an ACL is applied 
+to an interface, syslogs are generated:
+<ul>
+  <li>Once every 5 minutes for packets matching a particular ACE</li>
+  <li>If any log-enabled ACE in any ACL on any interface matches a packet within 
+  one second of the initial log message, the match or matches aggregated statistics for 
+  5 minutes are then reported.
+</ul>
+</p>
+<p>
+If you want logs for ACEs to be displayed more frequently than every 5 minutes, use 
+the command <code><b>ip access-list log-update threshold &lt;0-2147483647&gt;</b></code>
+with the value being the number of hits; display a syslog after x number of packets 
+match the ACE. This applies to all ACEs of an ACL.
+</p>
+<p style="font-weight:bold;">
+This increases the CPU Load. Even though logs for individual ACEs are only 
+displayed every 5 minutes, every packet that matches the ACE must be process-switched.
+</p>
+<p>
+To reduce this; use the command <code><b>ip access-list logging interval 
+&lt;0-214748367&gt; </b></code>. The value is in milliseconds; for all the 
+packets that match the ACE, send packets to the CPU every nth (configured) 
+interval.
+</p>
+
+<h3>Filtering on Log Output</h3>
+<p>
+ACL syslogs have different identifiers depending on type of traffic that triggered 
+the log.
+</p>
+<p>
+  <img alt="LOG-CODES" src="">
+</p>
+<p>
+When sending ACL syslogs to logging buffer, one can filter one these identifiers:
+<ol>
+  <li>Severity: 0-7: <code><b>logging buffer &lt;severity&gt;</b></code></li>
+  <li>Filter the log output based on the applicable protocol: <code><b>show log | 
+  include RP</b></code> filters for TCP and UDP generated logs. This displays 
+  permitted or denied Syslogs.
+</ol>
+</p>
