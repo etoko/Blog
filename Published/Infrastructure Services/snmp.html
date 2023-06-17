@@ -99,7 +99,7 @@ Security with SNMP can be refined by implementing the following:
 <p>
 SNMPv2c is defined by <a href="https://www.ietf.org/rfc/rfc1441.txt" target="_blank">RFC 1441</a> 
 and RFC 1452 with improvements to SNMPv1 in areas 
-of performance, security and manager to device communications. It introduced 
+of performance, security and manager-to-device communications. It introduced 
 GetBulkRequest, an alternative to iterative GetNextRequests for retrieving large 
 amounts of management data in a single request. SNMPv2c sends the community strings in clear text.
 SNMPv2c includes detailed error reporting; this minimizes the number of round trips. 
@@ -195,13 +195,13 @@ R1(config)#<b>snmp-server host 192.168.5.2 traps version 2c ciscolab</b>
 </code></div></p>
 <p>
 Without the <code><b>snmp-server host</b></code> command on a managed device, no notifications are sent. 
-Each succeeding <code><b>snmp-server host</b></code> command over-writes the previous command. Entering 
+Each succeeding <code><b>snmp-server host</b></code> command overwrites the previous command. Entering 
 the <code><b>snmp-server host</b></code> command without keywords enables all trap types for the host. 
 </p>
 </li>
 <li><b>System information:</b>
-The first snmp-server command entered enables SNMP on the device. Configuring 
-SNMP system information is an optional however, the information configured can 
+The first <code><b>snmp-server</b></code> command entered enables SNMP on the device. Configuring 
+SNMP system information is optional, however, the information configured can 
 be valuable when troubleshooting SNMP. System information includes; chassis-id, 
 location and contact information of the device.
 <p>
@@ -233,7 +233,7 @@ R1(config-std-nacl)#<b>10 permit host 192.168.5.1</b><br>
 </code></div>
 </p>
 </li>
-<li><b>Add the ACL to the configuration of the community string:</b> configure the read only and / or 
+<li><b>Add the ACL to the configuration of the community string:</b> configure the read only or 
 read-write community string that references the ACL
 <code><b>snmp-server community &lt;string&gt; view &lt;view-name&gt; &lt;ro | rw &gt; 
 &lt;ipv6 nacl&gt; &lt;acl&gt;</b></code>. The view and the ACL are optional parameters. 
@@ -285,11 +285,9 @@ R1#<b>show snmp</b>                                        <br>
 
 </p>
 
-<h2>Troubleshooting</h2>
+<h2>Troubleshooting SNMPv2</h2>
 <p>
-SNMP users UDP port 161 for general messages and UDP 162 for traps and informs. 
-Check ACLs denying traffic on these ports.
-Ensure that;
+When troubleshooting SNMPv2, verify the following:
 <ul>
  <li>Traps are enabled by default (traps are unsolicited)</li>
  <li>Specify correct traps if all are not desired.</li>
@@ -329,7 +327,7 @@ supports, groups and users must be configured.
 With the added security features, SNMPv3 structures its configuration into three
 main sections:
 <ol>
-  <li><b>SNMP View:</b> Restricts which OID are visible to the NMS. It defines 
+  <li><b>SNMP View:</b> Restricts the OIDs visible to the NMS. It defines 
   what the manager is able to access/view on the device. This restriction can include 
   access to interfaces or particular interface. The view can be associated with 
   a group.</li>
