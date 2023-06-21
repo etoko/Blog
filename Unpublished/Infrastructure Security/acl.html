@@ -1,4 +1,13 @@
-<h1>Access Control Lists</h1>
+<h2>Contents</h2>
+<ol>
+  <li><a href="">Standard ACLs</a>
+  <li><a href="">Extended ACLs</a>
+  <li><a href="">Infrastructure ACLs</a>
+  <li><a href="">Reflexive ACLs</a>
+  <li><a href="">Dynamic ACLs</a>
+</ol>
+
+<h1>Introduction and Overview</h1>
 
 <p>
 An Access Control List (ACL) is a sequential list of rules containing permit 
@@ -13,59 +22,23 @@ such as:
   <li>Source IP address</li>
   <li>Destination IP address</li>
   <li>IP protocols such as TCP, UDP, ICMP, OSPF, EIGRP etc</li>
-  <li>TCP/UDP source <!--and destination port numbers.--></li>
+  <li>TCP/UDP source and destination port numbers</li>
 </ul>
 </p>
 <p>
-In addition to network traffic control, ACLs serve many other purposes such as; 
+The original intent of ACLs was packet filtering. ACLs application has increased 
+to include multiple applications such as:
 <ul>
-  <li>Performing a matching service with Network Address Translation (NAT)</li>
-  <li>Policy Based Routing (PBR)</li> 
+  <!--<li>Filtering traffic (egress or ingress): most commonly used application of ACLs</li> -->
+  <li>Quality of Server (QoS) operations such as queueing, traffic classification for 
+  policing</li>
+  <li>Policy-based routing (PBR)</li>
+  <li>Route maps</li>
+  <li>Network identification in routing protocols</li>
+  <li>Route modification/filtering</li>
+  <li>Management plane restrictions such as Telnet, SSH, VPN</li>
   <li>Object tracking</li>
-  </ul>
-  </p>
-  <p>
-One common application of ACLs is in packet filtering where packets 
-that meet specified criteria will be permitted through the router to their destination 
-or dropped.
-By default, routers do not filter traffic; they examine the destination IP address 
-and refer to the routing table to determine which interface to forward the traffic 
-through. When an ACL is applied to a router interface:
-<ul>
-  <li>It evaluates all network packets</li>
-  <li>Determines if the packet is permitted or denied.</li>
 </ul>
-
-A router processing an ACL checks the header 
-of each packet to determine whether it matches the criteria specified in each ACE 
-of an ACL. If any packet matches any of the ACEs, it will examine the action to 
-be taken as specified in the ACE (permit or deny). A permit action allows the 
-packet through. A deny action results in a dropped packet.
-Each ACE is issued with a sequence number. If not specified during configuration, 
-sequence numbers have a default increment of 10; with the first ACE having a sequence 
-number of 10, second 20, third 30 and so on.
-ACL entries are processed in sequence from top to bottom of the list. 
-</p>
-<p>
-By default, ACLs have an implicit deny added to the end of the ACL and these ACLs
-are used for through-the-box access rules. Management ACLs control to-the-box traffic. 
-These ACLs do not have the implicit deny at the end of the ACL. 
-</p>
-<p>
-A router can filter packets using ACLs that are applied inbound or outbound. An 
-inbound ACL filters packets coming into an interface but before any route processing 
-takes place i.e., before they are routed to the outbound interface. An outbound 
-ACL filters packets after route processing.
-
-If a packet matches any of the ACEs in an ACL, the action (permit or deny) is 
-applied and the router immediately stops processing the ACL. The first match ends 
-the processing of an ACL. Because of this, when configuring ACLs, the ordering 
-of the ACEs is extremely important.
-<p>
-ACLs use wildcard bits and not subnet masks to match traffic. Wildcard bits allow for more 
-specific matching of traffic compared to subnet masks. The bits that are set to 
-zero in a wildcard bit must match. For instance;
-172.16.1.1 0.15.255.255 matches addresses in the range 172.16.1.1 172.31.255.255
 </p>
 
 <h1>Types of ACLs</h1>
@@ -82,27 +55,50 @@ There are several types of ACLs:
   <li>Context-based</li>
 </p>
 
-<h1>Application of ACLs</h1>
-<p>
-The original intent of ACLs was packet filtering. ACLs application has increased 
-tp include multiple applications such as:
-<ul>
-  <li>Filtering traffic (egress or ingress): most commonly used application of ACLs</li>
-  <li>Quality of Server (QoS) operations such as queueing, policing</li>
-  <li>Route maps</li>
-  <li>Network identification in routing protocols</li>
-  <li>Route modification/filtering</li>
-  <li>Management plane restrictions such as Telnet, SSH, VPN</li>
-</ul>
-</p>
-
 
 <h1>Processing of ACLs</h1>
+
+  <p>
+  The following description of ACLs is in reference to the application of ACLs in 
+  packet filtering. Reference may be made to the application of ACLs in other 
+  features of routers.
+  </p>
+  <p>
+The most common application of ACLs, in enterprise networks, is in packet filtering.
+By default, routers do not filter traffic; they examine the destination IP address 
+and refer to the routing table to determine the egress interface. When an ACL is applied to a router interface:
+<ul>
+  <li>It evaluates all transiting packets</li>
+  <li>Determines if the packet is permitted or denied.</li>
+</ul>
+
+A router processing an ACL checks the header 
+of each packet to determine whether it matches the criteria specified in each ACE 
+of an ACL. If a match is found in any of the ACEs, it will examine the action to 
+be taken as specified in the ACE (permit or deny):
+
+<ul>
+  <li>A permit action allows the packet through.</li>
+  <li>A deny action results in a dropped packet.</li>
+</ul>
+Each ACE is assigned a sequence number. If not explicitly defined during configuration, 
+sequence numbers have a default increment of 10; with the first ACE having a sequence 
+number of 10, 2<sup>nd</sup> 20, 3<sup>rd</sup> 30 and so on.
+ACL entries are processed sequentially from top to bottom of the list. 
+By default, ACLs have an implicit deny added at the bottom of the ACL and these ACLs
+are used for through-the-box access rules. Management ACLs control to-the-box traffic. 
+These ACLs do not have the implicit deny at the end of the ACL. 
+</p>
 <p>
-ACLs are processed sequentially from top to bottom with ACEs at the top having the 
-lowest numerical sequence number. If a packet is matched on an ACE, the ACL stops 
-processing and applies the action which can be permit or deny.
-There is an implicit deny statement at the end of every ACL.
+A router can filter packets using ACLs that are applied inbound or outbound. An 
+inbound ACL filters packets coming into an interface but before any route processing 
+takes place i.e., before they are routed to the outbound interface. An outbound 
+ACL filters packets after route processing.
+
+If a packet matches any of the ACEs in an ACL, the action (permit or deny) is 
+applied and the router immediately stops processing the ACL. The first match ends 
+the processing of an ACL. Because of this, when configuring ACLs, the ordering 
+of the ACEs is extremely important.
 </p>
 <p>
 ACLs for traffic filtering do not block local router generated traffic.
@@ -114,8 +110,8 @@ When defining network ranges to be permitted or denied, the more specific addres
 entries should be configured before the more general entries. The most specific 
 network address entry is that defining a specific host IP address using the 
 keyword <code><b>host</b></code> or wildcard bit <code><b>0.0.0.0</b></code>.
-These should then be followed by the more general wildcard bits. Some illustrative 
-examples include:
+These should then be followed by the more general wildcard bits. An illustrative 
+example is:
 <ul>
   <li><code><b>deny host 192.168.1.1</b></code></li>
   <li><code><b>permit 192.168.1.0 0.0.0.127</b></code></li>
@@ -131,17 +127,20 @@ the more general address, IOS will display an error message.
 
 <h1>Wildcard Bits</h1>
 <p>
-IP standard and extended ACls use wildcard bits to match binary 0s and 1s of 
-the IP address. Wildcard bits use the following rules to match binary 0s and 1s:
+ACLs use wildcard bits and not subnet masks to match  binary 0s and 1s of 
+the IP address. Wildcard bits allow for more 
+specific matching of traffic compared to subnet masks. The bits that are set to 
+zero in a wildcard bit must match. For example;
+172.16.1.1 0.15.255.255 matches addresses in the range 172.16.1.1 172.31.255.255
+Wildcard bits use the following rules to match binary 0s and 1s:
 <ul>
-  <li>Wildcard bit bit 0: Match the corresponding bit value in the address.</li>
-  <li>Wildcard bit bit 1: Ignore the corresponding bit value in the address. 
-  If a bit is set in the wildcard bit, it means, do not 
-  care.</li>  
+  <li>Wildcard bit 0: Match the corresponding bit value in the address.</li>
+  <li>Wildcard bit 1: Ignore the corresponding bit value in the address (do not 
+  care).</li>  
 </ul>
 </p>
 <p>
-Unlike wildcard masks used in OSPF, wildcard bits do not have to be contiguous; 
+Unlike wildcard masks used in OSPF, EIGRP, wildcard bits do not have to be contiguous; 
 they can be on or off anywhere to represent sections of the IP address that have 
 to match and sections that do not have to match.
 </p>
@@ -158,7 +157,7 @@ to match and sections that do not have to match.
  mask can be determined as follows:
 <div>
   <figure>
-    <img alt="Determination of wildcard bit" src="images/acl/wildcard bit.png">
+    <img alt="Determination of wildcard bit" src="images/acl/wildcard_bit.png">
   </figure>
 </div>
 </p>
@@ -178,25 +177,29 @@ wildcard bit can be determined as follows:
 <p>
 In this instance, given three hosts: 
 <ol>
-   <li>A with IP address 150.57.0.9</li>
-   <li>B with IP address 120.37.19.20</li> 
-   <li>C with IP address 8.17.29.100</li>
+   <li>A with IP address 172.31.3.2</li>
+   <li>B with IP address 172.31.28.128</li>
+   <li>C with IP address 172.31.29.2</li> 
+   <li>D with IP address 172.31.30.10</li>
+   <li>E with IP address 172.31.31.10</li>
+   <li>F with IP address 172.31.33.3</li>
  </ol>
    If an ACL with ACE 
-<code><b>access-list 1 permit 150.75.1.0 255.255.254.254</b></code> is applied 
+<code><b>access-list 100 permit ip any 172.31.1.0 255.255.254.254 log</b></code> is applied 
 to an interface in the ingress direction:
 <ul>
   <li>The first and second octets of the wildcard bit indicates do not match anything.
-  Therefore, all hosts A, B, and C match this criteria.
+  Therefore, all hosts A, B, C, D, E, and F match this criteria.
   </li>
   <li>The third octet of the wildcard bit indicates match an odd number. This 
   is because it has one bit set but the address it is matching has one(1) in the 
-  third octet. Hosts B, and C match this third octet.</li>
+  third octet. Hosts A, C, E, and F match this third octet.</li>
   <li>The fourth octet of the wildcard bit matches an even number.
-  Hosts B, and C match this third octet.
+  Hosts A, C, and E match this 4<sup>th</sup> octet.
   </li>
+  <li>IOS will save the above ACL as <code><b>10 permit ip any 0.0.1.0 255.255.254.254 log</b></code>.</li>
 </ul>
-Hosts B, and C will be permitted through as their IP addresses match the ACE.
+Hosts A, C, and E will be permitted through as their IP addresses match the ACE.
 </p>
 
 <h2>Matching Hosts</h2>
@@ -211,9 +214,13 @@ To match a specific host's IP address, ACLs use three approaches:
 
 <h2>Matching any/all hosts</h2>
 <p>
-To permit any source IP address, ACLs use two approaches; using the 255.255.255.255 
-wildcard bit or the <code><b>any</b></code> keyword. The <code><b>any</b></code> 
+To match any IP address, ACLs use two approaches: 
+<ul>
+  <li>using the 255.255.255.255 wildcard bit</li>
+  <li>the <code><b>any</b></code> keyword. The <code><b>any</b></code> 
 keyword denotes the IP address and wildcard bits of <code><b>0.0.0.0 0.0.0.0</b></code>.
+</li>
+</ul>
 </p>
 <p>
 An example can be <code><b>access-list 1 permit 0.0.0.0 255.255.255.255</b></code>.
@@ -235,7 +242,8 @@ The recommended standard for placement of ACLs is for one ACL, per interface
  traffic is denied close to the source and not wasting the available network 
  bandwidth.</li>
  <li><b>Standard ACLs</b> are usually placed near the destination of the traffic 
- because standard ACLs do not specify destination addresses.
+ because standard ACLs do not specify destination addresses. This reduces the 
+ possibility of inadvertently blocking traffic that should be permitted.
  </li>
  </ul>
 </p>
@@ -278,8 +286,6 @@ The ACL naming recommendations include the following:
 <p>
 A standard ACL filters traffic based on source IP address of a packet. 
 Based on the ACL number, standard ACLs have two ranges i.e. 1-99 and 1300-1999 (expanded).
-</p>
-<p>
 There are three ways to write access control lists:
 <ul>
   <li>Modern named</li>
@@ -287,10 +293,6 @@ There are three ways to write access control lists:
   <li>Modern numbered</li>
 </ul>
 </p>
-<p>
-By default, there is an <b>implied deny</b> ACL for traffic that was not matched.
-</p>
-
 
 <h2>Modern Named</h2>
 <p>
