@@ -58,7 +58,7 @@ There are several types of ACLs:
 The ACLs that are discussed in this post are: standard ACLs, extended ACLs, 
 time-based ACLs, reflexive ACLs, and Dynamic ACLs.
 </p>
-
+<a id="MORE"></a>
 
 <h1>Processing of ACLs</h1>
 
@@ -127,7 +127,14 @@ example is:
 If the more specific addresses are entered after the more general addresses which
 overlap the more specific address i.e., the more specific address is a subset of 
 the more general address, IOS will display an error message. 
-<b style="color: red;">TODO: Add Error Message</b>
+</p>
+<p>
+ <p>
+  <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  	<code>
+R2(config-std-nacl)#<b>5 deny 192.168.3.0 0.0.0.255</b><br>
+% Access rule can't be configured at lower sequence num as Host at sequence 10 is part of the given address block
+</code></div>
 </p>
 
 <h1>Wildcard Bits</h1>
@@ -294,6 +301,12 @@ There are two ways to write access control lists:
   <li>Numbered (classical or modern)</li>
 </ul>
 </p>
+<p>
+<figure>
+ <img alt="" src="images/acl/standard_acl_topology.png">
+</figure>
+
+</p>
 
 <h2>Named Standard ACLs</h2>
 <p>
@@ -301,19 +314,45 @@ Named standard ACLs can be uniquely identified by the name. The name of the ACL
 is guided by the ACL naming recommendations <a href="#ACL_NAMES">previously discussed</a>.
 </p>
 <p>
+Using the network diagram above, an ACL is configured to deny packets sourced 
+from the network 192.168.8.0/22 i.e., IP addresses in the network 192.168.8.0/24, 
+192.168.9.0/24, 192.168.10.0/24. 192.168.11.0/24. All other packets will be 
+permitted.
+
 To configure a named standard ACL:
 <ol>
   <li><b>Define the ACL</b> using the command <code><b>ip access-list standard &lt;ACL-NAME&gt;</b></code>
+  <p>
+  <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  	<code>
+  R2(config)#<b>ip access-list standard ACL_DENY_192.168.8.0/22</b>
+  </code></div>
+  </p>
   </li>
+  
   <li><b>Specify the permit or deny statements:</b> using the command <code><b>
   [permit | deny] {&lt;ip-address&gt; &lt;wildcard-mask&gt; | any}</b></code>. If specifying 
   a specific host IP address, use the <code><b>host</b></code> keyword instead of 
   adding the wildcard bit <code><b>0.0.0.0</b></code> using the command
   <code><b>
   [permit | deny] host &lt;ip-address&gt;</b></code>
+  <p>
+  <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+    R2(config-std-nacl)#<b>10 deny 192.168.8.0 0.0.3.255</b><br>
+    R2(config-std-nacl)#<b>permit any</b>
+  </code></div>
+  </p>
   </li>
   <li><b>Apply the ACL to the interface</b> using the interface mode command  
     <code><b>ip access-group &lt;ACL-NAME&gt; [in | out]</b></code>.
+    <p>
+    <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+    R2(config)#<b>interface g0/0</b><br>
+    R2(config-if)#<b>ip access-group ACL_DENY_192.168.8.0/22 in</b>
+    </code></div>
+    </p>
   </li>
 </ol>
 
@@ -321,43 +360,59 @@ To configure a named standard ACL:
 
 <h2>Numbered Standard ACLs</h2>
 <p>
-Any ACL whose number matches can be considered as an ACE that is part of the ACL
-with the specific matching number. Standard ACLs have numbers ranging from 1 – 99
-and the expanded range 1300 – 1999. Extended ACL numbers are 100 - 199 and 2000 – 2699.
+Numbered standard ACLs have ACL ID numbers ranging from 1 – 99 and in the expanded 
+range 1300 – 1999.
+If configuring numbered ACLs using the classical approach (using command 
+<code><b>access-list &lt;1-99|1300-1999&gt;</b></code>)
+any ACL whose ACL-ID matches can be considered as an ACE that is part of the 
+same ACL with the specific matching number.
 </p>
 
 <p>
 To configure a numbered standard access control list:
 <ol>
   <li><b>Configure the ACL:</b> in global configuration mode using the command 
-  <code><b>ip access-list standard &lt;ACL-ID&gt;</b></code>
-  
-  <ul>
-	  <li> <code><b>permit</b></code>: implies that the traffic will not be 
-	  filtered</li>
-	  <li><code><b>deny</b></code>: implies that traffic will be filtered.</li>
-	  </li>
-  </ul>
+  <code><b>ip access-list standard &lt;1-99 | 1300-1999&gt;</b></code>
   <p>
-  A descriptive message can be added to the ACL using the <code><b>remark</b></code> 
-  keyword <code><b>access-list &lt;acl-number&gt; remark &lt;descriptive-text&gt;</b></code>. This helps with 
+  <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+  R2(config)#<b>ip access-list standard 1300</b><br>
+  </code></div>
+  </p>
+  <p>
+  A descriptive message can be added to the ACL using the command  
+   <code><b>remark &lt;descriptive-text&gt;</b></code>. This helps with 
   the documentation of the ACL.
+  </p>
+  <p>
+  <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+  R2(config-std-nacl)#<b>remark deny host 192.168.3.1/24</b>
+  </code></div>
   </p>
   <p>
   Numbered ACLs can also be configured using the command 
   <code><b>access-list &lt;1-99&gt; [permit | deny] &lt;ip-address&gt; &lt;wildcard bit&gt;</b></code>.
   </p>
+  <p>
+  <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+	  R2(config)#<b>access-list 1300 permit host 192.168.3.1</b><br>
+	  R2(config)#<b>access-list 1300 permit 192.168.3.0 0.0.0.255</b><br>
+	  R2(config)#<b>access-list 1300 remark Deny network 192.168.3.0/24</b>
+  </code></div>
+  </p>
   </li>
   <li><b>Apply the ACL to the interface:</b> using interface mode command 
   <code><b>ip access-group &lt;acl-number&gt; [ in | out ]</b></code>. 
   When applying the ACL to the interface, the direction of operation should be stated:
-     <ul>
-       <li><b>in:</b> packets are filtered as they enter the interface. ACLs 
-       must check every packet.</li>
-       <li><b>out:</b> packets are filtered as they exit the interface. These are 
-       preferred over inbound ACLs.</li>
-     </ul>
-     The default direction is "out".
+     <p>
+     <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+     	<code>
+		 R2(config)#<b>interface g1/0</b><br>
+		 R2(config)#<b>ip access-group 1300 out</b><br>
+       </code></div>
+     </p>
   </li>
 </ol>
 </p>
@@ -379,7 +434,10 @@ thereafter the ACL can be deleted.
 
 <h4>Modifying Existing ACE</h4>
 <p>
-To modify a numbered ACL:
+Only a numbered ACL created using the command <code><b>ip access-list standard &lt;acl-id | acl-name</b></code> 
+can have its ACEs modified.
+
+To modify a standard numbered ACL:
 <ol>
   <li>Display the ACE sequence numbers using the command <code><b>show access-lists &lt;acl-number&gt;</b></code>.
   </li>
@@ -409,18 +467,32 @@ To modify a numbered ACL:
 
 <h2>Matching a default Route</h2>
 <p>
-The default route has an IP address of 0.0.0.0 and subnet mask of 0.0.0.0. To 
+All routing protocols have a mechanism through which a default route can be 
+advertised. The default route has an IP address of 0.0.0.0 and subnet mask of 0.0.0.0. To 
 match against the default route in a standard ACL, use the ACE 
 <code><b>access-list 10 permit 0.0.0.0</b></code>.
 </p>
 
 <h2>Verification of Standard ACLs</h3>
 
-<h3><code>show access-lists</code></h3>
+<h3><code>show access-lists</code> and <code>show ip access-lists</code></h3>
 <p>
-The command <code><b>show access-lists</b></code> displays configured ACLs. If 
+The command <code><b>show access-lists</b></code> or similar alternative 
+<code><b>show ip access-lists</b></code> displays configured ACLs. If 
 any ACEs are configured with the <code><b>log</b></code> option, a summary of 
 matches is included in the display.
+</p>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  	<code>
+R2#<b>show ip access-lists</b><br>
+Standard IP access list 1300<br>
+&nbsp;&nbsp;&nbsp;&nbsp;10 deny&nbsp;&nbsp; 192.168.3.1 log (10 matches)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;20 permit any (10 matches)<br>
+Standard IP access list ACL_DENY_192.168.8.0/22<br>
+&nbsp;&nbsp;&nbsp;&nbsp;10 deny&nbsp;&nbsp; 192.168.8.0, wildcard bits 0.0.3.255 (50 matches)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;20 permit any (253 matches)<br>
+</code></div>
 </p>
 <p>
 In the output of this command, the host statements are listed first in order to be 
@@ -435,13 +507,57 @@ of whether they may have a lower sequence number.
 Displays any configured interfaces and the traffic filtering direction i.e., whether 
 inbound or outbound.
 </p>
+<p>
+  <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  	<code>
+R2#<b>show ip interface g0/0</b><br>                   
+GigabitEthernet0/0 is up, line protocol is up                      <br>
+&nbsp;&nbsp;Internet address is 192.168.12.2/30                    <br>
+&nbsp;&nbsp;Broadcast address is 255.255.255.255                   <br>
+&nbsp;&nbsp;Address determined by non-volatile memory              <br>
+&nbsp;&nbsp;MTU is 1500 bytes                                      <br>
+&nbsp;&nbsp;Helper address is not set                              <br>
+&nbsp;&nbsp;Directed broadcast forwarding is disabled              <br>
+&nbsp;&nbsp;Multicast reserved groups joined: 224.0.0.9            <br>
+&nbsp;&nbsp;Outgoing access list is not set                        <br>
+&nbsp;&nbsp;<span style="background:#d1d1d1;">Inbound  access list is ACL_DENY_192.168.8.0/22</span>        <br>
+&nbsp;&nbsp;Proxy ARP is enabled                                   <br>
+&nbsp;&nbsp;Local Proxy ARP is disabled                            <br>
+&nbsp;&nbsp;Security level is default                              <br>
+&nbsp;&nbsp;Split horizon is enabled                               <br>
+&nbsp;&nbsp;ICMP redirects are always sent                         <br>
+&nbsp;&nbsp;ICMP unreachables are always sent                      <br>
+&nbsp;&nbsp;ICMP mask replies are never sent                       <br>
+&nbsp;&nbsp;IP fast switching is enabled                           <br>
+&nbsp;&nbsp;IP fast switching on the same interface is disabled    <br>
+&nbsp;&nbsp;IP Flow switching is disabled                          <br>
+&nbsp;&nbsp;IP CEF switching is enabled                            <br>
+&nbsp;&nbsp;IP CEF switching turbo vector                          <br>
+&nbsp;&nbsp;IP CEF turbo switching turbo vector                    <br>
+&nbsp;&nbsp;IP multicast fast switching is enabled                 <br>
+&nbsp;&nbsp;IP multicast distributed fast switching is disabled    <br>
+&nbsp;&nbsp;IP route-cache flags are Fast, CEF                     <br>
+&nbsp;&nbsp;Router Discovery is disabled                           <br>
+&nbsp;&nbsp;IP output packet accounting is disabled                <br>
+&nbsp;&nbsp;IP access violation accounting is disabled             <br>
+&nbsp;&nbsp;TCP/IP header compression is disabled                  <br>
+&nbsp;&nbsp;RTP/IP header compression is disabled                  <br>
+&nbsp;&nbsp;Policy routing is disabled                             <br>
+&nbsp;&nbsp;Network address translation is disabled                <br>
+&nbsp;&nbsp;BGP Policy Mapping is disabled                         <br>
+&nbsp;&nbsp;Input features: Access List, MCI Check                 <br>
+&nbsp;&nbsp;IPv4 WCCP Redirect outbound is disabled                <br>
+&nbsp;&nbsp;IPv4 WCCP Redirect inbound is disabled                 <br>
+&nbsp;&nbsp;IPv4 WCCP Redirect exclude is disabled
+  </code></div>
+</p>
 
 <h1>Extended Access Control Lists</h1>
 <p>
-Compared to standard ACLs, extended ACLs provide increased granular control over 
+Compared to standard ACLs, extended ACLs provide granular control over 
 traffic filtering. 
-Extended ACLs can be numbered or named. Numbered extended ACLs are assigned a 
-number in the range from 100 - 199 and 2000 - 2699. Named extended ACLs are 
+Extended ACLs can be numbered or named. Numbered extended ACLs are configured with 
+an ACL ID in the range from 100 - 199 and 2000 - 2699. Named extended ACLs are 
 assigned a unique name.
 Extended ACLs are processed from top to bottom. 
 </p>
