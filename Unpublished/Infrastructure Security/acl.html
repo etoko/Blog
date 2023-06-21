@@ -557,12 +557,10 @@ GigabitEthernet0/0 is up, line protocol is up                      <br>
 Compared to standard ACLs, extended ACLs provide granular control over 
 traffic filtering. 
 Extended ACLs can be numbered or named. Numbered extended ACLs are configured with 
-an ACL ID in the range from 100 - 199 and 2000 - 2699. Named extended ACLs are 
-assigned a unique name.
-Extended ACLs are processed from top to bottom. 
+an ACL ID in the range from 100 - 199 and 2000 - 2699.
 </p>
 <p>
-Extended ACLs filter traffic based on a number of criteria:
+Extended ACLs filter traffic based on the following parameters:
 <ul>
   <li>Protocol type i.e., IP, ICMP, EIGRP, OSPF, TCP, UDP etc.</li>
   <li>Source IP address</li>
@@ -572,7 +570,7 @@ Extended ACLs filter traffic based on a number of criteria:
 </ul>
 </p>
 <p>
-Extended ACLs support a many layer 3 and layer 4 protocols. The protocols are 
+Extended ACLs support many layer 3 and layer 4 protocols. The protocols are 
 defined using the protocol name or number. Some supported protocol names include:
 eigrp, esp, ip, ospf, tcp, udp, icmp, gre. The  supported protocol numbers are 
 in the range 0 - 255. TCP has a protocol number of 6, UDP 17, OSPF 89.
@@ -586,31 +584,71 @@ a new ACE without indicating the sequence number adds it to the bottom of the AC
 and generates the highest sequence number for the ACE.
 </p>
 <p>
-#access-list 100 – 199 action (permit or deny) protocol (tcp, udp, ip) source_network 
-wildcard_mask destination_network wildcard_mask matching_port_number port_number_or_protocol
-
-Matching action:
+The command to configure an extended ACL is <code><b>
+ip access-list extended &lt;100 – 199 | 1300 - 1999 | acl-name&gt; &lt;permit or deny&gt; 
+&lt;protocol&gt; [host] &lt;source-network&gt; &lt;wildcard-bits&gt; [&lt;operator&gt; port-number] 
+&lt;destination-network&gt; &lt;wildcard-bits&gt; [&lt;operator&gt; port-number]
+</b></code>
+</p>
+<p>
+The operator can be any of the following:
 <ul>
-  <li>eq: match one specific port</li>
-  <li>range: to match a specified range of ports</li>
-  <li>gt: match ports greater than</li>
-  <li>lt: match ports less than</li>
+  <li><b>eq:</b> match one specific port</li>
+  <li><b>range:</b> to match a specified range of ports</li>
+  <li><b>gt:</b> match ports greater than</li>
+  <li><b>lt:</b> match ports less than</li>
 </ul>
 </p>
 <p>
 A remark can be added to an ACL to describe the purpose of the ACL.
+</p>
 
-#access-list 150 deny tcp
-Verification
 
-#show access-lists
 
-#show ip interface: to view ACLs configured on an interface.
+<h2>Configuration</h2>
+<p>
+To configure an extended ACL:
+<ol>
+  <li><b>Define the extended ACL:</b> 
+    <ol>
+      <li><b>Classic numbered extended ACL:</b> 
+  using the command <code><b>access-list 
+  &lt;100-199 | 2000-2699&gt; [permit | deny] &lt;protocol&gt; &lt;source-ip&gt; [source-port] 
+  &lt;destination-ip&gt; [destination-port]</b></code>.
+  </li> 
+  <li><b>Modern extended ACL:</b>
+    <code><b>ip access-list extended  
+  &lt;name | 100-199 | 2000-2699&gt; [permit | deny] &lt;protocol&gt; &lt;source-ip&gt; [source-port] 
+  &lt;destination-ip&gt; [destination-port]</b></code>.
+  </li>
+  </ol>
+  <p>
+  <p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  	<code>
+R2(config)#<b>ip access-list extended ACL_DENY_172.31.33.3</b>
+</code></div>
+</p>
+  </p>
+  </li>
+  <li>Specify the condition, protocol, destination and source addresses:  
+  permit or match
+  <p>
+  <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  	<code>
+  R2(config-ext-nacl)#<b>deny ip 192.168.12.0 0.0.0.3 host 172.31.33.3</b><br>
+  R2(config-ext-nacl)#<b>permit ip any any</b>
+  </code></div>
+  </p>
+  </li>
+</ol>
+</p>
+
 
 <h2>Accessing Layer 3 Options</h2>
 <p>
-Layer-3 options are accessed using the <code><b>ip</b></code> keyword. These 
-options include:
+Layer-3 options are accessed using the <code><b>ip</b></code> keyword as the 
+top-level protocol. These options include:
 <ul>
   <li><b>dscp:</b> matches packets with given dscp value</li>
   <li><b>fragments:</b> Check non-initial fragments</li>
@@ -648,15 +686,15 @@ or denied depending on the configured action.
 
 Session-layer(Layer-5) port numbers may be matched in a variety of ways:
 <ul>
-  <li><code><b>eq 23:</b></code> matching on an exact port number that "equals" 
+  <li><code><b>eq &lt;port-number&gt;:</b></code>: matching on an exact port number that "equals" 
   the supplied value</li>
-  <li><code><b>lt 1000</b></code> matching on any value less than the supplied 
+  <li><code><b>lt &lt;port-number&gt;</b></code>: matching on any value less than the supplied 
   value.</li>
-  <li><code><b>gt 500</b></code> : matching on any value greater than the supplied 
+  <li><code><b>gt &lt;port-number&gt;</b></code>: matching on any value greater than the supplied 
   value.</li>
-  <li><code><b>neq 20</b></code> : matching on any value not equal to the 
+  <li><code><b>neq &lt;port-number&gt;</b></code>: matching on any value not equal to the 
   supplied value.</li>
-  <li><code><b>range 100-200</b></code> matching on any value in the supplied 
+  <li><code><b>range &lt;lower-upper&gt;</b></code>: matching on any value in the supplied 
   range of values.
 </ul>
 </p>
@@ -664,11 +702,11 @@ Session-layer(Layer-5) port numbers may be matched in a variety of ways:
 When matching against port numbers, the destination port follows the destination 
 IP address and the source port follows the source IP address. If you specify 
 the protocol, source and destination IP addresses, source and destination port, etc,  
-for a packet to match, all these parameters have to be the same for the packet,
-to be registered as a match.
+for a packet to match the ACE, all these parameters have to be the same as the 
+configured values for the ACE to be registered as a match.
 </p>
 
-<h3>ACLs and Fragmentation</h3>
+<h3>Extended ACLs and Packet Fragmentation</h3>
 <p>
 When a packet is fragmented by a router, the first fragment of the packet contains 
 the layer-3 and layer 4 header details. With subsequent fragments, the layer 3 
@@ -681,17 +719,20 @@ fragment of a packet. Subsequent fragments of the packet are not matched by this
 If the TCP header has the fragment offset value of 0(zero), then the packet is 
 considered the first fragment or not a fragment at all. If a packet contains a 
 value greater than zero in the fragment offset field, then this can be considered 
-as not being a fragment. If a packet has a non-zero value for fragment offset, 
-the router will permit the packet if the ACL is checking denying packets with 
-specific TCP header values. This can be used in carrying out DoS attacks where 
+as being a fragment. If a packet has a non-zero value for fragment offset, 
+the router will permit the packet if the ACL is checking for packets with 
+specific TCP header values. This can be used in suppressing DoS attacks where 
 fragmented packets are sent without sending the first fragment.
 </p>
 <p>
 The <code><b>fragments</b></code> keyword is a layer 3 feature that can be used 
 to query fragments.</p>
 </p>
+
+<h3>Extended ACLs and TCP handshake</h3>
 <p>
-The TCP three-way handshake, when initiating a TCP connection, 
+The TCP three-way handshake, when initiating a TCP connection, consists of the 
+following exchanges:
 <ul>
    <li>Sender sets the SYNC flag</li>
    <li>Receiver sets ACK flag</li>
@@ -722,29 +763,6 @@ as change the sequence number increment value using the command
 &lt;increment&gt;</b></code>. This feature is available for all ACLs.
 </p>
 
-
-<h2>Configuration</h2>
-<p>
-To configure an extended ACL:
-<ol>
-  <li><b>Define the extended ACL:</b> 
-    <ol>
-      <li><b>Classic numbered extended ACL:</b> 
-  using the command <code><b>access-list 
-  &lt;100-199 | 2000-2699&gt; [permit | deny] &lt;protocol&gt; &lt;source-ip&gt; [source-port] 
-  &lt;destination-ip&gt; [destination-port]</b></code>.
-  </li> 
-  <li><b>Modern extended ACL:</b>
-    <code><b>ip access-list extended  
-  &lt;name | 100-199 | 2000-2699&gt; [permit | deny] &lt;protocol&gt; &lt;source-ip&gt; [source-port] 
-  &lt;destination-ip&gt; [destination-port]</b></code>.
-  </li>
-  </ol>
-  </li>
-  <li>Specify the condition, protocol, destination and source addresses:  
-  permit or match
-</ol>
-</p>
 
 <h2>Extended ACLs in Routing Protocols</h2>
 <h3>Interior Gateway Protocols</h3>
