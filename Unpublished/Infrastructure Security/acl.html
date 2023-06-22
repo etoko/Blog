@@ -2,10 +2,10 @@
 <ol>
   <li><a href="#INTRO">Introduction and Overview</a>
   <li><a href="#STD">Standard ACLs</a>
-  <li><a href="">Extended ACLs</a>
-  <li><a href="">Infrastructure ACLs</a>
-  <li><a href="">Reflexive ACLs</a>
-  <li><a href="">Dynamic ACLs</a>
+  <li><a href="#ACL_EXT">Extended ACLs</a>
+  <li><a href="#ACL_INF">Infrastructure ACLs</a>
+  <li><a href="#ACL_REF">Reflexive ACLs</a>
+  <li><a href="#ACL_DYM">Dynamic ACLs</a>
 </ol>
 
 <h1 id="INTRO">Introduction and Overview</h1>
@@ -106,7 +106,8 @@ the packet. Because of this, when configuring ACLs, the ordering
 of the ACEs is extremely important.
 </p>
 <p>
-<b>Note:</b> ACLs for traffic filtering do not block local router generated traffic.
+<b>Note:</b> ACLs for traffic filtering do not block local router generated 
+traffic in the egress direction.
 </p>
 
 <h2>Ordering of ACEs</h2>
@@ -552,7 +553,7 @@ GigabitEthernet0/0 is up, line protocol is up                      <br>
   </code></div>
 </p>
 
-<h1>Extended Access Control Lists</h1>
+<h1 id="ACL_EXT">Extended Access Control Lists</h1>
 <p>
 Compared to standard ACLs, extended ACLs provide granular control over 
 traffic filtering. 
@@ -637,6 +638,7 @@ R2(config)#<b>ip access-list extended ACL_DENY_172.31.33.3</b>
   <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
   	<code>
   R2(config-ext-nacl)#<b>deny ip 192.168.12.0 0.0.0.3 host 172.31.33.3</b><br>
+  R2(config-ext-nacl)#<b>permit tcp 192.168.12.0 0.0.0.3 host 172.31.33.3 eq www</b><br>
   R2(config-ext-nacl)#<b>permit ip any any</b>
   </code></div>
   </p>
@@ -675,6 +677,7 @@ options:
 </ul>
 </p>
 
+
 <h3>Matching on TCP/UDP Port Numbers</h3>
 <p>
 Matching on TCP/UDP port numbers also matches Layer 3 (IP) options as well. Matching 
@@ -705,6 +708,7 @@ the protocol, source and destination IP addresses, source and destination port, 
 for a packet to match the ACE, all these parameters have to be the same as the 
 configured values for the ACE to be registered as a match.
 </p>
+
 
 <h3>Extended ACLs and Packet Fragmentation</h3>
 <p>
@@ -748,26 +752,31 @@ The two potential solutions include:
 </ol>
 The two options do the same thing.
 </p>
-
-<h3>Sequence Numbers</h3>
 <p>
-When a new ACE is added to an ACL, by default, the first configured ACE is assigned 
-a sequence number of 10. Subsequent ACEs have their sequence numbers generated in 
-increments of 10 with the second ACE having sequence number 20, third ACE 30 and 
-so on.
+The following configuration permits HTTP traffic initiated by host 192.168.12.1
+to host 192.168.23.2. HTTP traffic initiated by host 192.168.23.2 to 192.168.12.1 
+is denied.
 </p>
 <p>
-It is possible to modify the starting sequence number of an existing ACE as well 
-as change the sequence number increment value using the command 
-<code><b>ip access-list resequence &lt;acl-id&gt; &lt;starting-seq-number&gt; 
-&lt;increment&gt;</b></code>. This feature is available for all ACLs.
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  	<code>
+R2(config-ext-nacl)#<b>do show ip access-lists  ACL_DENY_HTTP_192.168.23.2</b><br>
+Extended IP access list ACL_DENY_HTTP_192.168.23.2<br>
+&nbsp;&nbsp;&nbsp;&nbsp;10 permit tcp host 192.168.23.2 host 192.168.12.1 eq www established (9 matches)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;15 permit tcp host 192.168.23.2 host 192.168.12.1 ack fin (24 matches)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;30 permit ospf any any (182 matches)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;40 permit icmp host 192.168.12.1 host 172.31.33.3<br>
+&nbsp;&nbsp;&nbsp;&nbsp;50 permit icmp host 172.31.33.3 host 192.168.12.1 echo-reply (10 matches)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;100 deny ip any any log (11 matches)<br>
+  </code></div>
 </p>
 
 
 <h2>Extended ACLs in Routing Protocols</h2>
 <h3>Interior Gateway Protocols</h3>
 <p>
-When applied to interior gateway protocols for network selection, source fields 
+When applied to interior gateway protocols for prefix filtering during redistribution, 
+advertising etc., source fields 
 identify the network and destination fields identify the smallest prefix length 
 in that network range. 
 </p>
@@ -775,11 +784,11 @@ in that network range.
 When matching networks in IGPs:
 <ul>
   <li><code><b> permit ip any any </b></code>: permits all networks</li>
-  <li><code><b>permit ip host 172.16.0.0 host 255.240.0.0 </b></code>: Permits all 
-  networks in the range 172.16.0.0/12</li>
-  <li><code><b>permit ip host 172.16.0.0 host 255.255.0.0 </b></code>: Permits 
-  all networks in the 172.16.0.0/16 range</li>
-  <li><code><b> permit host 192.168.1.1 </b></code>: Permits only the 192.168.1.1/32
+  <li><code><b>permit ip host 10.1.0.0 host 255.240.0.0 </b></code>: Permits all 
+  networks in the range 10.1.0.0/12</li>
+  <li><code><b>permit ip host 10.1.0.0 host 255.255.0.0 </b></code>: Permits 
+  all networks in the 10.1.0.0/16 range</li>
+  <li><code><b> permit host 10.1.1.1 </b></code>: Permits only the 10.1.1.1/32
   network</li>
 </ul>
 </p>
@@ -791,18 +800,19 @@ destination fields identify the network mask.
 </p>
 <p>
   <ul>
-    <li><code><b>permit ip 10.0.0.0 0.0.0.0 255.255.0.0 0.0.0.0 </b></code>: Permits 
-    only the 10.0.0.0/16 network</li>
-    <li><code><b>Permit ip 10.0.0.0 0.0.255.0 255.255.255.0 0.0.0.0 </b></code>: 
-    Permits any 10.0.any.0 network with a /24 prefix</li>
-    <li><code><b>Permit ip 10.0.0.0 0.0.255.255 255.255.255.0 0.0.0.255 </b></code>: 
-    Permits any 10.0.any.any network with a /24 - /32 prefix</li>
-    <li><code><b>permit ip 10.0.0.0 0.0.255.255 255.255.255.128 0.0.0.127 </b></code>:
-    Permits any 10.0.any.any network with a /25 - /32 prefix</li>
+    <li><code><b>permit ip 10.1.0.0 0.0.0.0 255.255.0.0 0.0.0.0 </b></code>: Permits 
+    only the 10.1.0.0/16 network</li>
+    <li><code><b>Permit ip 10.1.0.0 0.0.255.0 255.255.255.0 0.0.0.0 </b></code>: 
+    Permits any 10.1.any.0 network with a /24 prefix</li>
+    <li><code><b>Permit ip 10.1.0.0 0.0.255.255 255.255.255.0 0.0.0.255 </b></code>: 
+    Permits any 10.1.any.any network with a /24 - /32 prefix</li>
+    <li><code><b>permit ip 10.1.0.0 0.0.255.255 255.255.255.128 0.0.0.127 </b></code>:
+    Permits any 10.1.any.any network with a /25 - /32 prefix</li>
   </ul>
 </p>
 
-<h3>Extended ACLs in Packet Filtering</h3>
+<!--
+<h3>Exercises: Extended ACLs in Packet Filtering</h3>
 <p>
   <ul>
     <li>Allow all traffic</li>
@@ -815,25 +825,22 @@ destination fields identify the network mask.
     all TCO ports on server  4.4.4.4 except port 23.
   </ul>
 </p>
+-->
 
-
-<h1>Applying an ACL</h1>
 <h2>Packet Filtering using ACLs</h2>
 <p>
 ACLs are applied to an interface in a given direction; ingress or egress. Ingress 
-is when traffic is entering a router interface and egress is when traffic is exiting the router through an interface.
-
-To apply the ACL to an interface, you need to indicate the direction of traffic flow that the device should implement the ACL.
-
-#ip access-group 1 out | in
-
+is when traffic is entering a router interface and egress is when traffic is 
+exiting the router through an interface.
+To apply the ACL to an interface, you need to indicate the direction of traffic 
+flow that the device should implement the ACL.
 Pinging a destination that is blocked by an ACL results in ICMP unreachable output indicated by U.U,U,U
 </p>
 
 
 <h2>Matching a default Route</h2>
 <p>
-To match against the default route in a standard ACL, use the ACE 
+To match against the default route in an extended ACL, use the ACE 
 <code><b>access-list 100 permit ip host 0.0.0.0 host 0.0.0.0</b></code>. 
 </p>
 <p>In a prefix-list, to match a default route, use the command 
@@ -1349,7 +1356,24 @@ Displays the configuration of the object group.
 </p>
 
 
-<h1>Logging</h1>
+<h1>Additional ACL Features</h1>
+
+<h2>Sequence Numbers</h2>
+<p>
+When a new ACE is added to an ACL, by default, the first configured ACE is assigned 
+a sequence number of 10. Subsequent ACEs have their sequence numbers generated in 
+increments of 10 with the second ACE having sequence number 20, third ACE 30 and 
+so on.
+</p>
+<p>
+It is possible to modify the starting sequence number of an existing ACE as well 
+as change the sequence number increment value using the command 
+<code><b>ip access-list resequence &lt;acl-id&gt; &lt;starting-seq-number&gt; 
+&lt;increment&gt;</b></code>. This feature is available for all ACLs.
+</p>
+
+
+<h2>Logging</h2>
 <p>
 ACE entries can be appended with logging-related keywords: <code><b>log</b></code> 
 and <code><b>log-input</b></code>. 
@@ -1378,7 +1402,7 @@ role of the ACE e.g. <code><b>access-list 101 permit icmp any host 2.2.2.2 log-i
 This tags the ACE for traffic to the email server.
 </p>
 
-<h2>Log Interval</h2>
+<h3>Log Interval</h3>
 <p>
 Individual ACEs can have the "log" or "log-input" keywords. When an ACL is applied 
 to an interface, syslogs are generated:
