@@ -3,6 +3,7 @@
   <li><a href="#INTRO">Introduction and Overview</a>
   <li><a href="#STD">Standard ACLs</a>
   <li><a href="#ACL_EXT">Extended ACLs</a>
+  <li><a href="#ACL_TIME">Time-based ACLs</a>
   <li><a href="#ACL_INF">Infrastructure ACLs</a>
   <li><a href="#ACL_REF">Reflexive ACLs</a>
   <li><a href="#ACL_DYM">Dynamic ACLs</a>
@@ -849,16 +850,32 @@ To match against the default route in an extended ACL, use the ACE
 
 
 
-<h1>Time-based ACLs</h1>
-<p>
-Time-based ACLs activate ACEs during times you define. Times are defined within 
-a global time-range. Time-range can be periodic or absolute. Ensure that the 
-device has an accurate clock.
-</p>
+<h1 id="ACL_TIME">Time-based ACLs</h1>
 <p>
 Time-based ACLs are only active during a specified time range. The time-range 
-configured on a router references the router’s clock. Configure NTP to ensure a 
-correct clock. They are applied to extended ACLs.
+configured on a router references the router’s clock.
+Time-based ACLs consist of ACEs that are activated during configured time periods.
+The times periods are a feature that is separate from ACLs and are defined using 
+the configuration mode command <code><b>time-range</b></code>. This configured 
+time period is then applied to an extended ACLs making it a time-based ACL.
+
+The time configured using the <code<b>time-range 
+</b></code> command can be periodic or absolute:
+<ul>
+  <li><b>Periodic:</b> the ACE is activated at the scheduled time periods such 
+  as daily, specific days of the week, weekly, monthly, hourly, etc. The 
+  occurance of the activation of the ACE is depends on the value of the configured time 
+  period.</li>
+  <li><b>Absolute:</b> ACE gets activated for a specific duration and this occurs 
+  only once.</li>
+</ul>
+</p>
+<p>
+When configuring a time-based ACL, it is important to ensure the accuracy of 
+the device clock. It is recommended to use NTP to set the system clock.
+</p>
+<p>
+<p>
 It can be set to be periodic where it becomes active or inactive at specific times 
 of the day or on specific days of the week e.g. every Wednesday from 10am – 2pm or 
 absolute where there is a specific starting and stopping date and time.
@@ -872,78 +889,115 @@ The non-time-based rule always overrides the duplicate time-based rule, as they 
 <h2>Configuration of Time-based ACLs</h2>
 <p>
 <ol>
-  <li><b>Ensure that the clock is accurate:<</b> 
+  <li><b>Ensure that the clock is accurate:</b> it is important to ensure that 
+  the system clock is accurate when configuring time-based ACLs. The clock can 
+  be set manually or preferrably through NTP:
     <p>
-    <div><code>
-    clock set hh:mm:ss dd month year
-    </code></div>
+    <ul>
+      <li><b>Manually configuring clock:</b> using the privileged mode command 
+       <code><b>clock set hh:mm:ss dd month year </b></code></li>
+    <li><b>Using NTP:</b> A list of NTP servers can be configured using the global 
+    configuration command </b> <code><b>ntp server &lt;server-ip&gt; [prefer] [version]</b></code>. 
+    Current NTP version is 4. The optional <code><b>prefer</b></code> keyword 
+    indicates that this specific NTP server is preferred to other configured NTP servers.
+    </ul>
     </p>
   </li>
   <li><b>Configure the time-range:</b>
     <ol type="a">
-      <li><b>Define a global time-range:</b> 
+      <li><b>Define the time-range:</b> using the command global configuration 
+      command <code><b>time-range &lt;name&gt;</b></code>:  
 		<p>
-		<div><code>
-		  time-range &lt;name&gt; <br> 
+		<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+			<code>
+		  R1(config)#<b>time-range TIME-RANGE_WORK-WEEK</b>
 		</code></div>
 		</p>
 	  </li>
-	  <li><b>Decide on absolute or periodic type:</b>
+	  <li><b>Time-range type:</b> Decide on absolute or periodic type where 
+	  absolute activates the ACE only once for the defined duration and does not 
+	  repeat. Periodic occurs repeatedly where the ACE is activated on the 
+	  specified period and for the defined duration. Time values are defined in 
+	  24-hour clock.
+	  <ul>
+	    <li><b>Absolute:</b>  
+	 		<code>R1(config-time-range)#<b>absolute start &lt;hh:mm&gt; &lt;1-31&gt; 
+	 		&lt;Jan-Dec&gt; &lt;yyyy&gt; end &lt;hh:mm&gt; &lt;1-31&gt; 
+	 		&lt;Jan-Dec&gt; &lt;yyyy&gt;</b></code>
+	 		<p>
+		<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+			<code>
+	 		R1(config-time-range)#<b>absolute start 12:00 06 Jun 2022 end 00:00 31 Jan 2035</b>
+	 		</code></div></p>
+	    </li>
+	    <li><b>Periodic:</b> <code><b>periodic [Monday | Tuesday | Wednesday | 
+	    Thursday | Friday | daily | weekdays | weekend] &lt;hh:mm&gt; to &lt;hh:mm&gt;</b></code>. 
+	    If the periodic value configured is a day of the week, tt is possible to 
+	    set the value to a series of days <code><b>periodic Monday Wednesday Friday
+	    &lt;hh:mm&gt; to &lt;hh:mm&gt;</b></code>.
+	    <p>
+	    <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+			<code>
+	 		R1(config-time-range)#<b>R1(config-time-range)#periodic  weekdays 00:00 to 23:30</b>
+	 		</code></div></p>
+	    </li>
+	  </ul>
 	  <p>
-	  absolute happens only once and does not repeat. Periodic occurs repeatedly 
-	  on the specified days. Time values are defined in 24-hour clock.
-	  <code>
-	  periodic weekdays 7:00 to 18:00
-	  </code>
+	  Curiously, IOS permits the configuration of a periodic and abolute parameters. 
+	  
+	     <p>
+	    <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+			<code>
+	  R1#<B>show time-range</B><BR>
+time-range entry: TIME-RANGE_WORK-WEEK (inactive)<br>
+&nbsp;&nbsp; absolute start 12:00 06 June 2026 end 00:00 31 January 2035<br>
+&nbsp;&nbsp; periodic weekdays 0:00 to 23:30
+   </code></div>
+	  </p>
+	  <p>
+	  The <code><b>show time-range</b></code> command will display ‘inactive’ if the current time is not within 
+the range of the configured time.
+	  </p>
 	  </li>
     </ol>
   </li>
-  <li><b>Apply the time-range to the ACL:</b>
+  <li><b>Apply the time-range to the ACL:</b> using the keyword <code><b>time-range &lt;name_of_time-range&gt;</b></code> 
+  of the ACE ACL configuration.
   <p>
-  <div>
-  <code><b>access-list deny tcp 2.2.0.0 0.0.255.255 any eq www time-range No-Internet</b><br>
-  <b>access-list deny tcp 2.2.0.0 0.0.255.255 any eq 443 time-range No-Internet</b><br>
-  <b>access-list permit ip any any</b>
+  <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+			<code>
+  R1(config-ext-nacl)#<b>permit ip 192.168.23.0 0.0.0.3 host 192.168.12.1 time-range TIME-RANGE_WORK_WEEK</b><br>
+  R1(config-ext-nacl)#<b>permit tcp 172.16.33.0 0.0.0.255 192.168.8.0 0.0.0.255 eq www time-range TIME-RANGE_WEEKEND</b><br>
   </code></div></p>
   </li>
   <li><b>Apply the ACL to the interface:</b> 
   <p>
+  <div  style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
   <code>
-  <b>ip access-group 101 in</b>
-  </code></p>
-  
+  R1(config)#<b>interface g0/0</b><br>                                       
+  R1(config-if)#<b>ip access-group 100 in</b>                            
+</code></div>
+  </p>
   </li>
 </ol>
-To configure a time-based ACL, you must specify the time-range, then apply it to the ACL.
-</p>
-<p>
-#time-range TR_WORK_TIME
-#periodic &lt;monday thru friday | weekend | weeekday&gt; 8:00 to 17:00
-#absolute start hh:mm dd MM yy end hh:mm dd MM yyyy
-#ip access-list extended ACL_FILTER_SOCIAL_MEDIA
-#deny tcp any host 8.8.8.8 eq 80 time-range TR_WORK_TIME
-</p>
-<h2>Verification</h2>
-<p>
-#show time-range command will display ‘inactive’ if the current time is not within 
-the range of the configured time.
 </p>
 
 
-
-
-<h1>Infrastructure ACLs</h1>
+<h1 id="ACL_INF">Infrastructure ACLs</h1>
 <p>
-Is an extended ACL applied to routers residing at the edge of an enterprise network. 
+An infrastructure ACL is an extended ACL applied to layer 3 devices residing at 
+the edge of an enterprise network. 
 The primary purpose is to prevent malicious traffic from entering the enterprise. 
 It is usually applied inbound on the interface connecting to the external network.
+Typical ACEs configured in infrastructure ACLs include tracking TCP fragments, 
+blocking TCP connections initiated by outside users.
 </p>
 <p>
-#ip access-list extended INFRASTRUCTURE
-
-#deny &lt;tcp | udp | icmp | ip &gt; any any fragments
-
-#permit bgp | ssh | snmp | icmp …
+<div  style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+R1(config)#<b>ip access-list extended INFRASTRUCTURE</b><br>
+R1(config-ext-nacl)#<b>deny tcp any any fragments</b>
+</code></div>
 </p>
 
 
@@ -951,36 +1005,31 @@ It is usually applied inbound on the interface connecting to the external networ
 
 
 
-<h1>Reflexive ACLs (IP Session Filtering)</h1>
-<p>
-Allows outbound traffic and limits inbound traffic in response to sessions that 
-originate inside the router. 
-Can be defined only with extended named IP ACLs.
-Can be used in conjunction with other standard and static extended ACLs. 
-</p>
+<h1 id="ACL_REF">Reflexive ACLs (IP Session Filtering)</h1>
 
 <p>
-Operates similar to a stateful firewall protecting internal users from external 
+Reflexive ACLs enable a router to implement security features that firewalls 
+implement where a network is labelled an inside network and another network 
+labelled as an outside (and considered unsafe). Connections initiated by hosts in the inside 
+network to hosts in the outside network are permitted. Also permitted is return 
+traffic. Traffic initiated by hosts in the outside network is denied. 
+Reflexive ACLs permit outbound traffic and limit inbound traffic in response to sessions that 
+originate from the inside network.
+Reflexive ACLs make the edge routers operate similar to a stateful firewall protecting internal users from external 
 threats. Internal users are permitted to access external resources but external 
 users cannot initial connections to internal resources.
-Reflexive ACLs can be configured to track any protocol whether TCP, UDP, ICMP.
 </p>
-
 <p>
-Reflexive ACLs permit a router to implement security features that firewalls 
-implement where an inside network is labelled and an outside (and considered 
-unsafe) network is identified. Connections initiated by hosts in the inside 
-network and return traffic are permitted; traffic initiated by hosts in the 
-outside network is denied. Reflexive ACLs monitor for permitted, outgoing data 
-of any type. The type of expected traffic is defined e.g., SSH, HTTPS. An ACL is 
+Reflexive ACLs monitor for permitted, outgoing data 
+of any type; they can be configured to track any protocol whether TCP, UDP, ICMP.
+The type of expected traffic is defined e.g., SSH, HTTPS. 
+Reflexive ACLs are defined only with extended named IP ACLs. However, to improve 
+the security posture of the network, they 
+can be used in conjunction with other standard and static extended ACLs. 
+An ACL is 
 configured to permit the defined traffic types and the keyword reflect is added 
-to this ACL. The reflex keyword causes the router to remember the traffic that 
-matches the permitted traffic such as HTTPS session(source and destination, port
-numbers, IP protocol field), and monitor all return traffic.  The reflexive ACLs 
-create a mirror-image of transmitted traffic which will be permitted upon return; 
-the return traffic is then expected to have the source and destination ports, 
-source and destination IP addresses reversed. What was the source port in the 
-original traffic will be the destination port in the return traffic.
+to this ACL. 
+
 </p>
 <p>
 Reflexive ACLs have create a mirror-image of transmitted traffic which will be 
@@ -988,6 +1037,14 @@ permitted upon return.
 The reflexive ACL creates a dynamic ACL on-the-fly where it is expecting and 
 permitting a return packet. Return traffic is permitted because it matches the 
 return traffic. 
+
+The <code><b>reflex</b></code> keyword of an extended ACL causes the router to remember the traffic that 
+matches the permitted traffic such as HTTPS session(source and destination, port
+numbers, IP protocol field), and monitor all return traffic.  The reflexive ACLs 
+create a mirror-image of transmitted traffic which will be permitted upon return; 
+the return traffic is then expected to have the source and destination ports, 
+source and destination IP addresses reversed. What was the source port in the 
+original traffic will be the destination port in the return traffic.
 </p>
 
 <p>
@@ -1000,52 +1057,37 @@ Reflexive ACLs should be applied on the interface connecting to the untrusted
 network/host.
 </p>
 
-<h2>Timeout Values</h2>
-<p>
-Reflexive entries expire after configurable timeout value. When this happens, that 
-same TCP, UDP traffic will not be allowed on the interface. 
-Reflexive ACLs have a timeout value that expires. This value can be configured.
-After the expiry of the timeout value, the dynamic reflexive entry is removed and 
-that same TCP and UDP information is no longer permitted on the interface.
-</p>
-<p>
-<ol>
-  <li>Graceful TCP close (2 segments seen with FIN flags). Timeout = 5 seconds.</li>
-  <li>TCP reset: timeout is immediate.</li>
-  <li>TCP packets no longer seen: timeout value is 300 seconds.</li>
-  <li>UDP, ICMP and all others: timeout value is 300 seconds after last seen 
-  packet</li>
-</ol>
-</p>
-<p>
-Timeout values for 1 and 2 can not be modified. The timeout values for 3 and 4 
-can be modified.
-</p>
 
-<h2>Configuration</h2>
+<h2>Configuration of Reflexive ACLs</h2>
 <p>
   <ol>
-    <li><b>Configure a named extended ACL:</b> Can only be used with named 
-    extended ACLs.
+    <li><b>Configure a named extended ACL:</b> Reflexive ACLs can only be used with named 
+    extended ACLs. The following error message is displayed when an attempt is 
+    made to configure reflexive ACL using a numbered extended ACL: 
+    <code><b>% Reflexive ACLs are allowed on named ACLs only</b></code>.
      <p>
-<div>
-<code>
-ip access-list extended ACL_EGRESS<BR>
-permit ip any any reflect MIRROR
+<div  style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+  R2(config)#<b>ip access-list extended ACL_REFLEXIVE_EGRESS</b><br>
+R2(config-ext-nacl)#<b>permit ip host 192.168.12.1 host 172.31.30.10 reflect MIRROR</b>
 </code>
 </div>
 </p>
 <p>
-The dynamic ACL MIRROR reflects the permitted traffic swapping the source and 
-destination IP addresses, source and destination ports.
+The dynamic ACL MIRROR reflects the permitted traffic swapping the source IP address 
+with destination IP address, source port with destination port of the original 
+traffic.
 </p>
 
     </li>
-    <li><b>Create a Named, Extended ACL for Monitoring ingress Traffic from Untrusted Sources:</b>
+    <li><b>Create a named extended ACL for monitoring ingress traffic from untrusted sources:</b>
+    create a new extended named ACL and include the keyword <code><b>evaluate</b></code> 
+    referencing the previously configured reflexive ACL name.
     <p>
-      <div><code>
-      ip access-list extended ACL_INGRESS<br>
-      evaluate Mirror
+      <div  style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+      <code>
+      R2(config)#<b>ip access-list extended ACL_REFLEXIVE_INGRESS</b><br>
+      R2(config-ext-nacl)#<b>evaluate MIRROR</b>
       </code></div>
     </p>
     The name must match the name previously supplied after the "reflect" keyword.
@@ -1053,36 +1095,15 @@ destination IP addresses, source and destination ports.
     
     <li><b>Apply both ACLs to interface facing untrusted networks:</b> 
     <p>
-      <div><code>
-       interface ga0/0<br>
-       ip access-group ACL_EGRESS out<br>
-       ip access-group ACL_INGRESS in
+      <div  style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+      <code>
+       R2(config)#<b>interface g1/0</b><br>
+       R2(config-if)#<b>ip access-group ACL_REFLEXIVE_EGRESS out</b><br>
+       R2(config-if)#<b>ip access-group ACL_REFLEXIVE_INGRESS in</b>
       </code></div>
     </p>
     </li>
-    <li><b>Changing the timeout value:</b>
-    The mirror ACL should be active for a defined period of time. If it is indefinite,
-    this could become a security loophole.
-    <ol>
-      <li>Values for 1 and 2 cannot be changed.</li>
-      <li>Vlues for 3 and 4 can be modified per ACE or globally.
-        <ul>
-          <li><b>Globally:</b> <code><b>ip reflexive-list timeout &lt;1-2147483&gt;</b></code>
-          <li><b>Modifying within ACE Entries:</b>
-          <p>
-            <div><code>
-            ip access-list extended ACL_EGRESS<br>
-            permit tcp any any reflect Mirror timeout 30<br>
-            permit udp any any reflect Mirror timeout 45<br>
-            permit ip any any reflect Mirror timeout 120
-            </code></div>
-          </p>
-        </ul>
-      </li>
-    </ol>
-    </li>
   </ol>
-
 </p>
 
 <p>
@@ -1093,12 +1114,82 @@ ICMP traffic has to be tracked on the ACL using the command
 <code><b>permit icmp any any reflect Mirror</b></code>.
 </p>
 
-<h2>Verification</h2>
+
+<h2>Timeout Values</h2>
 <p>
-The dynamic ACL created by the reflexive ACL can be verified using the command 
+Reflexive entries expire after configurable timeout value. When this happens, that 
+same TCP, UDP return traffic that was previously permitted will be denied on the interface. 
+Reflexive ACLs have a timeout value that expires. This value can be configured.
+After the expiry of the timeout value, the dynamic reflexive entry is removed and 
+that same TCP and UDP information is no longer permitted on the interface.
+</p>
+<p>
+The timeout value expire under the following conditions:
+<ol>
+  <li>Graceful end of TCP session messages are received; 
+   (2 segments seen with FIN flags). The default timeout is 5 seconds.</li>
+  <li>TCP reset message is received (RST). The default timeout is immediate.</li>
+  <li>TCP messages no longer seen: the default timeout value is 300 seconds.</li>
+  <li>For UDP, ICMP and all other protocols, the default timeout value is 300 
+  seconds after last seen packet</li>
+</ol>
+</p>
+<p>
+Timeout values for graceful end of TCP session and TCP session reset can not be modified.
+The timeout values for non-receipt of TCP messages and other protocols such as 
+UDP, ICMP can be modified in two ways: 
+<ol>
+  <li><b>Globally:</b> using the global configuration command
+  	<code><b>ip reflexive-list timeout &lt;1-2147483&gt;</b></code>
+  </li>
+  <li><b>Modifying within ACE Entries:</b> 
+   <p>
+            <div><code>
+            R2(config)#<b>ip access-list extended ACL_REFLEXIVE_EGRESS</b><br>
+            R2(config-ext-nacl)#<b>10 permit host 192.168.12.1 host 172.31.30.10 reflect MIRROR timeout 250</b><br>
+            R2(config-ext-nacl)#<b>20 permit host 192.168.8.1 host 172.31.30.10 reflect MIRROR timeout 150</b><br>
+            R2(config-ext-nacl)#<b>permit host 192.168.10.1 host 172.31.30.10 reflect MIRROR timeout 120</b>
+            </code></div>
+          </p>
+  </li>
+</ol>
+</p>
+<p>
+The global reflexive ACL timeout values take precedence over the ACE specific 
+timeout values.
+</p>
+<p>
+The mirror ACL should be active for a defined period of time. If it is indefinite,
+    this could become a security loophole; though the default timeout values 
+    are enforced if explicit timeout values are not configured.
+</p>
+
+
+
+<h2>Verification</h2>
+
+<h3><code>show ip access-lists</code></h3>
+<p>
+The reflexive ACL created by the traffic can be verified using the command 
 <code><b>show ip access-list</b></code>. This is used to determine if the reflexive 
 ACL is in effect or not. 
 Command displays the matched hosts even if the keyword "any" was used in the ACL.
+</p>
+<p>
+<div  style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+<code>
+R2#<b>show ip access-list</b><br>
+Extended IP access list ACL_REFLEXIVE_EGRESS<br>                                                    
+&nbsp;&nbsp;&nbsp;&nbsp;10 permit ip host 192.168.12.1 host 172.31.30.10 reflect MIRROR (31 matches)<br>                
+&nbsp;&nbsp;&nbsp;&nbsp;20 permit ospf any any                                                          <br>            
+Extended IP access list ACL_REFLEXIVE_INGRESS                                           <br>        
+&nbsp;&nbsp;&nbsp;&nbsp;10 evaluate MIRROR                                                                      <br>    
+&nbsp;&nbsp;&nbsp;&nbsp;20 permit ospf any any (128 matches)                                                        <br>
+<span style="background: #d3d3d3;">
+Reflexive IP access list MIRROR                                                                 <br>
+&nbsp;&nbsp;&nbsp;&nbsp; permit tcp host 172.31.30.10 eq www host 192.168.12.1 eq 63366 (5 matches) (time left 297) </span><br>
+R2#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                                             
+</code></div>
 </p>
 
 <p>
@@ -1108,20 +1199,90 @@ indicate when the ACL was created.
 
 <h2><code>debug ip access-list data-plane</code></h2>
 <p>
-Not recommended as it generates a lot of traffic on the network. To determine 
+Running the command <code><b>debug ip access-list data-plane</b></code> is not 
+recommended as it generates a lot of traffic on the network. To determine 
 the timestamp when the reflexive ACL was created:
 <ol>
-  <li>disable logging to the console <code><b>no logging console</b></code>.</li>
+  <li>Disable logging to the console <code><b>no logging console</b></code>.</li>
   <li>Send logs with severity of debugging to the logging buffer using the command
    <code><b>logging buffer debug</b></code></li>
    <li>Increase buffer size: <code><b>logging buffer 100000</b></code></li>
-   <li>Debug ACL: <code><code>debug ip access-list data-plabe</code></code></li>
-   <li>To view the ACL creation timestamp: <code><b>show log | in Reflexive</b></code></li>
+   <li>Debug ACL: <code><b>debug ip access-list data-plane</b></code>
+   
+   <p>
+<div  style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+<code>
+R2#<b>debug ip access-list data-plane</b><br>
+R2#<br>
+*Jun 23 05:25:06.155: IPACL-DP: ACL check is not done due to either of invalid input interface or output interface doesnt have any acl attached or locally generated traffic <br>                                                                                                                                               
+R2#                                                                                                                                                                          <br>
+*Jun 23 05:25:10.375: IPACL-DP: Pkt matched ACL: ACL_REFLEXIVE_INGRESS seq: 20 Action: Permit                                                                                <br>
+*Jun 23 05:25:10.375: IPACL-DP: Pkt matched permit it                                                                                                                        <br>
+*Jun 23 05:25:10.379: IPACL-DP: Pkt is permitted in process path: interface GigabitEthernet1/0 inbound direction                                                             <br>
+*Jun 23 05:25:11.643: IPACL-DP: Reflexive ACL: Punt the packet as we are in interrupt context                                                                                <br>
+*Jun 23 05:25:11.643: IPACL-DP: Pkt matched ACL: ACL_REFLEXIVE_EGRESS seq: 10 Action: Deny                                                                                   <br>
+*Jun 23 05:25:11.643: IPACL-DP: Pkt matched punt/drop it                                                                                                                     <br>
+*Jun 23 05:25:11.643: IPACL-DP: ipaccess_fib_acl_check_inline : Pkt is punted to process path from cef path: interface GigabitEthernet1/0 outbound direction                 <br>
+*Jun 23 05:25:11.651: IPACL-DP: New Reflexive acl entry created for the flow                                                                                                 <br>
+*Jun 23 05:25:11.651: IPACL-DP: Pkt matched ACL: ACL_REFLEXIVE_EGRESS seq: 10 Action: Permit                                                                                 <br>
+*Jun 23 05:25:11.651: IPACL-DP: Pkt matched permit it                                                                                                                        <br>
+*Jun 23 05:25:11.651: IPACL-DP: Pkt is permitted in process path: interface GigabitEthernet1/0 outbound                                                                      <br>
+R2# direction                                                                                                                                                                <br>
+*Jun 23 05:25:11.663: IPACL-DP: Pkt matched ACL: ACL_REFLEXIVE_INGRESS seq: 10 Action: Permit                                                                                <br>
+*Jun 23 05:25:11.663: IPACL-DP: Pkt matched permit it                                                                                                                        <br>
+*Jun 23 05:25:11.663: IPACL-DP: ipaccess_fib_acl_check_inline : Pkt is permitted in cef path: interface GigabitEthernet1/0 inbound direction                                 <br>
+*Jun 23 05:25:11.675: IPACL-DP: Pkt matched ACL: ACL_REFLEXIVE_EGRESS seq: 10 Action: Permit                                                                                 <br>
+*Jun 23 05:25:11.675: IPACL-DP: Pkt matched permit it                                                                                                                        <br>
+*Jun 23 05:25:11.675: IPACL-DP: ipaccess_fib_acl_check_inline : Pkt is permitted in cef path: interface GigabitEthernet1/0 outbound direction                                <br>
+*Jun 23 05:25:11.679: IPACL-DP: Pkt matched ACL: ACL_REFLEXIVE_EGRESS seq: 10 Action: Permit                                                                                 <br>
+*Jun 23 05:25:11.679: IPACL-DP: Pkt matched permit it                                                                                                                        <br>
+*Jun 23 05:25:11.679: IPACL-DP: ipaccess_fib_acl_check_inline : Pkt is permitted in cef path: interface GigabitEthernet1/0 outbound direction                                <br>
+*Jun 23 05:25:11.899: IPACL-DP: Pkt matched ACL: ACL_REFLEXIVE_INGRESS seq: 10 Action: Permit                                                                                <br>
+*Jun 23 05:25:11                                                                                                                                                             <br>
+R2#.899: IPACL-DP: Pkt matched permit it                                                                                                                                     <br>
+*Jun 23 05:25:11.899: IPACL-DP: ipaccess_fib_acl_check_inline : Pkt is permitted in cef path: interface GigabitEthernet1/0 inbound direction                                 <br>
+R2#                                                                                                                                                                          <br>
+*Jun 23 05:25:15.431: IPACL-DP: ACL check is not done due to either of invalid input interface or output interface doesnt have any acl attached or locally generated traffic                                                                                                                                                               <br>
+R2#                                                                                                                                                                          <br>
+*Jun 23 05:25:20.031: IPACL-DP: Pkt matched ACL: ACL_REFLEXIVE_INGRESS seq: 20 Action: Permit                                                                                <br>
+*Jun 23 05:25:20.031: IPACL-DP: Pkt matched permit it                                                                                                                        <br>
+*Jun 23 05:25:20.031: IPACL-DP: Pkt is permitted in process path: interface GigabitEthernet1/0 inbound direction                                                             <br>
+R2#                                                                                                                                                                          <br>
+*Jun 23 05:25:25.155: IPACL-DP: ACL check is not done due to either of invalid input interface or output interface doesnt have any acl attached or locally generated traffic                                                                                                                                                <br>
+R2#        
+</code></div>
+</p>
+   
+   </li>
+   <li>To view the ACL creation timestamp: <code><b>show log | include REFLEXIVE</b></code>
+   <p>
+<div  style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+<code>
+   R2#<b>show log | include REFLEXIVE</b><br>
+*Jun 23 05:25:29.391: IPACL-DP: Pkt matched ACL: ACL_REFLEXIVE_INGRESS seq: 20 Action: Permit <br>
+*Jun 23 05:25:38.551: IPACL-DP: Pkt matched ACL: ACL_REFLEXIVE_INGRESS seq: 20 Action: Permit <br>
+*Jun 23 05:25:48.283: IPACL-DP: Pkt matched ACL: ACL_REFLEXIVE_INGRESS seq: 20 Action: Permit <br>
+*Jun 23 05:25:57.987: IPACL-DP: Pkt matched ACL: ACL_REFLEXIVE_INGRESS seq: 20 Action: Permit <br>
+*Jun 23 05:26:06.979: IPACL-DP: Pkt matched ACL: ACL_REFLEXIVE_INGRESS seq: 20 Action: Permit <br>
+*Jun 23 05:26:11.687: IPACL-DP: Pkt matched ACL: ACL_REFLEXIVE_INGRESS seq: 10 Action: Permit <br>
+*Jun 23 05:26:11.707: IPACL-DP: Pkt matched ACL: ACL_REFLEXIVE_EGRESS seq: 10 Action: Permit  <br>
+*Jun 23 05:26:16.051: IPACL-DP: Pkt matched ACL: ACL_REFLEXIVE_INGRESS seq: 20 Action: Permit <br>
+*Jun 23 05:26:25.503: IPACL-DP: Pkt matched ACL: ACL_REFLEXIVE_INGRESS seq: 20 Action: Permit <br>
+*Jun 23 05:26:35.391: IPACL-DP: Pkt matched ACL: ACL_REFLEXIVE_INGRESS seq: 20 Action: Permit <br>
+*Jun 23 05:26:44.627: IPACL-DP: Pkt matched ACL: ACL_REFLEXIVE_INGRESS seq: 20 Action: Permit <br>
+*Jun 23 05:26:54.431: IPACL-DP: Pkt matched ACL: ACL_REFLEXIVE_INGRESS seq: 20 Action: Permit <br>
+*Jun 23 05:27:04.231: IPACL-DP: Pkt matched ACL: ACL_REFLEXIVE_INGRESS seq: 20 Action: Permit <br>
+*Jun 23 05:27:11.727: IPACL-DP: Pkt matched ACL: ACL_REFLEXIVE_INGRESS seq: 10 Action: Permit <br>
+*Jun 23 05:27:11.743: IPACL-DP: Pkt matched ACL: ACL_REFLEXIVE_EGRESS seq: 10 Action: Permit  <br>
+*Jun 23 05:27:13.699: IPACL-DP: Pkt matched ACL: ACL_REFLEXIVE_INGRESS seq: 20 Action: Permit <br>
+*Jun 23 05:27:23.415: IPACL-DP: Pkt matched ACL: ACL_REFLEXIVE_INGRESS seq: 20 Action: Permit <br>
+*Jun 23 05:27:32.779: IPACL-DP: Pkt matched ACL: ACL_REFLEXIVE_INGRESS seq: 20 Action: Permit <br>
+*Jun 23 05:27:41.851: IPACL-DP: Pkt matched ACL: ACL_REFLEXIVE_INGRESS seq: 20 Action: Permit <br>
+*Jun 23 05:27:51.403: IPACL-DP: Pkt matched ACL: ACL_REFLEXIVE_INGRESS seq: 20 Action: Permit <br>
+   </code></div></p>
+   </li>
  </ol>
 </p>
-
-
-
 
 
 
