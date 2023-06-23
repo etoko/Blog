@@ -1256,7 +1256,7 @@ R2#
    </li>
    <li>To view the ACL creation timestamp: <code><b>show log | include REFLEXIVE</b></code>
    <p>
-<div  style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
 <code>
    R2#<b>show log | include REFLEXIVE</b><br>
 *Jun 23 05:25:29.391: IPACL-DP: Pkt matched ACL: ACL_REFLEXIVE_INGRESS seq: 20 Action: Permit <br>
@@ -1288,23 +1288,27 @@ R2#
 
 <h1>Dynamic Access Lists</h1>
 <p>
-Restrict network access to only authenticated users.  
-</p>
-<p>
-Reflexive ACLs do not have absolute timeouts where regardless of activity or inactivity, 
-traffic is denied at the absolute timeout interval. 
+Dynamic ACLs are used  to restrict network access to only authenticated users.  
 Dynamic ACLs provide support for permitting access based on an authentication 
-server. Every authentication request is offloaded to a central authentication 
-database. Might require manual configuration of each device. The device sends 
+server. Every authentication request to a device is offloaded to a central 
+authentication database. This might require manual configuration of each device. The device sends 
 out an authentication request to the host before permitting access, e.g. SSH access 
 to a network device.
 </p>
+
 <p>
-Dynamic ACL forces the user to first telnet to the router; SSH support can alternatively 
+When attempting to access a network service such as HTTP server, a 
+dynamic ACL forces the unauthenticated user to first Telnet the authentication 
+service which may be configured on a router; SSH support can alternatively 
 be enabled. After successful 
-authentication, Telnet session is closed and the dynamic ACL is created on the 
-interface. Dynamic ACL is removed from the interface after configurable absolute-timeout 
-or idle-timeout value expires.
+authentication, the Telnet session is closed and a dynamic ACL is created on the 
+interface permitting access to the host with the network service. 
+</p>
+<p>
+The dynamic ACL is removed from the interface after a configurable absolute-timeout 
+or idle-timeout value expires. 
+Reflexive ACLs do not have absolute timeouts where regardless of activity or inactivity, 
+traffic is denied at the absolute timeout interval.
 </p>
 
 <p>
@@ -1312,39 +1316,59 @@ Components of a dynamic access list inclide the following:
 <ul>
   <li>Connection used for authentication: Telnet, SSH</li>
   <li>Extended Acces Control List (ACL) configured with dynamic entries</li>
-  <li>Autocommand with access-enable option: this is implemented for the user, 
-  or line level. 
-    Autocommand: once authentication is successful, disconnect from the device. 
+  <li>Autocommand with access-enable option: this is implemented at the user, 
+  or line level:
+    <ul>
+    <li><b>Autocommand:</b> once authentication is successful, disconnect from the device. 
       Autocommand then executes access-enable.
-    Access-enable ensures that the dynamic part of the ACL gets activated.
+    </li>
+    <li><b>Access-enable:</b> ensures that the dynamic part of the ACL gets activated.</li>
+   </ul>
   </li> 
 </ul>
 </p>
-
+<p>
+One use case for implementing sdynamic ACLs, if individuals require temporary 
+access to a network device e.g., Telnet access to a router for a specified period.
+</p>
 <h2>Dynamic ACL Rules</h2>
 <p>
-Cannot be used to provide different access rights to different users. 
-Dynamic ACLs may use either an idle-timeout or absolute timeout value.
-Autocommand access-enable may be configured either: at the username level or 
-within the VTY line. Dynamic ACLs are configured with named or numbered extended ACLs only.
-Standard ACLs do not support dynamic ACLs.
+The following guiding principles apply to the configuration and operation of dynamic 
+ACLs:
+<ul>
+  <li>Dynamic ACLs cannot be used to provide different access rights to different 
+    users.</li> 
+  <li>Dynamic ACLs may use either an idle-timeout or absolute timeout value.</li>
+  <li>Autocommand access-enable may be configured either: at the username level 
+    or within the VTY line.</li>
+  <li>Dynamic ACLs are configured with named or numbered extended ACLs only.</li>
+  <li>Standard ACLs do not support dynamic ACLs.</li>
+</ul>
 </p>
 
 <h2>Configuration</h2>
-<p>
-The use case for dynamic ACLs, if individuals require temporary access to the 
-network, e.g. provide a user telnet access to a router for a specified period.
-</p>
+
 <p>
 <ol>
-  <li><b>Create a username:</b> 
-  <code><b>username bob password 0 s3cr3t</b><br>
+  <li><b>Create a local account:</b> using the command  
+  <code><b>username &lt;name&gt; password &lt;password&gt;</b>
   </code>
+  <p>
+  <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+  	R2(config)#<b>username admin password cisco</b>
+  </code></div>
+  </p>
   <p> The access can be enabled through the following methods:
   <ul>
-    <li>
-    <code><b>username bob autocommand access-enable timeout 5</b></code> Command temporarily present 
-     the username and password prompt. 
+    <li><b>Under the local user account:</b> using the command 
+    <code><b>username &lt;username&gt; autocommand access-enable timeout &lt;value&gt;</b></code>. This 
+    command temporarily present the username and password prompt.
+    <p>
+    <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+    R2(config)#username admin autocommand access-enable timeout 5
+    </code></div>
 		  <ul>
 			<li><b>autocommand:</b> If they authenticate successfully or fail to 
 		  authenticate three times unsuccessfully, close the authentication page.
@@ -1352,13 +1376,17 @@ network, e.g. provide a user telnet access to a router for a specified period.
 			<li><b>access-enable:</b> implement dynamic access list.</li>
 			<li><b>timeout:</b> idle timeout value.</li>
 			</ul>
+			</p>
      </li>
      <li>
        Add the autocommand directly under the VTY lines:
-       <div>
-       <code><b>line vty 0 4<br>
-       autocommand access-enable timeout 5</b></code>
-       </div>
+       <p>
+    <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+     <code>
+       R2(config)#<b>line vty 0 4</b><br>
+       R2(config-line)#<b>autocommand enable-access timeout 5</b>
+       </code></div>
+       </p>
      </li>
      </ul>
     </p>
@@ -1368,36 +1396,61 @@ network, e.g. provide a user telnet access to a router for a specified period.
     </p>
   </li>
   <li>
-  <b>Create the access list:</b> This applies to either named or numbered access-lists.
-  <code><b>access-list 101 dynamic Project timeout 15 permit ip any any</b></code>. 
+  <b>Create the access list:</b> using named or numbered extended access-lists.
+  <ol type="a">
+    <li><b> Define the dynamic ACE:</b>
+      <p>
+  <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+     <code>
+     R2(config)#<b>ip access-list extended 101</b><br>
+     R2(config-ext-nacl)#<b>10 dynamic ACL_DYNAMIC_TELNET timeout 15 permit ip any any</b><br>
+     </code>
+     </div>
+  <!--<code><b>access-list 101 dynamic Project timeout 15 permit ip any any</b></code>. -->
+  </p>
+  <p>
   The timeout specified here is the absolute timeout value. Both timeout values 
   can be specified. There is no default timeout value; if none of the timeout 
-  values is not defined, then there is no timeout value for the dynamic ACL and 
-  access is granted in indefinitely.
+  values is not defined, then there is no timeout value for the dynamic ACL 
+  resulting in access is granted in indefinitely.
+  </p>
   <p>
   Only one ACE in an ACL can have the <code><b>dynamic</b></code> keyword. Typing 
   a second one triggers an error message.
   </p>
-  </li>
-  <li>
-  <b>Create the ACE permitting the traffic to the router:</b> 
-  <code><b>access-list 101 permit tcp any host 1.1.1.1 eq telnet</b></code>.
-  </li>
-  <li>
-  Enable local login: 
-  <div>
-  <code>
-  <b>line vty 0 4</b> <br>
-  login local
+    </li>
+    <li>
+  <b>Create the ACE permitting the traffic to the router:</b>
+  <p>
+  <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+     <code>
+  R2(config-ext-nacl)#<b>30 permit tcp host 192.168.12.1 host 172.31.30.10 eq telnet</b>
   </code></div>
+  </p>
+  </li>
+  </ol>
+  
+  </li>
+  
+  <li>
+    <b>Enable VTY local login:</b> 
+ <p>
+  <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+     <code>
+    R2(config)#<b>line vty 0 4</b><br>
+    R2(config-line)#<b>login local</b>
+    </code></div>
+    </p>
   </li>
   <li>
   Apply it to the interface pointing to the host that initiates the connection 
   in the inbound direction: A dynamic ACL is always in the inbound direction.
-  <div><code>
-    interface fastethernet0/0<br>
-    ip access-group 101 in
-  </code></div>
+ <p>
+  <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+     <code> 
+ R2(config-line)#<b>interface g0/0</b><br>
+ R2(config-if)#<b>ip access-group ACL_DYNAMIC_TELNET in</b>
+ </code></div></p>
   </li>
 </ol>
 </p>
@@ -1407,7 +1460,8 @@ network, e.g. provide a user telnet access to a router for a specified period.
 <p>
 Two timeout parameters can be configured: 
 <ul>
- <li><b>Idle timeout:</b> One is enabled through the access-enable host command with the timeout 
+ <li><b>Idle timeout:</b> One is enabled through the <code><b>access-enable 
+ host</b></code> command with the <code><b>timeout</b></code> 
  keyword where the value specified is in seconds.</li>
  <li><b>Absolute timeout:</b> specified with the dynamic entry</li>
 </ul>
@@ -1434,10 +1488,6 @@ IOS allows users to extend the life of their dynamic ACE by an additional 6 mmin
  value of 6 minutes is currently fixed and cannot be adjusted.
 </p>
 
-<h2>Monitoring</h2>
-<p>
-
-</p>
 
 <h1>Object Groups</h1>
 <p>
