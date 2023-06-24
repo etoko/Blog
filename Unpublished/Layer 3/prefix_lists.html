@@ -1,0 +1,205 @@
+<h1>Prefix Lists</h1>
+<p>
+Like an access list, a prefix-list is a filtering tool; however, unlike ACLs, 
+prefix-lists are predominantly used by routing protocols for route filtering. An ACL does not have the 
+ability to match the subnet mask.
+A prefix list can provide matching of the prefix, prefix-length or both. Like an 
+ACL, a prefix-list uses same same concept of permit or deny clauses. The naming 
+and structure of prefix lists is similar to named ACLs. 
+Prefix-lists use the concept of a unique name for a single prefix-list with 
+multiple entries. 
+Internal processing of IP prefix-lists uses an internal tree structure that results 
+in faster matching of routes compared to ACLs. This results in faster prefix matching.
+Though improvements have been made with processing both prefix-lists and ACLs in 
+hardware.
+</p>
+
+
+<h1>Naming and Structure</h1>
+<p>
+Naming and structure of prefix lists is similar to named ACLs. Prefix lists use
+the concept of a unique name for a single prefix-list with multiple entries. 
+Prefix-lists use the same concept of sequence number to allow later addition or 
+deletion of individual commands (entries) from a prefix list.
+</p>
+
+<h1>Processing Prefix Lists</h1>
+<p>
+Prefix-lists use the same concept of sequence number to allow later addition or 
+deletion of individual commands (entries) from a prefix-list.
+A prefix-list is used to match routes particularly for route filtering and not 
+for packet filtering:
+<ul>
+  <li><b>Permit:</b> the route is matched, the route should not be filtered.</li>
+  <li><b>Deny:</b> route is not matched and should be filtered.</li>
+</ul>
+</p>
+<p>
+Prefix-list have a default deny at the end.
+The command to configure a prefix-list is:
+<code><b>ip prefix-list &lt;name&gt; [seq &lt;num&gt;] {deny | permit} 
+&lt;prefix/prefix-length&gt; [ge &lt;length&gt;] [le &lt;length&gt;]</b></code> where:
+<ul>
+  <li><b>ge ( greater than or equal):</b> for the subnet mask to match, the subnet 
+  mask length must be the same as the specified prefix-length or greater i.e., 
+  between the subnet mask length and 32. 
+  <p>It is important to note that the prefix-length MUST be less than the ge value; otherwise IOS will report this  
+  error message <code><b>% Invalid prefix range for 10.1.1.0/24, make sure: len &lt; ge.value &lt;= le.value</b></code>.
+  ge value is guided by the following formular: ge &lt;= subnet mask &lt;= 32.
+  </p>
+  </li>
+  <li><b>le (less than or equal to):</b> for the subnet mask to match, the subnet 
+  mask length must be the same as the specified prefix-length or less i.e., 
+  between the 1 and subnet mask length. 
+  
+  <p>It is important to note that the prefix-length MUST be greater than the 
+  le value; otherwise IOS will report this  error message:
+  <div align="center">
+  <code><b>% Invalid prefix range for 10.1.1.0/24, make sure: len &lt; ge.value &lt;= le.value</b></code>
+  </div>
+  le value is guided by the following formula: config-length &lt;= subnet mask &lt;= le.
+  </p>
+  </li>
+  <li>le and ge: if both are configured, the value of le must be greater than or 
+  equal to the value of ge:
+    <ul>
+      <li>If le is equal to ge: one particular subnet mask is matched.</li>
+    </ul>
+  </li>
+  </li>
+</ul>
+</p>
+<p>
+Prefix-lists do not use wildcard masks or bits; they use the prefix length.
+</p>
+
+<p>
+The logic of IP prefix-list is as follows:
+<ul>
+  <li>The route's prefix must be within the range of addresses implied by the 
+  prefix-list command's prefix/length parameters.</li>
+  <li>The route's prefix-length must match the range of prefixes implied by the 
+  <code><b>prefix-list</b></code> command's prefix-length, 
+  <code><b>ge</code></b> and <code><b>le</b></code> parameters.</li>
+</ul>
+</p>
+
+
+<h1>Prefix Matching</h1>
+<p>
+Every matching done by a prefix list checks for matching of both the network address
+and the subnet mask. If the prefix-length range is not specified (using ge and/or 
+le), then the subnet mask and prefix length of the prefix list must match.
+Up to four types of matching can be performed using prefix lists:
+<ol>
+  <li><b>Exact match:</b>
+  </li>
+  <li><b>From minimum prefix length:</b> 
+  <li><b>Up to a maximum prefix length:</b> implemented using the le keyword permits prefixes with a subnet mask 
+  or prefix length starting from the defined length up to <code><b>le</b></code> value.
+  </li>
+  <li><b>Range of prefix lengths</b>:
+  
+  </li>
+</ol>
+</p>
+
+<ol>
+   <li><code><b>ip prefix-list PL 10.1.1.0/24</b></code>
+A router matches a received update 10.1.1.0/24 with the prefix-list as follows:
+<ul>
+  <li>Network Address: the first 24-bits of the network address are checked to see if 
+  they match with the prefix-list's prefix value of 10.1.1.0.</li>
+ <li>Subnet mask: the subnet mask has to be an exact match of 24 bits.
+ the first 24 bits of the subnet mask are checked to see if they 
+ match with the prefix-lists prefix-length value. If this case it matches. An 
+ update such as 10.1.1.0 with a subnet mask of 255.255.255.128 will not match.</li> 
+</ul>
+   </li>
+   <li><code><b>ip prefix-list PL deny 10.1.1.0/16 ge 22 le 30</b></code>
+     <ul>
+       <li>Matches the network address 10.1.x.x</li>
+       <li>Matches the subnet 255.255.252.0 - 255.255.255.252</li>
+     </ul>
+   </li>
+  <li><code><b>ip prefix-list PL deny 10.1.1.0/24 ge 26</b></code>
+    <ul>
+      <li>The prefix-length of 24-bits matches against the prefix.</li>
+      <li>ge 26 matches against the subnet mask where the subnet mask length 
+      must be between 26 - 32.</li>
+    </ul>
+   </li>ip prefix-list PL deny 10.1.1.0/24 ge 26</b></code>
+   <li><code><b>ip prefix-list PL deny 10.1.1.0/24 le 27</b></code>
+      <ul>
+        <li>Matches for a network address of 10.1.1.0/24</li>
+        <li>The subnet mask should be 29 bits long or less i.e. 24 - 29.</li>        
+      </ul>
+   </li>
+   <li><code><b>ip prefix-list PL deny 10.1.1.0/24 ge 26 le 29</b></code>
+     <ul>
+       <li>Matches the network address of 10.1.1.x</li>
+       <li>Matches the subnet mask 255.255.255.192 - 255.255.255.248.</li>
+     </ul>
+   </li>
+   <li><code><b>ip prefix-list PL deny 10.1.1.0/24 ge 26 le 26</b></code>
+     <ul>
+       <li>Matches the network address 10.1.1.x</li>
+       <li>Matches the subnet 255.255.255.192</li>
+     </ul>
+   </li>
+     </li>
+   <li><code><b>ip prefix-list PL deny 10.1.1.0/8 ge 9</b></code>
+     <ul>
+       <li>Matches the network address of 10.x.x.x</li>
+       <li>Matches the subnet mask 255.0.0.0 - 255.128.0.0.</li>
+     </ul>
+   </li>
+   <li><code><b>ip prefix-list PL deny 10.1.1.0/16 le 26</b></code>
+     <ul>
+       <li>Matches the network address 10.1.x.x</li>
+       <li>Matches the subnet 255.255.0.0 - 255.255.255.192</li>
+     </ul>
+   </li>
+</ol>
+</code>
+</li>
+</ul>
+</p>
+
+<h2>Matching the Default Route</h2>
+
+<h3>IPv4</h3>
+<p>
+<code><b>ip prefix-list PL permit 0.0.0.0/0</b></code>
+<ul>
+  <li>Match any address</li>
+  <li>The subnet mask MUST match zero(0). Only the default route has a subnet 
+  mask of zero.</li>
+</ul>
+</p>
+<h3>IPv6</h3>
+<p>
+<code><b>ipv6 prefix-list PL permit ::/0</b></code>
+</p>
+
+<h2>Match all prefixes</h2>
+
+<h3>IPv4</h3>
+<p>
+<code><b>ip prefix-list PL permit 0.0.0.0/0 le 32</b></code>
+<ul>
+  <li></li>
+  <li> le 32 implies that the subnet mask will match from 0.0.0.0 - 255.255.255.255.
+  Even the broadcast address is matched.</li>
+</ul>
+</p>
+<h3>IPv6</h3>
+<p>
+<code><b>ipv6 prefix-list PL permit ::/0 le 128</b></code>
+</p>
+
+<h2>Exercise</h2>
+<p>
+Objective: Deny all routes which have the first 24-bits of 10.10.10.x AND subnet 
+mask is GE 24 but LE 30.
+</p>
