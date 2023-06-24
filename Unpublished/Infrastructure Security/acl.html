@@ -6,7 +6,8 @@
   <li><a href="#ACL_TIME">Time-based ACLs</a>
   <li><a href="#ACL_INF">Infrastructure ACLs</a>
   <li><a href="#ACL_REF">Reflexive ACLs</a>
-  <li><a href="#ACL_DYM">Dynamic ACLs</a>
+  <li><a href="#ACL_DYN">Dynamic ACLs</a>
+  <li><a href="#ACL_OTHER">Other ACL Features</a>
 </ol>
 
 <h1 id="INTRO">Introduction and Overview</h1>
@@ -1286,7 +1287,7 @@ R2#
 
 
 
-<h1>Dynamic Access Lists</h1>
+<h1 id="ACL_DYN">Dynamic Access Lists</h1>
 <p>
 Dynamic ACLs are used  to restrict network access to only authenticated users.  
 Dynamic ACLs provide support for permitting access based on an authentication 
@@ -1488,18 +1489,20 @@ IOS allows users to extend the life of their dynamic ACE by an additional 6 mmin
  value of 6 minutes is currently fixed and cannot be adjusted.
 </p>
 
+<h1 id="ACL_OTHER">Additional ACL Features</h1>
 
-<h1>Object Groups</h1>
+
+<h2 id="OBJ">Object Groups</h2>
 <p>
-Object groups is a feature available in extended ACLs. Object group appears in 
+Originally designed for ASA firewalls, object groups is a feature in extended 
+ACLs that simplify ACL management by grouping similar "objects" together e.g., 
+pubilc_web_servers group. It allows for more modular changes; a change to an 
+object group dynamically affects all ACEs referencing that group. 
+Command syntax is slightly different on IOS routers than ASA firewalls. 
+<!--
 the ACL high-level protocol field, source address field, destination address field.
-Originally designed for ASA firewalls. Command syntax is slightly different on IOS 
-routers than ASA firewalls. Object groups simplify ACL management by grouping 
-similar "objects" together e.g., pubilc_web_servers group. It allows for more 
-modular changes; a change to an object group dynamically affects all ACEs referencing 
-that group.
-
 Not every device supports object groups.
+-->
 </p>
 <p>
 Traditionally, when modifying an existing ACL, the port that it is applied to 
@@ -1523,6 +1526,64 @@ On Cisco routers, there are two types of object groups:
 
 <h2>Configuration</h2>
 <p>
+In this configuration, different object groups are configured for clients, 
+servers and protocols.
+</p>
+ <p>
+  <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+     <code>
+R2#<b>configure terminal</b><br>
+R2(config)#<b>object-group network CLIENTS</b><br>
+R2(config-network-group)#<b>host 192.168.8.1</b><br>
+R2(config-network-group)#<b>192.168.3.0 /24</b><br>
+R2(config-network-group)#<b>192.168.12.0 0.0.0.3</b><br>
+</code>
+</div></p>
+
+<p>
+Servers
+</p>
+ <p>
+  <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+ <code>
+   R2(config)#<b>object-group network SERVERS</b><br>
+   R2(config-network-group)#<b>host 172.31.30.10</b><br>
+   R2(config-network-group)#<b>172.31.33.3 /24</b><br>
+   
+ </code></div>
+ </p>
+ 
+ <p>
+Protocols
+</p>
+ <p>
+  <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+ <code>
+   R2(config)#<b>object-group service NETWORK_SERVICES</b><br>
+   R2(config-service-group)#<b>tcp eq telnet</b><br>
+   R2(config-service-group)#<b>tcp eq www</b>
+ </code></div>
+ </p>
+ 
+ 
+ <p>
+Configuring the ACL to reference the object groups in the following order: 
+ <ol>
+    <li>Service object group</li>
+    <li>Source object group</li>
+    <li>Destination object group</li>
+ </ol>
+ <code><b>permit object-group &lt;protocol-object-group&gt; object-group  
+ &lt;source-object-group&gt; object-group  &lt;destination-object-group&gt;</b></code>
+</p>
+ <p>
+  <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+ <code>
+   R2(config)#<b>ip access-list extended 101</b><br>
+   R2(config-ext-nacl)#<b>permit object-group NETWORK_SERVICES object-group CLIENTS object-group SERVERS</b>
+ </code></div>
+ </p>
+ <!--
 <div><code>
 object-group network OUTSIDE_TRUSTED_HOSTS<br>
   host 200.0.0.1 <br>
@@ -1540,6 +1601,7 @@ OUTSIDE_TRUSTED_HOSTS object-group PUBLIC_INSIDE_SERVERS
 </code></div></p>
 
 </p>
+
 <h3>Object Groups with Dynamic ACLs</h3>
 <p>
 <div><code>
@@ -1559,15 +1621,31 @@ ip access-list extended Test <br>
  ip access-group TEST in<br>
   </code></div>
 </p>
-
+-->
 <h2>Verification</h2>
 <h3><code>show object-group</code></h3>
 <p>
 Displays the configuration of the object group.
 </p>
+ <p>
+  <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+ <code>
+R2#<b>show object-group</b><br>       <br>           
+Network object group CLIENTS          <br>
+&nbsp;&nbsp;host 192.168.8.1                     <br>
+&nbsp;&nbsp;192.168.3.0 255.255.255.0            <br>
+&nbsp;&nbsp;192.168.12.0 255.255.255.252         <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                 <br>
+Service object group NETWORK_SERVICES <br>
+&nbsp;&nbsp;tcp&nbsp;&nbsp;eq telnet                        <br>
+&nbsp;&nbsp;tcp&nbsp;&nbsp;eq www                           <br>
+&nbsp;&nbsp;ip&nbsp;&nbsp;&nbsp;&nbsp;                                 <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                 <br>
+Network object group SERVERS          <br>
+&nbsp;&nbsp;host 172.31.30.10                    <br>
+&nbsp;&nbsp;172.31.33.0 255.255.255.0            <br>
+</code></div></p>                                           
 
-
-<h1>Additional ACL Features</h1>
 
 <h2>Sequence Numbers</h2>
 <p>
@@ -1581,6 +1659,27 @@ It is possible to modify the starting sequence number of an existing ACE as well
 as change the sequence number increment value using the command 
 <code><b>ip access-list resequence &lt;acl-id&gt; &lt;starting-seq-number&gt; 
 &lt;increment&gt;</b></code>. This feature is available for all ACLs.
+</p>
+
+<p>
+  <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+ <code>
+R2#<b>show ip access-lists 101</b><br>
+Extended IP access list 101<br>
+&nbsp;&nbsp;&nbsp;&nbsp;10 Dynamic Project permit ip any any<br>
+&nbsp;&nbsp;&nbsp;&nbsp;20 permit tcp any host 172.31.30.10 eq telnet<br>
+&nbsp;&nbsp;&nbsp;&nbsp;30 permit ospf any any (676 matches)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;40 permit object-group NETWORK_SERVICES object-group CLIENTS object-group SERVERS<br>
+<br>
+R2#<b>ip access-list resequence 101 1000 50</b><br>
+R2#<b>show ip access-lists 101</b><br>
+Extended IP access list 101<br>
+&nbsp;&nbsp;&nbsp;&nbsp;1000 Dynamic Project permit ip any any<br>
+&nbsp;&nbsp;&nbsp;&nbsp;1050 permit tcp any host 172.31.30.10 eq telnet<br>
+&nbsp;&nbsp;&nbsp;&nbsp;1100 permit ospf any any (684 matches)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;1150 permit object-group NETWORK_SERVICES object-group CLIENTS object-group SERVERS<br>
+
+</code></div>    
 </p>
 
 
