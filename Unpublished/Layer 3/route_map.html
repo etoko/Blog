@@ -2,21 +2,31 @@
 <p>
 Route-maps provide If/Then/Else logic like in programming languages. 
 Route-maps are very flexible in matching prefixes. 
-A single route-map has several route-map commands with the same text name.
-Route-map also has the concept of using sequence numbers. When a route is matched
-by a route-map entry either as a permit or deny, the IOS stops processing the 
-route-map for that route, even when ethere are more entries in the route-map.
+A single route-map consists of a series of route-map statements with the same name
+but uniquely identified using its sequence number. When a route is matched
+by a route-map statement, either as a permit or deny, processing stops of the  
+route-map.
 </p>
 <p>
-A route-map can call an ACL or prefix-list. ACLs or prefix lists match the routes. 
-The route-map tells what to do with the matched routes: permit or deny. 
+A route-map statement references an ACL or prefix-list to match against a route
+with the action to take i.e.,permit or deny. 
 </p>
 <p>
-A single route-mmap contains one or more route-map commands (entries). Each route-map 
+A single route-map contains one or more route-map commands (entries). Each route-map 
 entry has underlying matching parameters, configured with the <code><b>match</b></code>
 command.
 </p>
-<h1>Using Route-maps</h1>
+<p>
+The flexibility of route maps means that they can be utilized in many routing 
+scenarios such as the following:
+<ul>
+  <li>Attribute manipulation in BGP</li>
+  <li>Route tagging in routing protocols such as OSPF</li>
+  <li>Policy based routing(PBR)</li>
+</ul>
+</p>
+
+<h1>Matching Prefixes Using Route-maps</h1>
 <p>
 When configuring a route-map, the first action should be a match statement.
 Route-maps use the following 
@@ -33,22 +43,35 @@ features to match routes:
 <p>
 Actions consist of permit or deny. 
 If a route-map references an ACL or prefix-list, the ACL and prefix-list permit 
-statement means match this prefix. the deny statement means do not match the 
+statement means match this prefix. The deny statement means do not match the 
 prefix.
 
-Route-maps have an explicity deny statement.
+Route-maps have an implicity deny all statement at the end.
 Route-maps support modifying prefix attributes. This is heavily utilized in BGP.
 </p>
 <p>
-Sequential, first-match processing:
-Unless otherwise, configured using "continue"
-Used in advanced cases when logical "and" processing is needed.
+Processing of route-maps starts with the lowest sequence number and proceeds 
+sequentially, until a match statement; processing then stops. However, if a 
+route-map statement has the "continue" keyword, processing continues in spite 
+of the match statement. The <code><b>code</b></code> continue keyword is used in 
+route-map statements when logical "AND" processing is needed.
 </p>
 <p>
-Use of route-maps makes it possible to use more than one prefix-list for filtering
-while if using a prefix-list directly for route-filtering, only one prefix-list 
-can be used per interface.
+When configuring filtering using prefix lists, only one prefix list can be used 
+for filtering per direction(ingress or egress). However, when filtering using 
+route maps, a route map can be configured with many statements each using different 
+prefix lists.
+</p>
 
+<h2>Sequence numbers</h2>
+<p>
+The first route map statement a sequence number of 10 by default. Route-maps do not 
+automatically increment the sequence number like ACLs. If no sequence number is 
+entered, subsequent statements  overwrite the first statement.
+</p>
+<p>
+
+<!--
 Task 1: Permit /24 to /27 from 192.168.0.0/16
 
 ip prefix-list PL1 permit 192.168.0.0/16 ge 24 le 27
@@ -70,22 +93,30 @@ route-map RM2 permit 20
 </b></code>
 </p>
 
+--->
+</p>
 
-<h2>Sequence numbers</h2>
+
+<h1>Configuration</h1>
+
+<ol>
+
+<li><b>Define the route map:</b>
+The route map is defined by specifying the route map name, processing action and 
+sequence number. The command used is <code><b>route-map &lt;route-map-name&gt; 
+[permit | deny] &lt;sequence-number&gt;</b></code>.
+
+</li>
+<li><b>Matching</b>
 <p>
-Route-maps give the first statement a sequence number of 10. Route-maps do not 
-automatically increment the sequence number like ACLs. If no sequence number is 
-entered, subsequent statements overwrite the first statement. 
+Route mps use ACLs or prefix-lists match the prefixes. The route-map tells what to do with the 
+matched routes using permit or deny. A permit action in the ACL or 
+prefix list means match the prefix and a deny action means do not match the prefix.
+All ACLs types are supported i.e., named or numbered standard and extended ACLs. 
 </p>
 <p>
-
-</p>
-<h1>Matching</h1>
-<p>
-ACLs or prefix-lists match the routes. The route-map tells what to do with the 
-matched routes using permit or deny. A deny or permit action in the ACL or 
-prefix list does not mean that the route is being filtered.
-
+Matching is done using the command 
+<code><b>match ip address [1-199 | 1300 - 1699 | acl-name | prefix-list &lt;prefix-list-name&gt;]</b></code>.
 </p>
 <p>
 A route-map without the match statement is equivalent to match any.
@@ -100,7 +131,38 @@ in the RM results in no match and execution of the RM moves to the next RM
 sequence number.
 </p>
 
+<p>
+When matching prefixes, it is possible to chain ACLs or prefixes using the <code>
+<b>match ip address &lt;acl-1&gt; &lt;acl-2&gt; &lt;acl-2&gt;</b></code> command.
+This represents and OR function where matching is done successfully if any of the 
+ACLs is matched.
+</p>
+</li>
+<li><b>Specify the action to be carried out on matched routes (Optional):</b>
+This is implemented using the <code><b>set</b></code> command.
+</li>
+<li><b>Application of Route Maps</b>
+<p>
+Where route maps are applied depends on what they will be used for:
+<ul>
+  <li>To manipulate BGP attributes, apply it to BGP</li>
+  <li>For PBG, use the <code><b>policy</b></code> command under the interface</li>
+  
+</ul>
+</p>
+
+</li>
+
+</ol>
+
+
 <h1>Verification</h1>
 <p>
 
 </p>
+
+<h2><code>show route-map</code></h2>
+<p>
+
+</p>
+
