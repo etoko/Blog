@@ -20,10 +20,17 @@ command.
 The flexibility of route maps means that they can be utilized in many routing 
 scenarios such as the following:
 <ul>
-  <li>Attribute manipulation in BGP</li>
+  <li>Filtering networks during advertisements</li>
+  <li><b>BGP Path Attribute Manipulation:</b> such as the next hop, AS PATH, local 
+  preference, weight etc. on a neighbor-by-neighbor basis</li>
   <li>Route tagging in routing protocols such as OSPF</li>
-  <li>Policy based routing(PBR)</li>
+  <li><b>Policy based routing(PBR)</b> </li>
+  <li>Modifying network attributes particularly during advertisement.</li>
 </ul>
+</p>
+<p>
+Like an access-list, an implicit deny any appears at the end of a route-map. The 
+consequences of this deny depend on how the route-map is being used.
 </p>
 
 <h1>Matching Prefixes Using Route-maps</h1>
@@ -62,13 +69,6 @@ for filtering per direction(ingress or egress). However, when filtering using
 route maps, a route map can be configured with many statements each using different 
 prefix lists.
 </p>
-
-<h2>Sequence numbers</h2>
-<p>
-The first route map statement a sequence number of 10 by default. Route-maps do not 
-automatically increment the sequence number like ACLs. If no sequence number is 
-entered, subsequent statements  overwrite the first statement.
-</p>
 <p>
 
 <!--
@@ -96,15 +96,58 @@ route-map RM2 permit 20
 --->
 </p>
 
-
 <h1>Configuration</h1>
 
+Route maps consist of the following set of actions:
+<ol>
+  <li>Sequence number: determines the order of processing.</li>
+  <li>Conditional matching: prefix characteristics</li>
+  <li>Processing action: permit or deny statements</li>
+  <li>Addition, modification of route characteristics</li>
+</ol>
+</p>
+<p>
+When deleting a specific route map statement, include the sequence number to 
+prevent deleting the entire route map.
+</p>
+
+<p>
+If no other entry is already defined with the supplied route-map name, an entry 
+is created with the sequence number 10.
+If only one entry is already defined with the supplied route-map tag, that entry 
+is the default entry for the route-map command, and the sequence number of the 
+sentry is unchanged.  
+If more than one entry is already defined with the supplied 
+route-map tag, an error message is displayed, indicating that the sequence 
+number is required.
+The match condition route-map configuration commands are used to define the 
+conditions to be checked. The set condition route-map configuration commands are
+used to define the actions to be followed if there is a match and the action to 
+be taken is permit.
+
+A route-map statement without any match statements will be considered matched.
+</p>
+<p>
 <ol>
 
 <li><b>Define the route map:</b>
 The route map is defined by specifying the route map name, processing action and 
 sequence number. The command used is <code><b>route-map &lt;route-map-name&gt; 
-[permit | deny] &lt;sequence-number&gt;</b></code>.
+[permit | deny] &lt;sequence-number&gt;</b></code> where:
+<ul>
+  <li><code><b>permit | deny</b></code> (Optional): specifies the action to be taken if the 
+  route map match conditions are met. The meaning of permit or deny is dependent 
+  on how the route-map is used. The default action of a route-map command is permit 
+  with a sequence number of 10 (if not included in the configuration). 
+  </li>
+  <li><code><b>sequence-number</b></code> (Optional): number that indicates the 
+  position that a new route-map statement will have in the list of route-map
+  statements already configured with the same name. 
+  The first route map statement a sequence number of 10 by default. Route-maps do not 
+automatically increment the sequence number like ACLs. If no sequence number is 
+entered, subsequent statements  overwrite the first statement.
+  </li>
+</ul>
 
 </li>
 <li><b>Matching</b>
@@ -113,10 +156,131 @@ Route mps use ACLs or prefix-lists match the prefixes. The route-map tells what 
 matched routes using permit or deny. A permit action in the ACL or 
 prefix list means match the prefix and a deny action means do not match the prefix.
 All ACLs types are supported i.e., named or numbered standard and extended ACLs. 
+It is important to note that when matching prefixes, IPv4 and IPv6 prefixes cannot 
+be matched in the same route map. Different separate route maps are required to 
+match each protocol separately.
 </p>
 <p>
-Matching is done using the command 
-<code><b>match ip address [1-199 | 1300 - 1699 | acl-name | prefix-list &lt;prefix-list-name&gt;]</b></code>.
+Matching is done using the following commands: 
+</p>
+<p>
+<table width="100%" cellspacing="0" cellpadding="2">
+ <thead  style="background:#d3d3d3; font-weight: bold;">
+    <tr>
+      <td style="border-bottom: 1px solid: border-top: 1px solid;" width="35%">Command</td>
+      <td style="border-bottom: 1px solid: border-top: 1px solid;">Action</td>
+    </tr>
+  </thead>
+
+<tbody>
+	
+    <tr>
+      <td style="border-bottom: 1px solid;">
+      <code><b>match ip address [1-199 | 1300 - 1699 | acl-name]</b></code>
+      </td>
+      <td style="border-bottom: 1px solid;">
+      Matches based on a referenced named or numbered access control list.
+      </td>
+    </tr>
+    <tr>
+      <td style="border-bottom: 1px solid;">
+      <code><b>match ip address prefix-list &lt;prefix-list-name&gt;</b></code>
+      </td>
+      <td style="border-bottom: 1px solid;">
+      Matches based on a referenced prefix list.
+      </td>
+    </tr>
+    <tr>
+      <td style="border-bottom: 1px solid;">
+      <code><b>match as-path &lt;ASN-acl-number&gt;</b></code>
+      </td>
+      <td style="border-bottom: 1px solid;">
+      Matches prefixes based on a regular expression query to isolate the Autonomous 
+      System Number (ASN) in the BGP path attribute AS path. The AS path ACLs are 
+      numbered 1 - 500. This command allows for multiple match variables.
+      </td>
+    </tr>
+    <tr>
+      <td style="border-bottom: 1px solid;">
+      <code><b>match length &lt;min&gt; &lt;max&gt;</b></code>
+      </td>
+      <td style="border-bottom: 1px solid;">
+      matches based on a packet's Layer 3 length
+      </td>
+    </tr>
+    <tr>
+      <td style="border-bottom: 1px solid;">
+      <code><b>match interface &lt;interface-id&gt;</b></code>
+      </td>
+      <td style="border-bottom: 1px solid;">
+      matches any routes that have the next hop out of one of the interfaces specified.
+      </td>
+    </tr>
+    <tr>
+      <td style="border-bottom: 1px solid;">
+      <code><b>match ip next-hop &lt;acl-1 acl-2 acl3&gt;
+      </td>
+      <td style="border-bottom: 1px solid;">
+      matches any routes that have a next-hop router address permitted by one of the access-lists 
+  specified
+      </td>
+    </tr>
+    <tr>
+      <td style="border-bottom: 1px solid;">
+        <code><b>match ip route-source &lt;acl-1 acl-2 acl-3&gt;</b></code>
+      </td>
+      <td style="border-bottom: 1px solid;">
+       matches routes that have been advertised by routers and acccess servers that 
+  have an address permitted by one of the access lists specified.
+      </td>
+    </tr>
+    <tr>
+      <td style="border-bottom: 1px solid;">
+      <code><b>match metric [&lt;1-4294967295&gt; | external &lt;1-4294967295&gt;]
+      [+-deviation]</b></code>
+      </td>
+      <td style="border-bottom: 1px solid;">
+      matches routes have the metric specified, a range, or within acceptable 
+      deviation.
+      </td>
+    </tr>
+    <tr>
+      <td style="border-bottom: 1px solid;">
+      <code><b>match route-tpe [external  | internal | level-1 | level-2 | local]
+  </b></code>
+      </td>
+      <td style="border-bottom: 1px solid;">
+       matches routes of the specified type.
+      </td>
+    </tr>
+    <tr>
+      <td style="border-bottom: 1px solid;">
+      <code><b>match community &lt;list-name | list-num&gt;</b></code>
+      </td>
+      <td style="border-bottom: 1px solid;">
+      matches a BGP community
+      </td>
+    </tr>
+    <tr>
+      <td style="border-bottom: 1px solid;">
+      <code><b>match tag &lt;0-4294967295&gt;</b></code>
+      </td>
+      <td style="border-bottom: 1px solid;">
+       matches based on the tag of a route that was set by another router. This 
+       command allows for multiple match variables.
+      </td>
+    </tr>
+    <tr>
+      <td style="border-bottom: 1px solid;">
+      <code><b>match local-preference &lt;local-preference&gt;</b></code>
+      </td>
+      <td style="border-bottom: 1px solid;">
+      Matches prefixes based on the BGP attribute local preference. This command 
+      allows for multiple match variables.
+      </td>
+    </tr>
+</tbody>
+</table>
 </p>
 <p>
 A route-map without the match statement is equivalent to match any.
@@ -137,32 +301,324 @@ When matching prefixes, it is possible to chain ACLs or prefixes using the <code
 This represents and OR function where matching is done successfully if any of the 
 ACLs is matched.
 </p>
-</li>
-<li><b>Specify the action to be carried out on matched routes (Optional):</b>
-This is implemented using the <code><b>set</b></code> command.
-</li>
-<li><b>Application of Route Maps</b>
+
 <p>
-Where route maps are applied depends on what they will be used for:
-<ul>
-  <li>To manipulate BGP attributes, apply it to BGP</li>
-  <li>For PBG, use the <code><b>policy</b></code> command under the interface</li>
-  
-</ul>
+A deny statement in an ACL, prefix list or AS-Path ACL excludes the route 
+from being matched. 
+When matching using an ACL or prefix list, take note of the following:
+</p>
+<p>
+<table width="100%" cellspacing="0"> 
+<thead style="background: #d3d3d3;">
+<tr>
+      <td style="border-top: 1px solid; border-bottom: 1px solid">ACL/Prefix-list Action</td>
+      <td style="border-top: 1px solid; border-bottom: 1px solid">Route-map Action</td>
+      <td style="border-top: 1px solid; border-bottom: 1px solid">Result</td>
+    </tr>
+</thead>
+  <tbody>
+    <tr>
+      <td style="border-bottom: 1px solid;">deny</td>
+      <td style="border-bottom: 1px solid;">permit</td>
+      <td style="border-bottom: 1px solid;"></td>
+    </tr>
+    <tr>
+      <td style="border-bottom: 1px solid;"></td>
+      <td style="border-bottom: 1px solid;"></td>
+      <td style="border-bottom: 1px solid;"></td>
+    </tr>
+    <tr>
+      <td style="border-bottom: 1px solid;"></td>
+      <td style="border-bottom: 1px solid;"></td>
+      <td style="border-bottom: 1px solid;"></td>
+    </tr>
+    <tr>
+      <td style="border-bottom: 1px solid;"></td>
+      <td style="border-bottom: 1px solid;"></td>
+      <td style="border-bottom: 1px solid;"></td>
+    </tr>
+    <tr>
+      <td style="border-bottom: 1px solid;"></td>
+      <td style="border-bottom: 1px solid;"></td>
+      <td style="border-bottom: 1px solid;"></td>
+    </tr>
+  </tbody>
+</table>
 </p>
 
 </li>
+<li><b>Specify the action to be carried out on matched routes (Optional):</b>
+This is implemented using the <code><b>set</b></code> command. Supported features 
+include the following:
 
+<p>
+<table width="100%" cellspacing="0">
+  <thead  style="background:#d3d3d3; font-weight: bold;">
+    <tr>
+      <td style="border-bottom: 1px solid: border-top: 1px solid;" width="35%">Command</td>
+      <td style="border-bottom: 1px solid: border-top: 1px solid;">Action</td>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="border-bottom: 1px solid;">
+      <code><b>set metric [+value | -value | &lt;value&gt;]</b></code>
+      </td>
+      <td style="border-bottom: 1px solid;">
+       sets the metric value for a route or modifies the existing metric. Allowable 
+       values are in the range 0 - 4294967295.
+      </td>
+    </tr>
+    <tr>
+      <td style="border-bottom: 1px solid;">
+      <code><b>set metric-type [type-1 | type-2 | internal | external]</b></code>
+      </td>
+      <td style="border-bottom: 1px solid;">
+      sets the metric type for the destination routing protocol.
+      </td>
+    </tr>
+    <tr>
+      <td style="border-bottom: 1px solid;">
+      <code><b>set default interface &lt;interface-id&gt;</b></code>
+      </td>
+      <td style="border-bottom: 1px solid;">
+       indicates where to send output packets that pass a match clause of a route map for 
+  policy routing.
+      </td>
+    </tr>
+    <tr>
+      <td style="border-bottom: 1px solid;">
+      <code><b>set interface &lt;interface-id&gt;</b></code>
+      </td>
+      <td style="border-bottom: 1px solid;">
+      indicates where to sent output packets that pass a match clause of a route map for policy routing.
+      </td>
+    </tr>
+    <tr>
+      <td style="border-bottom: 1px solid;">
+      <code><b>set ip default next-hop &lt;ip-address&gt;</b></code>
+      </td>
+      <td style="border-bottom: 1px solid;">
+      indicates where to 
+  send output packets that pass a match clause of a route map for policy routing
+  and for which the Cisco IOS software has no explicit route to the destination.
+      </td>
+    </tr>
+    <tr>
+      <td style="border-bottom: 1px solid;">
+      <code><b> set ip default next-hop verify-availability</b></code>
+      </td>
+      <td style="border-bottom: 1px solid;">
+      Forces 
+  the router to check the CDP database to determine if an entry is available 
+  for the next hop that is specified by the <code><b>set ip default next-hop</b></code> 
+  command. This command is used to prevent traffic from being "blackholed" if the 
+  configured next hop becomes unavailable.
+      </td>
+    </tr>
+    <tr>
+      <td style="border-bottom: 1px solid;">
+      <code><b>set ip next-hop &lt;ip-address-1 ip-address-2 ip-address-3 | 
+      peer-address | self&gt;</b></code>
+      </td>
+      <td style="border-bottom: 1px solid;">
+       indicates where to send output packets that pass a match clause 
+  of a route map for policy routing. BGP dynamic manipulation uses the peer-address 
+  or self keywords.
+      </td>
+    </tr>
+    <tr>
+      <td style="border-bottom: 1px solid;">
+      <code><b>set ip next-hop verify-availability</b></code>
+      </td>
+      <td style="border-bottom: 1px solid;">
+      Forces the router to check the CDP database or use object tracking to 
+      determine if the next hop that is specified for policy-based routing 
+      is available.
+      </td>
+    </tr>
+    <tr>
+      <td style="border-bottom: 1px solid;">
+      <code><b>set ip vrf</b></code>
+      </td>
+      <td style="border-bottom: 1px solid;">
+      Indicates where to forward packets that pass a match clause of a route map 
+      for policy routing when the next hop must be under a specified VRF name.
+      </td>
+    </tr>
+    <tr>
+      <td style="border-bottom: 1px solid;">
+      <code><b>set next-hop</b></code>
+      </td>
+      <td style="border-bottom: 1px solid;">
+      Specifies the address of the next-hop
+      </td>
+    </tr>
+    <tr>
+      <td style="border-bottom: 1px solid;">
+      <code><b>set level [level-1 | level-2 | stub-area | backbone]</b></code>
+      </td>
+      <td style="border-bottom: 1px solid;">
+      Indicates at what level or type of area to import routes into (for IS-IS 
+      and OSPF routes).
+      </td>
+    </tr>
+    <tr>
+      <td style="border-bottom: 1px solid;">
+      <code><b>set as-path [tag | prepend &lt;as-path-string | last-as 1-10&gt;]</b></code>
+      </td>
+      <td style="border-bottom: 1px solid;">
+      Modifies an autonomous system path for BGP routes.
+      </td>
+    </tr>
+    <tr>
+      <td style="border-bottom: 1px solid;">
+      <code><b>set automatic-tag</b></code>
+      </td>
+      <td style="border-bottom: 1px solid;">
+      Automatically computes the BGP tag value.
+      </td>
+    </tr>
+    <tr>
+      <td style="border-bottom: 1px solid;">
+      <code><b>set community [&lt;community-number&gt; | additive | &lt;well-known-community&gt;
+      | none]</b></code>
+      </td>
+      <td style="border-bottom: 1px solid;">
+      Sets the BGP community attribute.
+      </td>
+    </tr>
+    <tr>
+      <td style="border-bottom: 1px solid;">
+      <code><b>set local-preference &lt;bgp-path-attribute&gt;</b></code>
+      </td>
+      <td style="border-bottom: 1px solid;">
+      Specifies a local preference value for the BGP autonomous system path.
+      </td>
+    </tr>
+    <tr>
+      <td style="border-bottom: 1px solid;">
+      <code><b>set weight &lt;0-65535&gt;</b></code>
+      </td>
+      <td style="border-bottom: 1px solid;">
+      Specifies the BGP weight value.
+      </td>
+    </tr>
+    <tr>
+      <td style="border-bottom: 1px solid;">
+      <code><b>set origin [igp | incomplete]</b></code>
+      </td>
+      <td style="border-bottom: 1px solid;">
+      Specifies the BGP origin code.
+      </td>
+    </tr>
+    <tr>
+      <td style="border-bottom: 1px solid;">
+      <code><b>set tag</b></code>
+      </td>
+      <td style="border-bottom: 1px solid;">
+      Specifies the tag value for the destination routing protocol.
+      </td>
+    </tr>
+  </tbody>
+  
+  </table>
+
+  </p>
+
+</li>
 </ol>
+</p>
 
+
+
+<h2>Interpretation</h2>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+<code>
+route-map DEMO permt 10<br>
+match X Y Z<br>
+match A <br>
+set B<br>
+set C<br>
+route-map DEMO permit 20<br>
+match Q<br>
+set R<br>
+route-map DEMO permit 30
+</code>
+</div>
+</p>
+<p>
+The route map DMEO is interpreted as follows:
+If ((X or Y or Z) and (A) match) then (set B and C) <br>
+Else <br>
+If Q matches then set R<br>
+Else <br>
+Set nothing
+</p>
+
+<p>
+A route map without a match or set command such as <code><b>route-map DEMO permit 40</b></code>, 
+matches all prefixes and permits all other prefixes. If this is the last sequence in a route map, it 
+disables the implicit deny all command at the end of the route map.
+</p>
+
+<h1>Application of Route Maps</h1>
+<p>
+Where route maps are applied depends on what they will be used for:
+</p>
+
+<h2>Filtering</h2>
+<p>
+
+</p>
+<h2>Redistribution</h2>
+<p>
+<img alt="" src="images/RM_Redistribution.png">
+</p>
+<p>
+Uses the command <code><b>redistribute route-map &lt;route-map-name&gt;</b></code>.
+
+      <li><b>Prefix Advertisement:</b> 
+      Filtering of prefixes when during advertisement using a routing protocol 
+      uses the command <code><b>distribute-list route-map &lt;route-map-name&gt;</b></code>
+      </li>
+  </ul>
+  </b>
+<h2>Attribute Manipulation</h2> 
+<p>
+use the command <code><b>neighbor &lt;ip-address&gt; route-map &lt;route-map-name&gt;</b></code>
+</p>
+<h2>Path Control</h2>
+<p>
+use the <code><b>ip policy route-map &lt;route-map-name&gt;</b></code> command under the interface</li>.
+
+Details of how route maps are used for path control are explained here: 
+<a target="_blank" href="https://emmanueltoko.blogspot.com/2023/06/path-control-using-policy-based-routing.html">HERE</a>
+</p>
+
+<h3>Redistribution Caveats</h3>
+<p>
+Redistribution of routing information adds to the complexity of a network and 
+increases the potential for routing confusion, so you should use it only when 
+necessary.
+
+The key issues that arise when you are using redistribution are as follows:
+<ul>
+ <li>Routing loops</li>
+ <li>Incompatible routing information</li>
+ <li>Inconsistent convergence time</li> 
+</ul>
+</p>
 
 <h1>Verification</h1>
 <p>
 
 </p>
 
-<h2><code>show route-map</code></h2>
+<h2><code>show route-map &lt;route-map-name&gt;</code></h2>
 <p>
-
+Verify what was configured. This displays all route maps configured. The specific
+route map name can be added <code>show route-map &lt;-route-map-name&gt;</code>
 </p>
 
