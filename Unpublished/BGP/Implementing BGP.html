@@ -3313,6 +3313,7 @@ weight path attribute is to be modified.</li>
 The following sequence of steps shows how the weight attribute can be modified 
 to influence the best path selection process of a prefix:
 </p>
+<p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
 <code style="font-size:120%">
 R1(config)#<b>do show bgp ipv4 unicast 10.10.10.0</b><br>
@@ -3330,6 +3331,8 @@ Paths: (2 available, best #2, table default)<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Origin IGP, localpref 100, valid, external, best<br>
 R1(config)#<br>
 </code></div>
+</p>
+
 <p>
 <b>Step 1:</b> Configure a prefix-list or access control list (ACL) to identify the prefix(es) whose weight is to be 
 modified.
