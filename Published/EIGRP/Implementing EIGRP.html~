@@ -4167,7 +4167,7 @@ af-interface mode. <code><b>summary-address</b></code>.
        
      </ul>
      <li><b>Traffic Engineering:</b> In networks with redundant links, summarization can be used to control the interfaces over which network 
-       ranges can be accessed. This can be done by advertising those specific summary addresses over specific interfaces 
+       ranges can be accessed. This can be done by advertising those specific summary addresses over particular interfaces 
        and suppressing the advertisement of the component routes over other interfaces. Additionally, more specific summaries 
        can be advertised over one interface and less specific addresses can be advertised over another interface. As routers 
        will prefer the more specific route, the path through interface A will be preferred over the path through interface B 
@@ -4183,21 +4183,12 @@ The path metric for the summary aggregate is based on the path attributes of the
 <p>
 Every time a matching component route for the summary aggregate is added or removed, EIGRP must verify that the summary
 route is still using the attributes from the path with the lowest metric.
-The fluctuation in the path metric is resolved by statically setting the metric on the summary aggregate with the command
+The fluctuation in the path metric is resolved by configuring a static metric for 
+the summary route with the command
 <code><b>summary-metric network {/prefix-length | subnet-mask} bandwidth delay reliability load MTU administrative_distance</b></code>. 
 The metric is statically defined per summary in the topology base configuration mode for named EIGRP and under router 
 eigrp process mode for classic EIGRP.
 </p>
-
-
-
-<h3>EIGRP Traffic Engineering with Summarization</h3>
-<p>
-EIGRP automatically suppresses the subnet advertisements of summaries. Since EIGRP hierarchy is arbitrary, selective summaries
-can be used for traffic engineering. The longest match route is always preferred. Implies that the router performing the 
-summary is less preferred.
-</p>
-
 
 
 <h3>Automatic Summarization</h3>
@@ -4212,14 +4203,14 @@ network boundary.
  EIGRP summarizes network prefixes on an interface-by-interface basis.
  A summary aggregate is configured for the EIGRP interface. 
 The summary aggregate prefix is not advertised until a prefix matches it. 
-Interface-specific summarization can be performed in any portion of the network topology. 
+Interface-specific summarization can be performed in any section of the network topology. 
 The advertisement of summary routes occurs on an interface-by-interface basis. 
 Summary routes are always advertised based on the outgoing interface.
 </p>
  <h4>Classic Mode</h4>
  <p>
  In classic-mode, EIGRP summary is configured using the interface mode command 
- <code><b>ip summary address eigrp &lt;as&gt; network subnet_mask [leak-map &lt;route-map-name&gt;] </b></code>.
+ <code><b>ip summary address eigrp &lt;as&gt; &lt;network&gt; &lt;subnet-mask&gt; [leak-map &lt;route-map-name&gt;] </b></code>.
  The following configuration shows the routing table of a downstream device R8 before and after the 
  configuration of summarization on device R3. 
  </p>
@@ -4295,8 +4286,10 @@ routes on both interfaces.
 </p>
 <h4>Named Mode</h4>
 <p>
- In named EIGRP mode, the summary address command is configured under the af-inteface mode. Note that summarization can 
- not be configured under the default interface configuration mode.
+ In named EIGRP mode, the summary address command is configured under the af-inteface mode. 
+ Note that summarization can not be configured under the default interface configuration mode.
+  The <code><b>af-interface default</b></code> option cannot be used with the 
+  <code><b>summary-address</b></code> command. It requires the use of a specific interface.
  </p>
  
 <p><div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
@@ -4336,9 +4329,7 @@ D&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;192.168.96.0/20 [90/19456] via 10.200.34.2, 00:45
 R3#                                                                                     <br />
 </code>
 </div></p>
-<p>
- The <code><b>af-interface default</b></code> option cannot be used with the summary-address command. It requires the use of a specific interface.
-</p>
+
 <p>
 It is important to note that if redistribution is implemented on a network and 
 route summarization is not configured on the redistributing router but instead 
@@ -4349,6 +4340,16 @@ summary address will view the summary address as an internal route.
 When implementing summarization, EIGRP poisons component routes of the summary; the summarizing router sends updates of the
 component routes with the delay parameter set to infinity. In some cases, the bandwidth is also set to maximum value of 
 4294967295
+</p>
+
+
+<h3>Discard Route</h3>
+<p>
+
+EIGRP adds a discard route to the routing table of the router where summarization is configured. This route 
+has an exit interface Null0. It is added to avoid routing loops. If a packet matches the summary address 
+range but no specific entry exists in the routing table to match that packet, it is forwarded to the Null0 interface i.e. 
+it is discarded.
 </p>
 <p><div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
 <code>
@@ -4373,15 +4374,6 @@ D EX     192.168.102.0 [170/19200] via 10.200.45.2, 00:09:06, POS5/0            
 R4(config-if)#                                                                                        <br />
 </code>
 </div></p>
-
-<h3>Discard Route</h3>
-<p>
-
-EIGRP adds a discard route to the routing table of the router where summarization is configured. This route 
-has an exit interface Null0. It is added to avoid routing loops. If a packet matches the summary address 
-range but no specific entry exists in the routing table to match that packet, it is forwarded to the Null0 interface i.e. 
-it is discarded.
-</p>
 <p>
 EIGRP installs a discard route on the summarizing routers as a routing loop prevention mechanism. 
 A discard route is a route that matches the summary aggregate prefix with the destination Null0. This prevents routing loops where portions of the summarized network range do not have a more specific entry in the Routing Information Base (RIB) on the summarizing router. 
@@ -4660,7 +4652,7 @@ Routing Protocol is "eigrp 1"                                <br/>
 &nbsp;&nbsp;&nbsp;&nbsp;Metric version 64bit                                     <br/> 
 &nbsp;&nbsp;&nbsp;&nbsp;NSF-aware route hold timer is 240                        <br/> 
 &nbsp;&nbsp;&nbsp;&nbsp;Router-ID: 10.255.254.10                                 <br/> 
-&nbsp;&nbsp;&nbsp;&nbsp;Stub, connected, summary                                 <br/> 
+&nbsp;&nbsp;&nbsp;&nbsp;<span style="background: #d3d3d3;">Stub, connected, summary</span>                                 <br/> 
 &nbsp;&nbsp;&nbsp;&nbsp;Topology : 0 (base)                                      <br/> 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Active Timer: 3 min                                    <br/> 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Distance: internal 90 external 170                     <br/> 
@@ -4813,7 +4805,7 @@ Default route propagation in EIGRP can be configured using the summary route 0.0
 a default route.
 <h3>Summary Address 0.0.0.0/0</h3>
  <p>
-A default route can be propaged in EIGRP using the summary address 0.0.0.0 0.0.0.0. 
+A default route can be propagated in EIGRP using the summary address 0.0.0.0 0.0.0.0. 
 This default route summary suppresses every single IPv4 prefix that was advertised by the local device.
 To advertise other IPv4 prefixes, configuration of a leakmap may be required.
 Summary can be configured on the interface in classic EIGRP configuration and af-interface in named 
@@ -4887,7 +4879,7 @@ Routing entry for 0.0.0.0/0, supernet                                           
 <p>
 The default route is propagated as an internal EIGRP route.
 </p>
-<h3>Default Route and Redistribution</h3>
+<h3>Default Route Advertisement Through Redistribution</h3>
 <p>
 In this method of default route propagation, the default route of a router is redistributed into EIGRP. 
 In many cases, this default route is a static route. This static route can then be redistributed into EIGRP. 
@@ -4949,9 +4941,10 @@ such as:
 
 <h3 id="EIGRP_K-VALUES">Custom K Values</h3>
 <p>
-If the design of the network requires that DUAL includes parameters additional to 
-bandwidth and delay in metric calculations, modification of the K-values can enable 
-such metric calculation. K values for the path metric calculation are set with the command 
+If the design of the network requires that delay and load to be included in metric 
+calculation additional to 
+bandwidth and delay in metric calculations, modification of the K-values may be 
+required. K values for the path metric calculation are set with the command 
 <code><b>metric weights TOS K1 K2 K3 K4 K5 [K6]</b></code> under the EIGRP process. 
 The TOS value always has a value of 0, and the K6 value is used for wide metric 
 calculation.
@@ -4973,8 +4966,8 @@ may be used by other processes running on the router such as OSPF.
 
 <p>
 Modifying the delay only affects EIGRP. The delay can be configured with the interface command: 
-<code> <b>delay &lt;value&gt;</b></code>. The delay value parameter is in tens of microseconds and has a range between 
- 1 - 16777215.
+<code> <b>delay &lt;1 - 16777215&gt;</b></code>. The delay value parameter is in 
+tens of microseconds.
 </p>
 <p>
 In the output below, EIGRP selectes the route path via interface GigabitEthernet1/0 to the network 10.8.10.0/24.
@@ -5280,41 +5273,42 @@ R3(config-router)#                                                              
 R3(config-router)#<b>do show ip protocols  </b>                                        <br />     
 *** IP Routing is NSF aware ***                                                 <br />     
                                                                                 <br />     
-Routing Protocol is "eigrp 1"                                                   <br />     
-  Outgoing update filter list for all interfaces is not set                     <br />     
-  Incoming update filter list for all interfaces is not set                     <br />     
-  Default networks flagged in outgoing updates                                  <br />     
-  Default networks accepted from incoming updates                               <br />     
-  EIGRP-IPv4 Protocol for AS(1)                                                 <br />     
-    Metric weight K1=1, K2=0, K3=1, K4=0, K5=0                                  <br />     
-    NSF-aware route hold timer is 240                                           <br />     
-    Router-ID: 3.3.3.3                                                          <br />     
-    Topology : 0 (base)                                                         <br />     
-      Active Timer: 3 min                                                       <br />     
-      Distance: internal 90 external 170                                        <br />     
-      Maximum path: 4                                                           <br />     
-      Maximum hopcount 100                                                      <br />     
-      <span style="background-color:#d3d3d3">Maximum metric variance 2 </span>  <br />     
-                                                                                <br />     
-  Automatic Summarization: disabled                                             <br />     
-  Maximum path: 4                                                               <br />     
-  Routing for Networks:                                                         <br />     
-    10.3.0.0/16                                                                 <br />     
-    10.200.13.0/30                                                              <br />     
-    10.200.23.2/32                                                              <br />     
-    10.200.34.0/30                                                              <br />     
-  Routing Information Sources:                                                  <br />     
-    Gateway         Distance      Last Update                                   <br />     
-    10.200.13.1           90      00:00:25                                      <br />     
-    10.200.23.1           90      00:00:25                                      <br />     
-    10.200.34.2           90      00:00:25                                      <br />     
-  Distance: internal 90 external 170                                            <br />     
-                                                                                <br />     
+Routing Protocol is "eigrp 1"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                     <br />     
+&nbsp;&nbsp;Outgoing update filter list for all interfaces is not set                     <br />     
+&nbsp;&nbsp;Incoming update filter list for all interfaces is not set                     <br />     
+&nbsp;&nbsp;Default networks flagged in outgoing updates                                  <br />     
+&nbsp;&nbsp;Default networks accepted from incoming updates                               <br />     
+&nbsp;&nbsp;EIGRP-IPv4 Protocol for AS(1)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                     <br />     
+&nbsp;&nbsp;&nbsp;&nbsp;Metric weight K1=1, K2=0, K3=1, K4=0, K5=0                                  <br />     
+&nbsp;&nbsp;&nbsp;&nbsp;NSF-aware route hold timer is 240&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                     <br />     
+&nbsp;&nbsp;&nbsp;&nbsp;Router-ID: 3.3.3.3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                      <br />     
+&nbsp;&nbsp;&nbsp;&nbsp;Topology : 0 (base)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                     <br />     
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Active Timer: 3 min&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                     <br />     
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Distance: internal 90 external 170&nbsp;&nbsp;                                      <br />     
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Maximum path: 4&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                     <br />     
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Maximum hopcount 100&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                      <br />     
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="background-color:#d3d3d3">Maximum metric variance 2 </span>  <br />     
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                      <br />     
+&nbsp;&nbsp;Automatic Summarization: disabled&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                     <br />     
+&nbsp;&nbsp;Maximum path: 4&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                     <br />     
+&nbsp;&nbsp;Routing for Networks:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                     <br />     
+&nbsp;&nbsp;&nbsp;&nbsp;10.3.0.0/16&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                     <br />     
+&nbsp;&nbsp;&nbsp;&nbsp;10.200.13.0/30&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                      <br />     
+&nbsp;&nbsp;&nbsp;&nbsp;10.200.23.2/32&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                      <br />     
+&nbsp;&nbsp;&nbsp;&nbsp;10.200.34.0/30&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                      <br />     
+&nbsp;&nbsp;Routing Information Sources:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                      <br />     
+&nbsp;&nbsp;&nbsp;&nbsp;Gateway&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Distance&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Last Update                                   <br />     
+&nbsp;&nbsp;&nbsp;&nbsp;10.200.13.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 90&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;00:00:25                                      <br />     
+&nbsp;&nbsp;&nbsp;&nbsp;10.200.23.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 90&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;00:00:25                                      <br />     
+&nbsp;&nbsp;&nbsp;&nbsp;10.200.34.2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 90&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;00:00:25                                      <br />     
+&nbsp;&nbsp;Distance: internal 90 external 170&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                      <br />     
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                      <br />     
 R3(config-router)#                                                              <br />     
 </code>
 </div></p>
 <p>
-In named-mode, the variance command can be configured under the topology base section of the appropriate address family.
+In named-mode, the <code><b>variance</b></code> command can be configured under 
+the topology base section of the appropriate address family.
 </p>
 
 <p><div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
@@ -5400,7 +5394,7 @@ R8(config-router-af-topology)#                                                  
 
 <p>
 Confirmation of load-balancing at Layer 2 level can be confirmed with the command 
-<code><b>show ip cef &lt;network_address&gt;</b></code>
+<code><b>show ip cef &lt;network-address&gt;</b></code>
 
 <p><div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
 <code>
@@ -5415,8 +5409,9 @@ R8#                                      <br />
 
  <h3>Maximum Paths</h3>
  <p>
- The number of paths to a destination network in the routing table can be limited 
- using the <code><b>maximum-paths &lt;number&gt;</b></code> command. On Cisco devices, the default number of maximum paths is four (4). 
+ The number of paths to a destination network that can be installed in the 
+ routing table can be controlled 
+ using the <code><b>maximum-paths &lt;1-16&gt;</b></code> command. On Cisco devices, the default number of maximum paths is four (4). 
  Maximum paths applies to be equal cost and unequal cost load-balancing.
  </p>
  <p>
@@ -5500,7 +5495,7 @@ Routing Protocol is "eigrp 1"                                                   
 </code>
 </div></p>
 <p>
-In EIGRP classic-mode, the maximum paths command is configured under the EIGRP routing process.
+In EIGRP classic-mode, the <code><b>maximum-paths</b></code> command is configured under the EIGRP routing process.
 </p>
 
  <h3>Forwarding Behaviour</h3>
@@ -5633,8 +5628,8 @@ minimum-cost path, even when there are multiple paths in the routing table. This
 forwarding behavior without use of the variance command. The <code><b>min</b></code> keyword has the additional option 
 <code><b>across-interfaces</b></code>.
 However, if you use the <code><b>traffic-share min</b></code> command and the 
-<code><b>variance</b></code> command, even though traffic 
-is sent over the minimum-cost path only, all feasible routes get installed into the routing table, which decreases 
+<code><b>variance</b></code> command, even though traffic is sent over the 
+minimum-cost path only, all feasible routes get installed into the routing table, which decreases 
 convergence times.
 </p>
 
@@ -5642,7 +5637,7 @@ convergence times.
 
 <p>
 EIGRP supports filtering of routes as they are received into or advertised out an interface.
-Filtering of routes can be matched against:
+Filtering of routes can be done using:
 <ul>
  <li>Access control lists (ACLs)</li>
  <li>IP prefix lists</li>
@@ -5831,7 +5826,6 @@ R2(config)#
 <h3>Filtering using Prefix Lists</h3>
 <p>
 Route filtering can be implemented using Prefix Lists.
-The filtered prefixes will be the same as in the configuration of ACLs.
 </p>
 <ul>
 <p>Step 1: Define the prefix list
@@ -5842,7 +5836,7 @@ R9(config)#<b>ip prefix-list PL_DENY_1921681617 seq 20 permit 0.0.0.0/0 le 32   
 </code></div></p>
 </p>
 <p>
-Step 2: Apply the prefix-list filter using the distribute-list command;
+Step 2: Apply the prefix-list filter using the <code><b>distribute-list</b></code> command;
 <h4>Named mode</h4>
 <p><div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
 <code>
@@ -5972,8 +5966,10 @@ To configure route filtering using route maps, follow these steps:
 <ul>
 <p>
 Step 1: Identify the traffic of interest using an ACL or prefix list<br />
-In this demonstration, we use a prefix list to identify redistributed EIGRP routes 192.168.0.0/16. Note that the prefix-list
-uses the permit statement to identify the network to be filtered.
+In this demonstration, we use a prefix list to identify redistributed EIGRP routes 192.168.0.0/16. 
+Note that the prefix-list
+uses the permit statement to identify the network to be filtered if the route map 
+control statement is deny.
 <p><div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
 <code>
 R8(config)#<b>ip prefix-list PL_DENY_19216800 seq 10 permit 192.168.0.0/16 le 32</b>
@@ -5991,14 +5987,14 @@ R8(config-route-map)#<b>match ip address prefix-list PL_DENY_19216800        </b
 R8(config)#<b>route-map RM_DENY_19216800 permit 20                           </b><br />
 R8(config)#<b>do show route-map                                              </b><br />
 route-map RM_DENY_19216800, deny, sequence 10                             <br />
-  Match clauses:                                                          <br />
-    ip address prefix-lists: PL_DENY_19216800                             <br />
-  Set clauses:                                                            <br />
-  Policy routing matches: 0 packets, 0 bytes                              <br />
+&nbsp;&nbsp;Match clauses:                                                          <br />
+&nbsp;&nbsp;&nbsp;&nbsp;ip address prefix-lists: PL_DENY_19216800                             <br />
+&nbsp;&nbsp;Set clauses:                                                            <br />
+&nbsp;&nbsp;Policy routing matches: 0 packets, 0 bytes                              <br />
 route-map RM_DENY_19216800, permit, sequence 20                           <br />
-  Match clauses:                                                          <br />
-  Set clauses:                                                            <br />
-  Policy routing matches: 0 packets, 0 bytes                              <br />
+&nbsp;&nbsp;Match clauses:                                                          <br />
+&nbsp;&nbsp;Set clauses:                                                            <br />
+&nbsp;&nbsp;Policy routing matches: 0 packets, 0 bytes                              <br />
 R8(config)#                                                               <br />
 </code></div></p>
 </p>
@@ -6068,7 +6064,7 @@ Routing Protocol is "eigrp 1"                                                  <
 Offset lists allow for the modification of route metrics based on the direction of the update, a specific prefix, 
 or a combination of direction and prefix. 
 An offset list is configured with the command 
-<code><b>offset-list &lt;offset-value&gt; {acl-number | acl-name] {in | out} [interface-id] </b></code>. 
+<code><b>offset-list &lt;offset-value&gt; [acl-number | acl-name] [in | out] [interface-id]</b></code>. 
 Specifying an interface restricts the conditional match for the offset list to the interface 
 that the route is received or advertised out of. 
 EIGRP classic configuration places the command under the EIGRP process, while named-mode configuration 
@@ -6289,14 +6285,14 @@ routes (routes redistributed into EIGRP) 170 and summary routes is 5.
 The default administrative distance in EIGRP can be modified for routes that are 
 internal, external or per route.
 
-If the AD of one or more routes is modified, EIGRP's Diffusing Update ALgorith (DUAL) is run
-due to the route configuration. The EIGRP neighbor relationship may be reset as 
+If the AD of one or more routes is modified, EIGRP's Diffusing Update ALgorith 
+(DUAL) is executed to recalculate the best path. The EIGRP neighbor relationship may be reset as 
 well.
 
 <h3>Modifying the AD of Internal and External Routes</h3>
 <p>
 The EIGRP default administrative distance for internal and external routes 
-can be modified using the <code><b>distance &lt;internal external&gt;</b></code> command:
+can be modified using the <code><b>distance &lt;internal&gt; &lt;external&gt;</b></code> command:
 </p>
 <p>
 For EIGRP classic-mode, the AD for internal routes is modified to 70 and external routes to 105.
@@ -6320,8 +6316,8 @@ R1(config-router-af-topology)#<b>distance eigrp 70 105</b>
 <h3>Modifying AD for Routes from Specific Neighbors</h3>
 <p>
 The AD for all routes from a specific EIGRP peer can be modified using the command: 
-<code><b>distance &lt;distance source_IP_address wildcard_mask&gt;</b></code> 
-where <code><b>source_IP_address</b></code> is the EIGRP neighbor IP address.
+<code><b>distance &lt;1-255&gt; &lt;source-ip-address&gt; &lt;wildcard-mask&gt;</b></code> 
+where <code><b>source-ip-address</b></code> is the EIGRP neighbor IP address.
 </p>
 
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#DCDCDC">
@@ -6407,7 +6403,7 @@ EIGRP named-mode af-interface command <code><b>summary-address</b></code>.
 <p>
 The configuration of a default summary route on an upstream router blocks the
 advertisement of more specific routes to downstream routers by intermediate routers.
-This problem can be resolved by configration of a floating summary route. 
+This problem can be resolved by configuration of a floating summary route. 
 On the upstream router that advertised the default summary route, an AD 
 greater than the default EIGRP AD is added to the floating summary route.
 </p>
@@ -6479,8 +6475,8 @@ Keychain creation is accomplished with the following steps:
 R7(config)#<b>key chain EIGRP_KEYCHAIN </b>
 </code></div></p>
 <p>
-<b>Step 2:</b> Identify the key sequence by using the command <code><b>key &lt;key-number&gt;</b></code>, 
-where key-number is in the range 0 to 2147483647. Note that the key number of the valid key must match on both EIGRP peers. 
+<b>Step 2:</b> Identify the key sequence by using the command <code><b>key &lt;0 - 2147483647&gt;</b></code>. 
+Note that the key number of the valid key must match on both EIGRP peers. 
 </p>
 <p><div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
 <code>
@@ -6539,7 +6535,7 @@ Key-chain EIGRP_KEYCHAIN:                                                       
 
 <h3>Automatic Key-Rotation</h3>
 <p>
-A key chain supports multiple key numbers. A router always sends the lowest valid key is more than one key is valid to 
+A key chain supports multiple key numbers. A router always sends the lowest valid key if more than one key is valid to 
 be sent. The key number's validity is based on time. Additionally, when configuring multiple keys, ensure 
 that the validity periods of the keys overlap by a significant amount of time; the second key should be valid to 
 be sent and received before the expiry of the first key. This ensures that at least more than one 
