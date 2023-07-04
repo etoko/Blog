@@ -3620,7 +3620,7 @@ existing routes withdrawn.
 </p>
 <p>
 It is important to note that a router becomes member of an area when any one or 
-more of its interfaces are configured into an area.
+more of its interfaces are participating in the area.
 </p>
 
 <p>
@@ -3714,7 +3714,7 @@ Multi-area OSPF involves the the deployment of a two-tier hierarchical topology
 that consists of the backbone area (area 0) and non-backbone area(s).
 
 Multi-area OSPF topology is the better option to handle scalability. A 
-combination of the following factors may influence the decision to delopy a 
+combination of the following factors may influence the decision to deploy a 
 multi-area OSPF topology:
 <ul>
   <li>High processor utilization in routers in the OSPF area.</li>
@@ -3792,7 +3792,7 @@ router resources.
   <ul>
     <li>In any multi-area OSPF domain, a backbone area must exist.</li>
     <li>All other areas must connect to the backbone area.</li>
-    <li>The backbone area must be contiguous. There must be one single OSPF area.</li>
+    <li>The backbone area must be contiguous; there must be one single OSPF area zero.</li>
   </ul>
   </p>
   
@@ -3803,7 +3803,7 @@ router resources.
   two types of non-backbone areas: normal areas and stub areas. All non-backbone 
   areas must connect to the backbone area which can act as a sort of transit area
   interconnecting two areas. 
-  If scenario occurs where a non-backbone area cannot connect directly to the 
+  If a scenario occurs where a non-backbone area cannot connect directly to the 
   backbone area, then a virtual link can be configured to ensure that the 
   non-backbone area connects to the backbone area.
  </p>
@@ -3846,9 +3846,9 @@ an area is configured as a stub area.
   <li>An ASBR can not be present in a stubby area.</li>
 </ol>
 
-Configuration
-<code><b>#area 1 stub</b></code>. As the stub area flag must match on all routers
-in the area, all routers in the stub area should have the above command configured.
+Configuration of a stubby area is accomplished using the OSPF mode command 
+<code><b>area 1 stub</b></code>. As the stub area flag must match on all routers
+in the area; all routers in the stub area should have the above command configured.
 </p>
 <p>
 When troubleshooting stub area mismatches, use the command <code><b>debug ip 
@@ -3904,21 +3904,23 @@ LSA). Type 7 LSAs carry information common to Type 5 LSAs. The format of a Type
 The ABR does not automatically advertise a default route when a Type 5 LSA is 
 blocked. The ABR of an NSSA area can be configured to advertise a default route 
 using the command:
-<code><b>area 1 nssa default-information-originate</b></code>
+<code><b>area 1 nssa default-information-originate</b></code>.
 If the optional <code><b>default-information-originate</b></code> keyword is 
 appended, the ABR generates a Type 7 default route into the NSSA.
 </p>
 
 <h5>Verification</h5>
+<p>
+The commands to verify the configuration of an NSSA area are:
 <div>
 <code><b>
-#show ip ospf <br>
-#show ip protocols</b>
+show ip ospf <br>
+show ip protocols</b>
 </code>
 </div></p>
 <p>
 A Type 7 LSA can only be flooded in its source area. A Type 7 LSA is structurally
-similar to LSA Types 1 and 2 interms of how it is flooded. 
+similar to LSA Types 1 and 2 in terms of how it is flooded. 
 The ABR of an NSSA translates a Type 7 LSA to Type 5 LSA for area 0.
 While an NSSA cannot be a transit area, it can host an ASBR.
 </p>
@@ -6108,7 +6110,7 @@ participating in is being advertised with OSPFv3. This can be verified by the
 <code>show ipv6 interface <i>interface_id</i></code> privileged-mode command:
 </p>
 
-<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#DCDCDC">
+<p><div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#DCDCDC">
 <code>
 R7#                                                           <br />
 R7#<b>show ipv6 interface gigabitethernet0/0  </b>            <br />
@@ -6137,7 +6139,7 @@ GigabitEthernet0/0 is up, line protocol is up                 <br />
 R7#                                                           <br />
  
 </code>
-</div>
+</div></p>
 <p>
 From the output above, R7 is a DR or BDR on the segment that interface Gigabitethernet0/0 is 
 connected to.
@@ -6158,22 +6160,22 @@ To enable a router to participate in an OSPFv3 domain:
 <p>
 <b>Step 1 Initialize IPv6 unicast routing:</b> OSPFv3 requires IPv6 to be running on the router. It will not initialize if 
 IPv6 is not enabled.
-<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#DCDCDC">
+<p><div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#DCDCDC">
 <code>
 R7#<b>configure terminal</b>                                       <br />
 Enter configuration commands, one per line.  End with CNTL/Z.      <br />
 R7(config)#<b>ipv6 unicast-routing</b>                             <br />
 </code>
-</div>
+</div></p>
 </p><p>
 <b>Step 2 Initialize OSPFv3 process:</b> with the config mode command 
 <code>router ospfv6 <i>process_id</i> :
 </code>
-<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#DCDCDC">
+<p><div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#DCDCDC">
  <code>
 R7(config)#<b>router ospfv3 1 </b>
  </code>
-</div>
+</div></p>
 </p>
 
 <p>
@@ -6181,26 +6183,26 @@ R7(config)#<b>router ospfv3 1 </b>
 the OSPFv3 domain. If more than one router is using the same RID, some prefixes may be dropped by a 
 router with the belief that the dropped prefixes were locally originated. This will result in sub-optimal 
 routing at best. Note that the RID of 0.0.0.0 is reserved and should not be used.
-<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#DCDCDC">
+<p><div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#DCDCDC">
 <code>
 R7(config-router)#<b>router-id 7.7.7.7</b>
 </code>
-</div>
+</div></p>
 </p>
 
 <p>
 <b>Step 4:</b> Enable OSPFv3 on the interface:
-<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#DCDCDC">
+<p><div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#DCDCDC">
 <code>
 R7(config)#                                <br />
 R7(config)#<b>interface gigabitethernet 0/0 </b>  <br />
 R7(config-if)#<b>ospfv3 1 ipv6 area 7    </b>     <br />
 </code>
-</div>
+</div></p>
 </p>
 
 <p>It is good practice to confirm the OSPFv3 configuration by using some verification commands:</p>
-<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#DCDCDC">
+<p><div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#DCDCDC">
 <code>
 R7#<b>show ospfv3 interface gigabitethernet 0/0 </b>                                <br /> 
 GigabitEthernet0/0 is up, line protocol is up                                <br /> 
@@ -6232,7 +6234,7 @@ Neighbor ID&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Pri&nbsp;&nbsp;&nbsp;State&nbsp;&nbsp;&
 8.8.8.8&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1&nbsp;&nbsp;&nbsp;FULL/DROTHER&nbsp;&nbsp;&nbsp;&nbsp;00:00:31&nbsp;&nbsp;&nbsp;&nbsp;4&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;GigabitEthernet0/0 <br />
 
 </code>
-</div>
+</div></p>
 <p>
 R7's Gigabitethernet0/0 interface does not have a global prefix configured. If R7 does not 
 have a global prefix configured on any of its interfaces, it will still form an adjacency. However, it will not 
@@ -6249,32 +6251,32 @@ Additionally, this interface does not receive Hello packets.
 <p>
 To make all interfaces passive:
 </p>
-<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#DCDCDC">
+<p><div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#DCDCDC">
 <code>
 R7(config)#<b>router ospfv3 1 </b> <br />
 R7(config-router)#<b>passive-interface default </b><br />
 </code>
-</div>
+</div></p>
 <p>
 After making all interfaces passive as indicated above, some interfaces will need to be 
 configured as active to allow adjacency formation and LSDB synchronization. This can be accomplished with 
 the negation command: <code>no passive-interface <i>interface</i></code>
 </p>
-<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#DCDCDC">
+<p><div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#DCDCDC">
 <code>
 R7(config)#<b>router ospfv3 1 </b> <br />
 R7(config-router)#<b>no passive-interface gigabitethernet0/0 </b> <br />
 </code>
-</div>
+</div></p>
 <p>
 To configure a specific interface as a passive interface:
 </p>
-<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#DCDCDC">
+<p><div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#DCDCDC">
 <code>
 R7(config)#<b>router ospfv3 1 </b><br />
 R7(config-router)#<b>passive-interface loopback 14</b> <br />
 </code>
-</div>
+</div></p>
 <p>
 If not configured under a specific address-family, the passive-interface state applies to 
 an interface running both IPv4 and IPv6 network protocols.
@@ -6284,7 +6286,7 @@ an interface running both IPv4 and IPv6 network protocols.
 OSPFv3 displays all interfaces on which it is running regardless of whether the interface 
 is configured as a passive interface or not.
 </p>
-<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#DCDCDC">
+<p><div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#DCDCDC">
 <code>
 R7#<b>show ospfv3 interface brief </b>                                    <br />
 Interface&nbsp;&nbsp;&nbsp;&nbsp;PID&nbsp;&nbsp;&nbsp;Area&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;AF&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Cost&nbsp;&nbsp;State Nbrs F/C        <br />
@@ -6296,7 +6298,7 @@ PO5/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1&nbsp;&nbsp;&nbsp;&nbsp;&n
 Gi0/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;7&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;IPv6&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;DROTH 2/2             <br />
 
 </code>
-</div>
+</div></p>
 
 <h2>OSPF Neighbor Adjacency</h2>
 The process of creating a neighborship with another OSPF enabled router is known as a neighborship. Neighboring OSPF-enabled routers need to become adjacent in order to share their known routers. The adjacency stage depends on the OSPF network type of the neighbors. 
@@ -6337,7 +6339,7 @@ R7#<b>show ospfv3 </b>                                                          
                                                                                              <br />
 R7#                                                                                          <br />
   </code>
-  </div>
+  </div></p>
   .</li>
   <li>Interfaces must be OSPF active (in an Up state). The interface through-which the 
   adjacency is to be formed must have OSPF enabled on it and must not be in an OSPF passive state.</li>
@@ -6357,7 +6359,7 @@ Mismatched MTUs can be ignored using the command:
    R7(config)#<b> interface g0/0 </b> <br />
   R7(config-if)#<b>ospfv3 mtu-ignore</b>
 </code>
-</div>
+</div></p>
 <p>
 However, ignoring MTU checks is not recommeded in production networks.
 </p>
@@ -6463,7 +6465,7 @@ R1(config-if)#<b>do show ospfv3</b>                                             
                                                                                                <br />
 
 </code>
-</div>
+</div></p>
 </p>
 <p>
 If the output of the command <code>show ospfv6 </code> shows that the router is 
@@ -6504,7 +6506,7 @@ IPv6 Routing Protocol is "ospf 1"                                  <br />
 &nbsp;&nbsp;Redistribution:                                        <br />
 &nbsp;&nbsp;&nbsp;&nbsp;None                                       <br />
 </code>
-</div>
+</div></p>
 <p>
 Other commands such <code><b>#show ip ospf </b></code> can display the router's type.
 </p>
@@ -6531,18 +6533,18 @@ The hello interval and dead intervals can be modified to values different from t
 In gigabit-ethernet networks, hello intervals of 10 seconds are rather long. They can be reduced to shorter durations of 
 say 5 seconds:
 </p>
-<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#DCDCDC">
+<p><div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#DCDCDC">
   <code>
 R1(config)#<b>interface fa3/0</b> <br />  
 R1(config-if)#<b>ip ospf hello-interval 5 </b> </code>
-</div>
+</div></p>
 <p>
 The dead interval is automatically modified to four times the value of the hello-interval.
 </p>
 
 <p>
 OSPF Hello values can be sent using sub-second values using the interface command<code>ip ospf dead-interval minimal hello-multiplier <i>multiplier</i></code>. The <code><i>multiplier</i></code> is the number of hello packets sent per second;
-<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#DCDCDC">
+<p><div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#DCDCDC">
   <code>
 R1(config)#<b>interface fa3/0</b> <br />  
 R1(config-if)#<b>ip ospf dead-interval minimal hello-multiplier 4 </b><br />
@@ -6565,7 +6567,7 @@ FastEthernet3/0 is up, line protocol is up<br />
 &nbsp;&nbsp;..... <br />
 R1#<br />
 </code>
-</div>
+</div></p>
 </p>
 <p>
 Where 4 implies four hello packets are to be sent per second.
@@ -6603,7 +6605,7 @@ do not.
 <p>
 The OSPF network type of an interface can be changed from its default using the interface mode command: <code><b>ip ospf  network</b> <i>network_type</i></code> <code>network_type</code> can be either of: broadcast, non-broadcast, point-to-point, point-to-multipoint.
 <br />
-<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#DCDCDC">
+<p><div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#DCDCDC">
 <code>
 R1(config)#<b>interface fa3/0</b><br />
 R1(config-if)#<b>ip ospf network point-to-point</b><br />
@@ -6618,7 +6620,7 @@ FastEthernet3/0 is up, line protocol is up<br />
     oob-resync timeout 40<br />
     Hello due in 73 msec<br />
 </code>
-</div>
+</div></p>
 </p>
 <p>
 
@@ -6673,7 +6675,7 @@ valid RID such as 255.255.255.255
 <p>
 The interface priority is a value from 1 to 255 inclusive. To change the router interface priority to 200:
 </p>
-<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#DCDCDC">
+<p><div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#DCDCDC">
 <code>
   R1(config)#<b>interface g0/0</b> <br />
 R1(config-if)#<b>ip ospf priority ? </b><br />
@@ -6686,7 +6688,7 @@ GigabitEthernet0/0 is up, line protocol is up <br />
   &nbsp;&nbsp; .... <br />
   &nbsp;&nbsp;Transmit Delay is 1 sec, State BDR, <span style="background-color:#DCDCDC;">Priority 200</span><br />
 </code>
-</div>
+</div></p>
 <p>
 A value of zero makes the router ineligible for DR/BDR election.
 </p>
@@ -6694,7 +6696,7 @@ A value of zero makes the router ineligible for DR/BDR election.
 The DR and BDR roles can not be preempted by a router with higher interface priority or RID values.
 The election of a DR/BDR can be forced by clearing the OSPF process. This can be done using the following command: 
 </p>
-<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#DCDCDC">
+<p><div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#DCDCDC">
 <code>
 R1# <br />
 R1#<b>clear ip ospf process</b> <br />
@@ -6703,7 +6705,7 @@ R1# <br />
 *Aug 11 22:03:11.495: %OSPF-5-ADJCHG: Process 1, Nbr 2.2.2.2 on GigabitEthernet0/0 from FULL to DOWN, Neighbor Down: Interface down or detached <br />
 *Aug 11 22:03:11.767: %OSPF-5-ADJCHG: Process 1, Nbr 2.2.2.2 on GigabitEthernet0/0 from LOADING to FULL, Loading Done <br />
 </code>
-</div>
+</div></p>
 
 
 <h3>DR Operation</h3>
@@ -6821,7 +6823,7 @@ The summary information on LSAs in the link-state database (LSDB) can be viewed 
 <code>show ospfv3 database</code>.
 </p>
 
-<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#DCDCDC">
+<p><div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#DCDCDC">
 <code>
 R7#                                                                           <br />
 R7#<b>show ospfv3 database</b>                                                       <br />
@@ -6882,7 +6884,7 @@ R7#<b>show ospfv3 database</b>                                                  
 &nbsp; 1.1.1.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1106&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0x80000001&nbsp;&nbsp;2001:DB8:FFFF:12::/64                <br />
 R7#
 </code>
-</div>
+</div></p>
 
 <h3>Link-State Advertisements (LSAs)</h3>
 <p>
@@ -6928,7 +6930,7 @@ If a stub network is added or removed, full SPF is not required.
   <code> show ospfv3 database router </code> <br />
   </p>
   
-  <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#DCDCDC">
+  <p><div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#DCDCDC">
 <code>
 R7#                                                            <br />                               
 R7#<b>show ospfv3 database router</b>                                                                            <br />
@@ -7001,7 +7003,7 @@ R7#<b>show ospfv3 database router</b>                                           
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Neighbor (DR) Router ID: 6.6.6.6                                          <br />
 
 </code>
-</div>
+</div></p>
 
   </li>
   <li><b>Type 2 Network LSA (0x2002): </b> 
@@ -7011,7 +7013,7 @@ R7#<b>show ospfv3 database router</b>                                           
   To view type 2 LSAs in the LSDB, issue the privileged mode command: 
   <code>show ospfv3 database network</code>
   </p>
-  <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#DCDCDC">
+  <p><div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#DCDCDC">
     <code>
     R7#<b>show ospfv3 database network </b> <br />
 <br />
@@ -7033,7 +7035,7 @@ R7#<b>show ospfv3 database router</b>                                           
                                                          <br />
 R7#                                                      <br />
     </code>
-  </div>
+  </div></p>
   <p>
   No prefix information is contained in the OSPFv3 type 2 network LSA.
   </p>
@@ -7044,7 +7046,7 @@ R7#                                                      <br />
   generated by ABRs to describe routes to IPv6 address prefixes that belong to other 
   areas. Renames the network summary LSA into inter-area prefix LSA. 
   </p>
-  <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#DCDCDC">
+  <p><div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#DCDCDC">
     <code>
     R7#<b>show ospfv3 database inter-area prefix</b>                               <br />
                                                                             <br />
@@ -7242,7 +7244,7 @@ OE2 2001:DB8:FFFF:12::/64 [110/20]                                          <br 
 &nbsp;&nbsp;&nbsp;&nbsp;via FE80::C806:5FF:FE94:8, GigabitEthernet0/0                          <br />
 R7#                                                                         <br />
 </code>
-</div>
+</div></p>
 
 <p>
 Inter-area prefix LSAs appear in the RIB as "OI" routes.
@@ -7258,7 +7260,7 @@ Inter-area prefix LSAs appear in the RIB as "OI" routes.
   command: <code> show ospfv3 database inter-area router </code>
   </p>
   
-<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#DCDCDC">
+<p><div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#DCDCDC">
     <code>  
 R7#<b>show ospfv3 database inter-area router </b>                   <br />
                                                              <br />
@@ -7280,7 +7282,7 @@ R7#<b>show ospfv3 database inter-area router </b>                   <br />
                                                              <br />
 R7#                                                          <br />
 </code>
-</div>  
+</div></p>  
 <p>
 Type 4 LSAs do not contain prefix information. Type 4 inter-area router LSA is flooded in the 
 originating area.
@@ -7296,7 +7298,7 @@ originating area.
   be viewed in the LDSDB by issuing the command: <code>show ospfv3 database external</code>.
   </p>
   
-  <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#DCDCDC">
+  <p><div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#DCDCDC">
     <code>
   R7#                                                        <br />
 R7#<b>show ospfv3 database external</b>                      <br />
@@ -7417,7 +7419,7 @@ OE2 2001:DB8:FFFF:12::/64 [110/20]                                          <br 
 &nbsp;&nbsp;&nbsp;&nbsp;via FE80::C806:5FF:FE94:8, GigabitEthernet0/0 </span>                         <br />
 R7#                                                                         <br />
 </code>
-</div>
+</div></p>
   <p>
   The flooding scope of type 5 LSAs is Autonomous System (AS) Scoping
   Type 5 external LSAs are of two types; 
@@ -7436,7 +7438,7 @@ R7#                                                                         <br 
   LSAs.
   </p>
   
-  <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#DCDCDC">
+  <p><div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#DCDCDC">
     <code>
                                                                 <br />
   R3#<b>show ospfv3 database nssa-external</b>                         <br />
@@ -7557,7 +7559,7 @@ Perform type-7/type-5 LSA translation </span>                       <br />
                                                                      <br />
 R1#                                                                  <br />
 </code>
-</div>  
+</div></p>  
   <p>
   This LSA contains prefix information and is flooded only to an NSSA area.
   The NSSA ABR will block type 7 NSSA-external LSAs and perform 
@@ -7587,7 +7589,7 @@ R1#                                                                  <br />
   Link-local addresses appear in OSPF link-LSAs. They are not allowed in other LSA types.
    </p>
    
-  <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#DCDCDC">
+  <p><div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#DCDCDC">
     <code>
                                                                       <br />
     R6#<b>show ospfv3 database link </b>                                     <br />                                    
@@ -7738,7 +7740,7 @@ R6#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp
 R6#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                        
   
   </code>
-</div>
+</div></p>
 <p>
 
 </p>
@@ -7749,7 +7751,7 @@ R6#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp
   transit segment. The router and network LSAs do not specify the IP address of the prefix for a network. LSA 9 contains all the 
 networks inside an area. They are not propagated out of the area.
 </p>
-<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#DCDCDC">
+<p><div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#DCDCDC">
 <code>
 R8#                                                              <br />                                           
 R8#<b>show ospfv3 database prefix</b>                            <br />
@@ -7816,7 +7818,7 @@ R8#<b>show ospfv3 database prefix</b>                            <br />
 &nbsp;&nbsp;Prefix Length: 128, Options: LA, Metric: 0                     <br />              
 R8#                                                              <br />
 </code>
-</div>
+</div></p>
 </li>
 </ul>
 
@@ -7853,7 +7855,7 @@ auto-cost reference-bandwidth <i>bandwidth </i>
 </code>
 The bandwidth value is in megabits per second.
 </p>
-<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#DCDCDC">
+<p><div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#DCDCDC">
 <code>
 R8(config-router)#<b>auto-cost reference-bandwidth 10000</b>                  <br />
 % OSPF: Reference bandwidth is changed.                                       <br />
@@ -7878,7 +7880,7 @@ R8(config-router)#<b>do show ip ospf</b>                                      <b
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SPF algorithm executed 2 times                                        <br />
         ........                                                       <br>
 </code>
-</div>
+</div></p>
 <p>
 The reference bandwidth should be set to the same value for all routers in the OSPF domain, 
 otherwise sub-optimal routing may occur.
@@ -7902,21 +7904,21 @@ path topology tree based on links instead of networks.
 <p>
 Configured on ABRs and for a specific address family:
 </p>
-<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#DCDCDC">
+<p><div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#DCDCDC">
 <code>
 #address-family ipv6 unicast <br>
 #area 0 range 2001:DB8:10::/65
 </code>
-</div>
+</div></p>
 
 <h3>Network Type</h3>
-<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#DCDCDC">
+<p><div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#DCDCDC">
 <code>
 #show ospfv3 interface brief<br>
 #int g0/2 <br>
 #ospfv3 network broadcast
 </code>
-</div>
+</div></p>
 
 <h2>Security of OSPFv3 Adjacencies and Route Exchange</h2>
 <p>
@@ -7939,11 +7941,11 @@ implemented as well with the entire packet being encrypted.
   
   </li>
   <li><b>Encapsulating Security Payload: </b> provides authentication and encryption
-  <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#DCDCDC">
+  <p><div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#DCDCDC">
   <code>
   #ospfv3 encryption ipsec spi 1000 esp 3des <i>key </i> sha1 <i>key</i>
   </code>
-  </div>
+  </div></p>
   Where: <br />
   Security policy index = 1000 <br />
   Encryption algorithm = 3des <br />
@@ -7955,11 +7957,11 @@ implemented as well with the entire packet being encrypted.
 <p>
 Verification
 </p>
-<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#DCDCDC">
+<p><div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#DCDCDC">
   <code>
   #show ospfv3 interface g0/2
   </code>
-</div>
+</div></p>
 <p>
 OSPFv3 neighbor authentication does not perform IKE to negotiate IPSec security associations (SA) values.
 Therefore IPSec security parameter index (SPI) algorithm and key must be manually defined when configuring
@@ -7969,22 +7971,22 @@ OSPFv3 authentication. IPSec peers cannot reuse the same SPI values.
 <h1>Troubleshooting Authentication</h1>
 OSPFv3 area authentication is applied to the OSPFv3 router mode command. In this mode, 
 the encryption or authentication parameters are configured. This is done using the following:
-<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#DCDCDC">
+<p><div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#DCDCDC">
 <code>
 #area 0 authentication ipsec spi 1000 sha password-key.
 </code>
-</div>
+</div></p>
 verification commands;
 <code>show crypto ipsec policy </code>
 <p>
 Area authentication applies to all interfaces in the area. SAs are created for outbound and inbound connections. 
 To view these, 
 </p>
-<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#DCDCDC">
+<p><div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#DCDCDC">
 <code>
 #show crypto ipsec sa <br />
 #show crypto ipsec policy <br />
 #show ospfv3 interface <br />
 </code>
-</div>
+</div></p>
 
