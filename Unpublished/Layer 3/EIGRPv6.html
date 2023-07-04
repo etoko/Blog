@@ -1,0 +1,133 @@
+<p>
+EIGRP packets use IP protocol 88 for both IPv4 and IPv6. Routers communicate with 
+each other using the interface's IPv6 link-local address as the source. The 
+destination may be either unicast link-local or multicast link-local scoped address
+FF02::A.
+</p>
+<p>
+<table width="100%" cellspacing="0">
+<thead>
+  <tr>
+    <td style="border-bottom: 1px solid; border-top: 1px solid;">EIGRP Packet</td>
+    <td style="border-bottom: 1px solid; border-top: 1px solid;">Source</td>
+    <td style="border-bottom: 1px solid; border-top: 1px solid;">Destination</td>
+    <td style="border-bottom: 1px solid; border-top: 1px solid;">Purpose</td>
+  </tr>
+</thead>
+<tbody>
+<tr>
+    <td style="border-bottom: 1px solid;">Hello</td>
+    <td style="border-bottom: 1px solid;">Link-local address</td>
+    <td style="border-bottom: 1px solid;">FF02::A</td>
+    <td style="border-bottom: 1px solid;">Neighbor discovery and keepalive</td>
+  </tr>
+  <tr>
+    <td style="border-bottom: 1px solid;">Acknowledgment</td>
+    <td style="border-bottom: 1px solid;">Link-local address</td>
+    <td style="border-bottom: 1px solid;">Link-local address</td>
+    <td style="border-bottom: 1px solid;">Acknowledges receipt of an update</td>
+  </tr>
+  <tr>
+    <td style="border-bottom: 1px solid;">Query</td>
+    <td style="border-bottom: 1px solid;">Link-local address</td>
+    <td style="border-bottom: 1px solid;">FF02::A</td>
+    <td style="border-bottom: 1px solid;">Request for route information during a
+    topology change event</td>
+  </tr>
+  <tr>
+    <td style="border-bottom: 1px solid;">Reply</td>
+    <td style="border-bottom: 1px solid;">Link-local address</td>
+    <td style="border-bottom: 1px solid;">Link-local address</td>
+    <td style="border-bottom: 1px solid;">A response to a query message</td>
+  </tr>
+  <tr>
+    <td style="border-bottom: 1px solid;">Update</td>
+    <td style="border-bottom: 1px solid;">Link-local address</td>
+    <td style="border-bottom: 1px solid;">Link-local address</td>
+    <td style="border-bottom: 1px solid;">Adjancency forming</td>
+  </tr>
+  <tr>
+    <td style="border-bottom: 1px solid;">Update</td>
+    <td style="border-bottom: 1px solid;">Link-local address</td>
+    <td style="border-bottom: 1px solid;">FF02::A</td>
+    <td style="border-bottom: 1px solid;">Topology change</td>
+  </tr>
+</tbody>
+</p>
+
+<h1>Configuration
+<p>
+EIGRPv6 supports two configuration modes: classic and named.
+</p>
+
+<h2>Classic mode</h2>
+<p>
+Original mode for configuration of EIGRPv6.
+<ol>
+  <li>Configure EIGRPv6 process using command <code><b>ipv6 router eigrp &lt;autonomous-system-number&gt;</b></code>
+  </li>
+  <li>Define the router ID using the command <code><b>eigrp router-id &lt;x.x.x.x&gt;
+  </b></code>
+  </li>
+  <li>Enable EIGRPv6 process on interface using interface command 
+  <code><b>ipv6 eigrp &lt;autonomous-system-number&gt;</b></code>
+</ol>
+</p>
+
+<h2>Named mode</h2>
+<p>
+Similar to IPv4 EIGRP named-mode configuration, is implemented in the following 
+steps:
+<ol>
+  <li>Configure the EIGRPv6 routing process using the command <code><b>router 
+  eigrp &lt;process-name&gt;</b></code></li>
+  <li>Define the IPv6 address family and autonomous system number using the command 
+  <code><b>address-family ipv6 autonomous-system &lt;autonomous-system-number&gt;</b></code>.
+  </li>
+  <li>Assign the router-id using the command <code><b>eigrp router-id &lt;ip-address&gt;</b></code>.
+  </li>
+</ol>
+</p>
+<p>
+Like IPv4 named-mode configuration, EIGRPv6 uses hierarchical configuration under 
+the address-family, topology base and interface modes.
+</p>
+
+<h1>Verification</h1>
+<p>
+Traditional EIGRP verification commands for IPv4 are the same for EIGRPv6.
+</p>
+
+<h2><code>show ipv6 eigrp interfaces</code></h2>
+<p>
+Displays EIGRPv6 interfaces
+</p>
+
+
+<h2><code>show ipv6 eigrp neighbors</code></h2>
+<p>
+
+
+</p>
+
+
+<h2><code>show ipv6 protocols</code></h2>
+<p>
+Displays the current state of active routing protocol.
+</p>
+
+<h1>Summarization</h1>
+<p>
+Done using the commands:
+<ul>
+  <li><b>Classic-mode:</b> <code><b>ipv6 summary-address eigrp &lt;autonomous-system-number&gt; 
+ipv6-prefix/prefix-length</b></code>.</li> 
+  <li><b>Named-mode:</b> <code><b>summary-address &lt;ipv6-address&gt; /&lt;prefix-length&gt;</b></code>
+  under the <code><b>af-interface</b></code> mode.</li>
+</p>
+
+<h1>Default route advertisement</h1>
+<p>
+A default route can be advertised by placing the default route ::/0 as a summary address on 
+an interface <code><b>ipv6 summary-address eigrp 10 ::/0</b></code>.
+</p>
