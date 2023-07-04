@@ -2655,7 +2655,47 @@ R5#<b>sho ip ospf datab router self-originate</b>           <br />
       <li><b>Link data:</b> connecting device IP address.</li>
     </ul>
   </p>
+  <p>
+  The following is the output of the LSDB showing an entry of the type 1 LSA with 
+  link type 4:
+  </p>
 
+<div style="background-color:#f4f0ec; border-style:dotted;border-width:1px;border-color:#DCDCDC">
+<code>
+R1#<b>show ip ospf database router self-originate</b><br>
+&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;OSPF Router with ID (1.1.1.1) (Process ID 1)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Router Link States (Area 0.0.0.0)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;           <br>
+&nbsp;&nbsp;LS age: 236                                                            <br>
+&nbsp;&nbsp;Options: (No TOS-capability, DC)                                       <br>
+&nbsp;&nbsp;LS Type: Router Links                                                  <br>
+&nbsp;&nbsp;Link State ID: 1.1.1.1                                                 <br>
+&nbsp;&nbsp;Advertising Router: 1.1.1.1                                            <br>
+&nbsp;&nbsp;LS Seq Number: 80000004                                                <br>
+&nbsp;&nbsp;Checksum: 0x78D1                                                       <br>
+&nbsp;&nbsp;Length: 72                                                             <br>
+&nbsp;&nbsp;Area Border Router                                                     <br>
+&nbsp;&nbsp;AS Boundary Router                                                     <br>
+&nbsp;&nbsp;Number of Links: 4                                                     <br>
+&nbsp;&nbsp;                                                                       <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Link connected to: a Virtual Link                          <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(Link ID) Neighboring Router ID: 8.8.8.8             <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(Link Data) Router Interface address: 10.255.254.1   <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Number of MTID metrics: 0                      <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;TOS 0 Metrics: 2                         <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                     <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Link connected to: a Transit Network                       <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(Link ID) Designated Router address: 10.255.1.33     <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(Link Data) Router Interface address: 10.255.1.33    <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Number of MTID metrics: 0                      <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;TOS 0 Metrics: 1                         <br>
+</code></div>
+<p>
+A type 1 LSA link type 4 is sent in a unicast LSU with the source and destination IP 
+addresses being the IP addresses of the virtual-link end points.
+</p>
  <h3>Type 1 LSA Body</h3>
 <p>
 The Link ID value identifies the object that the link connects to, which could be: the router ID, 
@@ -3910,7 +3950,13 @@ backbone area is split-up into two or more sections with each section separated 
 Discontiguous areas cause the ABR of the discontiguous area not to be reachable 
 via SPT. An ABR can only advertise routes between areas when one of the areas it
 is connected to is the backbone(area 0).
- 
+ Some preconditions of virtual-link include the following:</h3>
+<ul>
+  <li>End-points must be reachable via a normal area (not a stub area). 
+  OSPF stubby areas cannot be a transit area for a virtual-link.</li> 
+  <li>Transit area  must not have filtering applied i.e. LSA type 3 filters, distribute-lists.</li>
+  <li>The virtual link end-points are members of the transit area.</li>
+</ul>
 </p>
 <p>
 Discontiguous areas are eliminated by adding new area 0 links and adjacencies. The links could be either physical
@@ -3940,6 +3986,13 @@ A virtual link is characterized by the following features:
   <li>Only OSPF overhead traffic transits the virtual link; this includes OSPF 
   packets such as Hello, DBD, LSR, LSU and LSAck. OSPF adjacencies can therefore 
   be formed through the virtual link.</li>
+  <li>The virtual terminal end-points (routers where the virtual terminal is 
+  configured): 
+    <ul>
+      <li>Virtual terminal endpoints become ABRs.</li>
+      <li>belong to the same non-backbone area.</li>
+    </ul>
+  </li>
 </ul>
 The tunnel (of a virtual-link) belongs to the backbone area and therefore the 
 router terminating the virtual link becomes an ABR. The area in which the 
@@ -3949,33 +4002,37 @@ can be one hop or multiple hops away from the remote virtual-link endpoint.
 
 The virtual link is built using type 1 LSAs with link-type 4.
 
-A virtual-link inherits costs from SPT cost between end-points. The cost must be below 65535.
+A virtual-link inherits costs from SPT cost between end-points. The cost must be below 65535
+otherwise the virtual link will enter a down state.
 A virtual-link runs as a demand circuit so errors in configuration could be hidden until flooding 
-occurs.
-
+occurs. As a demand circuit, when making configurations to the virtual link such 
+as authentication, the virtual link will have to be cleared first before the 
+configurations take effect.
+</p>
+<p>
 Configuration: (on both virtual-link endpoints)
 </p>
 
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#DCDCDC">
 <code>
-R6(config)#<b>router ospf 6</b>                                                      <br />
-R6(config-router)#<b>area 7 virtual-link 8.8.8.8</b>                          <br />
-R6(config-router)#<b>end</b>                                                         <br />
+R8(config)#<b>router ospf 8</b>                                                      <br />
+R8(config-router)#<b>area 7 virtual-link 1.1.1.1</b>                          <br />
+R8(config-router)#<b>end</b>                                                         <br />
 <br />
 ------------------------------------ <br />
 <br />
-R8(config)#<b>router ospf 8</b>                                                      <br />
-R8(config-router)#<b>area 7 virtual-link 6.6.6.6</b>                          <br />
-R8(config-router)#<b>end</b>                                                         <br />                                                                                                         
+R1(config)#<b>router ospf 1</b>                                                      <br />
+R1(config-router)#<b>area 7 virtual-link 8.8.8.8</b>                          <br />
+R1(config-router)#<b>end</b>                                                         <br />                                                                                                         
 *Aug 15 14:59:34.035: %SYS-5-CONFIG_I: Configured from console by console     <br /> 
-R8# <br />
-R8#<b>show ip ospf virtual-links</b>                                                 <br />                 
-Virtual Link OSPF_VL0 to router 6.6.6.6 is up                                 <br />                 
+R1# <br />
+R1#<b>show ip ospf virtual-links</b>                                                 <br />                 
+Virtual Link OSPF_VL0 to router 1.1.1.1 is up                                 <br />                 
 &nbsp;&nbsp;<span style="background-color: #dcdcdc;">Run as demand circuit</span>                                                       <br />                 
 &nbsp;&nbsp;DoNotAge LSA allowed.                                                       <br />                 
 &nbsp;&nbsp;Transit area 7, via interface GigabitEthernet0/0                            <br />                 
 &nbsp;Topology-MTID  &nbsp;&nbsp;&nbsp;  Cost &nbsp;&nbsp;&nbsp;   Disabled  &nbsp;&nbsp;&nbsp;   Shutdown  &nbsp;&nbsp;&nbsp;    Topology Name            <br />                 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;no     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;     no      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;      Base                  <br />                 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;no     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;     no      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;      Base                  <br />                 
 &nbsp;&nbsp;Transmit Delay is 1 sec, State POINT_TO_POINT,                              <br />                 
 &nbsp;&nbsp;Timer intervals configured, Hello 10, Dead 40, Wait 40, Retransmit 5        <br />                 
 &nbsp;&nbsp;&nbsp;&nbsp;Hello due in 00:00:03                                                     <br />                 
@@ -3986,13 +4043,26 @@ Virtual Link OSPF_VL0 to router 6.6.6.6 is up                                 <b
 &nbsp;&nbsp;&nbsp;&nbsp;Last retransmission scan time is 0 msec, maximum is 0 msec                <br />                 
 &nbsp;&nbsp;Message digest authentication enabled                                       <br />                 
 &nbsp;&nbsp;&nbsp;&nbsp;Youngest key id is 1  <br />
-R8# <br />
-R8#<b>show ip ospf interface</b><br />
+</code></div>
+
+<p>
+The commands <code><b>show ip ospf virtual-link</b></code> and <code><b>show ip 
+ospf interface</b></code> can be used to verify the operational state of the virtual-link.
+</p>
+
+<h3>Virtual Link Interfaces</h3>
+<p>
+When a virtual link is configured, a virtual link interface is created through 
+which the virtual link is maintained. 
+</p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#DCDCDC">
+<code>
+R1#<b>show ip ospf interface</b><br />
 <span style="background-color:#DCDCDC;">OSPF_VL0 is up, line protocol is up</span><br />
-&nbsp;&nbsp;Internet Address 10.7.7.3/29, Area 0, Attached via Not Attached     <br />
-&nbsp;&nbsp;Process ID 8, Router ID 8.8.8.8, Network Type<span style="background-color:#DCDCDC;"> VIRTUAL_LINK</span>, Cost: 1 <br />
+&nbsp;&nbsp;Internet Address 10.255.2.6/30, Area 0, Attached via Not Attached     <br />
+&nbsp;&nbsp;Process ID 1, Router ID 1.1.1.1, Network Type<span style="background-color:#DCDCDC;"> VIRTUAL_LINK</span>, Cost: 2 <br />
 &nbsp;&nbsp;Topology-MTID  &nbsp;&nbsp;&nbsp;  Cost &nbsp;&nbsp;&nbsp;   Disabled  &nbsp;&nbsp;&nbsp;   Shutdown  &nbsp;&nbsp;&nbsp;    Topology Name            <br />                 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;no     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;     no      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;      Base                  <br />                 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;no     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;     no      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;      Base                  <br />                 
 &nbsp;&nbsp;Configured as demand circuit                                        <br />
 &nbsp;&nbsp;Run as demand circuit                                               <br />
 &nbsp;&nbsp;DoNotAge LSA allowed                                                <br />
@@ -4008,54 +4078,29 @@ R8#<b>show ip ospf interface</b><br />
 &nbsp;&nbsp;Last flood scan length is 1, maximum is 1                           <br />
 &nbsp;&nbsp;Last flood scan time is 0 msec, maximum is 0 msec                   <br />
 &nbsp;&nbsp;Neighbor Count is 1, Adjacent neighbor count is 1                   <br />
-&nbsp;&nbsp;  Adjacent with neighbor 6.6.6.6  (Hello suppressed)                <br />
+&nbsp;&nbsp;  Adjacent with neighbor 8.8.8.8  (Hello suppressed)                <br />
 &nbsp;&nbsp;Suppress hello for 1 neighbor(s)                                    <br />
 &nbsp;&nbsp;Message digest authentication enabled                               <br />
 &nbsp;&nbsp;&nbsp;  Youngest key id is 1                                              <br />
-GigabitEthernet0/0 is up, line protocol is up                                   <br />
-&nbsp;&nbsp;Internet Address 10.7.7.3/29, Area 7, Attached via Interface Enable           <br />
-&nbsp;&nbsp;Process ID 8, Router ID 8.8.8.8, Network Type BROADCAST, Cost: 1              <br />
-&nbsp;&nbsp;Topology-MTID  &nbsp;&nbsp;&nbsp;  Cost &nbsp;&nbsp;&nbsp;   Disabled  &nbsp;&nbsp;&nbsp;   Shutdown  &nbsp;&nbsp;&nbsp;    Topology Name            <br />                 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;no     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;     no      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;      Base                  <br />                 
-&nbsp;&nbsp;Enabled by interface config, including secondary ip addresses                 <br />
-&nbsp;&nbsp;Transmit Delay is 1 sec, State BDR, Priority 1                                <br />
-&nbsp;&nbsp;Designated Router (ID) 6.6.6.6, Interface address 10.7.7.1                    <br />
-&nbsp;&nbsp;Backup Designated router (ID) 8.8.8.8, Interface address 10.7.7.3             <br />
-&nbsp;&nbsp;Timer intervals configured, Hello 10, Dead 40, Wait 40, Retransmit 5          <br />
-&nbsp;&nbsp;&nbsp;  oob-resync timeout 40                                                       <br />
-&nbsp;&nbsp;&nbsp;  Hello due in 00:00:01                                                       <br />
-&nbsp;&nbsp;Supports Link-local Signaling (LLS)                                           <br />
-&nbsp;&nbsp;Cisco NSF helper support enabled                                              <br />
-&nbsp;&nbsp;IETF NSF helper support enabled                                               <br />
-&nbsp;&nbsp;Index 1/1, flood queue length 0                                               <br />
-&nbsp;&nbsp;Next 0x0(0)/0x0(0)                                                            <br />
-&nbsp;&nbsp;Last flood scan length is 1, maximum is 1                                     <br />
-&nbsp;&nbsp;Last flood scan time is 0 msec, maximum is 4 msec                             <br />
-&nbsp;&nbsp;Neighbor Count is 1, Adjacent neighbor count is 1                             <br />
-&nbsp;&nbsp;  Adjacent with neighbor 6.6.6.6  (Designated Router)                         <br />
-&nbsp;&nbsp;Suppress hello for 0 neighbor(s)                                              <br />
-R8#<b>show ip ospf neighbor</b> 
 
 </code>
 </div>
 
 </p>
-<p>
 
-The commands <code><b>show ip ospf virtual-link</b></code> and <code><b>show ip 
-ospf interface</b></code> 
-as indicated in the above command output verifies the operational state of the virtual-link.
-</p>
 <p>
-Hello packets are suppressed for virtual-links.
-</p>
-<h3>Virtual-link Preconditions</h3>
+The following are the characteristics of a 
+virtual link interface:
 <ul>
-  <li>End-points must be reachable via a normal area (not a stub area). 
-  OSPF stubby areas cannot be a transit area for a virtual-link.</li> 
-  <li>Transit area  must not have filtering applied i.e. LSA type 3 filters, distribute-lists. 
+  <li>The IP address of the virtual link is referenced from the IP address of 
+  the exit interface of the local router through which the router at the remote 
+  end of the virtual link is reached.</li>
+  <li>The OSPF network type of the virtual link is virtual link but the operational
+  state is point-to-point.</li>
+  <li>Hello packets are suppressed for virtual-links.</li>
+  
 </ul>
-
+</p>
 
 	  
 <h3 id="ROUTER_TYPES">OSPF Router Types </h3>
@@ -4606,9 +4651,17 @@ failure detection using BFD in OSPF.
   </ul>
   </li>
   <li><b>Step 2 - OSPF BFD Configuration:</b> In the OSPF process, register BFD 
-  as the failure detection mechanism using the command <code><b>bfd all-interfaces</b></code>.
+  as the failure detection mechanism using the command <code><b>bfd all-interfaces</b></code>
+  to configure BFD on all OSPF enabled interfaces. To configure BFD on individual 
+  interfaces, use the interface configuration command <code><b>ip ospf bfd</b></code>.
 </ul>
 </p>
+<h4>Verification</h4>
+<p>
+BFD operation and statistics can be verified using the commands: <code><b>show bfd summary</b></code>
+</p>
+
+
 <h2 id="CTRL_LSA_GENERATION">Controlling OSPF LSA Generation and Propagation</h2>
 <p>
 LSA generation and propagation in OSPF are controlled by the following features:
@@ -5715,8 +5768,22 @@ OSPF supports three types of authentication:
  The authentication key is always configured on the 
  interface regardless of whether type 1 authentication was enabled for the area.
  This is done using the interface mode command <code><b>ip ospf authentication-key 
- <i>key</i></b></code>.
+ <i>key</i></b></code>. The following output is a Wireshark packet capture of 
+ the header of an OSPF packet displaying type 1 authentication: 
  </p>
+ 
+ <div style="background-color: #f4f0ec; border-color:#DCDCDC; border-style: solid; border-width:1px">
+<code>
+ OSPF Header                                               <br />
+ &nbsp;&nbsp;&nbsp;&nbsp;Version: 2                        <br />
+ &nbsp;&nbsp;&nbsp;&nbsp;Message Type: Hello Packet (1)    <br />
+ &nbsp;&nbsp;&nbsp;&nbsp;Packet Length: 48                 <br />
+ &nbsp;&nbsp;&nbsp;&nbsp;Source OSPF Router: 2.2.2.2       <br />
+ &nbsp;&nbsp;&nbsp;&nbsp;Area ID: 0.0.0.0 (Backbone)       <br />
+ &nbsp;&nbsp;&nbsp;&nbsp;Checksum: 0xcd96 [correct]        <br />
+ &nbsp;&nbsp;&nbsp;&nbsp;<span style="background-color:gray;">Auth Type: Simple password (1)</span>    <br />
+ &nbsp;&nbsp;&nbsp;&nbsp;<span style="background-color:gray;">Auth Data (Simple): cisco</span>
+</code></div>
  
  <h3>Type 2 Authentication</h3>
  <p>
@@ -5737,22 +5804,61 @@ OSPF supports three types of authentication:
  <p>
  <p>
 OSPF supports the following SHA algorithms: HMAC-SHA-1, HMAC-SHA-256, HMAC-SHA-384, 
-HMAC-SHA-512. OSPF supports the use of key chains.
+HMAC-SHA-512. OSPF supports the use of key chains. When configuring the key chain,
+the following features are configured for the keychain: the cryptographic 
+algorithm, key ID, key string.
 </p>
+<div style="background-color: #f4f0ec; border-color:#DCDCDC; border-style: solid; border-width:1px">
 <code>
-#ip ospf authentication key-chain OSPF_KEY_CHAIN
-</code>
+R1(config)#<b>key chain OSPF_KEY</b>                                <br>
+R1(config-keychain)#<b>key 1</b>                                    <br>
+R1(config-keychain-key)#<b>key-string cisco</b>                     <br>
+R1(config-keychain-key)#<b>cryptographic-algorithm HMAC-SHA-384</b> <br>
+</code></div>
 <p>
-To define a key chain:
-</p>
+To configure the authentication key on the interface:
+ </p>
+
+ <div style="background-color: #f4f0ec; border-color:#DCDCDC; border-style: solid; border-width:1px">
 <code>
-key chain OSPF_KEY_CHAIN <br>
-  key 1<br>
-  key-string PASSWORD<br>
-  cryptographic-algorithm HMAC-SHA-384<br>
-</code>
+R1(config)#<b>interface g1/0</b><br>
+R1(config)#<b>ip ospf authentication key-chain OSPF_KEY</b>
+</code></div>
+ 
+ <p>
+ The following is the header of an OSPF packet after the configuration of type 2 
+ authentication using MD5.
  </p>
  
+  <div style="background-color: #f4f0ec; border-color:#DCDCDC; border-style: solid; border-width:1px">
+<code>
+ OSPF Header                                             <br />    
+ &nbsp;&nbsp;&nbsp;Version: 2                                           <br />
+ &nbsp;&nbsp;&nbsp;Message Type: DB Description (2)                     <br />
+ &nbsp;&nbsp;&nbsp;Packet Length: 32                                    <br />
+ &nbsp;&nbsp;&nbsp;Source OSPF Router: 1.1.1.1                          <br />
+ &nbsp;&nbsp;&nbsp;Area ID: 0.0.0.0 (Backbone)                          <br />
+ &nbsp;&nbsp;&nbsp;Checksum: 0x0000 (None)                              <br />
+ &nbsp;&nbsp;&nbsp;Auth Type: Cryptographic (2)                         <br />
+ &nbsp;&nbsp;&nbsp;Auth Crypt Key id: 1                                 <br />
+ &nbsp;&nbsp;&nbsp;Auth Crypt Data Length: 16                           <br />
+ &nbsp;&nbsp;&nbsp;Auth Crypt Sequence Number: 1667856667               <br />
+ &nbsp;&nbsp;&nbsp;Auth Crypt Data: a6df33177d1e6cdfc85153e69f1c3087    <br />
+</code></div>
+ 
+<p>
+Type 2 authentication adds an additional TLV, the crypto authentication TLV:
+</p>
+
+<div style="background-color: #f4f0ec; border-color:#DCDCDC; border-style: solid; border-width:1px">
+<code>
+Crypto Authentication TLV                                             <br>
+&nbsp;&nbsp;&nbsp;&nbsp;TLV Type: 2                                   <br>
+&nbsp;&nbsp;&nbsp;&nbsp;TLV Length: 20                                <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Sequence number: 0x636982a9                   <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Auth Data: 56650cbfc5a38d43dc18702f553ae0fb   <br>
+</code></div>
+
 <h2>Virtual-link Authentication</h2>
 <p>
 A virtual-link is an area 0 interface. It inherits area 0 authentication configurations.
@@ -5770,11 +5876,112 @@ configuring authentication.
 <p>
 <ul>
   <li><b>Type 2 authentication:</b> use the following commands:
-<code><b>area 0 virtual-link 4.4.4.4 authentication message-digest</b></code><br>
-<code><b>area 0 virtual-link 4.4.4.4 authentication message-digest message-digest 
--key 1 md5 cisco</b></code>
+<div style="background-color: #f4f0ec; border-color:#DCDCDC; border-style: solid; border-width:1px">
+<code>
+R8(config)#<b>router ospf 8</b><br>
+R8(config-router)#<b>area 7 virtual-link 1.1.1.1 authentication message-digest</b><br/>
+R8(config-router)#<b>area 7 virtual-link 1.1.1.1 message-digest-key 1 md5 cisco</b><br />
+</code></div>
+
 </ul>
 </p>
+<h2>Verification</h2>
+<p>
+Authentication can be verified using the following commands:
+</p>
+<h3><code>show ip ospf</code></h3>
+<p>
+Command verifies if authentication has been configured for the area.
+</p>
+
+<div style="background-color: #f4f0ec; border-color:#DCDCDC; border-style: solid; border-width:1px">
+<code>
+R1#<b>show ip ospf</b>                                                                                     <br />
+&nbsp;Routing Process "ospf 1" with ID 1.1.1.1                                                      <br />
+&nbsp;Start time: 00:00:29.024, Time elapsed: 03:38:17.128                                          <br />
+&nbsp;Supports only single TOS(TOS0) routes                                                         <br />
+&nbsp;..                                                                                            <br />
+&nbsp;Cisco NSF helper support enabled                                                              <br />
+&nbsp;Reference bandwidth unit is 100 mbps                                                          <br />
+&nbsp;&nbsp;&nbsp;&nbsp;Area BACKBONE(0.0.0.0)                                                      <br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Number of interfaces in this area is 4              <br />                   
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="background-color:gray;">Area has message digest authentication</span>              <br />                   
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SPF algorithm last executed 00:26:30.208 ago        <br />                   
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SPF algorithm executed 17 times                     <br />                   
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Area ranges are                                     <br />                   
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   10.1.32.0/22 Passive Advertise                   <br />                   
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Number of LSA 17. Checksum Sum 0x097919             <br />                   
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Number of opaque link LSA 0. Checksum Sum 0x000000  <br />                   
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Number of DCbitless LSA 0                           <br />                   
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Number of indication LSA 0                          <br />                   
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Number of DoNotAge LSA 0                            <br />                   
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Flood list length 0                                 <br />                   
+&nbsp;&nbsp;&nbsp;&nbsp;Area 0.0.0.7                                                                <br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Number of interfaces in this area is 1              <br />                   
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Area has no authentication                          <br />                   
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SPF algorithm last executed 00:13:57.260 ago        <br />                   
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SPF algorithm executed 19 times                     <br />                   
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Area ranges are                                     <br />                   
+</code></div>
+<p>
+From the above output, type 2 authentication has been configured for the backbone 
+area. Area authentication has not been configured for area 0.0.0.7.
+</p>
+<h3><code>show ip ospf interface</code></h3>
+<p>
+This command verifies the authentication type configured at the interface:
+</p>
+<div style="background-color: #f4f0ec; border-color:#DCDCDC; border-style: solid; border-width:1px">
+<code>
+R1#<b>show ip ospf interface </b>                                                   <br>
+OSPF_VL0 is up, line protocol is up                                          <br>
+&nbsp;&nbsp;Internet Address 10.255.254.1/30, Area 0.0.0.0, Attached via Not Attached  <br>
+&nbsp;&nbsp;Process ID 1, Router ID 1.1.1.1, Network Type VIRTUAL_LINK, Cost: 2        <br>
+&nbsp;&nbsp;Topology-MTID&nbsp;&nbsp;&nbsp;&nbsp;Cost&nbsp;&nbsp;&nbsp;&nbsp;Disabled&nbsp;&nbsp;&nbsp;&nbsp;Shutdown&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Topology Name           <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;no&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;no&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Base                 <br>
+&nbsp;&nbsp;Configured as demand circuit                                               <br>
+&nbsp;&nbsp;Run as demand circuit                                                      <br>
+&nbsp;&nbsp;DoNotAge LSA allowed                                                       <br>
+&nbsp;&nbsp;Transmit Delay is 1 sec, State POINT_TO_POINT                              <br>
+&nbsp;&nbsp;Timer intervals configured, Hello 10, Dead 40, Wait 40, Retransmit 5       <br>
+&nbsp;&nbsp;&nbsp;&nbsp;oob-resync timeout 40                                                    <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Hello due in 00:00:02                                                    <br>
+&nbsp;&nbsp;Supports Link-local Signaling (LLS)                                        <br>
+&nbsp;&nbsp;Cisco NSF helper support enabled                                           <br>
+&nbsp;&nbsp;IETF NSF helper support enabled                                            <br>
+&nbsp;&nbsp;Index 4/6, flood queue length 0                                            <br>
+&nbsp;&nbsp;Next 0x0(0)/0x0(0)                                                         <br>
+&nbsp;&nbsp;Last flood scan length is 1, maximum is 12                                 <br>
+&nbsp;&nbsp;Last flood scan time is 0 msec, maximum is 4 msec                          <br>
+&nbsp;&nbsp;Neighbor Count is 0, Adjacent neighbor count is 0                          <br>
+&nbsp;&nbsp;Suppress hello for 0 neighbor(s)                                           <br>
+&nbsp;&nbsp;<span style="background-color:gray;">Message digest authentication enabled</span>                                      <br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span style="background-color:gray;">Youngest key id is 1</span>                                                     <br>
+&nbsp;&nbsp;  .....                                                                    <br>
+</code></div>
+
+<h3><code>show ip ospf virtual-links</code></h3>
+<p>
+This command specifically verifies the operational state of the virtual links including 
+any authentication that may have been configured.
+</p>
+
+<div style="background-color: #f4f0ec; border-color:#DCDCDC; border-style: solid; border-width:1px">
+<code>
+R1#<b>show ip ospf virtual-links</b> <br>
+Virtual Link OSPF_VL0 to router 8.8.8.8 is up<br>
+&nbsp;&nbsp;Run as demand circuit<br>
+&nbsp;&nbsp;DoNotAge LSA allowed.<br>
+&nbsp;&nbsp;Transit area 0.0.0.7, via interface GigabitEthernet1/0<br>
+&nbsp;Topology-MTID&nbsp;&nbsp;&nbsp;&nbsp;Cost&nbsp;&nbsp;&nbsp;&nbsp;Disabled&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Shutdown&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Topology Name<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;no&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;no&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Base<br>
+&nbsp;&nbsp;Transmit Delay is 1 sec, State POINT_TO_POINT,<br>
+&nbsp;&nbsp;Timer intervals configured, Hello 10, Dead 40, Wait 40, Retransmit 5<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Hello due in 00:00:03<br>
+&nbsp;&nbsp;<span style="background-color:gray;">Message digest authentication enabled</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span style="background-color:gray;">Youngest key id is 1</span><br>
+R1#
+</code></div>
 
 <h2>Recommendations</h2>
 <p>
@@ -5812,7 +6019,7 @@ The following commands can the used to verify OSPF authentication configuration:
 With SHA/MD5 authentication, the packet is not encrypted. A digest of the key ID and password is embedded 
 in the packet header.
 </p>
-
+<!-- 
 <h1 id="TSHOOT">Troubleshooting</h1>
 Common reasons for sub-optimal traffic flow;
 <ul>
@@ -5820,3 +6027,4 @@ Common reasons for sub-optimal traffic flow;
  <li>Summarization is not consistently applied on ABRs for inter-area summarization.</li>
  <li>Problems with route redistribution that do not address issues with route feedback.</li>
 </ul>
+-->
