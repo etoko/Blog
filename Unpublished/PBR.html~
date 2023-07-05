@@ -1,31 +1,30 @@
 <h1>Path Control using Policy Based Routing (PBR)</h1>
 <p>
 By default, routers make forwarding decisions based on the destination IP address 
-of the packet. This is also known as destination-based routing where the 
-routing table is checked to determine if the destination IP address is listed and
-the exit interface through which packets are forwarded towards the destination network. 
-In majority of network designs, destination-based routing may meet designed network
+of the packet. This is known as destination-based routing where the 
+routing table is checked to determine next-hop IP address and the exit interface 
+through which packets are forwarded towards the destination. 
+In majority of network designs, destination-based routing meets designed network
 traffic flow. However, in some cases, some network traffic may require special 
 treatment for instance traffic to remote corporate resources may be preferred to be routed 
 through a specific ISP over another.
 </p
 <p>
-Policy-Based Routing(PBR) gives the capability to override the default 
-destination-based routing behaviour. 
-PBR uses a route-map to identify which unicast packets are to be policy-routed and 
-the direction to route the traffic. A unicast packet arriving on a PBR-configured interface 
-will be subject to PBR except when its destination IP address is the same as the IP 
-address of the router's interface. Because PBR uses a route map, it provides 
-solutions in cases where legal, contractual, or political constraints dictate 
-that traffic is routed through specific paths. It is important to note that PBR 
-is only applicable to unicast packets; it has no effect on multicast packets.
+Policy-Based Routing(PBR) provides the capability to override the default 
+destination-based routing behaviour of routing devices. 
+PBR is implemented using a route-map to identify which unicast packets are to be 
+policy-routed and how to route the traffic. A unicast packet arriving on a 
+PBR-configured interface will be subject to PBR except when its destination IP 
+address is the same as the IP address of the router's interface. Because PBR uses 
+a route map, it provides solutions in cases where legal, contractual, or political 
+constraints dictate that traffic is routed through specific paths.<br>
+<b>Note:</b> PBR is only applicable to unicast packets; it is not applicable to 
+multicast packets.
 </p>
 
 <p>
-With PBR, packets are examined for PBR processing as they are received on the 
-router interface i.e. the ingress interface. PBR makes forwarding decisions 
-independent of the routing table. These forwarding decisions may be based 
-upon any one or combination of the following:
+PBR makes forwarding decisions independent of the routing table. These forwarding 
+decisions may be based upon any one or combination of the following:
 <ul>
  <li>IP address i.e. destination IP address, source IP address or combination of 
  the two.</li>
@@ -46,30 +45,6 @@ Some of the drawbacks of conditional routing include the following:
 <li>Lack of network intelligence</li>
 <li>Troubleshooting complexity</li>
 </ul>
-</p>
-
-<p>
-PBR is implemented using route-maps. In addition to modification of the routing 
-path of packets, PBR supports the following modifications of IP packets;
-<ul>
-  <li><b>IP Precedence:</b> Modification of precedence attribute of IP packets 
-  using the route-map command <code><b>set ip precedence</b></code>. The IP 
-  header precedence setting determines how packets are treated by routers during 
-  times of high traffic. When packets containing these headers arrive at another 
-  router, the packets are ordered for transmission according to the precedence 
-  set if queuing feature is enabled. Precedence bits are not honoured if queueing 
-  is not enabled; in which case packet queueing will be based on FIFO. 
-  The precedence value can be changed by using a name or number. Possible values 
-  include: 0 (routine), 1 (priority), 2(immediate), 3(flash), 4 (flash-override), 
-  5(critical), 6(internet), 7(network).</li>
-  <li><b>DF bit:</b> The IP header DF bit can be modified using the command 
-  <code><b>set ip df <i>df</i></b></code>.</li>
-  <li><b>VRF:</b> The VRF of a packet can be configured using the command 
-  <code><b>set vrf <i>vrf</i></b></code>.</li>
- </ul>
-</p>
-<p>
-When PBR is configured, the PBR configured next hop takes precedence over the FIB table. 
 </p>
 
 <h2>PBR Fast Switching</h2>
@@ -228,10 +203,9 @@ R1(config-route-map)#<b>set ip next-hop 10.0.13.2</b>
   <li><code><b>set default next-hop <i>ip_address</i></b></code>: IP routing 
   table is first consulted for the next hop before the configured next hop is 
   considered. If the specific destination network does not exist in the routing 
-  table, then the PBR defined next hop is considered. It is important to note 
-  that the PBR-defined next-hop is takes priority over the routing table default 
-  route. Therefore matching of routes in the RIB holds true except the default route. 
-   The default route may actually be completely ignored.
+  table, then the PBR defined next hop is considered. The matching of routes in 
+  the RIB holds true except the default route. The routing table default route 
+  is not considered.
   This can be considered as some sort of default route for matched traffic. The 
   next hop has to be directly connected to the local router. The recursive 
   keyword enables configuration of a next-hop that is not directly connected.
@@ -239,21 +213,52 @@ R1(config-route-map)#<b>set ip next-hop 10.0.13.2</b>
   <li><code><b>set interface <i>exit-interface</i></b></code>: The egress interface 
   for the matched packets is defined. PBR does not verify if the configured 
   egress interface is up or down. When configuring the exit interface, a warning 
-  message is issued recommending that a P2P interface be configured in the set 
-  interface clause; this ensures that only one other router is connected to the 
-  exit interface such as serial interface. It is recommended that the egress 
-  interface be a serial interface. If an interface in a broadcast environment 
-  such as FastEthernet or GigabitEthernet is used, an ARP request is sent for 
-  each and every packet. If the configured egress interface is down, the router 
-  will route traffic using the RIB.</li>
+  message is issued recommending that a P2P interface be configured such as a
+  serial interface. It is recommended that the egress interface be a serial 
+  interface. If an interface in a broadcast environment such as FastEthernet or 
+  GigabitEthernet is used, an ARP request is sent for each and every packet. If 
+  the configured egress interface is down, the router will route traffic using the RIB.</li>
   <li><code><b>set default interface <i>exit-interface</i></b></code>: The RIB 
   is consulted first to determine the egress-interface. If RIB does not have the 
   destination network, then the configured egress interface is used. 
   </li>
   <li><code><b>set next hop verify-availability <i>ip-address</i> track 
-  <i>track-number</i></b></code>. Set the next hop if the track 
-is available.</li>
+  <i>track-number</i></b></code>. Set the next hop if the IP SLA track is up.
+  </li>
 </ul>
+</p>
+<p>
+In addition to modification of the routing path of packets, PBR supports the 
+following modifications to the header of IP packets;
+<ul>
+  <li><b>IP Precedence:</b> Modification of precedence attribute of IP packets 
+  using the route-map command <code><b>set ip precedence</b></code>. The IP 
+  header precedence setting determines how packets are treated by routers during 
+  times of high traffic. When packets containing these headers arrive at another 
+  router, the packets are ordered for transmission according to the precedence 
+  set if queuing feature is enabled. Precedence bits are not honoured if queueing 
+  is not enabled; in which case packet queueing will be based on FIFO. 
+  The precedence value can be changed by using a name or number. Possible values 
+  include: 
+  <ul>
+    <li>0 (routine)         </li>
+    <li>1 (priority)        </li>
+    <li>2(immediate)        </li>
+    <li>3(flash)            </li>
+    <li>4 (flash-override)  </li>
+    <li>5(critical)         </li>
+    <li>6(internet)         </li>
+    <li>7(network)          </li>
+  </ul>
+  </li>
+  <li><b>DF bit:</b> The IP header DF bit can be modified using the command 
+  <code><b>set ip df <i>df</i></b></code>.</li>
+  <li><b>VRF:</b> The VRF of a packet can be configured using the command 
+  <code><b>set vrf <i>vrf</i></b></code>.</li>
+ </ul>
+</p>
+<p>
+When PBR is configured, the PBR configured next hop takes precedence over the FIB table. 
 </p>
 
 </li>
@@ -301,18 +306,19 @@ in combination with PBR.
 <h2>IP SLA</h2>
 <p>
 Create the probe using the command 
-<code>
-<b>#ip sla 1
-#icmp-echo ipaddress source-ip ipaddress
-#frequency 10
-#show ip sla summary
-#ip sla schedule 1 life forever start-time now
-#show ip sla summary
-#show ip sla configuration
-#show ip sla statistics
-</b>
-</code>
 </p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+<code>
+<b>#ip sla 1                                         <br>
+#icmp-echo ipaddress source-ip ipaddress             <br>
+#frequency 10                                        <br>
+#show ip sla summary                                 <br>
+#ip sla schedule 1 life forever start-time now       <br>
+#show ip sla summary                                 <br>
+#show ip sla configuration                           <br>
+#show ip sla statistics                              <br>
+</b>
+</code></div>
 <p>
 IP SLA probes need to be enabled as they are disabled by default.
 </p>

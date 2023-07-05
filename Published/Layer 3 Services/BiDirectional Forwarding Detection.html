@@ -1,7 +1,8 @@
-<h1>BiDirectional Forwarding Detection</h1>
+<h1>Introduction and Overview</h1>
 <p>
 Bidirectional Forwarding Detection (BFD) is a  light-weight standards-based 
-protocol(defined by RFC 5880) that detects failure in the forwarding path on a 
+protocol, defined by <a href="https://www.ietf.org/rfc/rfc5880.txt" target="_blank">
+RFC 5880</a>, that detects failure in the forwarding path on a 
 layer 3 network between two adjacent routers. These failures may be on the 
 connecting interfaces, data links, tunnels, and forwarding planes of devices not 
 directly connected to the routers in a layer 2 network. 
@@ -30,21 +31,21 @@ client protocols. It is pointless to run BFD without client protocols.
 <p>
 Networks carrying realtime traffic such as video and voice need speedy network 
 convergence. Link failure detection time usually delays convergence of networks. 
-Traditional link failure detecton relies on:
+Traditional link failure detection relies on:
 <UL>
   <li>Hello message timeouts of routing protocols.</li>
   <li>Transmission technology capability to detect failure.</li>
 </UL>
 </p>
 <p>
-BFD runs independent of routing protocol hellos and notifies the client protocols of 
+BFD runs independent of routing protocol hello messages and notifies the client protocols of 
 link failure by sending rapid failure detection notices to routing protocols and
 reducing convergence time through routing table recalculation.
 BFD can be used in place of routing protocol timers and can act as
 a single method of liveliness detection between nodes irrespective of media type.
 </p>
 <p>
-On distributed platforms, BFD packets can be processed on interface modules of the line card hence
+<a id="MORE">On distributed platforms</a>, BFD packets can be processed on interface modules of the line card hence
 it is not CPU intensive.
 In most cases, routing protocol hello packets are processed by the control plane (CPU).
 </p>
@@ -71,11 +72,11 @@ BFD can be implemented in multiple ways:
 <h2>Benefits of BFD</h2>
 <p>
 The closest alternative to using BFD for failure detection is the hello packet 
- of routing protocols EIGRP, OSPF, IS-IS and BGP keepalives. 
+ of routing protocols EIGRP, OSPF, IS-IS and BGP keepalive messages. 
 If configured to their minimum supported values, these routing protocol timers 
 usually detect failures of peers or their links within one second of the failure. 
 With OSPF though, configuration of sub-second values is possible using the interface command 
-<code><b>ip ospf dead-interval minimal hello-multiplier <i>multiplier</i></b></code> 
+<code><b>ip ospf dead-interval minimal hello-multiplier &lt;multiplier&gt;</b></code> 
 where multiplier is the number of hello packets sent per second;
 </p>
 <p>
@@ -106,7 +107,7 @@ BFD does have some advantages over the aforementioned failure detection techniqu
 <ul>
   <li>When BFD is enabled on an interface, an access control list (ACL) with the "log" opton is not supported on that 
     interface.</li>
-  <li>BFD is not supported on IPSec.</li>
+  <li>BFD is not supported in IPSec.</li>
  </ul> 
 </p>
 
@@ -115,6 +116,8 @@ BFD does have some advantages over the aforementioned failure detection techniqu
 BFD operates in one of two modes: asynchronous or demand mode. BFD also offers an echo function which works with both modes.
 Most vendors support asynchronous mode operating with or without echo function enabled. 
 </p>
+
+
 <h3>Asynchronous Mode</h3>
 <p>
 BFD control packets are exchanged by neighboring systems at pre-agreed time intervals 
@@ -122,6 +125,8 @@ which is usually in milliseconds. If a specified number of sequential packets
 are not received from the BFD peer, BFD declares the session to be down and notifies 
 any registered protocol of this failure. Asynchronous mode is supported by Cisco IOS.
 </p>
+
+
 <h3>Demand Mode</h3>
 <p>
 Once the BFD session is established, the participating systems can request that the BFD packets not be sent, then request 
@@ -147,6 +152,8 @@ A BFD session is a three-way handshake and tear-down process:
   If an alternative path exists the routing protocol immediately converges.</li>
 </ol>
 </p>
+
+
 <h2>BFD Packets</h2>
 <p>
 BFD utilises control packets to exchange control information as well as detect the 
@@ -155,10 +162,10 @@ liveliness of the BFD peer.
 <h3>BFD Control Packet Format</h3>
 <p>
 <table cellspacing="0" width="100%">
-  <thead style="font-weight: bold; background:#a2a2a2;">
+  <thead style="font-weight: bold; background:#d3d3d3;">
     <tr>
-      <td width="25%" style="border: 1px solid;"> Field</td>
-      <td style="border: 1px solid;">Description</td>
+      <td width="25%" style="border-bottom: 1px solid; border-top: 1px solid;"> Field</td>
+      <td style="border-bottom: 1px solid; border-top: 1px solid;">Description</td>
     </tr>
   </thead>
 <tbody>
@@ -168,7 +175,7 @@ liveliness of the BFD peer.
   reason i.e. Up/Down/Init.</td>
   </tr>
   <tr>
-  <td style="border-bottom: 1px solid; font-weight: bold;">Dicriminators: </td>
+  <td style="border-bottom: 1px solid; font-weight: bold;">Discriminators: </td>
   <td style="border-bottom: 1px solid;">demultiplexers</td>
   </tr>
   <tr>
@@ -197,11 +204,14 @@ liveliness of the BFD peer.
 </tbody>
 </table>
 </p>
+
 <p>
 The following output shows a Wireshark packet capture of a BFD control packet. From this packet capture, it can be 
 determined that the transmit interval is configured to 1000ms, the receive interval to 1000ms, 
 minimum echo interval to 50ms and the multiplier to 3 (x3 the value of the transmit interval).
 </p>
+
+<p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
 <code>
 BFD Control message                                             <br>
@@ -225,6 +235,8 @@ BFD Control message                                             <br>
 
 </code>
 </div>
+</p>
+
 
 <h3>Timer Negotiation and Detection Times</h3>
 <p>
@@ -299,9 +311,11 @@ taken by data packets. This is a capability that the control packets are not abl
 to carry out. In some IOS distributions, the Echo function is enabled by default. 
 
 </p>
+
+
 <h3>Echo Packets</h3>
 <p>
-The Echo function uses echo packets using interesting values for the IP source 
+The Echo function echo packets have interesting values for the IP source 
 and destination addresses. The destination IP address is set to 
 the IP address of the sender. In other words, the destination IP address is the 
 same as the source IP address of the sender. For Layer 2 addressing, the destination
@@ -313,6 +327,8 @@ destination IP address is different from any of its IP addresses, it
 consults the RIB/FIB to determine how to forward the packet and sends it to the 
 sender. In this way it uses the data forwarding path of network traffic.
 </p>
+
+
 <h3>Echo Function in BFD Asynchronous Mode</h3>
 <p>
 Peers need to exchange BFD information such as intervals, State, Diag etc. Echo 
@@ -327,6 +343,8 @@ to exchange BFD information as usual. However, the control packets are sent less
 frequently; more frequently sent are echo packets which take the primary role of
 detecting link failure.
 </p>
+
+
 <h3>Echo Function Activation</h3>
 <p>
 BFD peers use the control packet to signal activation of the echo function. 
@@ -373,7 +391,9 @@ control packets are not used for failure detection hence may not be desirable to
 be exchanged frequently. This, in turn, further lightens the CPU load.
 </p>
 <p>To configure BFD slow timer use the global configuration mode command 
-<code><b>bfd slow-timer <i>milliseconds</i></b></code>:</p>
+<code><b>bfd slow-timer &lt;milliseconds&gt;</b></code>:</p>
+
+<p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
 <code>
 R6#<b>configure terminal</b><br>
@@ -381,13 +401,15 @@ Enter configuration commands, one per line.  End with CNTL/Z<br>
 R6(config)#<b>bfd slow-timers 12000</b><br>
 R6(config)#
 </code></div>
+</p>
+
 
 <h1>BFD Configuration</h1>
 <p>
 Configuration of BFD is a two step process:
   <p><b>Step 1:</b> Enable BFD on interface through which the peer is reachable
   using the interface configuration command: 
-  <code><b>bfd interval <i>tx-interval</i> min_rx <i> min_rex</i> multiplier <i>multiplier</i></b></code>. 
+  <code><b>bfd interval &lt;tx-interval&gt; min_rx &lt; min_rex&gt; multiplier &lt;multiplier&gt;</b></code>. 
   The rate of exchanging hello control packets (similar to hello-timer) can be set in the range 50 - 9999 milliseconds.
 min_rx: minimum interval supported for receiving BFD control packets from a neighbor. 
 multiplier: used to compute the hold-down time. If multiplier is 3 and hello interval 50 then holddown timer is 150 ms.
@@ -402,10 +424,14 @@ multiplier: used to compute the hold-down time. If multiplier is 3 and hello int
   include static routing, EIGRP, OSPF, BGP, FHRP(HSRP, VRRP, GLBP), MPLS LSP, etc registers with BFD and 
   is notified as soon as BFD detects a neighbor loss.
 </p>
+
+
 <h3>BFD for BGP</h3>
 <p>
 BFD must be running on all participating BGP devices.
 </p>
+
+<p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
 <code>
 R6(config)#<b>router bgp 65531</b><br>
@@ -413,18 +439,25 @@ R6(config-router)#<b>neighbor 1.1.1.1 remote-as 65532</b><br>
 R6(config-router)#<b>neighbor 1.1.1.1 fall-over bfd ?</b><br>
 &nbsp;&nbsp;multi-hop&nbsp;&nbsp;&nbsp;Force BFD multi-hop to detect failure <br>
 &nbsp;&nbsp;single-hop&nbsp;&nbsp;Force BFD single-hop to detect failure <br>
-  <cr>
+  &lt;cr&gt;
   
 </code> </div>
+</p>
+
+
 <p>
 BFD in BGP supports two session types: multi-hop and single-hop. This is because BGP supports BGP peers that can be 
 directly connected or several hops away. This BFD session type will depend on the BGP session type of the neighbor 
 being configured; if the neighbor is several hops away, configure the BFD multi-hop type. 
 </p>
+
+
 <h3>BFD in EIGRP</h3>
 <p>
 In EIGRP named mode, BFD is configured under the af-interface mode:
 </p>
+
+<p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
 <code>
 R6(config)#<b>router eigrp EIGRP_NAMED</b><br>
@@ -433,12 +466,16 @@ R6(config-router-af)#<b>af-interface gigabitethernet0/0</b><br>
 R6(config-router-af-interface)#<b>bfd</b><br>
 R6(config-router-af-interface)#
 </code></div>
+</p>
+
 
 <p>
 If BFD is configured under <code><b>af-interface default</b></code>, all interfaces with EIGRP peers will be registered to 
 receive BFD notifications. However, remember that BFD has to first be configured on the interface otherwise the 
 following error messaage will be generated:
 </p>
+
+<p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
 <code>
 R6(config)#<b>router eigrp EIGRP_NAMED</b><br>
@@ -448,30 +485,41 @@ R6(config-router-af-interface)#<b>bfd</b><br>
 %EIGRP: BFD interval is not configured on interface GigabitEthernet0/0 required for BFD operation.<br>
 R6(config-router-af-interface)#
 </code></div>
+</p>
+
 <p>
 In EIGRP classic mode, EIGRP can be configured to receive BFD notifications on link failure 
 on a single interface as below:
 </p>
+
+<p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
 <code>
 R6(config)#<b>router eigrp 2</b><br>
 R6(config-router)#<b>bfd interface gigabitethernet 0/0</b>
 </code></div>
+</p>
+
 
 <p>
 In EIGRP classic mode, EIGRP can be configured to receive BFD notifications on all EIGRP-enabled interfaces as below:
 </p>
+
+<p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
 <code>
 R6(config)#<b>router eigrp 2</b><br>
 R6(config-router)#<b>bfd all-interfaces</b>
 </code></div>
+</p>
+
 
 <p>
 <b>NOTE:</b> Configuration of EIGRP to receive notifications from all EIGRP enabled interfaces 
 as demonstrated above does not issue a log message if BFD has not been enabled on the 
 interface using the interface-mode BFD configuration commands.
 </p>
+
 
 <h3>BFD in OSPF</h3>
 <p>
@@ -490,6 +538,8 @@ Under an interface, to disable BFD for a specific interface in interface mode is
 BFD is able to detect failures in the forwarding path of static routes. To configure 
 BFD in static routing:
 </p>
+
+<p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
 <code>
 R6(config)#<b>interface g1/0</b><br>
@@ -497,11 +547,14 @@ R2(config-if)#<b>bfd interval 250 min_rx 150 multiplier 3</b><br>
 R2(config-if)#<b>exit</b><br>
 R6(config)#<b>ip route static bfd gigabitethernet1/0 10.0.26.1</b><br>
 </code></div>
+</p>
+
 
 <h2>Verification</h2>
 <p>
 BFD operation can be verified using the command <code><b>show bfd neighbors (detail) </b></code>
 </p>
+
 
 <h2>BFD Troubleshooting</h2>
 <p>
@@ -514,10 +567,10 @@ Troubleshooting of BFD may be required when BFD is not functioning effectively:
 <p>
 The following commands are important in troubleshooting BFD:
 <table cellspacing="0" width="100%">
-<thead style="font-weight: bold; background: #a3a3a3;">
+<thead style="font-weight: bold; background: #d3d3d3;">
 <tr>
-  <td style="border: 1px solid;">Command</td>
-  <td style="border: 1px solid;">Description</td>
+  <td style="border-bottom: 1px solid; border-top: 1px solid;" width="25%">Command</td>
+  <td style="border-bottom: 1px solid; border-top: 1px solid;">Description</td>
  </tr> 
  </thead>
  <tbody>
