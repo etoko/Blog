@@ -23,7 +23,7 @@
 
 <p>
 By default, all routers have single running VRF instance referred to as the 
-global VRF instamce. All interfaces, the global routing table, the forwarding table 
+global VRF instance. All interfaces, the global routing table, the forwarding table 
 are assigned to this global VRF instance. 
 One or more VRF instances can be configured on a single router that are separate 
 from the global routing VRF instance. The configured VRF instances can then be 
@@ -31,7 +31,7 @@ identified by their configured VRF names. Interfaces or sub-interfaces are then
 assigned to the configured VRFs. IP addresses configured on these VRF instances 
 can overlap if the interfaces are assigned to different VRFs. These IP addreses 
 are not included in the global routing table. If routing protocols are configured 
-for each VRF isntance, then separate SFP (OSPF) or DUAL (EIGRP) calculation 
+for each VRF instance, then separate SFP (OSPF) or DUAL (EIGRP) calculation 
 instances take place for each VRF instance.
 </p>
 <p>
@@ -126,7 +126,7 @@ VRFs can be configured in one of two ways:
    Cisco IOS has additional commands that enable VRFs created using the command 
    <code><b>ip vrf &lt;vrf-name&gt;</b></code> to support IPv6.
     To enable support for IPv6 VRFs, in global configuration mode issue the command  
-    <code><b>vrf upgrade-cli multi-af-mode common-policies &lt;vrf &lt;vrf-name&gt; </b></code>.
+    <code><b>vrf upgrade-cli multi-af-mode common-policies vrf &lt;vrf-name&gt; </b></code>.
     By default all VRFs will be configured to support IPv4 and IPv6. If the optional 
     VRF name is configured, only the specified VRF will support IPv4 and IPv6.
     The keyword <code><b>common-policies</b></code> copies the pre-configured 
@@ -160,13 +160,13 @@ and route distinguisher (RD).
 <h2>Step 2: Apply VRF to the Interface</h2>
 <p>
 Interfaces, physical or logical, can belong to only one VRF at a time.
-Interfaces assigned to the VRF  belong to that VRF's routing table isntance. 
+Interfaces assigned to the VRF  belong to that VRF's routing table instance. 
 Interfaces not in a VRF are in the global or default VRF. 
 Interfaces are assigned to VRFs depending on the way the VRF was created using 
 one of the following interface mode commands:
 <ul>
   <li><code><b>ip vrf forwarding &lt;vrf-name&gt;</b></code>: This command is used 
-  when the interface was created using the global configuration command 
+  when the VRF was created using the global configuration command 
   <code><b>ip vrf &lt;name&gt;</b></code>.
     <p><div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
     <code>
@@ -176,7 +176,7 @@ one of the following interface mode commands:
     </div></p>
   </li> 
   <li><code><b>vrf forwarding &lt;vrf-name&gt;</b></code>: This command is used 
-  when the interface was created using the global configuration command 
+  when the VRF was created using the global configuration command 
   <code><b>vrf definition &lt;vrf-name&gt;</b></code>.
   <p><div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
     <code>
@@ -239,8 +239,8 @@ for classic and named mode is similar.
 </p>
 <p><div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
     <code>
-R2(config)#<b>router eigrp 1</b><br>
-R2(config-router)#<b>address-family ipv4 unicast vrf NUTRITION autonomous-system 1</b>
+R2(config)#<b>router eigrp 1 vrf FINANCE</b><br>
+<!--R2(config-router)#<b>address-family ipv4 unicast vrf NUTRITION autonomous-system 1</b>-->
 </code></div></p>
 
 <h4>OSPF</h4> 
@@ -265,7 +265,7 @@ VRFs in BGP, the route distinguisher needs to be configured to uniquely identify
 
 Configuration of the route target is done using the VRF configuration mode command 
 <code><b>rd &lt;ASN:nn&gt;</b></code> or 
-<code><b>rd &lt;IP-address:nn&gt;</b></code>
+<code><b>rd &lt;ip-address:nn&gt;</b></code>
 The RD is used to keep the routes from various clients unique regardless of whether 
 the IP addresses used are overlapping; how we distinguish one route in one VRF 
 from a route in another VRF particularly when the IP addresses are overlapping 
@@ -283,9 +283,9 @@ otherwise the following error message is displayed when configuring VRF support 
 In the newer versions, you can skip over this step.
 </p>
 <p>
-If two VRF instances A and B have overlapping IP addresses, such as 10.0.0.0/24.
-and VRF X has a configured RD of 1:1 and B 2:2, the addresses will be differentiated 
-such as X's addresses will be 1:1:10.0.0.0/24 and Y 2:2:10.0.0./24. In the case 
+If two VRF instances X and Y have overlapping IP addresses, such as 10.0.0.0/24.
+and VRF X has a configured RD of 1:1 and Y 2:2, the addresses will be differentiated 
+such that X's addresses will be 1:1:10.0.0.0/24 and Y 2:2:10.0.0./24. In the case 
 of MP-BGP, these count as two separate routes. 
 </p>
 
@@ -522,7 +522,7 @@ R2#                                                                             
 </code></div></p>
 
 
-<h2><code>show ip vrf interfaces &lt;vrf-name&gt;</code></h2>
+<h2><code>show ip interfaces vrf &lt;vrf-name&gt;</code></h2>
 <p>
 Display interfaces in specified VRF.
 </p>
@@ -694,7 +694,7 @@ To view routes in the BGP table in a specific VRF
 
 <p><div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
   <code>
-  R2(config-if)#do show bgp vpnv4 unicast vrf RESEARCH                              <BR>
+  R2(config-if)#<b>do show bgp vpnv4 unicast vrf RESEARCH</b><BR>
 BGP table version is 10, local router ID is 2.2.2.2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;             <BR>
 Status codes: s suppressed, d damped, h history, * valid, > best, i - internal,     <BR>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;r RIB-failure, S Stale, m multipath, b backup-path, f RT-Filter,      <BR>
@@ -888,12 +888,3 @@ R2#<b>show ip ospf</b>                                          <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Number of DoNotAge LSA 0                                <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Flood list length 0                                     <br>
 </code></div></p>
-
-<h3><code>show ip ospf</code></h3>
-<p>
-
-</p>
-<p><div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-  <code>   
-  
-  </code></div></p>
