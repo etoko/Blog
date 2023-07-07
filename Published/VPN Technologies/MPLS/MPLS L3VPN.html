@@ -1,5 +1,3 @@
- <h1>Configuring MPLS Layer 3 VPN on Cisco IOS</h1>
- 
  <p>
    <ol>
      <li><a href="#INTRODUCTION">Introduction</a></li>
@@ -26,9 +24,10 @@ to their respective destinations using the SP's core network.
 </p>
 <p>
 The following topology will be used to configure MPLS Layer 3 VPNs.
-<img alt="" src="Media/l3vpn_topology.png">
-
 </p>
+<P>
+  <div class="separator" style="clear: both;"><a href="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjTnTYylC1PtI3OYDGvS69Bc7iq1z75aIfLB70OEbyjYkxpJe-gfS2WChrl9U8Tq3X85M1Qvfb4ZWguU2-NLIbIATk0EHsoUx643ISdZxVbYfHDLvzEtuv6UrnVxGRs0kg_XAUDJoYJWDIcoPc_Kmd7umh7yd47nyTlQbNE32AgPTJ9AUm5AeP9zgPKyOE/s1223/l3vpn_topology.PNG" style="display: block; padding: 1em 0; text-align: center; "><img alt="" border="0" width="600" data-original-height="856" data-original-width="1223" src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjTnTYylC1PtI3OYDGvS69Bc7iq1z75aIfLB70OEbyjYkxpJe-gfS2WChrl9U8Tq3X85M1Qvfb4ZWguU2-NLIbIATk0EHsoUx643ISdZxVbYfHDLvzEtuv6UrnVxGRs0kg_XAUDJoYJWDIcoPc_Kmd7umh7yd47nyTlQbNE32AgPTJ9AUm5AeP9zgPKyOE/s600/l3vpn_topology.PNG"/></a></div>
+</P>
 <p>
 The routers R1, R5, and R6 in the topology above are referred to as Provider Edge (PE) 
 routers or edge Label Switch Routers (LSR). The MPLS network is usually referred 
@@ -141,9 +140,9 @@ customer prefixes should be installed. RT is defined by RFC 4360 (BGP extended c
 
 The routes defined in the VRF of one customer are tagged for export 
 to the remote PE customer VRF using the command 
-<code style="font-size:120%;"><b>route-target export ASN:nn</b></code>. To 
+<code><b>route-target export ASN:nn</b></code>. To 
 import these routes into the appropriate VRF at the remote PE router, the command 
-<code style="font-size:120%;"><b>route-target import ASN:nn</b></code> is used.
+<code><b>route-target import ASN:nn</b></code> is used.
 The new BGP extended community attribute "route-target" is used to control what 
 prefixes enter and exit the VRF table.
 <ul>
@@ -215,13 +214,13 @@ global routing table (RIB). The RT and RD are then configured under each VRF.
 
 There are two ways to create a VRF; 
 <ol>
-  <li><code style="font-size:120%;"><b>ip vrf &lt;vrf-name&gt;</b></code> (older method).
+  <li><code><b>ip vrf &lt;vrf-name&gt;</b></code> (older method).
    <p>
    This command creates VRFs that for the IPv4 address family only.
    </p>
   <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-      	<code style="font-size:130%">
+      	<code>
 R1(config)#<b>ip vrf CUST_X_HQ</b>                       <br>
 R1(config-vrf)#<b>rd 300:100                  </b> <br>
 R1(config-vrf)#<b>route-target export 300:100 </b> <br>
@@ -238,10 +237,10 @@ Two VRFs CUST_X_HQ and CUST_Z_2 have been created.
 </p>
   
   </li> 
-  <li> <code style="font-size:120%;"><b>vrf definition &lt;vrf_name&gt;</b></code>.
+  <li> <code><b>vrf definition &lt;vrf_name&gt;</b></code>.
   <p>
   <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-      	<code style="font-size:130%">
+      	<code>
 R6(config)#<b>vrf definition CUST_Z_HQ           </b> <br>
 R6(config-vrf)#<b>rd 200:1                      </b> <br>
 R6(config-vrf)#<b>address-family ipv4                </b> <br>
@@ -257,18 +256,18 @@ significant.
   </ol>
 </p>
 
-<h3><code style="font-size:120%;">vrf upgrade-cli</code></h3>
+<h3><code>vrf upgrade-cli</code></h3>
 <p>
-The global configuration command <code style="font-size:120%;"><b>vrf upgrade-cli</b></code> 
+The global configuration command <code><b>vrf upgrade-cli</b></code> 
 is an important command to 
 use particularly when introducing VRFs in IPv6 in a network where IPv4 VRFs are 
-operational. It has been previously mentioned that the <code style="font-size:120%;"><b>
+operational. It has been previously mentioned that the <code><b>
 vrf definition &lt;vrf-name&gt;</b></code> command supports creation IPv6 VRFs. 
 If the VRFs were created like in following configuration;
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-      	<code style="font-size:130%">
+      	<code>
 R1(config)#<b>ip vrf CUST_X_HQ</b>                       <br>
 R1(config-vrf)#<b>rd 300:100                  </b> <br>
 R1(config-vrf)#<b>route-target export 300:100 </b> <br>
@@ -281,7 +280,7 @@ R1(config-vrf)#<b>route-target import 200:100 </b> <br>
 </code></div>
 </p>
 <p>
-The command <code style="font-size:120%;"><b>vrf upgrade-cli multi-af-mode common-policies</b></code> 
+The command <code><b>vrf upgrade-cli multi-af-mode common-policies</b></code> 
 will apply the same RT values configured for address-family IPv4 to IPv6 
 configuration automatically. This makes applying the same configuration 
 of IPv4 VRFs to IPv6 much easier.
@@ -292,7 +291,7 @@ configured under the VRF sub-mode.
 </p>
 
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-<code style="font-size:130%">
+<code>
 R1(config)#<b>vrf upgrade-cli multi-af-mode common-policies</b>                <br>
 You are about to upgrade to the multi-AF VRF syntax commands.                  <br>
 You will lose any IPv6 address configured on interfaces                        <br>
@@ -336,7 +335,7 @@ R1(config)#                                                                    <
 
 <h3 id="VERIFICATION">Verification</h3>
 <p>
-To verify the creation of VRFs, use the command <code style="font-size:120%;"><b>show vrf</b></code> 
+To verify the creation of VRFs, use the command <code><b>show vrf</b></code> 
 as demonstrated above.
 
 <h2>Step 3: Configure iBGP Peering between the PE routers using VPNv4 address-family</h2>
@@ -347,7 +346,7 @@ of 255 hops. To configure an iBGP neigborship on R1;
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-      	<code style="font-size:130%">
+      	<code>
 R1(config)#<b>router bgp 100                                 </b>  <br>
 R1(config-router)#<b>bgp log-neighbor-changes                  </b>  <br>
 R1(config-router)#<b>no bgp default ipv4-unicast               </b>  <br>
@@ -370,18 +369,18 @@ R6(config-router-af)#<b>exit-address-family                    </b>  <br>
 </code>
 </div>
 <p>
-The command <code style="font-size:120%;"><b>neighbor 30.255.1.1 send-community extended</b></code> is 
+The command <code><b>neighbor 30.255.1.1 send-community extended</b></code> is 
 automatically added by MP-BGP as it uses extended communities to route VPNv4 
-traffic. This can be verified by the command <code style="font-size:120%;"><b>show run | section bgp</b></code>.
+traffic. This can be verified by the command <code><b>show run | section bgp</b></code>.
 </p>
 
 <h3>Verification</h3>
 <p>
 Once the iBGP peering has been completed, this neighborship can be confirmed 
-using the command <code style="font-size:120%;"><b>show bgp vpnv4 unicast all summary</b></code>. The 
+using the command <code><b>show bgp vpnv4 unicast all summary</b></code>. The 
 result of this command is indicated in the following snippet.
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-      	<code style="font-size:130%">
+      	<code>
 R1#<b>show bgp vpnv4 unicast all summary</b>                                                  <br>
 BGP router identifier 30.255.1.1, local AS number 100                                  <br>
 BGP table version is 56, main routing table version 56                                 <br>
@@ -409,7 +408,7 @@ To confirm if extended BGP communities are being sent:
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-      	<code style="font-size:130%">
+      	<code>
 *Apr 14 05:57:04.319: BGP(4): 30.255.6.6 rcvd UPDATE w/ attr: nexthop 30.255.6.6, origin ?, localpref 100, metric 2, extended community RT:200:100 OSPF DOMAIN ID:0x0005:0x000003E80200 OSPF RT:0.0.0.1:2:0 OSPF ROUTER ID:10.255.67.2:0<br>
 *Apr 14 05:57:04.331: BGP(4): 30.255.6.6 rcvd 200:1:10.7.7.1/32, label 44 <br>
 *Apr 14 05:57:04.351: BGP(4): Revise route installing 1 of 1 routes for 10.7.7.1/32 -> 30.255.6.6(CUST_Z_2) to CUST_Z_2 IP table<br>
@@ -430,7 +429,7 @@ routing protocol is EIGRP with named EIGRP being configured on R2.
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-      	<code style="font-size:130%">
+      	<code>
 R1(config)#<b>interface g3/0                                                                         </b><br>
 R1(config-if)#<b>vrf forwarding CUST_Z_2</b><br> 
 % Interface GigabitEthernet3/0 IPv4 disabled and address(es) removed due to enabling VRF CUST_Z_2      </b><br>
@@ -447,7 +446,7 @@ On R9:
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-      	<code style="font-size:130%">
+      	<code>
 R9(config-if)#<b>router eigrp EIGRP_Z_S2                                                        </b><br>
 R9(config-router)#<b>address-family ipv4 unicast autonomous-system 10                             </b><br>
 R9(config-router-af)#<b>network 10.255.19.0 0.0.0.3                                                   </b><br>
@@ -479,7 +478,7 @@ accomplished using the redistribution command in the appropriate address-family.
 <p>
 On R2:
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-      	<code style="font-size:130%">
+      	<code>
 R1(config)#<b>router bgp 100                                                </b>    <br>
 R1(config-router)#<b>no bgp default ipv4-unicast                              </b>    <br>
 !REDISTRIBUTE CUST_X_HQ ROUTES INTO MP-BGP (LOCAL CUSTOMER SITE TO REMOTE SITES)  <br>
@@ -497,7 +496,7 @@ R1(config-router-af-topology)#<b>redistribute bgp 100 100000 100 250 10 1500</b>
 <p>
 On R5
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-      	<code style="font-size:130%">
+      	<code>
 R5(config)#<b>router bgp 100                                </b> <br>
 R5(config-router)#<b>address-family ipv4 vrf CUST_X_2    </b> <br>
 R5(config-router-af)#<b>redistribute eigrp 10                </b> <br>
@@ -521,7 +520,7 @@ To verify that the appropriate routes have been redistributed;
 <p>
 On the PE router;
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-      	<code style="font-size:130%">
+      	<code>
 R1#<b>show ip route vrf CUST_Z_2</b>                                           <br>       
                                                                                <br>
 Routing Table: CUST_Z_2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    <br>
@@ -591,7 +590,7 @@ R1#
 <p>
 On the CE router;
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-      	<code style="font-size:130%">
+      	<code>
 R9><b>show ip route</b> <br>
 Codes: L - local, C - connected, S - static, R - RIP, M - mobile, B - BGP       <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; D - EIGRP, EX - EIGRP external, O - OSPF, IA - OSPF inter area           <br>
@@ -644,12 +643,12 @@ R9>
 <p>
 Remote customer site routes are exchanged through L3VPN and are installed in the 
 MP-BGP VRF table. This can be verified by the command; 
-<code style="font-size:120%;"><b>show bgp vpnv4 unicast all</b></code>. This shows the routes in the 
+<code><b>show bgp vpnv4 unicast all</b></code>. This shows the routes in the 
 MP-BGP table for all VRFs.
 </p>
 
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-      	<code style="font-size:130%">
+      	<code>
 
 R1#<b>show bgp vpnv4 unicast all</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                 <br>   
 BGP table version is 40, local router ID is 30.255.1.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                 <br>
@@ -713,7 +712,7 @@ Note that the routes learned through MP-BGP VPNv4, have the next-hop as the iBGP
 
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-<code style="font-size:130%">
+<code>
 R1#<b>show bgp vpnv4 unicast all 10.80.1.0</b>                                <br>
 BGP routing table entry for 300:100:10.80.1.0/24, version 15                  <br>
 Paths: (1 available, best #1, table CUST_X_HQ)                                <br>
@@ -754,7 +753,7 @@ Some prefixes will have VPNv4 as the route source.
 </p>
 
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-<code style="font-size:130%">               
+<code>               
 R1><b>show ip eigrp vrf CUST_Z_2 topology</b>                               <br>        
 EIGRP-IPv4 VR(EIGRP_PE) Topology Table for AS(10)/ID(10.255.19.1)    <br>        
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Topology(base) TID(0) VRF(CUST_Z_2)                       <br>        
@@ -837,7 +836,7 @@ The following output shows the OSPF database of a remote PE router:
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-<code style="font-size:130%">
+<code>
 R5#<b>show ip ospf 1001 database</b>                                      <br>                
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                  <br>         
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;OSPF Router with ID (10.255.58.1) (Process ID 1001)           <br>         
@@ -869,7 +868,7 @@ On the CE router, these prefixes are E2 routes:
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-<code style="font-size:130%">
+<code>
 R8><b>show ip route</b><br>
 Codes: L - local, C - connected, S - static, R - RIP, M - mobile, B - BGP      <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; D - EIGRP, EX - EIGRP external, O - OSPF, IA - OSPF inter area          <br>
@@ -909,10 +908,10 @@ The value is inherited from the OSPF process ID.
 </P>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-<code style="font-size:130%">
+<code>
 R1#<b>show ip ospf 1000</b><br>
  Routing Process "ospf 1000" with ID 10.255.1.1                                <br>
-&nbsp;&nbsp; <span style="background:gray;">Domain ID type 0x0005, value 0.0.3.232</span><br>
+&nbsp;&nbsp; <span style="background:#d3d3d3;">Domain ID type 0x0005, value 0.0.3.232</span><br>
  Start time: 00:00:36.340, Time elapsed: 01:48:49.108                          <br>
  Supports only single TOS(TOS0) routes                                         <br>
  Supports opaque LSA                                                           <br>
@@ -963,10 +962,10 @@ On the remote PE R5:
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-<code style="font-size:130%">
+<code>
 R5(config-if)#<b>do show ip ospf 1001</b><br>
  Routing Process "ospf 1001" with ID 10.255.58.1               <br>
-&nbsp;&nbsp; <span style="background:gray;">Domain ID type 0x0005, value 0.0.3.233</span><br>
+&nbsp;&nbsp; <span style="background:#d3d3d3;">Domain ID type 0x0005, value 0.0.3.233</span><br>
  Start time: 00:15:57.372, Time elapsed: 00:13:48.868          <br>
  Supports only single TOS(TOS0) routes                         <br>
  Supports opaque LSA&nbsp;&nbsp;                                         <br>
@@ -1045,7 +1044,7 @@ be advertised as inter-area routes.
 
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-<code style="font-size:130%">
+<code>
 R5(config)#<b>router ospf 1001 vrf CUST_X_2</b>                          <br>
 R5(config-router)#<b>domain-id 0.0.3.232 </b>                            <br>
 R5(config-router)#<b>do show ip ospf 1001</b>                            <br>
@@ -1130,7 +1129,7 @@ On the remote site client CE, the routes are now considered inter-area:
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-<code style="font-size:130%">
+<code>
 R8><b>show ip route ospf</b><br>                                                <br>           
 Codes: L - local, C - connected, S - static, R - RIP, M - mobile, B - BGP       <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; D - EIGRP, EX - EIGRP external, O - OSPF, IA - OSPF inter area           <br>
@@ -1164,7 +1163,7 @@ show ip ospf &lt;process-ID&gt;</b></code>, the message,
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-<code style="font-size:130%">
+<code>
 R5(config-router)#<b>do show ip ospf 1001</b>                            <br>
  Routing Process "ospf 1001" with ID 10.255.58.1                  <br>
 &nbsp;&nbsp; Domain ID type 0x0005, value 0.0.3.232                         <br>
@@ -1174,7 +1173,7 @@ R5(config-router)#<b>do show ip ospf 1001</b>                            <br>
  Supports Link-local Signaling (LLS)                              <br>
  Supports area transit capability                                 <br>
  Supports NSSA (compatible with RFC 3101)                         <br>
- <span style="background:gray;">Connected to MPLS VPN Superbackbone, VRF CUST_X_2</span>     <br>
+ <span style="background:#d3d3d3;">Connected to MPLS VPN Superbackbone, VRF CUST_X_2</span>     <br>
  Event-log disabled                                               <br>
  It is an area border and autonomous system boundary router       <br>
  Redistributing External Routes from,                             <br>
@@ -1323,9 +1322,9 @@ On the RR to confirm sharing of prefixes with PE:
 A ping test or traceroute test can be used to confirm the operation of the MPLS L3VPN.
 </p>
 <p>
-<h3><code style="font-size:120%;">traceroute</code></h3>
+<h3><code>traceroute</code></h3>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-      	<code style="font-size:130%">
+      	<code>
 R7><b>traceroute 10.9.1.1</b>                                             <br>
 Type escape sequence to abort.                                            <br>
 Tracing the route to 10.9.1.1                                             <br>
@@ -1349,10 +1348,10 @@ to the egress PE where it finally gets popped and the packet is then redistribut
 into the IGP at the PE-CE link and routed using IP.
 </p>
 
-<h3><code style="font-size:120%;">ping</code></h3>
+<h3><code>ping</code></h3>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-      	<code style="font-size:130%">
+      	<code>
 R7><b>ping 10.9.2.1</b>                                              <br>
 Type escape sequence to abort.                                       <br>
 Sending 5, 100-byte ICMP Echos to 10.9.2.1, timeout is 2 seconds:    <br>
@@ -1367,7 +1366,7 @@ The ping command confirms the connectivity from customer site to remote customer
 <p>
 To view the MPLS LFIB
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-      	<code style="font-size:130%">
+      	<code>
 R6><b>show mpls forwarding-table</b>                                          <br>      
 Local&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Outgoing&nbsp;&nbsp; Prefix&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Bytes Label&nbsp;&nbsp; Outgoing&nbsp;&nbsp; Next Hop      <br>
 Label&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Label&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;or Tunnel Id&nbsp;&nbsp;&nbsp;&nbsp; Switched&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;interface&nbsp;&nbsp;&nbsp;&nbsp;            <br>
@@ -1453,11 +1452,11 @@ R6>
 <p>
 L3VPN routes have a [V] next to the learned route.
 
-To view the FIB for the different VRFs run the command <code style="font-size:120%;"><b>show ip cef vrf &lt;vrf_name&gt;</b></code>.
+To view the FIB for the different VRFs run the command <code><b>show ip cef vrf &lt;vrf_name&gt;</b></code>.
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-      	<code style="font-size:130%">
+      	<code>
 R6><b>show ip cef vrf CUST_Z_HQ</b><br/>
 Prefix&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Next Hop&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Interface&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   <br>
 0.0.0.0/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;no route&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   <br>
@@ -1492,7 +1491,7 @@ Additionally, to view the MPLS L3VPN on a specific route in the VRF LIB
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-      	<code style="font-size:130%">
+      	<code>
 R6><b>show ip cef vrf CUST_Z_HQ 10.9.1.0</b>               <br>         
 10.9.1.0/24                                                <br>  
 &nbsp;&nbsp;nexthop 30.255.46.1 GigabitEthernet0/0 label 4003 1000   <br>  

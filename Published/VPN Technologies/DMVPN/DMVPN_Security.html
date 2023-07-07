@@ -1,4 +1,4 @@
-<h1>Securing DMVPN Tunnels With IPSec, IKEv1 or IKEv2</h1>
+<!--<h1>Securing DMVPN Tunnels With IPSec, IKEv1 or IKEv2</h1> -->
 
 <h1>Introduction and Overview</h1>
 <p>
@@ -142,7 +142,7 @@ The IKE policy is configured using the command
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-      	<code style="font-size:110%">
+      	<code>
 HUB(config)#<b>crypto isakmp policy 100</b>
 </code></div>
 </p>
@@ -159,7 +159,7 @@ aes, 3des or des:
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
- <code style="font-size:110%">
+ <code>
 HUB(config-isakmp)#<b>encryption aes 256</b>
 </code></div>
 </p>
@@ -176,7 +176,7 @@ In this configuration, we opt to use preshared keys for authentication.
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
- <code style="font-size:110%">
+ <code>
 HUB(config-isakmp)#<b>authentication pre-share</b>
 </code></div>
 </p>
@@ -201,10 +201,14 @@ The Diffie-Hellman groups include the following;
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
- <code style="font-size:110%">
+ <code>
 HUB(config-isakmp)#<b>group 16</b>
 </code></div>
 </p>
+<p>
+If not specified, the default group is enabled.
+</p>
+
 <li><h4>Configure the hash function for data integrity</h4></li>
 <p>
 The hash algorithm provides a check for data integrity i.e, a check to ensure 
@@ -214,7 +218,7 @@ The command is <code><b>hash &lt;md5 | sha | sha256 | sha384 | sha512&gt;</b></c
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
- <code style="font-size:110%">
+ <code>
 HUB(config-isakmp)#<B>hash sha512</b>
 </code></div>
 </p>
@@ -232,7 +236,7 @@ explicitly configured.
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
- <code style="font-size:110%">
+ <code>
 HUB(config)#<b>crypto isakmp key simplesimple address 0.0.0.0</b>
 </code></div>
 </p>
@@ -293,7 +297,7 @@ If an encryption algorithm is configured, the key size should be defined.
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
- <code style="font-size:110%">
+ <code>
 HUB(config)#<b>crypto ipsec transform-set DMVPN_IPSEC_TSET esp-aes esp-sha512-hmac</b>
 </code></div>
 </p>
@@ -304,7 +308,7 @@ tunnel mode can be transport or tunnel
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
- <code style="font-size:110%">
+ <code>
 HUB(cfg-crypto-trans)#<b>mode transport</b>
 </code></div>
 </p>
@@ -319,7 +323,7 @@ defined.
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
- <code style="font-size:110%">
+ <code>
 HUB(config)#<b>crypto ipsec profile DMVPN_IPSEC_PROFILE  </b><br>
 HUB(ipsec-profile)#<b>set transform-set DMVPN_IPSEC_TSET </b><br>
 HUB(ipsec-profile)#<b>exit                               </b>
@@ -333,7 +337,7 @@ tunnel protection ipsec profile &lt;ipsec_profile_name&gt;</b></code>.
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
- <code style="font-size:110%">
+ <code>
 HUB(config)#<b>interface tunnel 0</b><br>
 HUB(config-if)#<b>tunnel protection ipsec profile DMVPN_IPSEC_PROFILE</b>
 </code></div>
@@ -367,7 +371,7 @@ vrf &lt;vrf-name&gt;</b></code> where:
 
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
- <code style="font-size:110%">
+ <code>
  SPOKE4(config)#<b>crypto keyring DMVPN_ISAKMP_KEYRING vrf FVRF</b>
  </code></div>
  </p>
@@ -378,7 +382,7 @@ Then define the key using the command <code><b>pre-shared-key address &lt;ip-add
 
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
- <code style="font-size:110%">
+ <code>
 SPOKE4(conf-keyring)#<b>pre-shared-key address 0.0.0.0 0.0.0.0 key simplesimple</b>
 </code></div>
 </p>
@@ -393,7 +397,7 @@ SPOKE4(conf-keyring)#<b>pre-shared-key address 0.0.0.0 0.0.0.0 key simplesimple<
   <li>Create an IKEv1 profile: <code><b>create isakmp profile &lt;profile-name&gt;</b></code>.
   <p>
   <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
- <code style="font-size:110%">
+ <code>
  SPOKE4(config)#<b>crypto isakmp profile DMVPN_ISAKMP_PROFILE</b>
  </code></div>
   </p>
@@ -401,7 +405,7 @@ SPOKE4(conf-keyring)#<b>pre-shared-key address 0.0.0.0 0.0.0.0 key simplesimple<
   <li>Configure the VRF that the profile will be used under: <code><b>vrf &lt;VRF-name&gt;</b></code>
   <p>
   <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
- <code style="font-size:110%">
+ <code>
    SPOKE4(conf-isa-prof)#<b>vrf FVRF</b>
  </code></div>
   </p>
@@ -409,7 +413,7 @@ SPOKE4(conf-keyring)#<b>pre-shared-key address 0.0.0.0 0.0.0.0 key simplesimple<
   <li>Reference the configured keyring: <code><b>keyring &lt;keyring-name&gt;</b></code>
     <p>
   <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
- <code style="font-size:110%">
+ <code>
   SPOKE4(conf-isa-prof)#<b>keyring DMVPN_ISAKMP_KEYRING</b><br>
  </code></div></p>
   </li>
@@ -417,7 +421,7 @@ SPOKE4(conf-keyring)#<b>pre-shared-key address 0.0.0.0 0.0.0.0 key simplesimple<
   applied to: <code><b>match identity address &lt;ip-address&gt; &lt;vrf&gt;</b></code>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
- <code style="font-size:110%">
+ <code>
 SPOKE4(conf-isa-prof)#<b>match identity address 0.0.0.0 FVRF</b>
 </code></div>
 </p>
@@ -433,7 +437,7 @@ The IPsec transform-set is configured as in step 3 above:
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
- <code style="font-size:110%">
+ <code>
  SPOKE4(config)#<b>crypto ipsec transform-set DMVPN_IPSEC_TSET esp-aes esp-sha512-hmac</b><br>
  SPOKE4(cfg-crypto-trans)#<b>mode transport</b>
  </code></div>
@@ -445,7 +449,7 @@ The IPsec transform-set is configured as in step 3 above:
   <li>Define the IPsec profile:<code><b>crypto ipsec profile &lt;profile-name&gt;</b></code>
   <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
- <code style="font-size:110%">
+ <code>
 SPOKE4(config)#<b>crypto ipsec profile DMVPN_IPSEC_PROFILE</b>
 </code></div>
 </p>
@@ -454,7 +458,7 @@ SPOKE4(config)#<b>crypto ipsec profile DMVPN_IPSEC_PROFILE</b>
   <code><b>set transform-set &lt;transform-set-name&gt;</b></code>
   <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
- <code style="font-size:110%">
+ <code>
 SPOKE4(ipsec-profile)#<b>set transform-set DMVPN_IPSEC_TSET</b>
 </code></div>
 </p>
@@ -463,7 +467,7 @@ SPOKE4(ipsec-profile)#<b>set transform-set DMVPN_IPSEC_TSET</b>
   <li>Reference the ISAKMP/IKEv1 profile: <code><b>set isakmp-profile &lt;isakmp-profile-name&gt;</b></code> 
     <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
- <code style="font-size:110%">
+ <code>
   SPOKE4(ipsec-profile)#<b>set isakmp-profile DMVPN_ISAKMP_PROFILE</b>
  </code></div></p>
   </li>
@@ -476,7 +480,7 @@ Tunnel protection using IPsec is configured under the tunnel interface:
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
- <code style="font-size:110%">
+ <code>
 SPOKE4(config)#<b>interface tunnel 0</b><br>
 SPOKE4(config-if)#<b>tunnel protection ipsec profile DMVPN_IPSEC_PROFILE</b>
 </code></div>
@@ -500,7 +504,7 @@ The following commands can be used to verify tunnel protection using IPsec:
 <h3><code>show dmvpn detail</code></h3>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
- <code style="font-size:110%">
+ <code>
 SPOKE2#<b>show dmvpn detail</b>                                                        <br>    
 Legend: Attrb --&gt; S - Static, D - Dynamic, I - Incomplete                           <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;N - NATed, L - Local, X - No Socket                                            <br>
@@ -585,7 +589,7 @@ Command displays security association information when for the ISAKMP exchange.
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
- <code style="font-size:110%">
+ <code>
 SPOKE2#<b>show crypto isakmp sa</b><br>
 IPv4 Crypto ISAKMP SA                                         <br>
 dst&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; src&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; state&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;conn-id status <br>
@@ -602,7 +606,7 @@ SPOKE2#                                                       <br>
 <p>
 Additional keywords to the above command display the following output:
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
- <code style="font-size:110%">
+ <code>
   SPOKE2#<b>show crypto isakmp sa ?</b><br>
 &nbsp;&nbsp;active&nbsp;&nbsp; Shows HA-enabled ISAKMP SAs in the active state    <br>
 &nbsp;&nbsp;count&nbsp;&nbsp;&nbsp;&nbsp;Show the number of ISAKMP Security Associations    <br>
@@ -615,7 +619,7 @@ Additional keywords to the above command display the following output:
 
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
- <code style="font-size:110%">
+ <code>
 SPOKE2#<b>show crypto isakmp sa detail</b> <br>
 Codes: C - IKE configuration mode, D - Dead Peer Detection&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; K - Keepalives, N - NAT-traversal&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <br>
@@ -643,7 +647,7 @@ SPOKE2#
 
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
- <code style="font-size:110%">
+ <code>
 SPOKE2#<b>show crypto isakmp sa count</b>   <br>
 Active ISAKMP SA's: 3                       <br>
 Standby ISAKMP SA's: 0                      <br>
@@ -655,7 +659,7 @@ Dead ISAKMP SA's: 0
 <h3><code>show crypto isakmp policy</code></h3>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
- <code style="font-size:110%">
+ <code>
 SPOKE2#<b>show crypto isakmp policy</b>                                           <br>
                                                                                   <br>
 Global IKE policy                                                                 <br>
@@ -672,7 +676,7 @@ SPOKE2#
 <h3><code>show crypto isakmp peers</code></h3>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
- <code style="font-size:110%">
+ <code>
 SPOKE2#<b>show crypto isakmp peers</b>
 Peer: 99.255.10.2 Port: 500 Local: 99.255.30.1 <br>
 &nbsp;Phase1 id: 99.255.10.2                        <br>
@@ -689,7 +693,7 @@ SPOKE2#                                        <br>
 <h3><code>show crypto isakmp key</code></h3>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
- <code style="font-size:110%">
+ <code>
  SPOKE2#<b>show crypto isakmp key</b>                                  <br>
 Keyring&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Hostname/Address&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Preshared Key <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <br>
@@ -702,7 +706,7 @@ SPOKE2#
 <h3><code>show crypto ipsec sa</code></h3>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
- <code style="font-size:110%">
+ <code>
  
  
  </code></div>
@@ -718,6 +722,15 @@ maintain SA state including negotiation of a session. If CPU utilization is high
 limited CPU resources.
 </p>
 <p>
+IKEv2 advantages over IKEv1 include:
+Protection against DoS attacks
+Support for new encryption algorithms for phase 2 (suite B).
+</p>
+<p> 
+With IKEv2, asymetric authentication methods are possible where one end uses 
+preshared keys and the other PKI.
+</p>
+<p>
 Deploying IPsec tunnel protection is with the use of a static pre-shared key involves the creation of an:
 <ol>
  <li>IKEv2 keyring</li>
@@ -727,134 +740,135 @@ Deploying IPsec tunnel protection is with the use of a static pre-shared key inv
 </ol>
 </p>
 
-<h2>IKEv2 Keyring</h2>
+<h2>Step 1: Configure the IKEv2 Keyring</h2>
 <p>
 The IKEv2 keyring is a repository of the pre-shared keys. In a keyring, it is 
 possible to define which keys apply to which hosts. Identification of the password 
 is based on the IP address of the remote router. The IKEv2 keyrong is created 
 with the following steps:
 </p>
-<h3>Step 1: Define the keyring instance</h3>
 <p>
-It is created with the global configuration command crypto ikev2 keyring
-</p>
-
-<h3>Step 2: Create a peer name</h3>
-<p>
-Multiple peers can exist in a keyring. Each peer has a matching qualifier and 
-can use a different password. The peer is created with the command peer peer_name.
-</p>
-
-<h3>Step 3: Identify the IP address for the peer</h3>
-<p>
-Multiple peers can reside in a keyring. The IP address is identified so that the
+  <ol>
+    <li><b>Define the keyring instance:</b>
+    	It is created with the global configuration command <code><b>crypto ikev2 keyring &lt;keyring-name&gt;</b></code>.
+    </li>
+    <li><b>Create a peer name:</b> Multiple peers can exist in a keyring. Each 
+    peer has a matching qualifier and can use a different password. The peer is 
+    created with the command <code><b>peer &lt;peer_name&gt;</b></code>.
+    </li>
+    <li><b>Identify the IP address for the peer:</b> Multiple peers can reside in a keyring. The IP address is identified so that the
 appropriate peer configuration is used based upon the remote device’s IP address. 
 The command address network netmask defines the IP address/range. Though not
 recommended for a production network, the value of 0.0.0.0 0.0.0.0 may be used to 
-match against any peer. For IPv6, the address ::/0 matches any IPv6 address.
+match against any peer. For IPv6, the address ::/0 matches any IPv6 address.</li>
+ 
+   <li><b>Define a preshared key:</b> 
+     Define the preshared key with <code><b>pre-shared-key &lt;password&gt;</b></code>.
+   </li>
+  </ol>
 </p>
 
-<h3>Step 4: Define a preshared key</h3>
+
 <p>
-Define the preshared key with pre-shared-key key.
+
 </p>
 
-<h2>IKEv2 Profile</h2>
+<h2>Step 2: IKEv2 Profile</h2>
 <p>
 IKEv2 profile is a collection of non-negotiable security parameters used during 
 IKE security association. The IKEv2 profile is later associated with the IPSec
 profile. Within the IKEv2 profile, local and remote authentication methods must
 be defined as well as a match statement.
 </p>
-<h3>Step 1: Define the IKEv2 profile</h3>
 <p>
-It is defined with the global configuration command crypto ikev2 profile 
-profile_name
-</p>
-<h3>Step 2:Identify the IP address for the remote router</h3>
-<p>
-the IP address must be identified for the initial IKEv2 session to establish.
-The peer IP address is defined with the command match identity remote address 
-ip_address. This can be 0.0.0.0 0.0.0.0 to match against any peer. For IPv6, it can be ::/0.
-</p>
-
-<h3>Step 3: (Optional) Configure the local router’s identity</h3>
-<p>
-the local router’s identity can be set based on an IP address with the command 
+  <ol>
+    <li><b>Define the IKEv2 profile:</b>
+    <code><b>crypto ikev2 profile &lt;profile_name&gt;</b></code>
+    </li>
+    <li><b>Identify the IP address for the remote router:</b>
+    the IP address must be identified for the initial IKEv2 session to establish.
+The peer IP address is defined with the command <code><b>match identity remote address 
+&lt;ip_address&gt;</b></code>. This can be 0.0.0.0 0.0.0.0 to match against any peer. For IPv6, it can be ::/0.
+    </li>
+    <li>
+    the IP address must be identified for the initial IKEv2 session to establish.
+The peer IP address is defined with the command <code><b>match identity remote address 
+&lt;ip_address&gt;</b></code>. This can be 0.0.0.0 0.0.0.0 to match against any peer. For IPv6, it can be ::/0.
+    </li>
+    <li> 
+    <b>(Optional) Configure the local router’s identity:</b>
+    the local router’s identity can be set based on an IP address with the command 
 identity local address ip_address. A loopback address is recommended as it is 
 always ‘up’. Note that the IP address configured here should match the IP address
 used during the certificate registration. This step is really not needed with 
 preshared key authentication but is very important in the deployment of public
 key infrastructure.
-</p>
-
-<h3>Step 4: Identify the Front-door VRF (FVRF) for the tunnel end</h3>
-<p>
-if a front-door VRF is used on the DMVPN tunnel, then the FVRF must be associated 
-to the IKEv2 profile with the command match fvrf vrf_name | any. Keyword any allows
+    </li>
+    <li><b>Identify the Front-door VRF (FVRF) for the tunnel end:</b>
+    if a front-door VRF is used on the DMVPN tunnel, then the FVRF must be associated 
+to the IKEv2 profile with the command <code><b>match fvrf &lt;vrf_name | any&gt;</b></code>. Keyword any allows
 any configured FVRF to be selected.
-</p>
-
-<h3>Step 5: Define the local authentication method</h3>
-<p>
-The authentication method must be defined for connection requests that are received 
-by remote peers. The command authentication local pre-share | rsa-sig defines the 
+    </li>
+    <li><b>Define the local authentication method:</b>
+    The authentication method must be defined for connection requests that are received 
+by remote peers. The command <code><b>authentication local &lt;pre-share | rsa-sig&gt;</b></code> defines the 
 local authentication. Only one local authentication can be selected. The pre-share
 keyword is for pre-shared static keys and rsa-sig is used for certificate based 
 authentication.
-</p>
-
-<h3>Step 6: Define the remote authentication method</h3>
-<p>
-The authentication method must be defined for connection requests that are sent
+    </li>
+    <li><b>Define the remote authentication method:</b>
+    The authentication method must be defined for connection requests that are sent
 to remote peers. The command authentication remote pre-share | rsa-sig defines 
 the remote authentication. The pre-share keyword is used for pre-shared static 
 keys and rsa-sig is used for certificate-based authentication.
+    </li>
+    <li><b>Define the IKEv2 keyring (for preshared authentication):</b>
+    preshared authentication requires that the IKEv2 keyring be associated to the 
+IKEv2 profile. The command <code><b>keyring local &lt;keyring-name&gt;</b></code> associates the IKEv2 keyring.
+    </li>
+  </ol>
 </p>
 
-<h3>Step 7: Define the IKEv2 keyring (for preshared authentication)</h3>
-<p>
-preshared authentication requires that the IKEv2 keyring be associated to the 
-IKEv2 profile. The command keyring local keyring_name associates the IKEv2 keyring.
-</p>
-
-<h1>IPSec Transform Set</h1>
+<h2>Step 3: Configure the IPSec Transform Set</h2>
 <p>
 The transform set identifies the security protocols for encrypting traffic (ESP) 
 or protocols for authenticating the data (AH). The transform set is created with 
 the following steps;
-<h2>Step 1: Create the transform set and identify the transforms</h2>
+</p>
 <p>
-Only one transform set can be selected for ESP encryption, ESP authentication, 
-AH authentication using the command crypto ipsec transform-set transform_set_name 
-esp-encryption esp-authentication ah-authentication
+  <ol>
+    <li><b>Create the transform set and identify the transforms:</b> 
+    Only one transform set can be selected for ESP encryption, ESP authentication, 
+AH authentication using the command <code><b>crypto ipsec transform-set &lt;transform_set_name&gt; 
+&lt;esp-encryption esp-authentication | ah-authentication&gt;</b></code>
+    </li>
+    <li><b>Specify the Transform Set mode:</b> 
+    the transform set mode is configured with <code><b>mode &lt;transport | tunnel&gt;</b></code>. Tunnel mode 
+is the default mode. However, it adds 20bytes of additional IPSec header to the 
+overall packet.
+    </li>
+  </ol>
 </p>
 
-<h2>Step 2: Specify the Transform Set mode</h2>
-<p>
-the transform set mode is configured with mode transport | tunnel. Tunnel mode 
-is the default mode. However, it adds 20bytes of additional IPSec header to the 
-overall packet. I’d personally recommend use of the transport mode.
 
-<h1>IPSec Profile</h1>
+<p>
+
+<h2>Step 4: Configure the IPSec Profile</h2>
 <p>
 The IPSec profile combines the IPSec transform set and the IKEv2 profile. The 
 IPSec profile is created with the following steps;
 </p>
-
-<h2>Step 1: Create the IPSec profile</h2>
 <p>
-use the command crypto ipsec profile profile_name
-</p>
-
-<h2>Step 2: Specify the transform set</h2>
-<p>
-The transform set is specified with the command set transform-set transform-set-name
-</p>
-
-<h2>Step 3: Specify the IKEv2 profile</h2>
-<p>
-the IKEv2 profile is specified with the command set ikev2-profile ike2-profile-name
+<ol>
+<li><b>Create the IPSec profile:</b> use the command <code><b>crypto ipsec profile &lt;profile-name&gt;</b></code>
+</li>
+<li><b>Specify the transform set:</b> 
+The transform set is specified with the command <code><b>set transform-set &lt;transform-set-name&gt;</b></code>.
+</li>
+<li><b>Specify the IKEv2 profile:</b>
+the IKEv2 profile is specified with the command <code><b>set ikev2-profile &lt;ike2-profile-name&gt;</b></code>.
+ </li>
+</ol>
 </p>
 
 <h2>Verification</h2>

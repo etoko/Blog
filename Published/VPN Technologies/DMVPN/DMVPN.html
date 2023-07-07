@@ -1,4 +1,4 @@
-<h1>Dynamic Multipoint Virtual Private Network (DMVPN)</h1>
+
 <h1>Contents</h1>
 <p>
   <ol>
@@ -170,7 +170,7 @@ message:
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">     
-      	<code style="font-size:110%">                                                             
+      	<code>                                                             
 Frame 57: 138 bytes on wire (1104 bits), 138 bytes captured (1104 bits) on interface -, id 0          <br>
 Ethernet II, Src: ca:06:06:9e:00:08 (ca:06:06:9e:00:08), Dst: ca:07:06:ad:00:1c (ca:07:06:ad:00:1c)   <br>
 Internet Protocol Version 4, Src: 99.255.30.1, Dst: 99.255.60.6                                       <br>
@@ -235,7 +235,9 @@ many more commands than those of the spokes.
 
 <p>
 In the configuration of DMVPN, the following topology will be used for reference:
-<img alt="" src="Images/DMVPN_Topology.png">
+</p>
+<p>
+  <div class="separator" style="clear: both;"><a href="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjkwa2N5PBozihKS4IikWO62WLEOvhbsDQIeeuVXwrHRo9ISdyU0M14jOEavcs7moqz3Nw0gHyy2b3GN1tmbcWSqymP7gjNIvWfzRMlL8_EfZAnCslawvAtUPH8hTYPkup3ItW5oCmF7uNE8tmiLugZCnOG0MKlV6CYdEiG3jX2iXOMsC79r0iBS6p2AB4/s1476/DMVPN%20Topology.png" style="display: block; padding: 1em 0; text-align: center; "><img alt="" border="0" width="600" data-original-height="802" data-original-width="1476" src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjkwa2N5PBozihKS4IikWO62WLEOvhbsDQIeeuVXwrHRo9ISdyU0M14jOEavcs7moqz3Nw0gHyy2b3GN1tmbcWSqymP7gjNIvWfzRMlL8_EfZAnCslawvAtUPH8hTYPkup3ItW5oCmF7uNE8tmiLugZCnOG0MKlV6CYdEiG3jX2iXOMsC79r0iBS6p2AB4/s600/DMVPN%20Topology.png"/></a></div>
 </p>
 
 <h4>Step 1: Create the tunnel interface</h4>
@@ -244,7 +246,7 @@ The global configuration command <code><b>interface tunnel &lt;tunnel_number&gt;
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-      	<code style="font-size:110%">
+      	<code>
 HUB#<b>configure terminal</b> <br>
 HUB(config)#<b>interface tunnel 0</b>
 </code></div>
@@ -264,7 +266,7 @@ The configuration command is <code><b>tunnel source &lt;ip_address | interface&g
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-      	<code style="font-size:110%">
+      	<code>
 HUB(config-if)#<b>tunnel source g3/0</b>
 </code></div>
 
@@ -280,7 +282,7 @@ topology that dynamically transitions from point-to-point to point-to-multipoint
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-      	<code style="font-size:110%">
+      	<code>
 HUB(config-if)#<b>tunnel mode gre multipoint</b>
 </code></div>
 </p>
@@ -295,7 +297,7 @@ of 255.255.255.0 (/24) is used.
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-      	<code style="font-size:110%">
+      	<code>
 HUB(config-if)#<b>ip address 172.30.1.1 255.255.255.0</b>
 </code></div>
 </p>
@@ -309,7 +311,7 @@ is not configured, then the tunnel priority will be low.
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
- <code style="font-size:110%">
+ <code>
 HUB(config-if)#<b>bandwidth 100000</b>
 </code>
 </div>
@@ -323,7 +325,7 @@ The default keepalive time is 10 seconds and 3 retries.
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
- <code style="font-size:110%">
+ <code>
 HUB(config-if)#<b>keepalive 10 5</b>
 </code>
 </div>
@@ -340,7 +342,7 @@ mode, the command is <code><b>ip mtu &lt;value&gt;</b></code>.
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
- <code style="font-size:110%">
+ <code>
 HUB(config-if)#<b>ip mtu 1400</b>
 </code>
 </div>
@@ -357,7 +359,7 @@ implemented by the hosts and not the routers as it is memory intensive.
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
- <code style="font-size:110%">
+ <code>
 HUB(config-if)#<b>ip tcp adjust-mss 1360</b>
 </code>
 </div>
@@ -377,7 +379,7 @@ interface of the hub;
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
- <code style="font-size:110%">
+ <code>
 SPOKE7(config-if)#<b>tunnel destination 99.255.10.2</b>
 </code>
 </div>
@@ -389,7 +391,7 @@ This IP address should be in the subnet of the tunnel of the Hub
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
- <code style="font-size:110%">
+ <code>
 SPOKE7(config-if)#<b>ip address 172.30.1.7 255.255.255.0</b>
 </code>
 </div>
@@ -447,7 +449,7 @@ This can be verified by debuggin messages;
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
- <code style="font-size:110%">
+ <code>
 . . . 
 *Feb 14 21:55:12.391: NHRP-RATE: Sending initial Registration Request for 10.100.100.1, reqid 2                        <br>
 *Feb 14 21:55:14.303: <b>NHRP: Setting retrans delay to 4 for nhs  dst 10.100.100.1</b>                                       <br>
@@ -504,7 +506,7 @@ packet:
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
- <code style="font-size:110%">
+ <code>
 Next Hop Resolution Protocol (NHRP Registration Request)         <br>
 &nbsp;&nbsp;&nbsp;&nbsp;NHRP Fixed Header                                            <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Address Family Number: IPv4 (0x0001)                     <br>
@@ -671,7 +673,7 @@ DMVPN clouds. This ID uniquely identifies each of these clouds.
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
- <code style="font-size:110%">
+ <code>
 HUB(config-if)#<b>ip nhrp network-id 200</b>
 </code>
 </div>
@@ -688,7 +690,7 @@ misconfigurations of NHCs registering with the wrong NHS.
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
- <code style="font-size:110%">
+ <code>
 HUB(config-if)#<b>tunnel key 200</b>
 </code>
 </div>
@@ -699,7 +701,7 @@ Configuration of the tunnel key adds an additional 4-bytes to the DMVPN header.
 <h4>Step 11: (Optional) Enable multicast support for NHRP</h4>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
- <code style="font-size:110%">
+ <code>
 HUB(config-if)#<b>ip nhrp map multicast dynamic</b>
 </code>
 </div>
@@ -720,7 +722,7 @@ requests can be made. The password used with NHRP authentication is stored in pl
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
- <code style="font-size:110%">
+ <code>
 HUB(config-if)#<b>ip nhrp authentication simplesimple123</b>
 </code>
 </div>
@@ -771,7 +773,7 @@ to match on all routers participant in the same DMVPN cloud.
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
- <code style="font-size:110%">
+ <code>
 SPOKE7(config-if)#<b>ip nhrp network-id 200</b>
 </code>
 </div>
@@ -788,7 +790,7 @@ NHCs registering with the wrong NHS.
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
- <code style="font-size:110%">
+ <code>
 SPOKE7(config-if)#<b>tunnel key 200</b>
 </code>
 </div>
@@ -801,7 +803,7 @@ The NHS NBMA address and multicast mapping is accomplished using the command
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
- <code style="font-size:110%">
+ <code>
 SPOKE7(config-if)#<b>ip nhrp nhs 172.30.1.1 nbma 99.255.10.2 multicast</b>
 </code>
 </div>
@@ -812,7 +814,7 @@ multicast map is needed for a node (NHC).
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
- <code style="font-size:110%">
+ <code>
 #ip nhrp nhs &lt;nhs_tunnel_address&gt;<br>
 #ip nhrp map &lt;nhs_tunnel_address&gt; &lt;nhs_nbma_addr&gt;<br>
 #ip nhrp map multicast &lt;nhs_nbma_addr | dynamic&gt;<br>
@@ -821,7 +823,7 @@ multicast map is needed for a node (NHC).
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
- <code style="font-size:110%">
+ <code>
 SPOKE7(config-if)#<b>ip nhrp nhs 172.30.1.1</b><br>
 SPOKE7(config-if)#<b>ip nhrp map 172.30.1.1 99.255.10.2</b><br>
 SPOKE7(config-if)#<b>ip nhrp map multicast 99.255.10.2</b>
@@ -844,7 +846,7 @@ confirmed through a traceroute to the NHS from any of the NHCs.
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
- <code style="font-size:110%">
+ <code>
 SPOKE2#<b>traceroute 172.30.1.7</b>                  <br>
 Type escape sequence to abort.                       <br>
 Tracing the route to 172.30.1.7                      <br>
@@ -859,7 +861,7 @@ The NHCs should be two hops away from each other with the first hop being the NH
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
- <code style="font-size:110%">
+ <code>
 SPOKE7#<b>traceroute 172.30.1.2</b><br>
 Type escape sequence to abort.                <br>
 Tracing the route to 172.30.1.2               <br>
@@ -874,7 +876,7 @@ SPOKE7#
 <h4><code>show dmvpn detail</code></h4>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
- <code style="font-size:110%">
+ <code>
 HUB#<b>show dmvpn detail</b>                                                     <br>
 Legend: Attrb --> S - Static, D - Dynamic, I - Incomplete&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;N - NATed, L - Local, X - No Socket&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  <br>
@@ -916,7 +918,7 @@ The NHRP table can be viewed as shown below:
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
- <code style="font-size:110%">
+ <code>
 HUB#<b>show ip nhrp detail</b>                   <br>        
 172.30.1.2/32 via 172.30.1.2                     <br> 
 &nbsp;&nbsp; Tunnel0 created 05:05:46, expire 01:39:22     <br> 
@@ -981,7 +983,7 @@ Replace:
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
- <code style="font-size:110%">
+ <code>
 SPOKE7(config-if)#<b>tunnel destination 99.255.10.2</b>
 </code>
 </div>
@@ -991,7 +993,7 @@ with
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
- <code style="font-size:110%">
+ <code>
 SPOKE7(config-if)#<b>tunnel mode gre multipoint</b>
 </code>
 </div>
@@ -1009,7 +1011,7 @@ via the mGRE interface back out that interface;
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
- <code style="font-size:110%">
+ <code>
 HUB(config)#<b>interface tunnel0</b><br>
 HUB(config-if)#<b>no ip next-hop-self eigrp 100</b><br>
 HUB(config-if)#<b>no ip split-horizon eigrp 100</b>
@@ -1021,7 +1023,7 @@ With OSPF, the interface type should be changed to BROADCAST
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
- <code style="font-size:110%">
+ <code>
 HUB(config)#<b>interface tunnel0</b><br>
 HUB(config-if)#<b>ip ospf network broadcast</b>
 </code>
@@ -1082,7 +1084,7 @@ In DMVPN Phase 3 configuration;
 <p>NHS</p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
- <code style="font-size:110%">
+ <code>
 HUB(config)#<b>interface tunnel0</b><br>
 HUB(config-if)#<b>ip nhrp redirect</b></br>
 </code>
@@ -1092,7 +1094,7 @@ HUB(config-if)#<b>ip nhrp redirect</b></br>
 <p>NHC;</p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
- <code style="font-size:110%">
+ <code>
 SPOKE7(config)#<b>interface tunnel0</b><br>
 SPOKE7(config-if)#<b>ip nhrp shortcut </b><br>
 </code>
@@ -1132,7 +1134,7 @@ Subsequent traffic is direct to remote spoke.
 
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
- <code style="font-size:110%">
+ <code>
 SPOKE8#<b>traceroute 10.2.12.1</b>           <br>
 Type escape sequence to abort.               <br>
 Tracing the route to 10.2.12.1               <br>
@@ -1152,7 +1154,7 @@ SPOKE8#
 <h4>Verification of traffic indication</h4>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
- <code style="font-size:110%">
+ <code>
 SPOKE7#<b>debug dmvpn all all</b>                                                         <br>
 SPOKE7#<b>ping 10.2.10.1</b>                                                                                                                                          <br>
 Type escape sequence to abort.                                                                                                                                 <br>
@@ -1300,7 +1302,7 @@ On the NHS:
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
- <code style="font-size:110%">
+ <code>
 HUB#<b>debug dmvpn all all</b>                                                                    <br>
 HUB#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                                                <br>
 *Apr&nbsp;&nbsp;7 04:57:28.563: NHRP: Tunnels gave us remote_nbma: 99.255.60.6 for Redirect                                   <br>
@@ -1413,11 +1415,13 @@ HUB#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbs
 </p>
 <p>
 The following is a Wireshark packet capture of an NHRP Traffic indication message:
-<img alt="Traffic Indication Packet Exchange" src="Images/NHRP Traffic Indication Capture.png">
+</p>
+<p>
+  <div class="separator" style="clear: both;"><a href="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiUxRu5zuOQu-w2h7S68mnYcJmfXz6ctQTzE_4ZOSqI0YGtFJVehawV2v24Mx1DpDnRSQ_WcKQbn1Qci3ZATFBjTpGBo_7-jEyvGR7XYJRitxJlQzv1BxEw_u3KFUZVU0Zj97sCM1KNzsvgvcKfGd8DPNP_L3WWCKh2C26jvdkQK3RlEQeGK87IT62d6JU/s1600/NHRP%20Traffic%20Indication%20Capture.PNG" style="display: block; padding: 1em 0; text-align: center; "><img alt="" border="0" data-original-height="296" data-original-width="958" src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiUxRu5zuOQu-w2h7S68mnYcJmfXz6ctQTzE_4ZOSqI0YGtFJVehawV2v24Mx1DpDnRSQ_WcKQbn1Qci3ZATFBjTpGBo_7-jEyvGR7XYJRitxJlQzv1BxEw_u3KFUZVU0Zj97sCM1KNzsvgvcKfGd8DPNP_L3WWCKh2C26jvdkQK3RlEQeGK87IT62d6JU/s1600/NHRP%20Traffic%20Indication%20Capture.PNG"/></a></div>
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
- <code style="font-size:110%">
+ <code>
 Frame 47: 122 bytes on wire (976 bits), 122 bytes captured (976 bits) on interface -, id 0              <br>
 Ethernet II, Src: ca:06:06:9e:00:08 (ca:06:06:9e:00:08), Dst: ca:07:06:ad:00:1c (ca:07:06:ad:00:1c)     <br>
 Internet Protocol Version 4, Src: 99.255.10.2, Dst: 99.255.60.6                                         <br>
@@ -1545,7 +1549,7 @@ Both entries in <code><b>show dmvpn detail</b></code> will be DT1 and not DT2 sh
 
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
- <code style="font-size:110%">
+ <code>
 HUB(config)#<b>router eigrp EIGRP_HUB</b> <br>
 HUB(config-router)#<b>address-family ipv4 unicast auto 1</b><br>
 HUB(config-router-af)#<b>af-interface tunnel0</b><br>
@@ -1558,7 +1562,7 @@ The spokes will receive this summary route from the hub:
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
- <code style="font-size:110%">
+ <code>
 SPOKE2#<b>show ip route eigrp</b>                                               <br>
 Codes: L - local, C - connected, S - static, R - RIP, M - mobile, B - BGP       <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; D - EIGRP, EX - EIGRP external, O - OSPF, IA - OSPF inter area           <br>
@@ -1575,7 +1579,7 @@ Gateway of last resort is not set&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp
 D&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.1.10.0/24 [90/76800640] via 172.30.1.1, 04:23:39, Tunnel0           <br>
 D&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.1.11.0/24 [90/76800640] via 172.30.1.1, 04:23:39, Tunnel0           <br>
 D&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.1.12.0/24 [90/76800640] via 172.30.1.1, 04:23:39, Tunnel0           <br>
-<span style="background:gray;">D&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.7.0.0/16 [90/104960000] via 172.30.1.1, 00:00:14, Tunnel0</span><br>
+<span style="background:#d3d3d3;">D&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.7.0.0/16 [90/104960000] via 172.30.1.1, 00:00:14, Tunnel0</span><br>
 D&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.8.10.0/24 [90/104960000] via 172.30.1.8, 03:24:09, Tunnel0 <br>
 D&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.8.11.0/24 [90/104960000] via 172.30.1.8, 03:24:09, Tunnel0 <br>
 D&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.8.12.0/24 [90/104960000] via 172.30.1.8, 03:24:09, Tunnel0 <br>
@@ -1589,7 +1593,7 @@ that is identified with the code ‘H’.
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
- <code style="font-size:110%">
+ <code>
 SPOKE2#<b>ping 10.7.10.1</b><br>
 Type escape sequence to abort.<br>
 Sending 5, 100-byte ICMP Echos to 10.7.10.1, timeout is 2 seconds:<br>
@@ -1620,7 +1624,7 @@ L&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.2.12.1/32 is directly connec
 C&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.2.13.0/24 is directly connected, Loopback13                        <br>
 L&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.2.13.1/32 is directly connected, Loopback13                        <br>
 D&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.7.0.0/16 [90/104960000] via 172.30.1.1, 00:00:49, Tunnel0          <br>
-<span style="background:gray;">H&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  10.7.10.0/24 [250/1] via 172.30.1.7, 00:00:04, Tunnel0</span><br>
+<span style="background:#d3d3d3;">H&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  10.7.10.0/24 [250/1] via 172.30.1.7, 00:00:04, Tunnel0</span><br>
 D&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.8.10.0/24 [90/104960000] via 172.30.1.8, 03:24:44, Tunnel0 <br>
 D&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.8.11.0/24 [90/104960000] via 172.30.1.8, 03:24:44, Tunnel0 <br>
 D&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.8.12.0/24 [90/104960000] via 172.30.1.8, 03:24:44, Tunnel0 <br>
@@ -1644,11 +1648,11 @@ This NHRP installed route is also reflected in the NHRP table:
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
- <code style="font-size:110%">
+ <code>
 SPOKE2#<b>show ip nhrp</b>                            <br>   
 10.7.10.0/24 via 172.30.1.7                           <br>
 &nbsp;&nbsp; Tunnel0 created 00:00:21, expire 01:59:37<br>      
-&nbsp;&nbsp; Type: dynamic, <span style="background:gray;">Flags: router used rib</span><br>      
+&nbsp;&nbsp; Type: dynamic, <span style="background:#d3d3d3;">Flags: router used rib</span><br>      
 &nbsp;&nbsp; NBMA address: 99.255.60.6                <br>      
 172.30.1.1/32 via 172.30.1.1                          <br>
 &nbsp;&nbsp; Tunnel0 created 04:35:26, never expire   <br>      
@@ -1666,7 +1670,7 @@ In the output of the DMVPN mapping table, NHRP installed routes have the flag
 <code><b>DT1</b></code>.
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
- <code style="font-size:110%">
+ <code>
 SPOKE2#<b>show dmvpn detail</b>                                                                                     <br>
 Legend: Attrb --&gt; S - Static, D - Dynamic, I - Incomplete&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;          <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;N - NATed, L - Local, X - No Socket&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;         <br>
@@ -1687,7 +1691,7 @@ Type:Spoke, Total NBMA Peers (v4/v6): 3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;          <br>
 # Ent&nbsp;&nbsp;Peer NBMA Addr Peer Tunnel Add State&nbsp;&nbsp;UpDn Tm Attrb&nbsp;&nbsp;&nbsp;&nbsp;Target Network&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;          <br>
 ----- --------------- --------------- ----- -------- ----- -----------------&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;          <br>
-&nbsp;&nbsp;&nbsp;&nbsp;1 99.255.60.6&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;172.30.1.7&nbsp;&nbsp;&nbsp;&nbsp;UP 00:40:42&nbsp;&nbsp;<span style="background:gray;">DT1</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 10.7.10.0/24  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;1 99.255.60.6&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;172.30.1.7&nbsp;&nbsp;&nbsp;&nbsp;UP 00:40:42&nbsp;&nbsp;<span style="background:#d3d3d3;">DT1</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 10.7.10.0/24  <br>
 &nbsp;&nbsp;&nbsp;&nbsp;2 99.255.60.2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;172.30.1.8&nbsp;&nbsp;&nbsp;&nbsp;UP 00:03:29&nbsp;&nbsp;DT2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 10.8.10.0/24&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;          <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;99.255.60.2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;172.30.1.8&nbsp;&nbsp;&nbsp;&nbsp;UP 00:03:29&nbsp;&nbsp;&nbsp;&nbsp;D&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;172.30.1.8/32&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;          <br>
 &nbsp;&nbsp;&nbsp;&nbsp;1 99.255.10.2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;172.30.1.1&nbsp;&nbsp;&nbsp;&nbsp;UP 05:15:48&nbsp;&nbsp;&nbsp;&nbsp;S&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;172.30.1.1/32&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;          <br>
@@ -1726,7 +1730,7 @@ command <code><b>ip cef &lt;prefix&gt;</b></code>.
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
- <code style="font-size:110%">
+ <code>
 SPOKE2#<b>ping 10.8.10.1</b>                                                          <br>            
 Type escape sequence to abort.                                                        <br>     
 Sending 5, 100-byte ICMP Echos to 10.8.10.1, timeout is 2 seconds:                    <br>     
@@ -1750,7 +1754,7 @@ D&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.1.10.0/24 [90/76800640] via 
 D&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.1.11.0/24 [90/76800640] via 172.30.1.1, 05:20:53, Tunnel0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;     <br>     
 D&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.1.12.0/24 [90/76800640] via 172.30.1.1, 05:20:54, Tunnel0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;     <br>     
 D&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.7.0.0/16 [90/104960000] via 172.30.1.1, 00:57:29, Tunnel0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;     <br>     
-<span style="background:gray;">D&nbsp;&nbsp; %&nbsp;&nbsp;&nbsp;&nbsp;10.8.10.0/24 [90/104960000] via 172.30.1.8, 04:21:24, Tunnel0</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;      <br>     
+<span style="background:#d3d3d3;">D&nbsp;&nbsp; %&nbsp;&nbsp;&nbsp;&nbsp;10.8.10.0/24 [90/104960000] via 172.30.1.8, 04:21:24, Tunnel0</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;      <br>     
 D&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.8.11.0/24 [90/104960000] via 172.30.1.8, 04:21:24, Tunnel0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;      <br>     
 D&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.8.12.0/24 [90/104960000] via 172.30.1.8, 04:21:24, Tunnel0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;      <br>     
 SPOKE2#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;     <br>     
@@ -1787,7 +1791,7 @@ Type:Spoke, Total NBMA Peers (v4/v6): 3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp
 # Ent&nbsp;&nbsp;Peer NBMA Addr Peer Tunnel Add State&nbsp;&nbsp;UpDn Tm Attrb&nbsp;&nbsp;&nbsp;&nbsp;Target Network&nbsp;&nbsp;&nbsp;&nbsp;      <br>     
 ----- --------------- --------------- ----- -------- ----- -----------------&nbsp;&nbsp;&nbsp;&nbsp;      <br>     
 &nbsp;&nbsp;&nbsp;&nbsp;1 99.255.60.6&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;172.30.1.7&nbsp;&nbsp;&nbsp;&nbsp;UP 00:56:58&nbsp;&nbsp;DT1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 10.7.10.0/24&nbsp;&nbsp;&nbsp;&nbsp;      <br>     
-&nbsp;&nbsp;&nbsp;&nbsp;<span style="background:gray;">2 99.255.60.2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;172.30.1.8&nbsp;&nbsp;&nbsp;&nbsp;UP 00:19:45&nbsp;&nbsp;DT2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 10.8.10.0/24</span>&nbsp;&nbsp;&nbsp;&nbsp;      <br>     
+&nbsp;&nbsp;&nbsp;&nbsp;<span style="background:#d3d3d3;">2 99.255.60.2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;172.30.1.8&nbsp;&nbsp;&nbsp;&nbsp;UP 00:19:45&nbsp;&nbsp;DT2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 10.8.10.0/24</span>&nbsp;&nbsp;&nbsp;&nbsp;      <br>     
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;99.255.60.2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;172.30.1.8&nbsp;&nbsp;&nbsp;&nbsp;UP 00:19:45&nbsp;&nbsp;&nbsp;&nbsp;D&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;172.30.1.8/32&nbsp;&nbsp;&nbsp;&nbsp;      <br>     
 &nbsp;&nbsp;&nbsp;&nbsp;1 99.255.10.2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;172.30.1.1&nbsp;&nbsp;&nbsp;&nbsp;UP 05:32:04&nbsp;&nbsp;&nbsp;&nbsp;S&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;172.30.1.1/32&nbsp;&nbsp;&nbsp;&nbsp;      <br>     
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;      <br>    
@@ -1799,7 +1803,7 @@ The next-hop override flag is also set in the NHRP table for this route:
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
- <code style="font-size:110%">
+ <code>
 SPOKE2#<b>show ip nhrp detail</b>             <br>
 10.7.10.0/24 via 172.30.1.7                   <br>
 &nbsp;&nbsp; Tunnel0 created 01:12:43, expire 00:47:15  <br>
@@ -1807,7 +1811,7 @@ SPOKE2#<b>show ip nhrp detail</b>             <br>
 &nbsp;&nbsp; NBMA address: 99.255.60.6                  <br>
 10.8.10.0/24 via 172.30.1.8                   <br>
 &nbsp;&nbsp; Tunnel0 created 00:35:30, expire 01:24:29  <br>
-&nbsp;&nbsp; <span style="background:gray;">Type: dynamic, Flags: router used rib nho</span><br>
+&nbsp;&nbsp; <span style="background:#d3d3d3;">Type: dynamic, Flags: router used rib nho</span><br>
 &nbsp;&nbsp; NBMA address: 99.255.60.2                  <br>
 172.30.1.1/32 via 172.30.1.1                  <br>
 &nbsp;&nbsp; Tunnel0 created 05:47:49, never expire     <br>
@@ -1839,7 +1843,7 @@ preferrable to disable it entirely.
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
- <code style="font-size:110%">
+ <code>
 HUB#<b>configure terminal</b>                       <br>
 HUB(config)#<b>interface tunnel 10</b>              <br>
 HUB(config-if)#<b>no ip split-horizon eigrp 100</b> <br>
@@ -1881,7 +1885,7 @@ Tunnel states can be any of the following:
 
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
- <code style="font-size:110%">
+ <code>
 SPOKE8#<b>show dmvpn interface tunnel0 detail</b>                                    <br>
 Legend: Attrb --&gt; S - Static, D - Dynamic, I - Incomplete                         <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;N - NATed, L - Local, X - No Socket&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                  <br>
@@ -1919,7 +1923,7 @@ monitoring and VRF contexts IPSec crypto info.
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
- <code style="font-size:110%">
+ <code>
 SPOKE8#<b>show dmvpn detail</b>                                                       <br>
 Legend: Attrb --&gt; S - Static, D - Dynamic, I - Incomplete                          <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;N - NATed, L - Local, X - No Socket&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                   <br>
@@ -1963,7 +1967,7 @@ an NHRP request and its request ID. The NHRP cache displays NHRP mapping entries
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
- <code style="font-size:110%">
+ <code>
 SPOKE8#<b>show ip nhrp brief</b>                                             <br>
 &nbsp;&nbsp; Target&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Via&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;NBMA&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Mode&nbsp;&nbsp; Intfc&nbsp;&nbsp; Claimed&nbsp;&nbsp; <br>
 172.30.1.1/32&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;172.30.1.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;99.255.10.2&nbsp;&nbsp;&nbsp;&nbsp; static&nbsp;&nbsp; Tu0&nbsp;&nbsp;&nbsp;&nbsp; &lt;&nbsp;&nbsp; &gt;  <br>
@@ -2038,7 +2042,7 @@ statistics on NHRP packets sent and received.
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
- <code style="font-size:110%">
+ <code>
 HUB#<b>show ip nhrp traffic</b><br>
 Tunnel0: Max-send limit:100Pkts/10Sec, Usage:0%                           <br>
 &nbsp;&nbsp; Sent: Total 16&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;             <br>
@@ -2123,7 +2127,7 @@ only command of the two that supports IPv6.
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
- <code style="font-size:110%">
+ <code>
 SPOKE1(config)#<b>vrf definition FVRF</b><br>
 SPOKE1(config-vrf)#<b>address-family ipv4</b>
 </code></div>
@@ -2140,7 +2144,7 @@ has been activated.
   </p>
   <p>
   <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
- <code style="font-size:110%">
+ <code>
   SPOKE1(config-if)#<b>interface g0/0</b><br>
   SPOKE1(config-if)#<b>vrf forwarding FVRF</b><br>
   SPOKE1(config-if)#<b>ip address 99.255.20.2 255.255.255.252</b><br>
@@ -2153,7 +2157,7 @@ has been activated.
   </p>
   <p>
     <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
- <code style="font-size:110%">
+ <code>
   SPOKE1(config)#<b>interface tunnel 0                        </b> <br>
   SPOKE1(config-if)#<b>ip address 172.30.1.100 255.255.255.0  </b> <br>
   SPOKE1(config-if)#<b>tunnel mode gre multipoint             </b> <br>
@@ -2171,7 +2175,7 @@ the configuration of a static route.
 </p>
 <p>
    <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
- <code style="font-size:110%">
+ <code>
 SPOKE1(config)#<b>ip route vrf FVRF 0.0.0.0 0.0.0.0 99.255.20.1</b>
 </code></div>
 </p>
@@ -2183,7 +2187,7 @@ FVRF configuration and operation can be verified using the command
 </p>
 <p>
  <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
- <code style="font-size:110%">
+ <code>
 SPOKE1#<b>show dmvpn detail</b>                                                       <br>
 Legend: Attrb --&gt; S - Static, D - Dynamic, I - Incomplete&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;          <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;N - NATed, L - Local, X - No Socket&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;           <br>
@@ -2235,7 +2239,7 @@ IPv6 commands are similar to IPv4 commands. To create mGRE tunnels;
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
- <code style="font-size:110%">
+ <code>
 SPOKE8(config-if)#<b>tunnel mode gre multipoint ipv6</b>
 </code></div>
 </p>
