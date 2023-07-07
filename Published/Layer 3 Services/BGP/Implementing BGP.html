@@ -5821,9 +5821,29 @@ R6(config-router)#<b>neighbor 4.4.4.4 inherit peer-session BGP_SESSION_TEMPLATE_
 R6(config-router)#<b>neighbor 5.5.5.5 inherit peer-session BGP_SESSION_TEMPLATE_AS65000</b>
 </code></div></p>
 
+
+<h4>Verification of Peer Sessions</h4>
 <p>
-Verification of the peer-session can be done using the privileged mode command: 
-<code><b>show bgp ipv4 unicast template peer-session</b></code>
+Configured peer sessions can be viewed using the command <code><b>show bgp ipv4 
+unicast template peer-session</b></code>. The following output shows an example of a the 
+details of a configured peer session template.
+</p>
+<p><div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+<code>
+R11#<b>show bgp ipv4 unicast template peer-session</b>     <br>
+Template:PEER_SESS_1000, index:1                           <br>
+Local&nbsp;&nbsp;policies:0x2000B1, Inherited polices:0x0  <br>
+Locally&nbsp;&nbsp;configured session commands:            <br>
+&nbsp;&nbsp;remote-as 1000.1000                            <br>
+&nbsp;&nbsp;password is configured                         <br>
+&nbsp;&nbsp;update-source Loopback255                      <br>
+&nbsp;&nbsp;timers&nbsp;&nbsp;70 210 140                   <br>
+&nbsp;&nbsp;ha-mode graceful-restart                       <br>
+Inherited session commands:                                <br>
+</code></div></p>
+
+<p>
+
 </p>
 <p><div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
 <code>
@@ -5837,26 +5857,6 @@ Locally configured session commands:           <br>
 Inherited session commands:                    <br>
                                                <br>
 R6#
-</code></div></p>
-
-<h4>Verification of Peer Sessions</h4>
-<p>
-Configured peer sessions can be viewed using the command <code><b>show bgp ipv4 
-unicast template peer-session</b></code>. The following output shows an example of a the 
-details of a configured peer session template.
-</p>
-<p><div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-<code>
-R11#show bgp ipv4 unicast template peer-session
-Template:PEER_SESS_1000, index:1
-Local policies:0x2000B1, Inherited polices:0x0
-Locally configured session commands:
- remote-as 1000.1000
- password is configured
- update-source Loopback255
- timers 70 210 140
- ha-mode graceful-restart
-Inherited session commands:
 </code></div></p>
 
 <h3>Peer policy</h3>
@@ -6050,16 +6050,16 @@ update-group.
 
 <h2 id="SUMMARIZATION">Route Summarization</h2>
 <p>
-BGP route summarization automatically summarizes prefixes on classful boundaries, 
-no mask required on the when defining networks to be advertised using the BGP 
-<code><b>network</b></code> command and requires subnet of network to be 
-present in the IGP. BGP auto-summary is disabled by default. 
+BGP route summarization automatically summarizes prefixes on classful boundary, 
+when no mask is provided when defining networks to be advertised using the BGP 
+<code><b>network</b></code> command. BGP auto-summary is disabled by default. 
 </p>
-<p>
+
 <h3>BGP Aggregation</h3>
+<p>
 The hierarchy of a BGP topology is arbitrary; learning of routes in path vector 
-protocols like BGP is simlar to distance vector routing protocols i.e. you learn 
-from your neighbor. OSPF and IS-IS is strict leaf-spine-leaf. This, therefore, 
+protocols like BGP is similar to distance vector routing protocols i.e. you learn 
+from your neighbor. This, therefore, 
 implies that summarization can be implemented anywhere in the toplogy. The only 
 requirement is that the subnet must exist in BGP table.
 </p>
@@ -6401,7 +6401,7 @@ The following command can be used to filter locally originated prefixes
 <code><b>ip as-path access-list 1 permit ^$</b></code>.
 </p>
 
-<h2 id="FILTERING">Route Filtering</h2>
+<h1 id="FILTERING">Route Filtering</h1>
 <p>
 BGP update filtering occurs on a per peer basis. 
 Cisco IOS provides the following  methods of filtering updates: distribute-lists, 
@@ -6412,13 +6412,14 @@ operations issue where for example a distribute-list and filter-list are applied
 to the same peer and it is not clear which is implemented first.
 </p>
 
-<h3>Distribute-list</h3>
+<h2>Distribute-list</h2>
 <p>
 Distribute-lists allow for the filtering of network prefixes on a neighbor-by-neighbor 
 basis using standard or extended Access Control Lists (ACLs). They are configured 
 in address-family mode: <code><b>neighbor &lt;ip-address&gt; 
 distribute-list &lt;acl&gt; [in | out]</b></code>
 </p>
+
 <p><div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
 <code>
 R3(config)#<b>do show bgp ipv4 unicast neighbor 9.9.9.9 advertised-routes</b><br>
@@ -6636,12 +6637,15 @@ RPKI validation codes: V valid, I invalid, N Not found                          
 &nbsp;                                                                                <br>
 Total number of prefixes 36                                                      <br>
 </code></div></p>
-<h4>Extended Access Control Lists (ACLs)</h4>
+
+<h3>Extended Access Control Lists (ACLs)</h3>
 <p>
 Extended ACLs provide extensive filtering capability that is comparable to 
 prefix-lists. Filtering using extended ACLs in BGP behave differently from the way they do in 
-OSPF or EIGRP; the destination section of the extended ACL maps to the prefix 
-and the source section of the ACL maps to the subnet mask.
+OSPF or EIGRP; the destination section of the extended ACL maps to the prefix-length 
+and the source section of the ACL maps to the prefix.
+</p>
+<p>
 The general structure of an extended ACL is: <code><b>&lt;sequence&gt; &lt;permit|deny&gt; 
 &lt;protocol&gt; &lt;source-ip&gt; &lt;source-mask&gt; &lt;destination-ip&gt; 
 &lt;destination-mask&gt; </b></code>. 
@@ -6659,7 +6663,7 @@ or greater, we permit the entry and block everything else:
 <code><b>#access-list 100 permit ip 100.100.0.0 0.0.255.255 255.255.0.0 0.0.255.255</b></code>.
 </p>
 <p>
-When matching using standard acls, we match only the source address and source mask. 
+When matching using standard ACLs, we match only the source address and source mask. 
 The destination part of the extended ACL matches against the netmask.
 When used for BGP filtering, whatever is the source part of the address is matched 
 against the prefix and the destination is matched against the netmask.
@@ -6681,6 +6685,7 @@ goal is: <code><b>10 permit 0.0.0.0 255.255.0.0 host 255.255.0.0</b></code>.
 The first two octets of the prefix and subnet mask are matched. This extended 
 ACL can then be applied using a distribute-list.
 </p>
+
 <p><div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
 <code>
 R7><b>show bgp ipv4 unicast neighbor 30.255.6.6 routes</b>                             <br>
@@ -6704,7 +6709,7 @@ Total number of prefixes 7                                                 <br>
 R7>
 </code></div></p>
 
-<h3>Prefix-List</h3>
+<h2>Prefix-List</h2>
 <p>
 Prefix-lists allow the filtering of network prefixes on a neighbor-by-neighbor 
 basis for a specific direction i.e. inbound or outbound. Compared to the access 
@@ -6869,8 +6874,9 @@ R1(config-router-af)#<b>do clear bgp ipv4 unicast 9.9.9.9 out</b>
 </code></div></p>
 <p>
 The Loc-RIB table of R1 and R9 after applying filtering using the prefix-list shows that prefixes 10.1.10.0/24, 
-10.1.11.0/24, 10.1.12.0/24. The aggregated prefix 10.1.0.0/16 is permitted by the prefix list and is therefore not 
-filtered. 
+10.1.11.0/24, 10.1.12.0/24 confirms that these component prefixes have been filtered.
+The aggregated prefix 10.1.0.0/16 is permitted by the prefix list and is therefore not 
+filtered by BGP. 
 </p>
 <p>
 This may be an effective method of advertising aggregated prefixes to eBGP peers and filtering the component prefixes 
@@ -6995,7 +7001,8 @@ Total number of prefixes 45                                                     
 R9#                                                                                <br>                           
 </code></div></p>
 
-<h4>Verification</h4>
+
+<h3>Verification</h3>
 <p><div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
 <code>
 R1#<b>show bgp ipv4 unicast neighbor 9.9.9.9</b>                                                    <br>
@@ -7058,11 +7065,11 @@ BGP neighbor is 9.9.9.9,  remote AS 65512, external link                        
 &nbsp;&nbsp;Refresh-Out took 0 seconds                                                                        <br>
 &nbsp;&nbsp;Last Received Refresh Start-of-rib: never                                                         <br>
 &nbsp;&nbsp;Last Received Refresh End-of-rib: never                                                           <br>
-&nbsp;&nbsp;                                     Sent       Rcvd                                              <br>
-&nbsp;&nbsp;      Refresh activity:              ----       ----                                              <br>
-&nbsp;&nbsp;        Refresh Start-of-RIB          2          0                                                <br>
-&nbsp;&nbsp;        Refresh End-of-RIB            2          0                                                <br>
-&nbsp;&nbsp;                                                                                                  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Sent&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Rcvd                                              <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Refresh activity:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;----&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ----                                              <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Refresh Start-of-RIB&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;                                              <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Refresh End-of-RIB&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;                                              <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                              <br>
 &nbsp;&nbsp;Address tracking is enabled, the RIB does have a route to 9.9.9.9                                 <br>
 &nbsp;&nbsp;Connections established 1; dropped 0                                                              <br>
 &nbsp;&nbsp;Last reset never                                                                                  <br>
@@ -7078,27 +7085,27 @@ Maximum output segment queue size: 50                                           
                                                                                                     <br>
 Enqueued packets for retransmit: 0, input: 0  mis-ordered: 0 (0 bytes)                              <br>
                                                                                                     <br>
-Event Timers (current time is 0x200D38):                                                            <br>
-Timer          Starts    Wakeups            Next                                                    <br>
-Retrans            44          0             0x0                                                    <br>
-TimeWait            0          0             0x0                                                    <br>
-AckHold            34         30             0x0                                                    <br>
-SendWnd             0          0             0x0                                                    <br>
-KeepAlive           0          0             0x0                                                    <br>
-GiveUp              0          0             0x0                                                    <br>
-PmtuAger         1192       1191        0x200E65                                                    <br>
-DeadWait            0          0             0x0                                                    <br>
-Linger              0          0             0x0                                                    <br>
-ProcessQ            0          0             0x0                                                    <br>
-                                                                                                    <br>
-iss: 1283527991  snduna: 1283530730  sndnxt: 1283530730                                             <br>
-irs:  383559796  rcvnxt:  383561252                                                                 <br>
-                                                                                                    <br>
-sndwnd:  15116  scale:      0  maxrcvwnd:  16384                                                    <br>
-rcvwnd:  14929  scale:      0  delrcvwnd:   1455                                                    <br>
-                                                                                                    <br>
+Event Timers (current time is 0x200D38):&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                  <br>
+Timer&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Starts&nbsp;&nbsp;&nbsp;&nbsp;Wakeups&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Next&nbsp;&nbsp;                                                  <br>
+Retrans&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;44&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0x0&nbsp;&nbsp;                                                  <br>
+TimeWait&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0x0&nbsp;&nbsp;                                                  <br>
+AckHold&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;34&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 30&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0x0&nbsp;&nbsp;                                                  <br>
+SendWnd&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0x0&nbsp;&nbsp;                                                  <br>
+KeepAlive&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0x0&nbsp;&nbsp;                                                  <br>
+GiveUp&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0x0&nbsp;&nbsp;                                                  <br>
+PmtuAger&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 1192&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 1191&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0x200E65&nbsp;&nbsp;                                                  <br>
+DeadWait&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0x0&nbsp;&nbsp;                                                  <br>
+Linger&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0x0&nbsp;&nbsp;                                                  <br>
+ProcessQ&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0x0&nbsp;&nbsp;                                                  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                  <br>
+iss: 1283527991&nbsp;&nbsp;snduna: 1283530730&nbsp;&nbsp;sndnxt: 1283530730                                             <br>
+irs:&nbsp;&nbsp;383559796&nbsp;&nbsp;rcvnxt:&nbsp;&nbsp;383561252&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                   <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                  <br>
+sndwnd:&nbsp;&nbsp;15116&nbsp;&nbsp;scale:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;maxrcvwnd:&nbsp;&nbsp;16384&nbsp;&nbsp;                                                  <br>
+rcvwnd:&nbsp;&nbsp;14929&nbsp;&nbsp;scale:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;delrcvwnd:&nbsp;&nbsp; 1455&nbsp;&nbsp;                                                  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                  <br>
 SRTT: 997 ms, RTTO: 1021 ms, RTV: 24 ms, KRTT: 0 ms                                                 <br>
-minRTT: 8 ms, maxRTT: 1000 ms, ACK hold: 200 ms                                                     <br>
+minRTT: 8 ms, maxRTT: 1000 ms, ACK hold: 200 ms&nbsp;&nbsp;                                                   <br>
 Status Flags: active open                                                                           <br>
 Option Flags: nagle, path mtu capable                                                               <br>
 IP Precedence value : 6                                                                             <br>
@@ -7109,7 +7116,7 @@ Sent: 80 (retransmit: 0, fastretransmit: 0, partialack: 0, Second Congestion: 0)
                                                                                                                         <br>
  Packets received in fast path: 0, fast processed: 0, slow path: 0                                                      <br>
  fast lock acquisition failures: 0, slow path: 0                                                                        <br>
-TCP Semaphore      0x6B0FB630  FREE                                                                                     <br>
+TCP Semaphore&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0x6B0FB630  FREE                                                                                     <br>
 R1#                                                                                                                     <br>
 </code></div></p>
 
@@ -7234,7 +7241,7 @@ R6&gt;
 <h3>AS Path Access Control Lists</h3>
 <p>
 There may be times when conditionally matching network prefixes may be too complicated,
-and identifying all routes from a specific organization using autonommous system 
+and identifying all routes from a specific organization using autonomous system 
 numbers (ASNs) is preferred. In such a 
 scenario, AS_PATH access control lists can be used. AS_PATH filtering is accomplished using an
 AS Path Access Control List, which uses regular expressions for matching.
@@ -7812,7 +7819,7 @@ whose BGP process is restarting. BGP devices support two modes of graceful resta
   <li><b>Graceful-restart capable:</b> all features of graceful restart are 
   supported.</li>
   <li><b>Graceful-restart aware:</b> not all features of graceful restart are 
-  supported but devices are aware that neigbors are capable of graceful restart.</li>
+  supported but devices are aware that neighbors are capable of graceful restart.</li>
 </ul>
 </p>
 <p>
@@ -7820,9 +7827,9 @@ Graceful restart is configured per neighbor, globally or in  a session template.
 Graceful restart feature is agreed upon by BGP neighbors during peering. 
 The restart time is the time that the BGP peer is expected to complete restarting
 the BGP process otherwise the peering will fail. By default, the graceful restart
-restart time is 120 sceonds. 
-and a stalepath time is 360 (how long stalepaths are maintained until restart is 
-complete). To confiigure graceful restart, under the BGP configuration issue the
+restart time is 120 seconds. 
+and a stalepath time is 360 seconds (how long stalepaths are maintained until restart is 
+complete). To configure graceful restart, under the BGP configuration issue the
  command <code><b>bgp graceful-restart</b></code>. The IOS will prompt to reset 
  peering for the configuration to take effect.
 </p>
@@ -7834,15 +7841,17 @@ from a BGP peer. This feature ensures that the BGP table does not overwhelm the
 router by exceeding its memory or processing capability. Maximum prefix feature 
 works with both eBGP and iBGP peers; though in production, it is typically 
 configured for eBGP peers.
-
+</p>
+<p>
 A full view refers to the sharing of all prefixes in the BGP table. 
 By default, a full view is allowed from all peers. A full view generally should 
 not come from downstream customers. 
-
+</p>
+<p>
 Routers can place prefix restrictions on the number of prefixes that they are able 
 to receive from a BGP neighbor. If the number of prefixes received exceeds the 
 configured maximum, two actions can be taken; generation of a log message
-or shutdown of the peer relationship. If not stated, the default behaviour is to 
+or shutdown of the peer relationship. If not explicitly configured, the default behaviour is to 
 shutdown the peer session with the "offending" peer.
 The maximum prefix can be configured using the BGP address family configuration command 
 <code><b>neighbor ip-address maximum-prefix &lt;prefix-count&gt; [warning-percentage] [restart &lt;minutes&gt;] [warning-only]</b></code>.
@@ -7914,14 +7923,14 @@ To tune memory consumption, consider the implementation of the following feature
 </ul>
 </p>
 
-<h3>Transport Optmization</h3>
+<h3>Transport Optimization</h3>
 <p>
 TCP can be tuned to reduce the memory and CPU utilization by BGP through the 
 following configurations:
 <ul>
   <li>TCP optimization thru MSS and window size.</li>
   <li>BGP update generation is automatically implemented using update groups.</li>
-  <li>Optmization of TCP ACK: ACks can be buffered</li>
+  <li>Optimization of TCP ACK: ACks can be buffered</li>
 </ul>
 </p>
 
@@ -7938,7 +7947,7 @@ iBGP peer and 20 for an eBGP peer.
 </p>
 <p>
 If a local static default route has been configured, it will be inserted into 
-the BGP table in preference to the BGP propagated default route because a static 
+the routing table in preference to the BGP propagated default route because a static 
 route has a lower administrative distance (of one) than the iBGP administrative 
 distance of 200.
 </p>
@@ -7975,7 +7984,7 @@ alternate paths are still usable.
 
 When a route flap occurs for a prefix:
 <ul>
-  <li>If a BGP withdrawal message is received, penalty on the increased by 1000 
+  <li>If a BGP withdrawal message is received, penalty on the prefix is increased by 1000 
   by default and the prefix is marked as having flap history</li>
   <li>If a BGP Update message is received, if the penalty is greater than 
   suppress-limit, the prefix is not announced to any BGP peers and is marked 
@@ -8006,6 +8015,10 @@ suppress threshold is 6,000 and max suppress threshold is 50,000.
 </p>
 
 <h3>Configuration</h3>
+<p>
+
+</p>
+
 <h4>Fixed Dampening</h4>
 <p>
 BGP flap dampening can be configured using the following command: 
@@ -8127,7 +8140,7 @@ using the command:
 <p>
 For peering using a loopback interface, the IP address or network of the loopback 
 interface should be in the routing table of the eBGP peer. In production networks, 
-usually a static route is configured. Scenarious exist where an IGP is configured 
+usually a static route is configured. Scenarios exist where an IGP is configured 
 between eBGP peers. Here, the IP address of the loopback interface is advertised 
 into the IGP. This will result in the peer session between the two prefixes to 
 flap as the eBGP route (with AD of 20) is installed into the routing table. 
@@ -8139,6 +8152,10 @@ For example <code><b>network 192.168.0.1 mask 255.255.255.255 backdoor</b></code
 </p>
 
 <h2>Miscellaneous Neighbor Options</h2>
+<p>
+
+</p>
+
 <h3><code>log-neighbor-changes</code></h3>
 <p>
 The <code><b>bgp log-neighbor-changes</b></code> command helps with logging the 
@@ -8166,6 +8183,10 @@ route reflection, and BGP confederations.
 
 
 <h1 id="TROUBLESHOOTING">Troubleshooting BGP</h1>
+<p>
+
+</p>
+
 <h2 id="TROUBLESHOOTING_PEERINGS">BGP Peerings</h2>
 <p>
 Some commands that can be used to verify the state of BGP peerings include:
@@ -8263,6 +8284,7 @@ MP-BGP extensions include an AFI that describe the supported protocols along
 with subsequent address family identifier (SAFI) attribute fields that describe whether the prefix applies to the unicast
 or multicast routing table:
 </p>
+<p>
 <table>
 <tr>
 <td>Protocol</td>
@@ -8279,6 +8301,7 @@ or multicast routing table:
 <td>1</td>
 </tr>
 </table>
+</p>
 <p>
 Every address family maintains a separate database in configuration for each protocol in BGP. This means that a database
 exists for each protocol IPv4 unicast and a different one for IPv4 multicast routing. This allows for the routing policy of 
@@ -8353,6 +8376,7 @@ command <code><b>bgp upgrade-cli</b></code>
 <p>
 The following commands are helpful for understanding the current status of the router:
 </p>
+<p>
 <table>
 <tr>
 <td>Command</td>
@@ -8373,6 +8397,7 @@ perspective</td>
 </tr>
 </table>
 <h1>Viewing BGP Prefixes</h1>
+<p>
 <table>
 
 <tr>
@@ -8406,6 +8431,7 @@ BGP path attributes are included.
 <td>Displays a brief summary of the BGP paths that were advertised to the specific BGP peer.
 </tr>
 </table>
+</td>
 
 <h1>MP-BGP IPv6 Route Summarization</h1>
 <p>
