@@ -13,11 +13,13 @@
 <p>
 MPLS Layer 3 VPNs (L3VPNs) are used by service providers (SPs) to provide layer 3   
 connectivity between an enterprise and its different remote offices/locations 
-through the service provider's network. MPLS L3VPNs are defined by RFC 4364. 
+through the service provider's network. MPLS L3VPNs are defined by 
+<a href="https://www.ietf.org/rfc/rfc4364.txt" target="_blank">RFC 4364</a>. 
 
 SPs are able to provide different customers layer 3 connectivity to their remote 
 locations using the same underlaying infrastructure. This is possible regardless of 
-whether the different customer sites use the same overlapping RFC 1918 IP 
+whether the different customer sites use the same overlapping 
+<a href="https://www.ietf.org/rfc/rfc1918.txt" target="_blank">RFC 1918</a> IP 
 addresses or not. 
 Traffic from different customers is differentiated using VPNv4 addresses and routed 
 to their respective destinations using the SP's core network.
@@ -122,7 +124,7 @@ The VPN label is used by the egress LSR/PE router to determine customer specific
 about the packet and what to do with it. The VPN label tells the PE router which 
 CE traffic is destined to. It is derived from VPNv4 advertisements of PEs.
 Other applications such as MPLS TE, FRR, etc., require even more labels.
-VPN labels are exchange between PE routers over the MP-BGP peering. Labeled 
+VPN labels are exchanged between PE routers over the MP-BGP peering. Labeled 
 packets are advertised along with BGP extended communities path attributes.
 MPLS generates labels for VPNv4 routes and adds [V] after the prefix to indicate 
 that the label is a VPNv4 label.
@@ -136,7 +138,8 @@ the MPLS header.
 <p>
 A route-target (RT) is a 64-bit value similar in format to the RD i.e. ASN:nn or 
 IP addess:nn. It is used by MP-BGP to determine the VRF into which the different 
-customer prefixes should be installed. RT is defined by RFC 4360 (BGP extended communities attribute).
+customer prefixes should be installed. RT is defined by 
+<a href="https://www.ietf.org/rfc/rfc4360.txt" target="_blank">RFC 4360 (BGP extended communities attribute)</a>.
 
 The routes defined in the VRF of one customer are tagged for export 
 to the remote PE customer VRF using the command 
@@ -277,7 +280,6 @@ R1(config-vrf)#<b>rd 200:2                  </b> <br>
 R1(config-vrf)#<b>route-target export 200:110 </b> <br>
 R1(config-vrf)#<b>route-target import 200:100 </b> <br>
 </code></div>
-</code></div>
 </p>
 <p>
 The command <code><b>vrf upgrade-cli multi-af-mode common-policies</b></code> 
@@ -290,6 +292,7 @@ configuration takes precedence over any other similar configuration that may hav
 configured under the VRF sub-mode.
 </p>
 
+<p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
 <code>
 R1(config)#<b>vrf upgrade-cli multi-af-mode common-policies</b>                <br>
@@ -299,7 +302,6 @@ belonging to upgraded VRFs.                                                    <
                                                                                <br>
 Are you sure ? [yes]: <b>yes</b>                                               <br>
 Number of VRFs upgraded: 2                                                     <br>
-R1(config)#                                                                    <br>
 R1(config)#                                                                    <br>
 R1(config)#<b>do show vrf detail</b>                                                  <br>
 VRF CUST_X_HQ (VRF Id = 1); default RD 300:100; default VPNID &lt;not set&gt;  <br>
@@ -330,13 +332,14 @@ Address family ipv4 (Table ID = 2 (0x2)):                                      <
 Address family ipv6 not active                                                 <br>
                                                                                <br>
 R1(config)#                                                                    <br>
-
 </code></div>
+</p>
 
 <h3 id="VERIFICATION">Verification</h3>
 <p>
 To verify the creation of VRFs, use the command <code><b>show vrf</b></code> 
 as demonstrated above.
+</p>
 
 <h2>Step 3: Configure iBGP Peering between the PE routers using VPNv4 address-family</h2>
 <p>
@@ -518,7 +521,9 @@ will simply be shared through the eBGP relationship from MP-BGP.
 To verify that the appropriate routes have been redistributed;
 </p>
 <p>
-On the PE router;
+On the PE router:
+</p>
+<p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
       	<code>
 R1#<b>show ip route vrf CUST_Z_2</b>                                           <br>       
@@ -559,7 +564,6 @@ C&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.255.19.0/30 is directly conn
 L&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.255.19.1/32 is directly connected, GigabitEthernet3/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    <br>
 B&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.255.67.0/30 [200/0] via 30.255.6.6, 00:39:18&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   <br>
 R1#<br>
-R1#<br>
 R1#<b>show bgp vpnv4 unicast vrf CUST_Z_2</b>                                     <br>
 BGP table version is 38, local router ID is 30.255.1.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                  <br>
 Status codes: s suppressed, d damped, h history, * valid, &gt; best, i - internal,<br>
@@ -588,7 +592,9 @@ R1#
 </p>
 
 <p>
-On the CE router;
+On the CE router:
+</p>
+<p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
       	<code>
 R9><b>show ip route</b> <br>
@@ -627,17 +633,16 @@ D EX&nbsp;&nbsp;&nbsp;&nbsp; 10.255.67.0/30&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;99.0.0.0/32 is subnetted, 1 subnets&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                 <br>
 C&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;99.255.9.9 is directly connected, Loopback255                          <br>
 R9>                                                                             <br>
-R9>                                                                             <br>
-R9>                                                                             <br>
-R9>ping 10.7.7.1                                                                <br>
+R9><b>ping 10.7.7.1</b><br>
 Type escape sequence to abort.                                                  <br>
 Sending 5, 100-byte ICMP Echos to 10.7.7.1, timeout is 2 seconds:               <br>
 !!!!!                                                                           <br>
 Success rate is 100 percent (5/5), round-trip min/avg/max = 84/100/128 ms       <br>
 R9>
-
 </code></div>
 </p>
+
+
 <h4><code>show bgp vpnv4 unicast all</code></h4>
 
 <p>
@@ -647,6 +652,7 @@ MP-BGP VRF table. This can be verified by the command;
 MP-BGP table for all VRFs.
 </p>
 
+<p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
       	<code>
 
@@ -660,52 +666,53 @@ RPKI validation codes: V valid, I invalid, N Not found&nbsp;&nbsp;&nbsp;&nbsp;&n
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                 <br>
 &nbsp;&nbsp;&nbsp;&nbsp; Network&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Next Hop&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Metric LocPrf Weight Path                <br>
 Route Distinguisher: 200:1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                 <br>
- *>i 10.10.1.0/24&nbsp;&nbsp;&nbsp;&nbsp; 30.255.6.6&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2&nbsp;&nbsp;&nbsp;&nbsp;100&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 ?&nbsp;&nbsp;                 <br>
- *>i 10.10.2.0/24&nbsp;&nbsp;&nbsp;&nbsp; 30.255.6.6&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2&nbsp;&nbsp;&nbsp;&nbsp;100&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 ?&nbsp;&nbsp;                 <br>
- *>i 10.10.3.0/24&nbsp;&nbsp;&nbsp;&nbsp; 30.255.6.6&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2&nbsp;&nbsp;&nbsp;&nbsp;100&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 ?&nbsp;&nbsp;                 <br>
- *>i 10.10.4.0/24&nbsp;&nbsp;&nbsp;&nbsp; 30.255.6.6&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2&nbsp;&nbsp;&nbsp;&nbsp;100&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 ?&nbsp;&nbsp;                 <br>
- *>i 10.10.5.0/24&nbsp;&nbsp;&nbsp;&nbsp; 30.255.6.6&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2&nbsp;&nbsp;&nbsp;&nbsp;100&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 ?&nbsp;&nbsp;                 <br>
- *>i 10.10.6.0/24&nbsp;&nbsp;&nbsp;&nbsp; 30.255.6.6&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2&nbsp;&nbsp;&nbsp;&nbsp;100&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 ?&nbsp;&nbsp;                 <br>
- *>i 10.10.7.0/24&nbsp;&nbsp;&nbsp;&nbsp; 30.255.6.6&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2&nbsp;&nbsp;&nbsp;&nbsp;100&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 ?&nbsp;&nbsp;                 <br>
- *>i 10.10.8.0/24&nbsp;&nbsp;&nbsp;&nbsp; 30.255.6.6&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2&nbsp;&nbsp;&nbsp;&nbsp;100&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 ?&nbsp;&nbsp;                 <br>
- *>i 10.10.9.0/24&nbsp;&nbsp;&nbsp;&nbsp; 30.255.6.6&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2&nbsp;&nbsp;&nbsp;&nbsp;100&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 ?&nbsp;&nbsp;                 <br>
- *>i 10.10.10.0/24&nbsp;&nbsp;&nbsp;&nbsp;30.255.6.6&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2&nbsp;&nbsp;&nbsp;&nbsp;100&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 ?&nbsp;&nbsp;                 <br>
- *>i 10.10.255.1/32&nbsp;&nbsp; 30.255.6.6&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2&nbsp;&nbsp;&nbsp;&nbsp;100&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 ?&nbsp;&nbsp;                 <br>
- *>i 10.255.67.0/30&nbsp;&nbsp; 30.255.6.6&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0&nbsp;&nbsp;&nbsp;&nbsp;100&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 ?&nbsp;&nbsp;                 <br>
+&nbsp;*>i 10.10.1.0/24&nbsp;&nbsp;&nbsp;&nbsp; 30.255.6.6&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2&nbsp;&nbsp;&nbsp;&nbsp;100&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 ?&nbsp;&nbsp;                 <br>
+&nbsp;*>i 10.10.2.0/24&nbsp;&nbsp;&nbsp;&nbsp; 30.255.6.6&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2&nbsp;&nbsp;&nbsp;&nbsp;100&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 ?&nbsp;&nbsp;                 <br>
+&nbsp;*>i 10.10.3.0/24&nbsp;&nbsp;&nbsp;&nbsp; 30.255.6.6&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2&nbsp;&nbsp;&nbsp;&nbsp;100&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 ?&nbsp;&nbsp;                 <br>
+&nbsp;*>i 10.10.4.0/24&nbsp;&nbsp;&nbsp;&nbsp; 30.255.6.6&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2&nbsp;&nbsp;&nbsp;&nbsp;100&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 ?&nbsp;&nbsp;                 <br>
+&nbsp;*>i 10.10.5.0/24&nbsp;&nbsp;&nbsp;&nbsp; 30.255.6.6&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2&nbsp;&nbsp;&nbsp;&nbsp;100&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 ?&nbsp;&nbsp;                 <br>
+&nbsp;*>i 10.10.6.0/24&nbsp;&nbsp;&nbsp;&nbsp; 30.255.6.6&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2&nbsp;&nbsp;&nbsp;&nbsp;100&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 ?&nbsp;&nbsp;                 <br>
+&nbsp;*>i 10.10.7.0/24&nbsp;&nbsp;&nbsp;&nbsp; 30.255.6.6&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2&nbsp;&nbsp;&nbsp;&nbsp;100&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 ?&nbsp;&nbsp;                 <br>
+&nbsp;*>i 10.10.8.0/24&nbsp;&nbsp;&nbsp;&nbsp; 30.255.6.6&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2&nbsp;&nbsp;&nbsp;&nbsp;100&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 ?&nbsp;&nbsp;                 <br>
+&nbsp;*>i 10.10.9.0/24&nbsp;&nbsp;&nbsp;&nbsp; 30.255.6.6&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2&nbsp;&nbsp;&nbsp;&nbsp;100&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 ?&nbsp;&nbsp;                 <br>
+&nbsp;*>i 10.10.10.0/24&nbsp;&nbsp;&nbsp;&nbsp;30.255.6.6&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2&nbsp;&nbsp;&nbsp;&nbsp;100&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 ?&nbsp;&nbsp;                 <br>
+&nbsp;*>i 10.10.255.1/32&nbsp;&nbsp; 30.255.6.6&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2&nbsp;&nbsp;&nbsp;&nbsp;100&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 ?&nbsp;&nbsp;                 <br>
+&nbsp;*>i 10.255.67.0/30&nbsp;&nbsp; 30.255.6.6&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0&nbsp;&nbsp;&nbsp;&nbsp;100&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 ?&nbsp;&nbsp;                 <br>
 Route Distinguisher: 200:2 (default for vrf CUST_Z_2)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                <br>
 &nbsp;&nbsp;&nbsp;&nbsp; Network&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Next Hop&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Metric LocPrf Weight Path                <br>
- *>&nbsp;&nbsp;10.9.1.0/24&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.255.19.2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2570240&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 32768 ?&nbsp;&nbsp;                 <br>
- *>&nbsp;&nbsp;10.9.2.0/24&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.255.19.2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2570240&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 32768 ?&nbsp;&nbsp;                 <br>
- *>&nbsp;&nbsp;10.9.3.0/24&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.255.19.2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2570240&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 32768 ?&nbsp;&nbsp;                 <br>
- *>&nbsp;&nbsp;10.9.4.0/24&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.255.19.2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2570240&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 32768 ?&nbsp;&nbsp;                 <br>
- *>i 10.10.1.0/24&nbsp;&nbsp;&nbsp;&nbsp; 30.255.6.6&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2&nbsp;&nbsp;&nbsp;&nbsp;100&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 ?&nbsp;&nbsp;                 <br>
- *>i 10.10.2.0/24&nbsp;&nbsp;&nbsp;&nbsp; 30.255.6.6&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2&nbsp;&nbsp;&nbsp;&nbsp;100&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 ?&nbsp;&nbsp;                 <br>
- *>i 10.10.3.0/24&nbsp;&nbsp;&nbsp;&nbsp; 30.255.6.6&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2&nbsp;&nbsp;&nbsp;&nbsp;100&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 ?&nbsp;&nbsp;                 <br>
- *>i 10.10.4.0/24&nbsp;&nbsp;&nbsp;&nbsp; 30.255.6.6&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2&nbsp;&nbsp;&nbsp;&nbsp;100&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 ?&nbsp;&nbsp;                 <br>
- *>i 10.10.5.0/24&nbsp;&nbsp;&nbsp;&nbsp; 30.255.6.6&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2&nbsp;&nbsp;&nbsp;&nbsp;100&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 ?&nbsp;&nbsp;                 <br>
- *>i 10.10.6.0/24&nbsp;&nbsp;&nbsp;&nbsp; 30.255.6.6&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2&nbsp;&nbsp;&nbsp;&nbsp;100&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 ?&nbsp;&nbsp;                 <br>
- *>i 10.10.7.0/24&nbsp;&nbsp;&nbsp;&nbsp; 30.255.6.6&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2&nbsp;&nbsp;&nbsp;&nbsp;100&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 ?&nbsp;&nbsp;                 <br>
- *>i 10.10.8.0/24&nbsp;&nbsp;&nbsp;&nbsp; 30.255.6.6&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2&nbsp;&nbsp;&nbsp;&nbsp;100&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 ?&nbsp;&nbsp;                 <br>
- *>i 10.10.9.0/24&nbsp;&nbsp;&nbsp;&nbsp; 30.255.6.6&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2&nbsp;&nbsp;&nbsp;&nbsp;100&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 ?&nbsp;&nbsp;                 <br>
- *>i 10.10.10.0/24&nbsp;&nbsp;&nbsp;&nbsp;30.255.6.6&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2&nbsp;&nbsp;&nbsp;&nbsp;100&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 ?&nbsp;&nbsp;                 <br>
- *>i 10.10.255.1/32&nbsp;&nbsp; 30.255.6.6&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2&nbsp;&nbsp;&nbsp;&nbsp;100&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 ?&nbsp;&nbsp;                 <br>
- *>&nbsp;&nbsp;10.255.19.0/30&nbsp;&nbsp; 0.0.0.0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 32768 ?&nbsp;&nbsp;                 <br>
- *>i 10.255.67.0/30&nbsp;&nbsp; 30.255.6.6&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0&nbsp;&nbsp;&nbsp;&nbsp;100&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 ?&nbsp;&nbsp;                 <br>
+&nbsp;*>&nbsp;&nbsp;10.9.1.0/24&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.255.19.2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2570240&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 32768 ?&nbsp;&nbsp;                 <br>
+&nbsp;*>&nbsp;&nbsp;10.9.2.0/24&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.255.19.2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2570240&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 32768 ?&nbsp;&nbsp;                 <br>
+&nbsp;*>&nbsp;&nbsp;10.9.3.0/24&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.255.19.2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2570240&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 32768 ?&nbsp;&nbsp;                 <br>
+&nbsp;*>&nbsp;&nbsp;10.9.4.0/24&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.255.19.2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2570240&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 32768 ?&nbsp;&nbsp;                 <br>
+&nbsp;*>i 10.10.1.0/24&nbsp;&nbsp;&nbsp;&nbsp; 30.255.6.6&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2&nbsp;&nbsp;&nbsp;&nbsp;100&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 ?&nbsp;&nbsp;                 <br>
+&nbsp;*>i 10.10.2.0/24&nbsp;&nbsp;&nbsp;&nbsp; 30.255.6.6&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2&nbsp;&nbsp;&nbsp;&nbsp;100&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 ?&nbsp;&nbsp;                 <br>
+&nbsp;*>i 10.10.3.0/24&nbsp;&nbsp;&nbsp;&nbsp; 30.255.6.6&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2&nbsp;&nbsp;&nbsp;&nbsp;100&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 ?&nbsp;&nbsp;                 <br>
+&nbsp;*>i 10.10.4.0/24&nbsp;&nbsp;&nbsp;&nbsp; 30.255.6.6&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2&nbsp;&nbsp;&nbsp;&nbsp;100&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 ?&nbsp;&nbsp;                 <br>
+&nbsp;*>i 10.10.5.0/24&nbsp;&nbsp;&nbsp;&nbsp; 30.255.6.6&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2&nbsp;&nbsp;&nbsp;&nbsp;100&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 ?&nbsp;&nbsp;                 <br>
+&nbsp;*>i 10.10.6.0/24&nbsp;&nbsp;&nbsp;&nbsp; 30.255.6.6&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2&nbsp;&nbsp;&nbsp;&nbsp;100&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 ?&nbsp;&nbsp;                 <br>
+&nbsp;*>i 10.10.7.0/24&nbsp;&nbsp;&nbsp;&nbsp; 30.255.6.6&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2&nbsp;&nbsp;&nbsp;&nbsp;100&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 ?&nbsp;&nbsp;                 <br>
+&nbsp;*>i 10.10.8.0/24&nbsp;&nbsp;&nbsp;&nbsp; 30.255.6.6&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2&nbsp;&nbsp;&nbsp;&nbsp;100&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 ?&nbsp;&nbsp;                 <br>
+&nbsp;*>i 10.10.9.0/24&nbsp;&nbsp;&nbsp;&nbsp; 30.255.6.6&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2&nbsp;&nbsp;&nbsp;&nbsp;100&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 ?&nbsp;&nbsp;                 <br>
+&nbsp;*>i 10.10.10.0/24&nbsp;&nbsp;&nbsp;&nbsp;30.255.6.6&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2&nbsp;&nbsp;&nbsp;&nbsp;100&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 ?&nbsp;&nbsp;                 <br>
+&nbsp;*>i 10.10.255.1/32&nbsp;&nbsp; 30.255.6.6&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2&nbsp;&nbsp;&nbsp;&nbsp;100&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 ?&nbsp;&nbsp;                 <br>
+&nbsp;*>&nbsp;&nbsp;10.255.19.0/30&nbsp;&nbsp; 0.0.0.0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 32768 ?&nbsp;&nbsp;                 <br>
+&nbsp;*>i 10.255.67.0/30&nbsp;&nbsp; 30.255.6.6&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0&nbsp;&nbsp;&nbsp;&nbsp;100&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 ?&nbsp;&nbsp;                 <br>
 Route Distinguisher: 300:100 (default for vrf CUST_X_HQ)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                 <br>
- *>i 10.80.1.0/24&nbsp;&nbsp;&nbsp;&nbsp; 30.255.5.5&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 10880&nbsp;&nbsp;&nbsp;&nbsp;100&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 ?&nbsp;&nbsp;                 <br>
- *>i 10.80.2.0/24&nbsp;&nbsp;&nbsp;&nbsp; 30.255.5.5&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 10880&nbsp;&nbsp;&nbsp;&nbsp;100&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 ?&nbsp;&nbsp;                 <br>
- *>i 10.80.3.0/24&nbsp;&nbsp;&nbsp;&nbsp; 30.255.5.5&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 10880&nbsp;&nbsp;&nbsp;&nbsp;100&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 ?&nbsp;&nbsp;                 <br>
- *>i 10.80.4.0/24&nbsp;&nbsp;&nbsp;&nbsp; 30.255.5.5&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 10880&nbsp;&nbsp;&nbsp;&nbsp;100&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 ?&nbsp;&nbsp;                 <br>
+&nbsp;*>i 10.80.1.0/24&nbsp;&nbsp;&nbsp;&nbsp; 30.255.5.5&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 10880&nbsp;&nbsp;&nbsp;&nbsp;100&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 ?&nbsp;&nbsp;                 <br>
+&nbsp;*>i 10.80.2.0/24&nbsp;&nbsp;&nbsp;&nbsp; 30.255.5.5&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 10880&nbsp;&nbsp;&nbsp;&nbsp;100&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 ?&nbsp;&nbsp;                 <br>
+&nbsp;*>i 10.80.3.0/24&nbsp;&nbsp;&nbsp;&nbsp; 30.255.5.5&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 10880&nbsp;&nbsp;&nbsp;&nbsp;100&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 ?&nbsp;&nbsp;                 <br>
+&nbsp;*>i 10.80.4.0/24&nbsp;&nbsp;&nbsp;&nbsp; 30.255.5.5&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 10880&nbsp;&nbsp;&nbsp;&nbsp;100&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 ?&nbsp;&nbsp;                 <br>
 &nbsp;&nbsp;&nbsp;&nbsp; Network&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Next Hop&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Metric LocPrf Weight Path                <br>
- *>i 10.255.58.0/30&nbsp;&nbsp; 30.255.5.5&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0&nbsp;&nbsp;&nbsp;&nbsp;100&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 ?&nbsp;&nbsp;                 <br>
+&nbsp;*>i 10.255.58.0/30&nbsp;&nbsp; 30.255.5.5&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0&nbsp;&nbsp;&nbsp;&nbsp;100&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 ?&nbsp;&nbsp;                 <br>
 Route Distinguisher: 300:110&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                 <br>
- *>i 10.80.1.0/24&nbsp;&nbsp;&nbsp;&nbsp; 30.255.5.5&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 10880&nbsp;&nbsp;&nbsp;&nbsp;100&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 ?&nbsp;&nbsp;                 <br>
- *>i 10.80.2.0/24&nbsp;&nbsp;&nbsp;&nbsp; 30.255.5.5&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 10880&nbsp;&nbsp;&nbsp;&nbsp;100&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 ?&nbsp;&nbsp;                 <br>
- *>i 10.80.3.0/24&nbsp;&nbsp;&nbsp;&nbsp; 30.255.5.5&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 10880&nbsp;&nbsp;&nbsp;&nbsp;100&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 ?&nbsp;&nbsp;                 <br>
- *>i 10.80.4.0/24&nbsp;&nbsp;&nbsp;&nbsp; 30.255.5.5&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 10880&nbsp;&nbsp;&nbsp;&nbsp;100&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 ?&nbsp;&nbsp;                 <br>
- *>i 10.255.58.0/30&nbsp;&nbsp; 30.255.5.5&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0&nbsp;&nbsp;&nbsp;&nbsp;100&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 ?&nbsp;&nbsp;                 <br>
+&nbsp;*>i 10.80.1.0/24&nbsp;&nbsp;&nbsp;&nbsp; 30.255.5.5&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 10880&nbsp;&nbsp;&nbsp;&nbsp;100&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 ?&nbsp;&nbsp;                 <br>
+&nbsp;*>i 10.80.2.0/24&nbsp;&nbsp;&nbsp;&nbsp; 30.255.5.5&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 10880&nbsp;&nbsp;&nbsp;&nbsp;100&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 ?&nbsp;&nbsp;                 <br>
+&nbsp;*>i 10.80.3.0/24&nbsp;&nbsp;&nbsp;&nbsp; 30.255.5.5&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 10880&nbsp;&nbsp;&nbsp;&nbsp;100&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 ?&nbsp;&nbsp;                 <br>
+&nbsp;*>i 10.80.4.0/24&nbsp;&nbsp;&nbsp;&nbsp; 30.255.5.5&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 10880&nbsp;&nbsp;&nbsp;&nbsp;100&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 ?&nbsp;&nbsp;                 <br>
+&nbsp;*>i 10.255.58.0/30&nbsp;&nbsp; 30.255.5.5&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0&nbsp;&nbsp;&nbsp;&nbsp;100&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 ?&nbsp;&nbsp;                 <br>
 R1#                                                                                  	
 </code></div>
+</p>
 <p>
 Note that the routes learned through MP-BGP VPNv4, have the next-hop as the iBGP remote PE peer.
 </p>
@@ -743,6 +750,7 @@ R1#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 From this output, the details of EIGRP composite metrics are encoded in the BGP extended
 community.
 </p>
+
 <h3>EIGRP</h3>
 <p>
 When redistributing prefixes into EIGRP, ensure that the seed metric is configured.
@@ -751,7 +759,7 @@ When redistributing prefixes into EIGRP, ensure that the seed metric is configur
 Verification: <code><b>show ip eigrp vrf &lt;vrf-name&gt; topology</b></code>. 
 Some prefixes will have VPNv4 as the route source.
 </p>
-
+<p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
 <code>               
 R1><b>show ip eigrp vrf CUST_Z_2 topology</b>                               <br>        
@@ -818,6 +826,8 @@ EIGRP-IPv4(10): Topology base(0) entry for 10.10.1.0/24              <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Administrator tag is 0 (0x00000000)                                <br>  
 R1>                                                                          
 </code></div>
+</p>
+
 
 <h3>OSPF</h3>
 <p>
@@ -910,39 +920,39 @@ The value is inherited from the OSPF process ID.
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
 <code>
 R1#<b>show ip ospf 1000</b><br>
- Routing Process "ospf 1000" with ID 10.255.1.1                                <br>
+&nbsp;Routing Process "ospf 1000" with ID 10.255.1.1                                <br>
 &nbsp;&nbsp; <span style="background:#d3d3d3;">Domain ID type 0x0005, value 0.0.3.232</span><br>
- Start time: 00:00:36.340, Time elapsed: 01:48:49.108                          <br>
- Supports only single TOS(TOS0) routes                                         <br>
- Supports opaque LSA                                                           <br>
- Supports Link-local Signaling (LLS)                                           <br>
- Supports area transit capability                                              <br>
- Supports NSSA (compatible with RFC 3101)                                      <br>
- Connected to MPLS VPN Superbackbone, VRF CUST_X_HQ                            <br>
- Event-log disabled                                                            <br>
- It is an area border and autonomous system boundary router                    <br>
- Redistributing External Routes from,                                          <br>
+&nbsp;Start time: 00:00:36.340, Time elapsed: 01:48:49.108                          <br>
+&nbsp;Supports only single TOS(TOS0) routes                                         <br>
+&nbsp;Supports opaque LSA                                                           <br>
+&nbsp;Supports Link-local Signaling (LLS)                                           <br>
+&nbsp;Supports area transit capability                                              <br>
+&nbsp;Supports NSSA (compatible with RFC 3101)                                      <br>
+&nbsp;Connected to MPLS VPN Superbackbone, VRF CUST_X_HQ                            <br>
+&nbsp;Event-log disabled                                                            <br>
+&nbsp;It is an area border and autonomous system boundary router                    <br>
+&nbsp;Redistributing External Routes from,                                          <br>
 &nbsp;&nbsp;&nbsp;&nbsp;bgp 100, includes subnets in redistribution                                <br>
- Router is not originating router-LSAs with maximum metric                     <br>
- Initial SPF schedule delay 5000 msecs                                         <br>
- Minimum hold time between two consecutive SPFs 10000 msecs                    <br>
- Maximum wait time between two consecutive SPFs 10000 msecs                    <br>
- Incremental-SPF disabled                                                      <br>
- Minimum LSA interval 5 secs                                                   <br>
- Minimum LSA arrival 1000 msecs                                                <br>
- LSA group pacing timer 240 secs                                               <br>
- Interface flood pacing timer 33 msecs                                         <br>
- Retransmission pacing timer 66 msecs                                          <br>
- Number of external LSA 0. Checksum Sum 0x000000                               <br>
- Number of opaque AS LSA 0. Checksum Sum 0x000000                              <br>
- Number of DCbitless external and opaque AS LSA 0                              <br>
- Number of DoNotAge external and opaque AS LSA 0                               <br>
- Number of areas in this router is 1. 1 normal 0 stub 0 nssa                   <br>
- Number of areas transit capable is 0                                          <br>
- External flood list length 0                                                  <br>
- IETF NSF helper support enabled                                               <br>
- Cisco NSF helper support enabled                                              <br>
- Reference bandwidth unit is 100 mbps                                          <br>
+&nbsp;Router is not originating router-LSAs with maximum metric                     <br>
+&nbsp;Initial SPF schedule delay 5000 msecs                                         <br>
+&nbsp;Minimum hold time between two consecutive SPFs 10000 msecs                    <br>
+&nbsp;Maximum wait time between two consecutive SPFs 10000 msecs                    <br>
+&nbsp;Incremental-SPF disabled                                                      <br>
+&nbsp;Minimum LSA interval 5 secs                                                   <br>
+&nbsp;Minimum LSA arrival 1000 msecs                                                <br>
+&nbsp;LSA group pacing timer 240 secs                                               <br>
+&nbsp;Interface flood pacing timer 33 msecs                                         <br>
+&nbsp;Retransmission pacing timer 66 msecs                                          <br>
+&nbsp;Number of external LSA 0. Checksum Sum 0x000000                               <br>
+&nbsp;Number of opaque AS LSA 0. Checksum Sum 0x000000                              <br>
+&nbsp;Number of DCbitless external and opaque AS LSA 0                              <br>
+&nbsp;Number of DoNotAge external and opaque AS LSA 0                               <br>
+&nbsp;Number of areas in this router is 1. 1 normal 0 stub 0 nssa                   <br>
+&nbsp;Number of areas transit capable is 0                                          <br>
+&nbsp;External flood list length 0                                                  <br>
+&nbsp;IETF NSF helper support enabled                                               <br>
+&nbsp;Cisco NSF helper support enabled                                              <br>
+&nbsp;Reference bandwidth unit is 100 mbps                                          <br>
 &nbsp;&nbsp;&nbsp;&nbsp;Area 1                                                                     <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Number of interfaces in this area is 1                                 <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Area has no authentication                                             <br>
@@ -964,39 +974,39 @@ On the remote PE R5:
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
 <code>
 R5(config-if)#<b>do show ip ospf 1001</b><br>
- Routing Process "ospf 1001" with ID 10.255.58.1               <br>
+&nbsp;Routing Process "ospf 1001" with ID 10.255.58.1               <br>
 &nbsp;&nbsp; <span style="background:#d3d3d3;">Domain ID type 0x0005, value 0.0.3.233</span><br>
- Start time: 00:15:57.372, Time elapsed: 00:13:48.868          <br>
- Supports only single TOS(TOS0) routes                         <br>
- Supports opaque LSA&nbsp;&nbsp;                                         <br>
- Supports Link-local Signaling (LLS)                           <br>
- Supports area transit capability                              <br>
- Supports NSSA (compatible with RFC 3101)                      <br>
- Connected to MPLS VPN Superbackbone, VRF CUST_X_2             <br>
- Event-log disabled&nbsp;&nbsp;                                          <br>
- It is an area border and autonomous system boundary router    <br>
- Redistributing External Routes from,                          <br>
+&nbsp;Start time: 00:15:57.372, Time elapsed: 00:13:48.868          <br>
+&nbsp;Supports only single TOS(TOS0) routes                         <br>
+&nbsp;Supports opaque LSA&nbsp;&nbsp;                                         <br>
+&nbsp;Supports Link-local Signaling (LLS)                           <br>
+&nbsp;Supports area transit capability                              <br>
+&nbsp;Supports NSSA (compatible with RFC 3101)                      <br>
+&nbsp;Connected to MPLS VPN Superbackbone, VRF CUST_X_2             <br>
+&nbsp;Event-log disabled&nbsp;&nbsp;                                          <br>
+&nbsp;It is an area border and autonomous system boundary router    <br>
+&nbsp;Redistributing External Routes from,                          <br>
 &nbsp;&nbsp;&nbsp;&nbsp;bgp 100, includes subnets in redistribution                <br>
- Router is not originating router-LSAs with maximum metric     <br>
- Initial SPF schedule delay 5000 msecs                         <br>
- Minimum hold time between two consecutive SPFs 10000 msecs    <br>
- Maximum wait time between two consecutive SPFs 10000 msecs    <br>
- Incremental-SPF disabled                                      <br>
- Minimum LSA interval 5 secs                                   <br>
- Minimum LSA arrival 1000 msecs                                <br>
- LSA group pacing timer 240 secs                               <br>
- Interface flood pacing timer 33 msecs                         <br>
- Retransmission pacing timer 66 msecs                          <br>
- Number of external LSA 6. Checksum Sum 0x04DD7F               <br>
- Number of opaque AS LSA 0. Checksum Sum 0x000000              <br>
- Number of DCbitless external and opaque AS LSA 0              <br>
- Number of DoNotAge external and opaque AS LSA 0               <br>
- Number of areas in this router is 1. 1 normal 0 stub 0 nssa   <br>
- Number of areas transit capable is 0                          <br>
- External flood list length 0                                  <br>
- IETF NSF helper support enabled                               <br>
- Cisco NSF helper support enabled                              <br>
- Reference bandwidth unit is 100 mbps                          <br>
+&nbsp;Router is not originating router-LSAs with maximum metric     <br>
+&nbsp;Initial SPF schedule delay 5000 msecs                         <br>
+&nbsp;Minimum hold time between two consecutive SPFs 10000 msecs    <br>
+&nbsp;Maximum wait time between two consecutive SPFs 10000 msecs    <br>
+&nbsp;Incremental-SPF disabled                                      <br>
+&nbsp;Minimum LSA interval 5 secs                                   <br>
+&nbsp;Minimum LSA arrival 1000 msecs                                <br>
+&nbsp;LSA group pacing timer 240 secs                               <br>
+&nbsp;Interface flood pacing timer 33 msecs                         <br>
+&nbsp;Retransmission pacing timer 66 msecs                          <br>
+&nbsp;Number of external LSA 6. Checksum Sum 0x04DD7F               <br>
+&nbsp;Number of opaque AS LSA 0. Checksum Sum 0x000000              <br>
+&nbsp;Number of DCbitless external and opaque AS LSA 0              <br>
+&nbsp;Number of DoNotAge external and opaque AS LSA 0               <br>
+&nbsp;Number of areas in this router is 1. 1 normal 0 stub 0 nssa   <br>
+&nbsp;Number of areas transit capable is 0                          <br>
+&nbsp;External flood list length 0                                  <br>
+&nbsp;IETF NSF helper support enabled                               <br>
+&nbsp;Cisco NSF helper support enabled                              <br>
+&nbsp;Reference bandwidth unit is 100 mbps                          <br>
 &nbsp;&nbsp;&nbsp;&nbsp;Area 1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                         <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Number of interfaces in this area is 1                 <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Area has no authentication                             <br>
@@ -1048,39 +1058,39 @@ be advertised as inter-area routes.
 R5(config)#<b>router ospf 1001 vrf CUST_X_2</b>                          <br>
 R5(config-router)#<b>domain-id 0.0.3.232 </b>                            <br>
 R5(config-router)#<b>do show ip ospf 1001</b>                            <br>
- Routing Process "ospf 1001" with ID 10.255.58.1                  <br>
+&nbsp;Routing Process "ospf 1001" with ID 10.255.58.1                  <br>
 &nbsp;&nbsp; Domain ID type 0x0005, value 0.0.3.232                         <br>
- Start time: 00:15:57.372, Time elapsed: 02:33:44.228             <br>
- Supports only single TOS(TOS0) routes                            <br>
- Supports opaque LSA                                              <br>
- Supports Link-local Signaling (LLS)                              <br>
- Supports area transit capability                                 <br>
- Supports NSSA (compatible with RFC 3101)                         <br>
- Connected to MPLS VPN Superbackbone, VRF CUST_X_2                <br>
- Event-log disabled                                               <br>
- It is an area border and autonomous system boundary router       <br>
- Redistributing External Routes from,                             <br>
+&nbsp;Start time: 00:15:57.372, Time elapsed: 02:33:44.228             <br>
+&nbsp;Supports only single TOS(TOS0) routes                            <br>
+&nbsp;Supports opaque LSA                                              <br>
+&nbsp;Supports Link-local Signaling (LLS)                              <br>
+&nbsp;Supports area transit capability                                 <br>
+&nbsp;Supports NSSA (compatible with RFC 3101)                         <br>
+&nbsp;Connected to MPLS VPN Superbackbone, VRF CUST_X_2                <br>
+&nbsp;Event-log disabled                                               <br>
+&nbsp;It is an area border and autonomous system boundary router       <br>
+&nbsp;Redistributing External Routes from,                             <br>
 &nbsp;&nbsp;&nbsp;&nbsp;bgp 100, includes subnets in redistribution                   <br>
- Router is not originating router-LSAs with maximum metric        <br>
- Initial SPF schedule delay 5000 msecs                            <br>
- Minimum hold time between two consecutive SPFs 10000 msecs       <br>
- Maximum wait time between two consecutive SPFs 10000 msecs       <br>
- Incremental-SPF disabled                                         <br>
- Minimum LSA interval 5 secs                                      <br>
- Minimum LSA arrival 1000 msecs                                   <br>
- LSA group pacing timer 240 secs                                  <br>
- Interface flood pacing timer 33 msecs                            <br>
- Retransmission pacing timer 66 msecs                             <br>
- Number of external LSA 0. Checksum Sum 0x000000                  <br>
- Number of opaque AS LSA 0. Checksum Sum 0x000000                 <br>
- Number of DCbitless external and opaque AS LSA 0                 <br>
- Number of DoNotAge external and opaque AS LSA 0                  <br>
- Number of areas in this router is 1. 1 normal 0 stub 0 nssa      <br>
- Number of areas transit capable is 0                             <br>
- External flood list length 0                                     <br>
- IETF NSF helper support enabled                                  <br>
- Cisco NSF helper support enabled                                 <br>
- Reference bandwidth unit is 100 mbps                             <br>
+&nbsp;Router is not originating router-LSAs with maximum metric        <br>
+&nbsp;Initial SPF schedule delay 5000 msecs                            <br>
+&nbsp;Minimum hold time between two consecutive SPFs 10000 msecs       <br>
+&nbsp;Maximum wait time between two consecutive SPFs 10000 msecs       <br>
+&nbsp;Incremental-SPF disabled                                         <br>
+&nbsp;Minimum LSA interval 5 secs                                      <br>
+&nbsp;Minimum LSA arrival 1000 msecs                                   <br>
+&nbsp;LSA group pacing timer 240 secs                                  <br>
+&nbsp;Interface flood pacing timer 33 msecs                            <br>
+&nbsp;Retransmission pacing timer 66 msecs                             <br>
+&nbsp;Number of external LSA 0. Checksum Sum 0x000000                  <br>
+&nbsp;Number of opaque AS LSA 0. Checksum Sum 0x000000                 <br>
+&nbsp;Number of DCbitless external and opaque AS LSA 0                 <br>
+&nbsp;Number of DoNotAge external and opaque AS LSA 0                  <br>
+&nbsp;Number of areas in this router is 1. 1 normal 0 stub 0 nssa      <br>
+&nbsp;Number of areas transit capable is 0                             <br>
+&nbsp;External flood list length 0                                     <br>
+&nbsp;IETF NSF helper support enabled                                  <br>
+&nbsp;Cisco NSF helper support enabled                                 <br>
+&nbsp;Reference bandwidth unit is 100 mbps                             <br>
 &nbsp;&nbsp;&nbsp;&nbsp;Area 1&nbsp;&nbsp;&nbsp;&nbsp;                                                    <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Number of interfaces in this area is 1                    <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Area has no authentication                                <br>
@@ -1165,39 +1175,39 @@ show ip ospf &lt;process-ID&gt;</b></code>, the message,
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
 <code>
 R5(config-router)#<b>do show ip ospf 1001</b>                            <br>
- Routing Process "ospf 1001" with ID 10.255.58.1                  <br>
+&nbsp;Routing Process "ospf 1001" with ID 10.255.58.1                  <br>
 &nbsp;&nbsp; Domain ID type 0x0005, value 0.0.3.232                         <br>
- Start time: 00:15:57.372, Time elapsed: 02:33:44.228             <br>
- Supports only single TOS(TOS0) routes                            <br>
- Supports opaque LSA                                              <br>
- Supports Link-local Signaling (LLS)                              <br>
- Supports area transit capability                                 <br>
- Supports NSSA (compatible with RFC 3101)                         <br>
- <span style="background:#d3d3d3;">Connected to MPLS VPN Superbackbone, VRF CUST_X_2</span>     <br>
- Event-log disabled                                               <br>
- It is an area border and autonomous system boundary router       <br>
- Redistributing External Routes from,                             <br>
+&nbsp;Start time: 00:15:57.372, Time elapsed: 02:33:44.228             <br>
+&nbsp;Supports only single TOS(TOS0) routes                            <br>
+&nbsp;Supports opaque LSA                                              <br>
+&nbsp;Supports Link-local Signaling (LLS)                              <br>
+&nbsp;Supports area transit capability                                 <br>
+&nbsp;Supports NSSA (compatible with RFC 3101)                         <br>
+&nbsp;<span style="background:#d3d3d3;">Connected to MPLS VPN Superbackbone, VRF CUST_X_2</span>     <br>
+&nbsp;Event-log disabled                                               <br>
+&nbsp;It is an area border and autonomous system boundary router       <br>
+&nbsp;Redistributing External Routes from,                             <br>
 &nbsp;&nbsp;&nbsp;&nbsp;bgp 100, includes subnets in redistribution                   <br>
- Router is not originating router-LSAs with maximum metric        <br>
- Initial SPF schedule delay 5000 msecs                            <br>
- Minimum hold time between two consecutive SPFs 10000 msecs       <br>
- Maximum wait time between two consecutive SPFs 10000 msecs       <br>
- Incremental-SPF disabled                                         <br>
- Minimum LSA interval 5 secs                                      <br>
- Minimum LSA arrival 1000 msecs                                   <br>
- LSA group pacing timer 240 secs                                  <br>
- Interface flood pacing timer 33 msecs                            <br>
- Retransmission pacing timer 66 msecs                             <br>
- Number of external LSA 0. Checksum Sum 0x000000                  <br>
- Number of opaque AS LSA 0. Checksum Sum 0x000000                 <br>
- Number of DCbitless external and opaque AS LSA 0                 <br>
- Number of DoNotAge external and opaque AS LSA 0                  <br>
- Number of areas in this router is 1. 1 normal 0 stub 0 nssa      <br>
- Number of areas transit capable is 0                             <br>
- External flood list length 0                                     <br>
- IETF NSF helper support enabled                                  <br>
- Cisco NSF helper support enabled                                 <br>
- Reference bandwidth unit is 100 mbps                             <br>
+&nbsp;Router is not originating router-LSAs with maximum metric        <br>
+&nbsp;Initial SPF schedule delay 5000 msecs                            <br>
+&nbsp;Minimum hold time between two consecutive SPFs 10000 msecs       <br>
+&nbsp;Maximum wait time between two consecutive SPFs 10000 msecs       <br>
+&nbsp;Incremental-SPF disabled                                         <br>
+&nbsp;Minimum LSA interval 5 secs                                      <br>
+&nbsp;Minimum LSA arrival 1000 msecs                                   <br>
+&nbsp;LSA group pacing timer 240 secs                                  <br>
+&nbsp;Interface flood pacing timer 33 msecs                            <br>
+&nbsp;Retransmission pacing timer 66 msecs                             <br>
+&nbsp;Number of external LSA 0. Checksum Sum 0x000000                  <br>
+&nbsp;Number of opaque AS LSA 0. Checksum Sum 0x000000                 <br>
+&nbsp;Number of DCbitless external and opaque AS LSA 0                 <br>
+&nbsp;Number of DoNotAge external and opaque AS LSA 0                  <br>
+&nbsp;Number of areas in this router is 1. 1 normal 0 stub 0 nssa      <br>
+&nbsp;Number of areas transit capable is 0                             <br>
+&nbsp;External flood list length 0                                     <br>
+&nbsp;IETF NSF helper support enabled                                  <br>
+&nbsp;Cisco NSF helper support enabled                                 <br>
+&nbsp;Reference bandwidth unit is 100 mbps                             <br>
 &nbsp;&nbsp;&nbsp;&nbsp;Area 1&nbsp;&nbsp;&nbsp;&nbsp;                                                    <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Number of interfaces in this area is 1                    <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Area has no authentication                                <br>
@@ -1512,6 +1522,10 @@ R6>
 </p>
 
 <h1 id="TROUBLESHOOTING">Troubleshooting</h1>
+<p>
+
+</p>
+
 <h2>LDP Adjacency</h2>
 <p>
 <ul>
@@ -1565,6 +1579,9 @@ Advertise labels for all IGP learned routes.
 </p>
 
 <h2>VPNv4 BGP</h2>
+<p>
+
+</p>
 
 <h3>Is the route-target being filtered</h3>
 <p>

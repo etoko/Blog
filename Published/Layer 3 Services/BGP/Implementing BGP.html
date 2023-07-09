@@ -8323,7 +8323,7 @@ A hardware failure or cable move changes the MAC address, resulting in a new lin
 </p>
 <p>
 During the initial open message negotiation, the BGP peer routers exchange capabilities such as the AFI and SAFI that each 
-router will support. All the same underlying IPv4 path vectorrouting protocol features and rules also apply to MP-BGP 
+router will support. All the same underlying IPv4 path vector routing protocol features and rules also apply to MP-BGP 
 for IPv6.
 </p>
 <p>
@@ -8354,11 +8354,11 @@ If no IP address is configured, the router will dynamically choose an ID of
 </p>
 <p>
 <b>Step 6 (Optional):</b> Modify the BGP session timers with the command:
-<code><b>neighbor &lt;ip-address&gt; timers &lt;keep-alive_time hold_time&gt;</b></code>
+<code><b>neighbor &lt;ip-address&gt; timers &lt;keep-alive_time&gt; &lt;hold_time&gt;</b></code>
 </p>
 <p>
 <b>Step 7:</b> Initialize the address family with the command:
-<code><b>address-family afi safi</b></code>
+<code><b>address-family &lt;afi&gt; &lt;safi&gt;</b></code>
 </p>
 <p>
 <b>Step 8:</b> Activate the address-family for that neighbor with the command:
@@ -8378,67 +8378,73 @@ command <code><b>bgp upgrade-cli</b></code>
 The following commands are helpful for understanding the current status of the router:
 </p>
 <p>
-<table>
+<table width="100%" cellspacing="0">
+<thead style="background: #d3d3d3; font-weight: bold;">
 <tr>
-<td>Command</td>
-<td>Description</td>
+<td style="border-bottom: 1px solid; border-top: 1px solid;" width="35%">Command</td>
+<td style="border-bottom: 1px solid; border-top: 1px solid;">Description</td>
 </tr>
+</thead>
+<tbody>
 <tr>
-<td><code><b>show bgp &lt;afi safi&gt; summary</b></code></td>
-<td>Displays a brief summary of the BGP process, neighbor state and prefixes received or transmitted from a high-level
+<td style="border-bottom: 1px solid;"><code><b>show bgp &lt;afi&gt; &lt;safi&gt; summary</b></code></td>
+<td style="border-bottom: 1px solid;">Displays a brief summary of the BGP process, neighbor state and prefixes received or transmitted from a high-level
 perspective</td>
 </tr>
 <tr>
-<td><code><b>show bgp &lt;afi safi&gt; neighbor &lt;ip-address&gt;</b></code></td>
-<td>Displays a brief summary of the BGP process, neighbor state and capabilities. Prefixes</td>
+<td style="border-bottom: 1px solid;"><code><b>show bgp &lt;afi&gt; &lt;safi&gt; neighbor &lt;ip-address&gt;</b></code></td>
+<td style="border-bottom: 1px solid;">Displays a brief summary of the BGP process, neighbor state and capabilities. Prefixes</td>
 </tr>
 <tr>
-<td><code><b>show tcp brief</b></code></td>
-<td>Displays the TCP session status to see if BGP can establish a session using port 179.</td>
+<td style="border-bottom: 1px solid;"><code><b>show tcp brief</b></code></td>
+<td style="border-bottom: 1px solid;">Displays the TCP session status to see if BGP can establish a session using port 179.</td>
 </tr>
+</tbody>
 </table>
+</p>
+
 <h1>Viewing BGP Prefixes</h1>
 <p>
-<table>
+<table width="100%" cellspacing="0">
 
+<thead style="background: #d3d3d3; font-weight: bold;">
 <tr>
-<td>Command</td>
-<td>Description</td>
+<td style="border-bottom: 1px solid; border-top: 1px solid;" width="35%">Command</td>
+<td style="border-bottom: 1px solid; border-top: 1px solid;">Description</td>
 </tr>
+</thead>
+<tbody>
 <tr>
-<td>Command</td>
-<td>Description</td>
-</tr>
-<tr>
-<td><code><b>show ipv6 route network</b></code></td>
-<td>
+<td style="border-bottom: 1px solid;"><code><b>show ipv6 route &lt;network&gt;</b></code></td>
+<td style="border-bottom: 1px solid;">
 Assuming this is a BGP learned prefix, it will provide a brief overview of the BGP best path that was presented to the 
 RIB for installation.
 </td>
 </tr>
 <tr>
-<td><code><b>show bgp &lt;afi safi&gt;</b></code></td>
-<td>
+<td style="border-bottom: 1px solid;"><code><b>show bgp &lt;afi&gt; &lt;safi&gt;</b></code></td>
+<td style="border-bottom: 1px solid;">
 Displays the BGP Loc-RIB table with all the network prefixes and paths that are available. A brief list of common 
 BGP path attributes are included.
 </td>
 </tr>
 <tr>
-<td><code><b>show bgp &lt;afi safi prefix&gt;</b></code></td>
-<td>It displays the BGP Loc-RIB for the specified network prefix with all path attributes and determines the best path.</td>
+<td style="border-bottom: 1px solid;"><code><b>show bgp &lt;afi&gt; &lt;safi&gt; &lt;prefix&gt;</b></code></td>
+<td style="border-bottom: 1px solid;">It displays the BGP Loc-RIB for the specified network prefix with all path attributes and determines the best path.</td>
 </tr>
 <tr>
-<td><code><b>show bgp &lt;afi safi&gt; neighbor &lt;ip-address&gt; advertised-routes</b></code></td>
-<td>Displays a brief summary of the BGP paths that were advertised to the specific BGP peer.
+<td style="border-bottom: 1px solid;"><code><b>show bgp &lt;afi&gt; &lt;safi&gt; neighbor &lt;ip-address&gt; advertised-routes</b></code></td>
+<td style="border-bottom: 1px solid;">Displays a brief summary of the BGP paths that were advertised to the specific BGP peer.</td>
 </tr>
+</tbody>
 </table>
-</td>
+</p>
 
 <h1>MP-BGP IPv6 Route Summarization</h1>
 <p>
 The same process for summarizing or aggregating IPv4 routes occurs with IPv6 routes. The format is identical except that 
 the configuration is placed under the IPv6 address family using the command:
-<code><b>aggregate-address prefix/length [summary-only] [as-set]</b></code>
+<code><b>aggregate-address &lt;prefix&gt;/&lt;length&gt; [summary-only] [as-set]</b></code>
 </p>
 <h2>Multi-Protocol BGP for IPv6 over IPv4</h2>
 <p>
@@ -8480,30 +8486,38 @@ uniqueness of a prefix. A VPN prefix is an RD+Prefix. There is only one ED assoc
 </p>
 <p>
 <b>Step 3:</b> Initialize the address family for the VRF with the command 
-<code><b>address-family &lt;afi safi&gt;</b> vrf &lt;vrf_name&gt;</code>.
+<code><b>address-family &lt;afi&gt; &lt;safi&gt; vrf &lt;vrf_name&gt;</b></code>.
 </p>
 <p>
 <b>Step 4:</b> Define the BGP neighbor's remote autonomous system number:
-<code><b>neighbor <b>ip-address</b> remote-as &lt;as_number&gt;</code>
+<code><b>neighbor &lt;ip-address&gt; remote-as &lt;as_number&gt;</b></code>
 </p>
+
 <h2>BGP VPNv4 Diagnostic Commands</h2>
 <p>
-<table>
+<table width="100%" cellspacing="0">
+<thead style="background: #d3d3d3; font-weight: bold;">
 <tr>
-<td>Command</td><td>Description</td>
+<td style="border-bottom: 1px solid; border-top: 1px solid;" width="35%">Command</td>
+<td style="border-bottom: 1px solid; border-top: 1px solid;">Description</td>
 </tr>
+</thead>
+<tbody>
 <tr>
-<td><code><b>show bgp vpnv4 unicast [all | rd &lt;route-distinguisher&gt; | vrf &lt;vrf_name&gt;]</b></code></td>
-<td><code><b>rd:</b></code> Displays the routes associated on the router with the identified route distinguisher. <br/>
+<td style="border-bottom: 1px solid;"><code>
+<b>show bgp vpnv4 unicast [all | rd &lt;route-distinguisher&gt; | vrf &lt;vrf_name&gt;]</b></code></td>
+<td style="border-bottom: 1px solid;">
+<code><b>rd:</b></code> Displays the routes associated on the router with the identified route distinguisher. <br/>
 <code><b>vrf:</b></code> Displays all the routes associated on the router with the locally configured VRF. <br />
 <code><b>all:</b></code> Displays the routes associated with all network prefixes learned within the VPNv4 address family.
 </td>
 </tr>
 <tr>
-<td><code><b>show ip route vrf</b></code></td>
-<td>
+<td style="border-bottom: 1px solid;"><code><b>show ip route vrf</b></code></td>
+<td style="border-bottom: 1px solid;">
 Displays RIB for that defined VRF.
 </td>
 </tr>
+</tbody>
 </table>
 </p>
