@@ -708,7 +708,102 @@ SPOKE2#
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
  <code>
  
- 
+HUB#<b>show crypto ipsec sa</b><br>
+                                                                                                <br>
+interface: Tunnel0                                                                              <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Crypto map tag: Tunnel0-head-0, local addr 10.10.1.1                                        <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                                                      <br>
+&nbsp;&nbsp; protected vrf: (none)                                                                        <br>
+&nbsp;&nbsp; local&nbsp;&nbsp;ident (addr/mask/prot/port): (10.10.1.1/255.255.255.255/47/0)                         <br>
+&nbsp;&nbsp; remote ident (addr/mask/prot/port): (10.10.1.3/255.255.255.255/47/0)                         <br>
+&nbsp;&nbsp; current_peer 10.10.1.3 port 500                                                              <br>
+&nbsp;&nbsp;&nbsp;&nbsp; PERMIT, flags={origin_is_acl,}                                                             <br>
+&nbsp;&nbsp;&nbsp;&nbsp;#pkts encaps: 11, #pkts encrypt: 11, #pkts digest: 11                                       <br>
+&nbsp;&nbsp;&nbsp;&nbsp;#pkts decaps: 16, #pkts decrypt: 16, #pkts verify: 16                                       <br>
+&nbsp;&nbsp;&nbsp;&nbsp;#pkts compressed: 0, #pkts decompressed: 0                                                  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;#pkts not compressed: 0, #pkts compr. failed: 0                                             <br>
+&nbsp;&nbsp;&nbsp;&nbsp;#pkts not decompressed: 0, #pkts decompress failed: 0                                       <br>
+&nbsp;&nbsp;&nbsp;&nbsp;#send errors 0, #recv errors 0                                                              <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                                                      <br>
+&nbsp;&nbsp;&nbsp;&nbsp; local crypto endpt.: 10.10.1.1, remote crypto endpt.: 10.10.1.3                            <br>
+&nbsp;&nbsp;&nbsp;&nbsp; plaintext mtu 1442, path mtu 1500, ip mtu 1500, ip mtu idb GigabitEthernet0/0              <br>
+&nbsp;&nbsp;&nbsp;&nbsp; current outbound spi: 0x566CA6C2(1449961154)                                               <br>
+&nbsp;&nbsp;&nbsp;&nbsp; PFS (Y/N): N, DH group: none                                                               <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                                                      <br>
+&nbsp;&nbsp;&nbsp;&nbsp; inbound esp sas:                                                                           <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;spi: 0xE65C1095(3864793237)                                                               <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;transform: esp-aes esp-sha512-hmac ,                                                    <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;in use settings ={Transport, }                                                          <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;conn id: 3, flow_id: SW:3, sibling_flags 80000000, crypto map: Tunnel0-head-0           <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sa timing: remaining key lifetime (k/sec): (4266073/3469)                               <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;IV size: 16 bytes                                                                       <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;replay detection support: Y                                                             <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Status: ACTIVE(ACTIVE)                                                                  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                                                      <br>
+&nbsp;&nbsp;&nbsp;&nbsp; inbound ah sas:                                                                            <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                                                      <br>
+&nbsp;&nbsp;&nbsp;&nbsp; inbound pcp sas:                                                                           <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                                                      <br>
+&nbsp;&nbsp;&nbsp;&nbsp; outbound esp sas:                                                                          <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;spi: 0x566CA6C2(1449961154)                                                               <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;transform: esp-aes esp-sha512-hmac ,                                                    <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;in use settings ={Transport, }                                                          <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;conn id: 4, flow_id: SW:4, sibling_flags 80000000, crypto map: Tunnel0-head-0           <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sa timing: remaining key lifetime (k/sec): (4266074/3469)                               <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;IV size: 16 bytes                                                                       <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;replay detection support: Y                                                             <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Status: ACTIVE(ACTIVE)                                                                  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                                                      <br>
+&nbsp;&nbsp;&nbsp;&nbsp; outbound ah sas:                                                                           <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                                                      <br>
+&nbsp;&nbsp;&nbsp;&nbsp; outbound pcp sas:                                                                          <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                                                      <br>
+&nbsp;&nbsp; protected vrf: (none)                                                                        <br>
+&nbsp;&nbsp; local&nbsp;&nbsp;ident (addr/mask/prot/port): (10.10.1.1/255.255.255.255/47/0)                         <br>
+&nbsp;&nbsp; remote ident (addr/mask/prot/port): (10.10.1.2/255.255.255.255/47/0)                         <br>
+&nbsp;&nbsp; current_peer 10.10.1.2 port 500                                                              <br>
+&nbsp;&nbsp;&nbsp;&nbsp; PERMIT, flags={origin_is_acl,}                                                             <br>
+&nbsp;&nbsp;&nbsp;&nbsp;#pkts encaps: 12, #pkts encrypt: 12, #pkts digest: 12                                       <br>
+&nbsp;&nbsp;&nbsp;&nbsp;#pkts decaps: 12, #pkts decrypt: 12, #pkts verify: 12                                       <br>
+&nbsp;&nbsp;&nbsp;&nbsp;#pkts compressed: 0, #pkts decompressed: 0                                                  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;#pkts not compressed: 0, #pkts compr. failed: 0                                             <br>
+&nbsp;&nbsp;&nbsp;&nbsp;#pkts not decompressed: 0, #pkts decompress failed: 0                                       <br>
+&nbsp;&nbsp;&nbsp;&nbsp;#send errors 0, #recv errors 0                                                              <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                                                      <br>
+&nbsp;&nbsp;&nbsp;&nbsp; local crypto endpt.: 10.10.1.1, remote crypto endpt.: 10.10.1.2                            <br>
+&nbsp;&nbsp;&nbsp;&nbsp; plaintext mtu 1442, path mtu 1500, ip mtu 1500, ip mtu idb GigabitEthernet0/0              <br>
+&nbsp;&nbsp;&nbsp;&nbsp; current outbound spi: 0x11E881C1(300450241)                                                <br>
+&nbsp;&nbsp;&nbsp;&nbsp; PFS (Y/N): N, DH group: none                                                               <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                                                      <br>
+&nbsp;&nbsp;&nbsp;&nbsp; inbound esp sas:                                                                           <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;spi: 0xC5D936AE(3319346862)                                                               <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;transform: esp-aes esp-sha512-hmac ,                                                    <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;in use settings ={Transport, }                                                          <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;conn id: 1, flow_id: SW:1, sibling_flags 80000000, crypto map: Tunnel0-head-0           <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sa timing: remaining key lifetime (k/sec): (4321569/3249)                               <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;IV size: 16 bytes                                                                       <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;replay detection support: Y                                                             <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Status: ACTIVE(ACTIVE)                                                                  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                                                      <br>
+&nbsp;&nbsp;&nbsp;&nbsp; inbound ah sas:                                                                            <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                                                      <br>
+&nbsp;&nbsp;&nbsp;&nbsp; inbound pcp sas:                                                                           <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                                                      <br>
+&nbsp;&nbsp;&nbsp;&nbsp; outbound esp sas:                                                                          <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;spi: 0x11E881C1(300450241)                                                                <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;transform: esp-aes esp-sha512-hmac ,                                                    <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;in use settings ={Transport, }                                                          <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;conn id: 2, flow_id: SW:2, sibling_flags 80000000, crypto map: Tunnel0-head-0           <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sa timing: remaining key lifetime (k/sec): (4321569/3249)                               <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;IV size: 16 bytes                                                                       <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;replay detection support: Y                                                             <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Status: ACTIVE(ACTIVE)                                                                  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                                                      <br>
+&nbsp;&nbsp;&nbsp;&nbsp; outbound ah sas:                                                                           <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                                                      <br>
+&nbsp;&nbsp;&nbsp;&nbsp; outbound pcp sas:                                                                          <br>
+HUB#                                                                                            <br>
+HUB#
  </code></div>
  </p>
 
@@ -744,26 +839,51 @@ Deploying IPsec tunnel protection is with the use of a static pre-shared key inv
 <p>
 The IKEv2 keyring is a repository of the pre-shared keys. In a keyring, it is 
 possible to define which keys apply to which hosts. Identification of the password 
-is based on the IP address of the remote router. The IKEv2 keyrong is created 
+is based on the IP address of the remote router. The IKEv2 keyring is created 
 with the following steps:
 </p>
 <p>
   <ol>
     <li><b>Define the keyring instance:</b>
-    	It is created with the global configuration command <code><b>crypto ikev2 keyring &lt;keyring-name&gt;</b></code>.
+    	It is created with the global configuration command 
+    	<code><b>crypto ikev2 keyring &lt;keyring-name&gt;</b></code>.
+    	<p>
+			<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+			 <code>
+			 HUB(config)#<b>crypto ikev2 keyring IKEv2_KEYRING</b> 
+			 </code></div></p>
     </li>
     <li><b>Create a peer name:</b> Multiple peers can exist in a keyring. Each 
     peer has a matching qualifier and can use a different password. The peer is 
-    created with the command <code><b>peer &lt;peer_name&gt;</b></code>.
+    created with the command <code><b>peer &lt;peer-name&gt;</b></code>.
+    <p>
+			<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+			 <code>
+			 HUB(config-ikev2-keyring)#<b>peer ANY</b> 
+			 </code></div></p>
     </li>
-    <li><b>Identify the IP address for the peer:</b> Multiple peers can reside in a keyring. The IP address is identified so that the
+    <li><b>Identify the IP address for the peer:</b> Multiple peers can reside 
+    in a keyring. The IP address is identified so that the
 appropriate peer configuration is used based upon the remote device’s IP address. 
 The command address network netmask defines the IP address/range. Though not
 recommended for a production network, the value of 0.0.0.0 0.0.0.0 may be used to 
-match against any peer. For IPv6, the address ::/0 matches any IPv6 address.</li>
+match against any peer. For IPv6, the address ::/0 matches any IPv6 address.
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+			 <code>
+			 HUB(config-ikev2-keyring-peer)#<b>address 0.0.0.0 </b><br>
+			 </code></div>
+</p>
+</li>
  
    <li><b>Define a preshared key:</b> 
-     Define the preshared key with <code><b>pre-shared-key &lt;password&gt;</b></code>.
+     Define the preshared key with <code><b>pre-shared-key &lt;password&gt;</b></code>:
+     <p>
+     <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+			 <code>
+			 HUB(config-ikev2-keyring-peer)#<b>pre-shared-key cisco123</b>
+			 </code></div>
+			 </p>
    </li>
   </ol>
 </p>
@@ -783,22 +903,29 @@ be defined as well as a match statement.
 <p>
   <ol>
     <li><b>Define the IKEv2 profile:</b>
-    <code><b>crypto ikev2 profile &lt;profile_name&gt;</b></code>
+    <code><b>crypto ikev2 profile &lt;profile_name&gt;</b></code>:
+    <p>
+     <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+	   <code>
+	     HUB(config)#<b>crypto ikev2 profile IKEv2_PROF</b>
+	   </code></div>
+	   </p>
     </li>
     <li><b>Identify the IP address for the remote router:</b>
     the IP address must be identified for the initial IKEv2 session to establish.
 The peer IP address is defined with the command <code><b>match identity remote address 
 &lt;ip_address&gt;</b></code>. This can be 0.0.0.0 0.0.0.0 to match against any peer. For IPv6, it can be ::/0.
-    </li>
-    <li>
-    the IP address must be identified for the initial IKEv2 session to establish.
-The peer IP address is defined with the command <code><b>match identity remote address 
-&lt;ip_address&gt;</b></code>. This can be 0.0.0.0 0.0.0.0 to match against any peer. For IPv6, it can be ::/0.
+<p>
+     <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+	   <code>
+	   HUB(config-ikev2-profile)#<b>match identity remote address 0.0.0.0</b> 
+	   </code></div>
+	   </p>
     </li>
     <li> 
     <b>(Optional) Configure the local router’s identity:</b>
     the local router’s identity can be set based on an IP address with the command 
-identity local address ip_address. A loopback address is recommended as it is 
+<code><b>identity local address &lt;ip-address&gt;&gt;</b></code>. A loopback address is recommended as it is 
 always ‘up’. Note that the IP address configured here should match the IP address
 used during the certificate registration. This step is really not needed with 
 preshared key authentication but is very important in the deployment of public
@@ -815,16 +942,36 @@ by remote peers. The command <code><b>authentication local &lt;pre-share | rsa-s
 local authentication. Only one local authentication can be selected. The pre-share
 keyword is for pre-shared static keys and rsa-sig is used for certificate based 
 authentication.
+<p>
+     <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+	   <code>
+	   HUB(config-ikev2-profile)#<b>authentication local pre-share</b> 
+	   </code></div>
+	   </p>
     </li>
     <li><b>Define the remote authentication method:</b>
     The authentication method must be defined for connection requests that are sent
-to remote peers. The command authentication remote pre-share | rsa-sig defines 
+to remote peers. The command <code><b>authentication remote [pre-share | rsa-sig]</b></code> defines 
 the remote authentication. The pre-share keyword is used for pre-shared static 
 keys and rsa-sig is used for certificate-based authentication.
+	<p>
+     <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+	   <code>
+	   HUB(config-ikev2-profile)#<b>authentication remote pre-share</b>
+	   </code>
+	 </div>
+	 </p>
     </li>
     <li><b>Define the IKEv2 keyring (for preshared authentication):</b>
     preshared authentication requires that the IKEv2 keyring be associated to the 
 IKEv2 profile. The command <code><b>keyring local &lt;keyring-name&gt;</b></code> associates the IKEv2 keyring.
+<p>
+     <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+	   <code>
+		HUB(config-ikev2-profile)#<b>keyring local IKEv2_KEYRING</b><br>
+		HUB(config-ikev2-profile)#<b>exit</b>
+		</code></div>
+		</p>
     </li>
   </ol>
 </p>
@@ -841,11 +988,21 @@ the following steps;
     Only one transform set can be selected for ESP encryption, ESP authentication, 
 AH authentication using the command <code><b>crypto ipsec transform-set &lt;transform_set_name&gt; 
 &lt;esp-encryption esp-authentication | ah-authentication&gt;</b></code>
+<p>
+     <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+	   <code>
+	   HUB(config)#<b>crypto ipsec transform-set IPSEC_TSET esp-aes esp-sha512-hmac</b> 
+	   </code></div></p>
     </li>
     <li><b>Specify the Transform Set mode:</b> 
     the transform set mode is configured with <code><b>mode &lt;transport | tunnel&gt;</b></code>. Tunnel mode 
 is the default mode. However, it adds 20bytes of additional IPSec header to the 
 overall packet.
+	<p>
+     <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+	   <code>
+	     HUB(cfg-crypto-trans)#<b>mode transport</b>
+	   </code></div></p>
     </li>
   </ol>
 </p>
@@ -861,37 +1018,602 @@ IPSec profile is created with the following steps;
 <p>
 <ol>
 <li><b>Create the IPSec profile:</b> use the command <code><b>crypto ipsec profile &lt;profile-name&gt;</b></code>
+	<p>
+     <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+	   <code>
+	   HUB(config)#<b>crypto ipsec profile IPSEC_PROF</b>
+	   </code></div>
+	   </p>
 </li>
 <li><b>Specify the transform set:</b> 
 The transform set is specified with the command <code><b>set transform-set &lt;transform-set-name&gt;</b></code>.
+<p>
+     <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+	   <code>
+	   HUB(ipsec-profile)#<b>set transform-set IPSEC_TSET</b>
+	   </code>
+	   </div></p>
 </li>
 <li><b>Specify the IKEv2 profile:</b>
 the IKEv2 profile is specified with the command <code><b>set ikev2-profile &lt;ike2-profile-name&gt;</b></code>.
+<p>
+     <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+	   <code>
+	   HUB(ipsec-profile)#<b>set ikev2-profile IKEv2_PROF</b><br> 
+	   HUB(ipsec-profile)#<b>exit</b>
+	   </code>
+	   </div></p>
  </li>
 </ol>
 </p>
-
-<h2>Verification</h2>
 <p>
-show crypto ipsec profile
-</p>
-
-<h1>Securing the DMVPN Tunnel</h1>
+<h2>Securing the DMVPN Tunnel</h2>
 <p>
 To secure the DMVPN tunnel, the IPSec profile should be associated with the DMVPN 
-tunnel interface with the command; tunnel protection ipsec profile profile_name 
-[shared]. The shared keyword is required for routers that terminate multiple secured
-DMVPN tunnels on the same transport interface. The command shares the IPSec security
+tunnel interface with the command; <code><b>tunnel protection ipsec profile &lt;profile-name&gt; 
+[shared]</b></code>. The <code><b>shared</b></code> keyword is required for routers that terminate multiple secured
+DMVPN tunnels on the same transport interface. 
+</p>
+<p>
+     <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+	   <code>
+	   HUB(config)#<b>interface tunnel 0</b><br>
+	   HUB(config-if)#<b>tunnel protection ipsec profile IPSEC_PROF</b>
+	   </code>
+	   </div></p>
+	   <p>
+The command shares the IPSec security
 association database (SADB) among multiple DMVPN tunnels. Because the SADB is 
 shared, a unique tunnel key must be defined on each DMVPN tunnel interface to 
 ensure that the encrypted/decrypted traffic aligns to the proper DMVPN tunnel.
 </p>
 
+</p>
+
+<h2>Verification of IKEv2 Tunnels</h2>
+<p>
+<b><code>show crypto ipsec profile</code></b>
+</p>
+
+<h3><code>show dmvpn</code></h3>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+	   <code>
+HUB#<b>show dmvpn detail</b>                                                     <br>
+Legend: Attrb --&gt; S - Static, D - Dynamic, I - Incomplete&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;          <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;N - NATed, L - Local, X - No Socket&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;        <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;T1 - Route Installed, T2 - Nexthop-override&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;        <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;C - CTS Capable, I2 - Temporary&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;        <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Ent --&gt; Number of NHRP entries with same NBMA peer&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;           <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;NHS Status: E --&gt; Expecting Replies, R --&gt; Responding, W --&gt; Waiting     <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;UpDn Time --&gt; Up or Down Time for a Tunnel&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;           <br>
+==========================================================================       <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;       <br>
+Interface Tunnel0 is up/up, Addr. is 192.168.1.1, VRF ""&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;       <br>
+&nbsp;&nbsp; Tunnel Src./Dest. addr: 10.10.1.1/Multipoint, Tunnel VRF ""&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;       <br>
+&nbsp;&nbsp; Protocol/Transport: "multi-GRE/IP", Protect "IPSEC_PROF"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;        <br>
+&nbsp;&nbsp; Interface State Control: Disabled&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;       <br>
+&nbsp;&nbsp; nhrp event-publisher : Disabled&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;       <br>
+Type:Hub, Total NBMA Peers (v4/v6): 2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;        <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;       <br>
+# Ent&nbsp;&nbsp;Peer NBMA Addr Peer Tunnel Add State&nbsp;&nbsp;UpDn Tm Attrb&nbsp;&nbsp;&nbsp;&nbsp;Target Network     <br>
+----- --------------- --------------- ----- -------- ----- -----------------     <br>
+&nbsp;&nbsp;&nbsp;&nbsp;1 10.10.1.2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 192.168.1.2&nbsp;&nbsp;&nbsp;&nbsp;UP 00:13:26&nbsp;&nbsp;&nbsp;&nbsp; D&nbsp;&nbsp;&nbsp;&nbsp; 192.168.1.2/32    <br>
+&nbsp;&nbsp;&nbsp;&nbsp;1 10.10.1.3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 192.168.1.3&nbsp;&nbsp;&nbsp;&nbsp;UP 00:02:57&nbsp;&nbsp;&nbsp;&nbsp; D&nbsp;&nbsp;&nbsp;&nbsp; 192.168.1.3/32    <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;       <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;       <br>
+Crypto Session Details:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;        <br>
+-------------------------------------------------------------------------------- <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;       <br>
+Interface: Tunnel0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;       <br>
+Session: [0x1110A890]&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;        <br>
+&nbsp;&nbsp;Session ID: 2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;        <br>
+&nbsp;&nbsp;IKEv2 SA: local 10.10.1.1/500 remote 10.10.1.2/500 Active&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;        <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Capabilities:(none) connid:1 lifetime:23:46:29&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;       <br>
+&nbsp;&nbsp;Crypto Session Status: UP-ACTIVE&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;       <br>
+&nbsp;&nbsp;fvrf: (none), Phase1_id: 10.10.1.2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;       <br>
+&nbsp;&nbsp;IPSEC FLOW: permit 47 host 10.10.1.1 host 10.10.1.2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;        <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Active SAs: 2, origin: crypto map&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;        <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Inbound:&nbsp;&nbsp;#pkts dec'ed 1020 drop 0 life (KB/Sec) 4173553/2789&nbsp;&nbsp;&nbsp;&nbsp;        <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Outbound: #pkts enc'ed 1020 drop 0 life (KB/Sec) 4173553/2789&nbsp;&nbsp;&nbsp;&nbsp;        <br>
+&nbsp;&nbsp; Outbound SPI : 0xD07B32DF, transform : esp-aes esp-sha512-hmac&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;        <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Socket State: Open&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;       <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;       <br>
+Interface: Tunnel0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;       <br>
+Session: [0x1110A798]&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;        <br>
+&nbsp;&nbsp;Session ID: 3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;        <br>
+&nbsp;&nbsp;IKEv2 SA: local 10.10.1.1/500 remote 10.10.1.3/500 Active&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;        <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Capabilities:(none) connid:2 lifetime:23:56:23&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;       <br>
+&nbsp;&nbsp;Crypto Session Status: UP-ACTIVE&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;       <br>
+&nbsp;&nbsp;fvrf: (none), Phase1_id: 10.10.1.3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;       <br>
+&nbsp;&nbsp;IPSEC FLOW: permit 47 host 10.10.1.1 host 10.10.1.3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;        <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Active SAs: 2, origin: crypto map&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;        <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Inbound:&nbsp;&nbsp;#pkts dec'ed 1022 drop 0 life (KB/Sec) 4181658/3383&nbsp;&nbsp;&nbsp;&nbsp;        <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Outbound: #pkts enc'ed 1014 drop 0 life (KB/Sec) 4181659/3383&nbsp;&nbsp;&nbsp;&nbsp;        <br>
+&nbsp;&nbsp; Outbound SPI : 0xB5895749, transform : esp-aes esp-sha512-hmac&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;        <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Socket State: Open&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;       <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;       <br>
+Pending DMVPN Sessions:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;        <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;       <br>
+HUB#
+</code></div>
+</p>
+<p>
+On the spoke
+</p>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+   <code>
+SPOKE1(config-if)#<b>do show dmvpn detail</b><br>
+Legend: Attrb --&gt; S - Static, D - Dynamic, I - Incomplete                            <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;N - NATed, L - Local, X - No Socket                                             <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;T1 - Route Installed, T2 - Nexthop-override                                     <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;C - CTS Capable, I2 - Temporary                                                 <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Ent --&gt; Number of NHRP entries with same NBMA peer                         <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;NHS Status: E --&gt; Expecting Replies, R --&gt; Responding, W --&gt; Waiting   <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;UpDn Time --&gt; Up or Down Time for a Tunnel                                   <br>
+==========================================================================              <br>
+                                                                                        <br>
+Interface Tunnel0 is up/down, Addr. is 192.168.1.2, VRF ""                              <br>
+&nbsp;&nbsp; Tunnel Src./Dest. addr: 10.10.1.2/10.10.1.1, Tunnel VRF ""                           <br>
+&nbsp;&nbsp; Protocol/Transport: "GRE/IP", Protect "IPSEC_PROF"                                   <br>
+&nbsp;&nbsp; Interface State Control: Disabled                                                    <br>
+&nbsp;&nbsp; nhrp event-publisher : Disabled                                                      <br>
+                                                                                        <br>
+IPv4 NHS:                                                                               <br>
+192.168.1.1&nbsp;&nbsp; E NBMA Address: 10.10.1.1 priority = 0 cluster = 0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;            <br>
+Type:Spoke, Total NBMA Peers (v4/v6): 1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;           <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;            <br>
+# Ent&nbsp;&nbsp;Peer NBMA Addr Peer Tunnel Add State&nbsp;&nbsp;UpDn Tm Attrb&nbsp;&nbsp;&nbsp;&nbsp;Target Network            <br>
+----- --------------- --------------- ----- -------- ----- -----------------            <br>
+&nbsp;&nbsp;&nbsp;&nbsp;1 10.10.1.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 192.168.1.1&nbsp;&nbsp;INTF 00:04:17&nbsp;&nbsp;&nbsp;&nbsp; S&nbsp;&nbsp;&nbsp;&nbsp; 192.168.1.1/32           <br>
+                                                                                        <br>
+                                                                                        <br>
+Crypto Session Details:                                                                 <br>
+--------------------------------------------------------------------------------        <br>
+                                                                                        <br>
+Interface: Tunnel0                                                                      <br>
+Session: [0x10F9C2E8]&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                         <br>
+&nbsp;&nbsp;Session ID: 0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                         <br>
+&nbsp;&nbsp;IKEv1 SA: local 10.10.1.2/500 remote 10.10.1.1/500 Inactive                           <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Capabilities:(none) connid:0 lifetime:0                                       <br>
+&nbsp;&nbsp;Crypto Session Status: DOWN-NEGOTIATING                                               <br>
+&nbsp;&nbsp;fvrf: (none),&nbsp;&nbsp; IPSEC FLOW: permit 47 host 10.10.1.2 host 10.10.1.1                   <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Active SAs: 0, origin: crypto map                                               <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Inbound:&nbsp;&nbsp;#pkts dec'ed 0 drop 0 life (KB/Sec) 0/0                               <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Outbound: #pkts enc'ed 0 drop 0 life (KB/Sec) 0/0                               <br>
+&nbsp;&nbsp; Outbound SPI : 0x&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0, transform :                                               <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Socket State: Closed&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                          <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                          <br>
+Pending DMVPN Sessions:                                                                 <br>
+                                                                                        <br>
+SPOKE1(config-if)#                                                                      <br>
+</code></div>
+</p>
+
+<h3><code>show crypto ipsec sa detail</code></h3>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+   <code>
+   HUB#<b>show crypto ipsec sa detail</b><br> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                                  <br>
+interface: Tunnel0                                                          <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Crypto map tag: Tunnel0-head-0, local addr 10.10.1.1                    <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                                  <br>
+&nbsp;&nbsp; protected vrf: (none)                                                    <br>
+&nbsp;&nbsp; local&nbsp;&nbsp;ident (addr/mask/prot/port): (10.10.1.1/255.255.255.255/47/0)     <br>
+&nbsp;&nbsp; remote ident (addr/mask/prot/port): (10.10.1.3/255.255.255.255/47/0)     <br>
+&nbsp;&nbsp; current_peer 10.10.1.3 port 500                                          <br>
+&nbsp;&nbsp;&nbsp;&nbsp; PERMIT, flags={origin_is_acl,}                                         <br>
+&nbsp;&nbsp;&nbsp;&nbsp;#pkts encaps: 1016, #pkts encrypt: 1016, #pkts digest: 1016             <br>
+&nbsp;&nbsp;&nbsp;&nbsp;#pkts decaps: 1024, #pkts decrypt: 1024, #pkts verify: 1024             <br>
+&nbsp;&nbsp;&nbsp;&nbsp;#pkts compressed: 0, #pkts decompressed: 0                              <br>
+&nbsp;&nbsp;&nbsp;&nbsp;#pkts not compressed: 0, #pkts compr. failed: 0                         <br>
+&nbsp;&nbsp;&nbsp;&nbsp;#pkts not decompressed: 0, #pkts decompress failed: 0                   <br>
+&nbsp;&nbsp;&nbsp;&nbsp;#pkts no sa (send) 0, #pkts invalid sa (rcv) 0                          <br>
+&nbsp;&nbsp;&nbsp;&nbsp;#pkts encaps failed (send) 0, #pkts decaps failed (rcv) 0               <br>
+&nbsp;&nbsp;&nbsp;&nbsp;#pkts invalid prot (recv) 0, #pkts verify failed: 0                     <br>
+&nbsp;&nbsp;&nbsp;&nbsp;#pkts invalid identity (recv) 0, #pkts invalid len (rcv) 0              <br>
+&nbsp;&nbsp;&nbsp;&nbsp;#pkts replay rollover (send): 0, #pkts replay rollover (rcv) 0          <br>
+&nbsp;&nbsp;&nbsp;&nbsp;##pkts replay failed (rcv): 0                                           <br>
+&nbsp;&nbsp;&nbsp;&nbsp;#pkts tagged (send): 0, #pkts untagged (rcv): 0                         <br>
+&nbsp;&nbsp;&nbsp;&nbsp;#pkts not tagged (send): 0, #pkts not untagged (rcv): 0                 <br>
+&nbsp;&nbsp;&nbsp;&nbsp;#pkts internal err (send): 0, #pkts internal err (recv) 0               <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                                  <br>
+&nbsp;&nbsp;&nbsp;&nbsp; local crypto endpt.: 10.10.1.1, remote crypto endpt.: 10.10.1.3        <br>
+&nbsp;&nbsp;&nbsp;&nbsp; plaintext mtu 1442, path mtu 1500, ip mtu 1500, ip mtu idb GigabitEthernet0/0<br>
+&nbsp;&nbsp;&nbsp;&nbsp; current outbound spi: 0xB5895749(3045676873)                                      <br>
+&nbsp;&nbsp;&nbsp;&nbsp; PFS (Y/N): N, DH group: none                                                      <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                                             <br>
+&nbsp;&nbsp;&nbsp;&nbsp; inbound esp sas:                                                                  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;spi: 0x70EA8A16(1894418966)                                                      <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;transform: esp-aes esp-sha512-hmac ,                                           <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;in use settings ={Transport, }                                                 <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;conn id: 7, flow_id: SW:7, sibling_flags 80000000, crypto map: Tunnel0-head-0  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sa timing: remaining key lifetime (k/sec): (4181657/2972)                      <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;IV size: 16 bytes                                                              <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;replay detection support: Y                                                    <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Status: ACTIVE(ACTIVE)                                                         <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                                             <br>
+&nbsp;&nbsp;&nbsp;&nbsp; inbound ah sas:                                                                   <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                                             <br>
+&nbsp;&nbsp;&nbsp;&nbsp; inbound pcp sas:                                                                  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                                             <br>
+&nbsp;&nbsp;&nbsp;&nbsp; outbound esp sas:                                                                 <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;spi: 0xB5895749(3045676873)                                                      <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;transform: esp-aes esp-sha512-hmac ,                                           <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;in use settings ={Transport, }                                                 <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;conn id: 8, flow_id: SW:8, sibling_flags 80000000, crypto map: Tunnel0-head-0  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sa timing: remaining key lifetime (k/sec): (4181659/2972)                      <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;IV size: 16 bytes                                                              <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;replay detection support: Y                                                    <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Status: ACTIVE(ACTIVE)                                                         <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                                             <br>
+&nbsp;&nbsp;&nbsp;&nbsp; outbound ah sas:                                                                  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                                             <br>
+&nbsp;&nbsp;&nbsp;&nbsp; outbound pcp sas:                                                                 <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                                             <br>
+&nbsp;&nbsp; protected vrf: (none)                                                               <br>
+&nbsp;&nbsp; local&nbsp;&nbsp;ident (addr/mask/prot/port): (10.10.1.1/255.255.255.255/47/0)                <br>
+&nbsp;&nbsp; remote ident (addr/mask/prot/port): (10.10.1.2/255.255.255.255/47/0)                <br>
+&nbsp;&nbsp; current_peer 10.10.1.2 port 500                                                     <br>
+&nbsp;&nbsp;&nbsp;&nbsp; PERMIT, flags={origin_is_acl,}                                                    <br>
+&nbsp;&nbsp;&nbsp;&nbsp;#pkts encaps: 1022, #pkts encrypt: 1022, #pkts digest: 1022                        <br>
+&nbsp;&nbsp;&nbsp;&nbsp;#pkts decaps: 1022, #pkts decrypt: 1022, #pkts verify: 1022                        <br>
+&nbsp;&nbsp;&nbsp;&nbsp;#pkts compressed: 0, #pkts decompressed: 0                                         <br>
+&nbsp;&nbsp;&nbsp;&nbsp;#pkts not compressed: 0, #pkts compr. failed: 0                                    <br>
+&nbsp;&nbsp;&nbsp;&nbsp;#pkts not decompressed: 0, #pkts decompress failed: 0                              <br>
+&nbsp;&nbsp;&nbsp;&nbsp;#pkts no sa (send) 0, #pkts invalid sa (rcv) 0                                     <br>
+&nbsp;&nbsp;&nbsp;&nbsp;#pkts encaps failed (send) 0, #pkts decaps failed (rcv) 0                          <br>
+&nbsp;&nbsp;&nbsp;&nbsp;#pkts invalid prot (recv) 0, #pkts verify failed: 0                                <br>
+&nbsp;&nbsp;&nbsp;&nbsp;#pkts invalid identity (recv) 0, #pkts invalid len (rcv) 0                         <br>
+&nbsp;&nbsp;&nbsp;&nbsp;#pkts replay rollover (send): 0, #pkts replay rollover (rcv) 0                     <br>
+&nbsp;&nbsp;&nbsp;&nbsp;##pkts replay failed (rcv): 0                                                      <br>
+&nbsp;&nbsp;&nbsp;&nbsp;#pkts tagged (send): 0, #pkts untagged (rcv): 0                                    <br>
+&nbsp;&nbsp;&nbsp;&nbsp;#pkts not tagged (send): 0, #pkts not untagged (rcv): 0                            <br>
+&nbsp;&nbsp;&nbsp;&nbsp;#pkts internal err (send): 0, #pkts internal err (recv) 0                          <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                                             <br>
+&nbsp;&nbsp;&nbsp;&nbsp; local crypto endpt.: 10.10.1.1, remote crypto endpt.: 10.10.1.2                   <br>
+&nbsp;&nbsp;&nbsp;&nbsp; plaintext mtu 1442, path mtu 1500, ip mtu 1500, ip mtu idb GigabitEthernet0/0     <br>
+&nbsp;&nbsp;&nbsp;&nbsp; current outbound spi: 0xD07B32DF(3497734879)                                      <br>
+&nbsp;&nbsp;&nbsp;&nbsp; PFS (Y/N): N, DH group: none                                                      <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                                             <br>
+&nbsp;&nbsp;&nbsp;&nbsp; inbound esp sas:                                                                  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;spi: 0x75C10060(1975582816)                                                      <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;transform: esp-aes esp-sha512-hmac ,                                           <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;in use settings ={Transport, }                                                 <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;conn id: 5, flow_id: SW:5, sibling_flags 80000000, crypto map: Tunnel0-head-0  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sa timing: remaining key lifetime (k/sec): (4173553/2378)                      <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;IV size: 16 bytes                                                              <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;replay detection support: Y                                                    <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Status: ACTIVE(ACTIVE)                                                         <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                                             <br>
+&nbsp;&nbsp;&nbsp;&nbsp; inbound ah sas:                                                                   <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                                             <br>
+&nbsp;&nbsp;&nbsp;&nbsp; inbound pcp sas:                                                                  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                                             <br>
+&nbsp;&nbsp;&nbsp;&nbsp; outbound esp sas:                                                                 <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;spi: 0xD07B32DF(3497734879)                                                      <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;transform: esp-aes esp-sha512-hmac ,                                           <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;in use settings ={Transport, }                                                 <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;conn id: 6, flow_id: SW:6, sibling_flags 80000000, crypto map: Tunnel0-head-0  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sa timing: remaining key lifetime (k/sec): (4173552/2378)                      <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;IV size: 16 bytes                                                              <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;replay detection support: Y                                                    <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Status: ACTIVE(ACTIVE)                                                         <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                                             <br>
+&nbsp;&nbsp;&nbsp;&nbsp; outbound ah sas:                                                                  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                                             <br>
+&nbsp;&nbsp;&nbsp;&nbsp; outbound pcp sas:                                                                 <br>
+HUB#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                                             <br>
+   </code></div>
+</p>
+
+
+<h3><code>show crypto ikev2 sa detailed</code></h3>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+   <code>
+HUB#<b>show crypto ikev2 sa detailed</b><br> 
+&nbsp;IPv4 Crypto IKEv2  SA                                                                                   <br>
+                                                                                                         <br>
+Tunnel-id Local&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Remote&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;fvrf/ivrf&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Status                        <br>
+2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 10.10.1.1/500&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 10.10.1.3/500&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; none/none&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;READY                         <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Encr: AES-CBC, keysize: 256, PRF: SHA512, Hash: SHA512, DH Grp:5, Auth sign: PSK, Auth verify: PSK <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Life/Active Time: 86400/610 sec&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                          <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CE id: 1004, Session-id: 2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                           <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Status Description: Negotiation done&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                           <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Local spi: A0F8071EC395BD3C&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Remote spi: 97AE858B6CAA71A2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                           <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Local id: 10.10.1.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                          <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Remote id: 10.10.1.3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                           <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Local req msg id:&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Remote req msg id:&nbsp;&nbsp;2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                          <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Local next msg id: 0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Remote next msg id: 2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                          <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Local req queued:&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Remote req queued:&nbsp;&nbsp;2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                          <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Local window:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;5&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Remote window:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;5&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                          <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;DPD configured for 0 seconds, retry 0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                          <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Fragmentation not&nbsp;&nbsp;configured.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                           <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Dynamic Route Update: disabled&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                           <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Extended Authentication not configured.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                          <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;NAT-T is not detected&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                          <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Cisco Trust Security SGT is disabled&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                           <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Initiator of SA : No&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                           <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                           <br>
+Tunnel-id Local&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Remote&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;fvrf/ivrf&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Status                        <br>
+1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 10.10.1.1/500&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 10.10.1.2/500&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; none/none&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;READY                         <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Encr: AES-CBC, keysize: 256, PRF: SHA512, Hash: SHA512, DH Grp:5, Auth sign: PSK, Auth verify: PSK <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Life/Active Time: 86400/1204 sec&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                           <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CE id: 1003, Session-id: 1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                           <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Status Description: Negotiation done&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                           <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Local spi: B085F9ECBA72967E&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Remote spi: 69A6A65ED87EC303&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                           <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Local id: 10.10.1.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                          <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Remote id: 10.10.1.2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                           <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Local req msg id:&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Remote req msg id:&nbsp;&nbsp;2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                          <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Local next msg id: 0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Remote next msg id: 2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                          <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Local req queued:&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Remote req queued:&nbsp;&nbsp;2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                          <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Local window:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;5&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Remote window:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;5&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                          <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;DPD configured for 0 seconds, retry 0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                          <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Fragmentation not&nbsp;&nbsp;configured.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                           <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Dynamic Route Update: disabled&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                           <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Extended Authentication not configured.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                          <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;NAT-T is not detected&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                          <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Cisco Trust Security SGT is disabled&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                           <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Initiator of SA : No&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                           <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                           <br>
+ IPv6 Crypto IKEv2  SA                                                                                   <br>
+</code></div>
+ </p>
+ 
+ <p>
+On the client
+</p>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+   <code>
+SPOKE2#<b>show crypto ikev2 sa detailed</b>                                                               <br>
+&nbsp;IPv4 Crypto IKEv2  SA                                                                                    <br>
+                                                                                                          <br>
+Tunnel-id Local&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Remote&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;fvrf/ivrf&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Status&nbsp;&nbsp;                       <br>
+1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 10.10.1.3/500&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 10.10.1.1/500&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; none/none&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;READY&nbsp;&nbsp;                        <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Encr: AES-CBC, keysize: 256, PRF: SHA512, Hash: SHA512, DH Grp:5, Auth sign: PSK, Auth verify: PSK  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Life/Active Time: 86400/78 sec&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                        <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CE id: 1002, Session-id: 1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                        <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Status Description: Negotiation done&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                        <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Local spi: 97AE858B6CAA71A2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Remote spi: A0F8071EC395BD3C&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                        <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Local id: 10.10.1.3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                       <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Remote id: 10.10.1.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                        <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Local req msg id:&nbsp;&nbsp;2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Remote req msg id:&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                       <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Local next msg id: 2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Remote next msg id: 0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                       <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Local req queued:&nbsp;&nbsp;2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Remote req queued:&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                       <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Local window:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;5&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Remote window:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;5&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                       <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;DPD configured for 0 seconds, retry 0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                       <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Fragmentation not&nbsp;&nbsp;configured.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                        <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Dynamic Route Update: disabled&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                        <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Extended Authentication not configured.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                       <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;NAT-T is not detected&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                       <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Cisco Trust Security SGT is disabled&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                        <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Initiator of SA : Yes&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                       <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                        <br>
+&nbsp;IPv6 Crypto IKEv2&nbsp;&nbsp;SA&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                        <br>
+</code></div>
+</p>
+
+	
+
+<h3><code>show crypto ikev2 profile</code></h3>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+   <code>
+HUB#<b>show crypto ikev2 profile</b><br> 
+                                                    <br>
+IKEv2 profile: IKEv2_PROF                           <br>
+&nbsp;Ref&nbsp;Count: 6                                       <br>
+&nbsp;Match criteria:                                    <br>
+&nbsp;&nbsp;Fvrf: global                                      <br>
+&nbsp;&nbsp;Local address/interface: none                     <br>
+&nbsp;&nbsp;Identities:                                       <br>
+&nbsp;&nbsp;&nbsp;address 0.0.0.0                                  <br>
+&nbsp;&nbsp;Certificate maps: none                            <br>
+&nbsp;Local identity: none                               <br>
+&nbsp;Remote identity: none                              <br>
+&nbsp;Local authentication method: pre-share             <br>
+&nbsp;Remote authentication method(s): pre-share         <br>
+&nbsp;EAP&nbsp;options: none                                  <br>
+&nbsp;Keyring: IKEv2_KEYRING                             <br>
+&nbsp;Trustpoint(s): none                                <br>
+&nbsp;Lifetime: 86400 seconds                            <br>
+&nbsp;DPD: disabled                                      <br>
+&nbsp;NAT-keepalive: disabled                            <br>
+&nbsp;Ivrf: none                                         <br>
+&nbsp;Virtual-template: none                             <br>
+&nbsp;mode auto: none                                    <br>
+&nbsp;AAA&nbsp;AnyConnect EAP authentication mlist: none      <br>
+&nbsp;AAA&nbsp;EAP authentication mlist: none                 <br>
+&nbsp;AAA&nbsp;Accounting: none                               <br>
+&nbsp;AAA&nbsp;group authorization: none                      <br>
+&nbsp;AAA&nbsp;user authorization: none                       <br>
+HUB#
+</code></div>
+</p>
+
+<h3><code>show crypto ikev2 stats</code></h3>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+   <code>
+SPOKE1#<b>show crypto ikev2 stats</b><br> 
+--------------------------------------------------------------------------------      <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Crypto IKEv2 SA Statistics                                  <br>
+--------------------------------------------------------------------------------      <br>
+System Resource Limit:&nbsp;&nbsp; 0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Max IKEv2 SAs: 0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Max in nego(in/out): 40/400 <br>
+Total incoming IKEv2 SA Count:&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;active:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;negotiating: 0     <br>
+Total outgoing IKEv2 SA Count:&nbsp;&nbsp;&nbsp;&nbsp;1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;active:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;negotiating: 0     <br>
+Incoming IKEv2 Requests: 0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;accepted:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;rejected:&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;            <br>
+Outgoing IKEv2 Requests: 1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;accepted:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;rejected:&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;            <br>
+Rejected IKEv2 Requests: 0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;rsrc low:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SA limit:&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;            <br>
+IKEv2 packets dropped at dispatch: 0                                                  <br>
+Incoming Requests dropped as LOW Q limit reached : 0                                  <br>
+Incoming IKEV2 Cookie Challenged Requests: 0                                          <br>
+&nbsp;&nbsp;&nbsp;&nbsp;accepted: 0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;rejected: 0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;rejected no cookie: 0                       <br>
+Total Deleted sessions of Cert Revoked Peers: 0                                       <br>
+                                                                                      <br>
+SPOKE1#
+</code></div>
+</p>
+
+
+<h3><code>show crypto ipsec profile</code></h3>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+   <code>
+SPOKE1(config-if)#<b>do show crypto ipsec profile</b>                 <br>
+IPSEC profile IPSEC_PROF                                              <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;IKEv2 Profile: IKEv2_PROF                                     <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Security association lifetime: 4608000 kilobytes/3600 seconds <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Responder-Only (Y/N): N                                       <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;PFS (Y/N): N                                                  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Mixed-mode : Disabled                                         <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Transform sets={                                              <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;IPSEC_TSET:  { esp-aes esp-sha512-hmac  } ,           <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                   <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                    <br>
+IPSEC profile default                                                 <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Security association lifetime: 4608000 kilobytes/3600 seconds <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Responder-Only (Y/N): N                                       <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;PFS (Y/N): N                                                  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Mixed-mode : Disabled                                         <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Transform sets={                                              <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;default:&nbsp;&nbsp;{ esp-aes esp-sha-hmac  } ,                 <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                   <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                    <br>
+SPOKE1(config-if)#                                                    <br>
+</code></div>
+</p>
+
+
+<h3><code>show crypto ikev2 profile</code></h3>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+   <code>
+SPOKE1#<b>show crypto ikev2 profile</b>          <br>
+                                                 <br>
+IKEv2 profile: IKEv2_PROF                        <br>
+&nbsp;Ref Count: 5                                    <br>
+&nbsp;Match criteria:                                 <br>
+&nbsp;&nbsp;Fvrf: global                                   <br>
+&nbsp;&nbsp;Local address/interface: none                  <br>
+&nbsp;&nbsp;Identities:                                    <br>
+&nbsp;&nbsp;&nbsp;address 0.0.0.0                               <br>
+&nbsp;&nbsp;Certificate maps: none                         <br>
+&nbsp;Local identity: none                            <br>
+&nbsp;Remote identity: none                           <br>
+&nbsp;Local authentication method: pre-share          <br>
+&nbsp;Remote authentication method(s): pre-share      <br>
+&nbsp;EAP options: none                               <br>
+&nbsp;Keyring: IKEv2_KEYRING                          <br>
+&nbsp;Trustpoint(s): none                             <br>
+&nbsp;Lifetime: 86400 seconds                         <br>
+&nbsp;DPD: disabled                                   <br>
+&nbsp;NAT-keepalive: disabled                         <br>
+&nbsp;Ivrf: none                                      <br>
+&nbsp;Virtual-template: none                          <br>
+&nbsp;mode auto: none                                 <br>
+&nbsp;AAA AnyConnect EAP authentication mlist: none   <br>
+&nbsp;AAA EAP authentication mlist: none              <br>
+&nbsp;AAA Accounting: none                            <br>
+&nbsp;AAA group authorization: none                   <br>
+&nbsp;AAA user authorization: none                    <br>
+SPOKE1#                                          <br>
+</code></div>
+</p>
+
+<h3><code>show crypto ikev2 policy</code></h3>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+   <code>
+SPOKE1#<b>show crypto ikev2 policy</b><br> 
+                                     <br>
+&nbsp;IKEv2 policy : default              <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Match fvrf : any               <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Match address local : any      <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Proposal&nbsp;&nbsp;&nbsp;&nbsp;: default          <br>
+SPOKE1#                              <br>
+</code></div>
+</p>
+<h3><code>show crypto ikev2 session</code></h3>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+   <code>
+SPOKE1#<b>show crypto ikev2 session</b><br> 
+&nbsp;IPv4 Crypto IKEv2 Session<br> 
+<br>
+Session-id:1, Status:UP-ACTIVE, IKE count:1, CHILD count:1<br>
+<br>
+Tunnel-id Local&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Remote&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;fvrf/ivrf&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Status                          <br>
+1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 10.10.1.2/500&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 10.10.1.1/500&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; none/none&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;READY                           <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Encr: AES-CBC, keysize: 256, PRF: SHA512, Hash: SHA512, DH Grp:5, Auth sign: PSK, Auth verify: PSK   <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Life/Active Time: 86400/132 sec                                                                      <br>
+Child sa: local selector&nbsp;&nbsp;10.10.1.2/0 - 10.10.1.2/65535                                                    <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;remote selector 10.10.1.1/0 - 10.10.1.1/65535                                                    <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ESP spi in/out: 0xD07B32DF/0x75C10060                                                            <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                                                 <br>
+&bnsp;IPv6 Crypto IKEv2 Session                                                                                 <br>
+                                                                                                           <br>
+SPOKE1#                                                                                                    <br>
+</code></div>
+</p>
+
+<h3><code>show crypto ikev2 session detail</code></h3>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+   <code>
+SPOKE1#<b>show crypto ikev2 session detail</b>                                                            <br>
+ IPv4 Crypto IKEv2 Session                                                                                <br>
+                                                                                                          <br>
+Session-id:1, Status:UP-ACTIVE, IKE count:1, CHILD count:1                                                <br>
+                                                                                                          <br>
+Tunnel-id Local&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Remote&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;fvrf/ivrf&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Status                         <br>
+1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 10.10.1.2/500&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 10.10.1.1/500&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; none/none&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;READY                          <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Encr: AES-CBC, keysize: 256, PRF: SHA512, Hash: SHA512, DH Grp:5, Auth sign: PSK, Auth verify: PSK  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Life/Active Time: 86400/137 sec                                                                     <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CE id: 1002, Session-id: 1                                                                          <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Status Description: Negotiation done                                                                <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Local spi: 69A6A65ED87EC303&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Remote spi: B085F9ECBA72967E                                      <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Local id: 10.10.1.2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                                 <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Remote id: 10.10.1.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                                <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Local req msg id:&nbsp;&nbsp;2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Remote req msg id:  0                                             <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Local next msg id: 2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Remote next msg id: 0                                             <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Local req queued:&nbsp;&nbsp;2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Remote req queued:  0                                             <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Local window:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;5&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Remote window:      5                                             <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;DPD configured for 0 seconds, retry 0                                                               <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Fragmentation not  configured.                                                                      <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Dynamic Route Update: disabled                                                                      <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Extended Authentication not configured.                                                             <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;NAT-T is not detected                                                                               <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Cisco Trust Security SGT is disabled                                                                <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Initiator of SA : Yes                                                                               <br>
+Child sa: local selector  10.10.1.2/0 - 10.10.1.2/65535                                                   <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;remote selector 10.10.1.1/0 - 10.10.1.1/65535                                                   <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ESP spi in/out: 0xD07B32DF/0x75C10060                                                           <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;AH spi in/out: 0x0/0x0                                                                          <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CPI in/out: 0x0/0x0                                                                             <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Encr: AES-CBC, keysize: 128, esp_hmac: SHA512                                                   <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ah_hmac: None, comp: IPCOMP_NONE, mode transport                                                <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                                                                <br>
+ IPv6 Crypto IKEv2 Session                                                                                <br>
+                                                                                                          <br>
+SPOKE1#
+</code></div>
+</p>
+
+
+
 <h2>Protection and Optimisation of DMVPN Tunnel</h2>
+<p>
+
+</p>
 
 <h3>Protection of IKEv2</h3>
 <p>
-The command crypto ikev2 limit max-in-negotiation-sa limit | max-sa limit outgoing 
+The command <code><b>crypto ikev2 limit max-in-negotiation-sa limit | max-sa limit outgoing</b></code> 
 limits the number of sessions being established or that are allowed to establish.
 <ul>
     <li><b>Max-sa:</b> limits the total count of SAs that a router can establish 
@@ -903,19 +1625,19 @@ limits the number of sessions being established or that are allowed to establish
 <p>
 To protect the IKE from half open sessions, a cookie can be used to validate that
 sessions are valid IKEv2 sessions and not a Denial of Service (DoS) attack. The 
-command crypto ikev2 cookie-challege challenge-number defines the threshold of 
+command <code><b>crypto ikev2 cookie-challege &lt;challenge-number&gt;</b></code> defines the threshold of 
 half-open SAs before issuing an IKEv2 challenge.
 </p>
 <h3>Verification</h3>
 <p>                                                                
-show crypto ikev2 stats
+<code><b>show crypto ikev2 stats</b></code>
 </p>
 
 <h2>IPSec Packet Replay Protection</h2>
 <p>
 The IPSec implementation includes an anti-replay mechanism that prevents intruders 
 from duplicating encrypted packets by assigning a unique sequence number to each 
-encrypted packet. When a router decrypts the IPSec oackets, it keeps track of the 
+encrypted packet. When a router decrypts the IPSec packets, it keeps track of the 
 packets it has received. The IPSec anti-replay service rejects (discards) duplicate packets or old packets.
 </p>
 <p>
@@ -981,12 +1703,3 @@ routing neighborship so NAT state is not maintained. NAT keepalives are enabled
 with the command crypto isakmp nat keepalive seconds.
 </p>
 
-<h1>Verification of DMVPN Tunnel Security</h1>
-<h2>show dmvpn detail</h2>
-<p>
-Output lists the status of the tunnel
-</p>
-<h2>show crypto ipsec sa</h2>
-<p>
-
-</p>
