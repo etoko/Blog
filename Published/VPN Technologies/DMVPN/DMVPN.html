@@ -62,7 +62,7 @@ DMVPN's characteristics make its operation flexible and scalable:
 <ul>
 <li>
 <p>
-DMVPN provides full meshed connectivity with simple configuration of hub and spoke.
+DMVPN provides full-meshed connectivity with simple configuration of hub and spoke.
 </p>
 <p>
 DMVPN creates on-demand tunnels between nodes: the initial tunnel-mesh is 
@@ -86,10 +86,10 @@ configuration on the hub when adding a new spoke.</p></li>
 <li><p>DMVPN features automatic IPsec triggering for building IPsec protected 
 VPN tunnels. It remains usable with or without IPsec encryption.</p></li>
 <li><p>Supports IP unicast and IP multicast traffic enabling the support of interior routing
-protocols such as OSPF, EIGRP. Multicast packets are encapsulated bt GRE in unicast packets.</p></li>
+protocols such as OSPF, EIGRP. Multicast packets are encapsulated by GRE in unicast packets.</p></li>
 <li><p> DMVPN supports the configuration of one mGRE interface on each spoke which 
 supports multipoint VPN connectivity. On the hub, DMVPN configuration is accomplished 
-with fewer configuration command and one tunnel interface for all spokes.</p></li>
+with fewer configuration commands and one tunnel interface for all spokes.</p></li>
 <li><p>Dynamic tunnel destination simplifies support for dynamically addressed spokes.</p></li> 
 <li>Spoke-to-spoke data-plane traffic is through the hub (phase 1) or direct (phase 2 and 3). 
 However, control-plane and multicast traffic is only exchanged with the hub regardless of DMVPN phase in operation.
@@ -242,7 +242,7 @@ In the configuration of DMVPN, the following topology will be used for reference
 
 <h4>Step 1: Create the tunnel interface</h4>
 <p>
-The global configuration command <code><b>interface tunnel &lt;tunnel_number&gt;</b></code> is used.
+The global configuration command <code><b>interface tunnel &lt;tunnel-number&gt;</b></code> is used.
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
@@ -262,13 +262,14 @@ connection through different router interfaces, then any one of the other "up" i
 be used to route the tunnel traffic if the primary interface through which the 
 VPN tunnel has been created goes down. If a loopback
 interface is used, remember to advertise the configured network on this interface.
-The configuration command is <code><b>tunnel source &lt;ip_address | interface&gt;</b></code>.
+The configuration command is <code><b>tunnel source &lt;ip-address | interface&gt;</b></code>.
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
       	<code>
 HUB(config-if)#<b>tunnel source g3/0</b>
 </code></div>
+</p>
 
 <h3>Hub Configuration</h3>
 <p>
@@ -445,7 +446,7 @@ it is torn down.
 Probe state: NHCs attempting to register with a down NHS start sending probe 
 packets periodically to determine the availability of the NHS. The delay in probe
 packets is 1, 2, 4, 8, 16, 32, 64. After 64 seconds, no more probe packets are sent.
-This can be verified by debuggin messages;
+This can be verified by debugging messages;
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
@@ -601,7 +602,7 @@ NHRP redirect messages are sent by an intermediate router (hub) to notify the sp
   path (spoke to spoke) (Phase 3) rather than through the hub. This makes it possible 
   for DMVPN to support building dynamic spoke-to-spoke tunnels. NHRP Redirect 
   suppression messages can be sent by spoke to indicate that the redirected path is not feasible.
-This is simlar to IP redirects, when packet in/out interface is the same. 
+This is similar to IP redirects, when packet in/out interface is the same. 
 Redirect messages are sent by hubs that are configured with the tunnel command 
 <code><b> ip nhrp redirect</b></code> in DMVPN phase 3 operation.
 </p>
@@ -657,6 +658,9 @@ sends a resolution request to the NHS, the NHS shares the NHRP table with the NH
 </p>
 
 <h2>Configuration of NHRP</h2>
+<p>
+
+</p>
 
 <h3>Hub Configuration</h3>
 <p>
@@ -750,7 +754,7 @@ In Phase 1, no NHRP requests are sent. Additionally, route summarization at the
 hub is possible in phase 1 and 3 but not in DMVPN phase 2.
 </p>
 <p>
-The default behaviour of EIGRP is DMVPN phase 1 a router makes itself as the 
+The default behaviour of EIGRP in DMVPN phase 1 a router makes itself as the 
 next-hop by default.
 </p>
 <p>
@@ -839,6 +843,10 @@ interface will not activate the tunnel.
 </p>
 
 <h3 id="VERIFICATION_PHASE1">Verification</h3>
+<p>
+
+</p>
+
 <h4><code>traceroute</code></h4>
 <p>
 The NHS (HUB) should always be one hop away from the NHC through the VPN tunnel. This can 
@@ -1056,7 +1064,7 @@ The NHCs are configured with the IP address of the hub.
 <p>
 The spoke to spoke tunnel information is temporary. The address of the hub is 
 permanent. However, for spoke information,the tunnel is torn down after the 
-communication is completed and the exipry of the tunnel session timer.
+communication is completed and the expiry of the tunnel session timer.
 </p>
 
 <h3>OSPF</h3>
@@ -1149,7 +1157,7 @@ VRF info: (vrf in name/id, vrf out name/id)  <br>
 &nbsp;&nbsp;1 172.30.1.2 16 msec 72 msec 28 msec       <br>
 SPOKE8#
 </code></div>
-
+</p>
 
 <h4>Verification of traffic indication</h4>
 <p>
@@ -1513,7 +1521,8 @@ In DMVPN phase 3, if EIGRP is configured as the routing protocol over the overla
 network, EIGRP, by default, changes the next-hop to the router it is running on.
 In phase 3, the configuration of <code><b>next-hop-self</b></code> feature is 
 usually ignored as the redirect on the NHS and shortcut on NHC will take care of 
-spoke to spoke communication. Its presence or absence in NHS configuration is of no effect.
+spoke to spoke communication; its presence or absence in NHS configuration has no 
+effect on the next-hop behaviour.
 </p>
 
 <p>
@@ -1856,6 +1865,10 @@ the underlay network in routing protocol over the overlay network.
 </p>
 
 <h1 id="VERIFICATION">Verification of DMVPN</h1>
+<p>
+
+</p>
+
 <h2>Viewing DMVPN Tunnel States</h2>
 <p>
 The tunnel interface experiences varying states based on the stage of tunnel 
@@ -1863,7 +1876,7 @@ creation or if the tunnel experienced problems during establishment or operation
 Addition of encryption to the tunnel also affects the state of the DMVPN tunnels. 
 </p>
 
-<h3><code>show dmvpn interface &lt;interface&gt; &lt;detail&gt;</b></code> </h3>
+<h3><code>show dmvpn interface &lt;interface&gt; detail</b></code> </h3>
 <p>
 The specified interface is the tunnel interface.
 </p>
@@ -1914,7 +1927,7 @@ Type:Spoke, Total NBMA Peers (v4/v6): 4&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp
     </code></div>
 </p>
 
-<h3><code>show dmvpn &lt;detail&gt;</code></h3>
+<h3><code>show dmvpn detail</code></h3>
 
 <p>
 Run from the hub displays the mapping between the tunnel address and NBMA address.
@@ -1959,8 +1972,11 @@ Pending DMVPN Sessions:                                                         
 
 </p>
 <h2>Viewing the NHRP Cache</h2>
+<p>
 
-<h3><code>show ip nhrp &lt;brief | detail&gt;</code></h3>
+</p>
+
+<h3><code>show ip nhrp [brief | detail]</code></h3>
 <p>
 The displays the local NHRP cache. The <code><b>detail</b></code> keyword lists routers that submitted
 an NHRP request and its request ID. The NHRP cache displays NHRP mapping entries and NHRP message flags.
@@ -2058,12 +2074,19 @@ Tunnel0: Max-send limit:100Pkts/10Sec, Usage:0%                           <br>
 
 
 <h2>Overlay Routes</h2>
+<p>
+
+</p>
+
 <h3><code>show ip route</code></h3>
 <p>
 Overlay routes have the tunnel interface as the exit interface.
 </p>
 
 <h1 id="OPTIMIZATION">Optimization of DMVPN Operation</h1>
+<p>
+
+</p>
 
 <h2>Unique IP NHRP Registration</h2>
 <p>
@@ -2076,13 +2099,15 @@ Verify using the command <code><b>show ip nhrp 10.100.100.8</b></code>.
 </p>
 
 <h2>Recursive Routing Problems</h2>
+<p>
 Recursive routing happens when the transport/NBMA network is advertised into the same routing
 protocol that runs on the overlay network. One of the main preconditions for 
 recursive routing is the routing protocol in the overlay network having a lower 
 Administrative Distance (AD) than the routing protocol being used in the underlay
 network. An example of this can be where EIGRP is running on the overlay network 
 and OSPF in the underlay network.
-
+</p>
+<p>
 The two routers that have a DMVPN tunnel formed will share their routes using 
 the EIGRP over the tunnel. EIGRP having an AD (90) lower than OSPF (110) will 
 have its underlay route selected as the preferred route over the OSPF route by 
@@ -2093,7 +2118,10 @@ network times out and gets terminated. As the router loses the tunnel, it create
 a new OSPF neighborship with its underlay neighbor resulting in the reformation
 of the tunnel. Then EIGRP sends the same update of the underlay network across 
 the tunnel. This process repeats continuously.
+</p>
+
 <h3>Solution</h3>
+<p>
 <ul>
 <li>Removing the transport network from the overlay routing protocol resolves
 recursive routing.</li>
@@ -2110,6 +2138,7 @@ the transport and overlay networks remain in separate routing tables. The transp
 network and interface can be associated with the transport VRF and the tunnel 
 network and interface associated with the tunnel VRF.
 </p>
+
 <h3>Configuring FVRF</h3>
 <p>
 The VRF can be created using the older global configuration command 
@@ -2214,6 +2243,9 @@ Type:Spoke, Total NBMA Peers (v4/v6): 1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp
 </p>
 
 <h2>DMVPN Failure Detection and High Availability</h2>
+<p>
+
+</p>
 <h3>Hold time</h3>
 <p>
 By default, an NHRP mapping stays in the NHRP cache for 7200 seconds (2 hours) 
@@ -2248,6 +2280,8 @@ A unique IPv6 link-local address should be assigned to the tunnel inteface when
 the tunnelling protocol is IPv6. IPv6 routing protocols use link-local addresses
 to discover each other and install in the RIB.
 </p>
+
+
 <h2>IPv6 DMVPN Commands</h2>
 <p>
 <ul>
