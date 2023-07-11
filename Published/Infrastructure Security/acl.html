@@ -43,26 +43,7 @@ been deployed to provide multiple network functions such as:
 </ul>
 </p>
 
-<h1>Types of ACLs</h1>
-<p>
-There are several types of ACLs:
-  <li>Standard</li>
-  <li>Extended ACLs</li>
-  <li>Infrastructure</li>
-  <li>Transit</li>
-  <li>Time-based</li>
-  <li>Dynamic</li>
-  <li>IP Named</li>
-  <li>Reflexive</li>
-  <li>Context-based</li>
-</p>
-<p>
-The ACLs that are discussed in this post are: standard ACLs, extended ACLs, 
-time-based ACLs, reflexive ACLs, and Dynamic ACLs.
-</p>
-<a id="MORE"></a>
-
-<h1>Processing of ACLs</h1>
+<h1><a id="MORE">Processing of ACLs</a></h1>
 
   <p>
   The following description of ACLs applies to ACLs in 
@@ -92,8 +73,8 @@ Sequence numbers have a default increment of 10; with the first ACE having a seq
 number of 10, 2<sup>nd</sup> 20, 3<sup>rd</sup> 30 and so on.
 ACL entries are processed sequentially from top to bottom of the list. 
 By default, ACLs have an implicit deny added at the bottom of the ACL and these ACLs
-are used for through-the-box access rules. Management ACLs control to-the-box traffic. 
-These ACLs do not have the implicit deny at the end of the ACL. 
+are used for through-the-box access rules. Management ACLs control to-the-box traffic; 
+these ACLs do not have the implicit deny at the end of the ACL. 
 </p>
 <p>
 ACLs can be applied in the inbound or outbound directions from the perspective 
@@ -146,7 +127,7 @@ ACLs use wildcard bits and not subnet masks to match  binary 0s and 1s of
 the IP address. Wildcard bits allow for more 
 specific matching of traffic compared to subnet masks. The bits that are set to 
 zero in a wildcard bit must match. For example;
-172.16.1.1 0.15.255.255 matches addresses in the range 172.16.1.1 172.31.255.255
+172.16.1.1 0.15.255.255 matches addresses in the range 172.16.1.1 172.31.255.255.
 Wildcard bits use the following rules to match binary 0s and 1s:
 <ul>
   <li>Wildcard bit 0: Match the corresponding bit value in the address.</li>
@@ -164,6 +145,10 @@ i.e., 255.255.255.255 (/24).
 </p>
 
 <h2>Matching Subnets</h2>
+<p>
+
+</p>
+
 <h3>Example 1</h3>
 <p>
  If an 
@@ -189,7 +174,7 @@ wildcard bit can be determined as follows:
 
 <h3>Example 3</h3>
 <p>
-In this instance, given three hosts: 
+Given six hosts: 
 <ol>
    <li>A with IP address 172.31.3.2</li>
    <li>B with IP address 172.31.28.128</li>
@@ -213,7 +198,7 @@ to an interface in the ingress direction:
   </li>
   <li>IOS will save the above ACL as <code><b>10 permit ip any 0.0.1.0 255.255.254.254 log</b></code>.</li>
 </ul>
-Hosts A, C, and E will be permitted through as their IP addresses match the ACE.
+Hosts A, C, and E will be permitted through as their IP addresses match this ACE.
 </p>
 
 <h2>Matching Hosts</h2>
@@ -252,9 +237,10 @@ design and type of ACL:
  <ul>
    <li><b>Extended ACLs</b> are usually placed near the source; undesirable 
  traffic is denied close to the source. This minimizes the waste of available network 
- bandwidth with traffic that will be dropped.</li>
+ bandwidth with traffic that will be subsequently dropped.</li>
  <li><b>Standard ACLs</b> are usually placed near the destination of the traffic 
- because standard ACLs do not specify destination addresses. This reduces the 
+ because standard ACLs match against the source IP address and do not specify 
+ destination addresses. This reduces the 
  possibility of inadvertently blocking traffic that should be permitted.
  </li>
  </ul>
@@ -279,8 +265,9 @@ When applying an ACL to filter traffic, the following keywords are used:
 
 
 <h1 id="ACL_NAMES">Named ACL Recommendations</h1>
-
 <p>
+ACLs may be named or numbered. If an ACL is to be defined using an ACL name, the 
+ACL naming recommendations are advised to be used when defining the ACL name.
 The ACL naming recommendations include the following:
 <ul>
   <li>Name cannot contain spaces or punctuation marks.</li>
@@ -294,16 +281,30 @@ The ACL naming recommendations include the following:
 </ul>
 </p>
 
+<h1>Types of ACLs</h1>
+<p>
+There are several types of ACLs:
+  <li>Standard</li>
+  <li>Extended ACLs</li>
+  <li>Infrastructure</li>
+  <li>Transit</li>
+  <li>Time-based</li>
+  <li>Dynamic</li>
+  <li>IP Named</li>
+  <li>Reflexive</li>
+  <li>Context-based</li>
+</p>
+<p>
+The ACLs that are discussed in this post are: standard ACLs, extended ACLs, 
+time-based ACLs, reflexive ACLs, and Dynamic ACLs.
+</p>
+
+
 <h1>Standard Access Control Lists</h1>
 <p>
-A standard ACL filters traffic based on source IP address of a packet. 
-Based on the ACL number, standard ACLs have two ranges i.e. 1-99 and 1300-1999 (expanded).
-There are two ways to write access control lists:
-<ul>
-  <li>Named</li>
-  <li>Numbered (classical or modern)</li>
-</ul>
-</p>
+A standard ACL filters traffic based on source IP address of the packet. 
+Standard ACLs can be named or numbered. If an ACL number is used to define the  
+ACL, standard ACLs have two numbered ranges; 1-99 and 1300-1999 (expanded).
 <p>
 <figure>
  <img alt="" src="images/acl/standard_acl_topology.png">
@@ -324,7 +325,7 @@ permitted.
 
 To configure a named standard ACL:
 <ol>
-  <li><b>Define the ACL</b> using the command <code><b>ip access-list standard &lt;ACL-NAME&gt;</b></code>
+  <li><b>Define the ACL</b> using the command <code><b>ip access-list standard &lt;ACL-name&gt;</b></code>
   <p>
   <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
   	<code>
@@ -421,6 +422,10 @@ To configure a numbered standard access control list:
 </p>
 
 <h3>Editing Numbered ACLs</h3>
+<p>
+
+</p>
+
 <h4>Delete Numbered ACL</h4>
 <p>
 To delete a standard numbered ACL, use the command <code><b>no access-list &lt;acl-number&gt;</b></code>.
@@ -444,6 +449,7 @@ To modify a standard numbered ACL:
 <ol>
   <li>Display the ACE sequence numbers using the command <code><b>show access-lists &lt;acl-number&gt;</b></code>.
   </li>
+  <li>Enter into the ACL editing mode using the command <code><b>ip access-list standard &lt;acl-number&gt;</b></code></li>
   <li>
   Remove the ACE that is to be modified by referencing its sequence number using 
   the ACL mode command <code><b>no &lt;acl-number&gt;</b></code>. 
@@ -477,6 +483,10 @@ match against the default route in a standard ACL, use the ACE
 </p>
 
 <h2>Verification of Standard ACLs</h3>
+<p>
+
+</p>
+
 
 <h3><code>show access-lists</code> and <code>show ip access-lists</code></h3>
 <p>
@@ -498,10 +508,10 @@ Standard IP access list ACL_DENY_192.168.8.0/22<br>
 </code></div>
 </p>
 <p>
-In the output of this command, the host statements are listed first in order to be 
+In the output of this command, the <code><b>host</b></code> statements are listed first in order to be 
 efficiently processed by the IOS keeping the original sequence numbers. The 
-range statements are listed after the host statements, in the order that they 
-were configured along with their original sequence number. This is regardless of 
+<code><b>range</b></code> statements are listed after the host statements, in the order that they 
+were configured along with their original sequence number. This is regardless 
 of whether they may have a lower sequence number. 
 </p>
 
@@ -682,8 +692,8 @@ options:
 
 <h3>Matching on TCP/UDP Port Numbers</h3>
 <p>
-Matching on TCP/UDP port numbers also matches Layer 3 (IP) options as well. Matching 
-of TCP or UDP port numbers can use keywords such as www, telnet, ftp, ftp-data or 
+Matching on TCP/UDP port numbers also matches Layer 3 (IP) options as well. 
+When matching TCP or UDP ports keywords can be used such as www, telnet, ftp, ftp-data or 
 port numbers. However, not all port numbers have keywords associated with them.
 When matching TCP/UDP, the source and/or destination port numbers are optional.
 If the port numbers are not specified, then all protocol traffic will be permitted 
@@ -775,6 +785,11 @@ Extended IP access list ACL_DENY_HTTP_192.168.23.2<br>
 
 
 <h2>Extended ACLs in Routing Protocols</h2>
+<p>
+
+</p>
+
+
 <h3>Interior Gateway Protocols</h3>
 <p>
 When applied to interior gateway protocols for prefix filtering during redistribution, 
@@ -836,7 +851,7 @@ is when traffic is entering a router interface and egress is when traffic is
 exiting the router through an interface.
 To apply the ACL to an interface, you need to indicate the direction of traffic 
 flow that the device should implement the ACL.
-Pinging a destination that is blocked by an ACL results in ICMP unreachable output indicated by U.U,U,U
+Pinging a destination that is blocked by an ACL results in ICMP unreachable output indicated by U.U.U.U
 </p>
 
 
@@ -856,8 +871,8 @@ To match against the default route in an extended ACL, use the ACE
 Time-based ACLs are only active during a specified time range. The time-range 
 configured on a router references the router’s clock.
 Time-based ACLs consist of ACEs that are activated during configured time periods.
-The times periods are a feature that is separate from ACLs and are defined using 
-the configuration mode command <code><b>time-range</b></code>. This configured 
+The time periods are a feature that is separate from ACLs and are defined using 
+the global configuration command <code><b>time-range</b></code>. This configured 
 time period is then applied to an extended ACLs making it a time-based ACL.
 
 The time configured using the <code<b>time-range 
@@ -944,7 +959,8 @@ The non-time-based rule always overrides the duplicate time-based rule, as they 
 	    </li>
 	  </ul>
 	  <p>
-	  Curiously, IOS permits the configuration of a periodic and abolute parameters. 
+	  Curiously, IOS permits the configuration of periodic and absolute parameters 
+	  values on the same ACL. 
 	  
 	     <p>
 	    <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
@@ -1168,6 +1184,9 @@ The mirror ACL should be active for a defined period of time. If it is indefinit
 
 
 <h2>Verification</h2>
+<p>
+
+</p>
 
 <h3><code>show ip access-lists</code></h3>
 <p>
@@ -1332,6 +1351,7 @@ Components of a dynamic access list inclide the following:
 One use case for implementing sdynamic ACLs, if individuals require temporary 
 access to a network device e.g., Telnet access to a router for a specified period.
 </p>
+
 <h2>Dynamic ACL Rules</h2>
 <p>
 The following guiding principles apply to the configuration and operation of dynamic 
@@ -1490,7 +1510,9 @@ IOS allows users to extend the life of their dynamic ACE by an additional 6 mmin
 </p>
 
 <h1 id="ACL_OTHER">Additional ACL Features</h1>
+<p>
 
+</p>
 
 <h2 id="OBJ">Object Groups</h2>
 <p>
@@ -1623,6 +1645,11 @@ ip access-list extended Test <br>
 </p>
 -->
 <h2>Verification</h2>
+<p>
+
+</p>
+
+
 <h3><code>show object-group</code></h3>
 <p>
 Displays the configuration of the object group.
