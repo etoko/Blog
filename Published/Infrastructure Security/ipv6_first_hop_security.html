@@ -26,12 +26,12 @@ Most IPv6 first-hop security features are implemented on a layer 2 device(switch
 In IPv6, ICMPv6 ND/NDP replaces IPv4 ARP. ARP uses two messages: request and reply.
 With ICMPv6 ND uses four messages:
 <ol>
-  <li><b>Neighbor Solicitation(NS):</b> a device requests for information about a
+  <li><b>Neighbor Solicitation (NS):</b> a device requests for information about a
   neighbor.</li>
-  <li><b>Neighbor Advertisement(NA):</b> a device advertises its information to other neighbors.</li>
-  <li><b>Router Solicitation(RS):</b> a device requests for information about 
+  <li><b>Neighbor Advertisement (NA):</b> a device advertises its information to other neighbors.</li>
+  <li><b>Router Solicitation (RS):</b> a device requests for information about 
   local routers i.e., routers in the network segment.</li>
-  <li><b>Router Advertisement(RA):</b> a device advertises itself as an active 
+  <li><b>Router Advertisement (RA):</b> a device advertises itself as an active 
   router.</li>
 </ol>
 </p>
@@ -42,7 +42,7 @@ When a host is added to a network:
   <li>The host chooses a link-local address; usually FE80::/10 for the network 
   segment of the address. The host segment of the address is generated using EUI-64.</li>
   <li>The host then checks to confirm that the link-local address is unique by 
-  sending an NS on the local link to the solicited node multicast address(FF02:0:0:0:0:1:FF00::/104 + 24 
+  sending an NS on the local link to the solicited node multicast address (FF02:0:0:0:0:1:FF00::/104 + 24 
   low-order bits from the EUI-64). If no response is received for the NS, then 
   the link-local address is confirmed as unique.</li>
   <li>The host then sends a NA to the "all hosts multicast address" FF02::1
@@ -146,7 +146,7 @@ as trusted ports.</li>
 </ul>
 </p>
 <p>
-When configuring RA Guard, two policies are usually configued; one policy for 
+When configuring RA Guard, two policies are usually configured; one policy for 
 ports where routers are attached and a separate policy for ports where hosts are 
 attached.
 </p>
@@ -187,12 +187,12 @@ Creating a second policy for routers:
  </p>
   </li>
 
-  <li><b>Specify the device role:</b> The device role can be host or router: 
-    <code><b>device-role host</b></code>.
+  <li><b>Specify the device role:</b> The device role is router: 
+    <code><b>device-role router</b></code>.
     <p>
     <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
  <code>
- SW1(config-nd-raguard)#<b>device-role host</b>
+ SW1(config-nd-raguard)#<b>device-role router</b>
  </code></div>
  </p>
     </li>
@@ -270,7 +270,7 @@ The following commands verify RA Guard configuration and operation:
   <li><code><b>show ipv6 snooping policies</b></code>: RA guard will appear as one of the snooping policies configured</li>
   <li><code><b>show ipv6 nd raguard policy &lt;policy-name&gt;</b></code></li>
   <li><code><b>debug ipv6 snooping raguard &lt;filter | interface | vlanID&gt;</b></code></li>
-  <li><code><b>show ipv6 snooping capture-policy interface &lt;interface_id&gt;</b></code>: for configured interfaces</li>
+  <li><code><b>show ipv6 snooping capture-policy interface &lt;interface-id&gt;</b></code>: for configured interfaces</li>
 </ul>
 </p>
 
@@ -476,15 +476,15 @@ The binding table supports features that can be leveraged to provide first hop
 security:
 <ul>
   <li>Limits can be set for the number of IPv6 addresses that a MAC address can have.</li>
+   <li>The binding table recovery mechanism feature enables the binding table to recover
+in the event of a device reboot. The recovery mechanism will block any data traffic sourced from an unknown source
+(a source that is not in the binding table).</li>
+
   <li>The binding table introduces the capacity to provide a prefix-list that is matched 
 before the recovery is attempted for both DHCP and NDP.
 If an address does not match the prefix-list associated with the protocol, the
 recovery of the binding table entry will not be attempted with that protocol.
 </li>
- <li>The binding table recovery mechanism feature enables the binding table to recover
-in the event of a device reboot. The recovery mechanism will block any data traffic sourced from an unknown source
-(a source that is not in the binding table).
-
 
 </ul>
 </p>
@@ -561,12 +561,13 @@ Debugging of IPv6 snooping information
 </p>
 
 <h3>Restriction</h3>
+<p>
 IPv6 snooping is not supported on etherchannels.
-</>
+</p>
 
 <h1>Source Guard</h1>
 <p>
-If a device starts transmitted on a network segment without IPv6 host discovery 
+If a device starts transmitting on a network segment without IPv6 host discovery 
 messages such as NS, NA, DHCPv6 message exchange, source guard enables the switch  
 to drop such traffic from an unfamiliar IPv6 source address.</p>
 <p>

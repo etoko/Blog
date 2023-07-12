@@ -159,7 +159,7 @@ Defining a policy for hosts:
     <li><b>Define the RA guard policy:</b> <code><b>ipv6 nd raguard policy &lt;policy-name&gt;</b></code>
     <p>
     <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
- <code style="font-size:110%">
+ <code>
     SW1(config)#<b>ipv6 nd raguard policy HOSTS</b>
  </code></div>
  </p>
@@ -168,7 +168,7 @@ Defining a policy for hosts:
     <code><b>device-role host</b></code>.
     <p>
     <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
- <code style="font-size:110%">
+ <code>
  SW1(config-nd-raguard)#<b>device-role host</b>
  </code></div>
  </p>
@@ -181,7 +181,7 @@ Creating a second policy for routers:
    <li><b>Define the RA guard policy:</b> <code><b>ipv6 nd raguard policy &lt;policy-name&gt;</b></code>
     <p>
     <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
- <code style="font-size:110%">
+ <code>
     SW1(config)#<b>ipv6 nd raguard policy ROUTERS</b>
  </code></div>
  </p>
@@ -191,7 +191,7 @@ Creating a second policy for routers:
     <code><b>device-role host</b></code>.
     <p>
     <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
- <code style="font-size:110%">
+ <code>
  SW1(config-nd-raguard)#<b>device-role host</b>
  </code></div>
  </p>
@@ -200,7 +200,7 @@ Creating a second policy for routers:
   <li><b>Configure the port as trusted:</b> <code><b>trusted-port</b></code>
       <p>
     <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
- <code style="font-size:110%">
+ <code>
  SW1(config-nd-raguard)#<b>trusted-port</b>
  </code></div>
  </p>
@@ -210,7 +210,7 @@ Creating a second policy for routers:
   another source such as a DHCP or DNS server.
   <p>
     <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
- <code style="font-size:110%">
+ <code>
  SW1(config-nd-raguard)#<b>other-config-flag on</b>
  </code></div>
  </p>
@@ -240,7 +240,7 @@ Creating a second policy for routers:
   <li><b>VLAN:</b>
   <p>
   <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-  <code style="font-size:110%">
+  <code>
  SW1(config)#<b>vlan configuration 1</b><br>
  SW1(config-vlan-config)#<b>ipv6 nd raguard attach-policy HOSTS</b><br>
  </code></div>
@@ -252,7 +252,7 @@ Creating a second policy for routers:
   <code><b>ipv6 nd raguard attach-policy &lt;policy-name&gt; [vlan &lt;add|except|none|remove|all&gt; vlan &lt;vlan1, vlan2 … vlan n&gt;]</b></code>
   <p>
   <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-  <code style="font-size:110%">
+  <code>
  SW1(config)#<b>interface g0/0</b><br>
  SW1(config-if)#<b>ipv6 nd raguard attach-policy ROUTERS</b><br>
  </code></div>
@@ -357,7 +357,7 @@ servers. The policy is then applied to a VLAN or interface.
        <li>
          <p>
           <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-  <code style="font-size:110%">
+  <code>
   SW1(config)#<b>ipv6 dhcp guard policy SERVERS</b><br>
   SW1(config)#<b>device-role server</b><br>
   SW1(config)#<b>trusted-port</b>
@@ -403,7 +403,7 @@ servers. The policy is then applied to a VLAN or interface.
        <li>
          <p>
           <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-  <code style="font-size:110%">
+  <code>
   SW1(config)#<b>ipv6 dhcp guard policy CLIENTS</b><br>
   SW1(config)#<b>device-role client</b>
   </code></div>
@@ -426,7 +426,7 @@ preference is less than the specified limit</li>
       <li>Interface: 
       <p>
       <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-  <code style="font-size:110%">
+  <code>
   SW1(config)#<b>interface g0/0</b><br>
   SW1(config-if)#<b>ipv6 dhcp guard attach-policy SERVERS</b><br>
   </code>
@@ -435,7 +435,7 @@ preference is less than the specified limit</li>
       <li>VLAN:
       <p>
       <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-  <code style="font-size:110%">
+  <code>
   SW1(config)#<b>vlan configuration 1</b><br>
   SW1(config-vlan-config)#<b>ipv6 dhcp guard attach-policy CLIENTS</b>
   </code></div>
@@ -520,7 +520,7 @@ To configure an IPv6 snooping policy;
   <li>Configure the snooping policy:
     <p>
     <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-    	<code style="font-size:110%">
+    	<code>
     		SW(config)#<b>ipv6 snooping policy SNOOP_POLICY</b><br>
   		</code>
   	</div>
@@ -529,7 +529,7 @@ To configure an IPv6 snooping policy;
     <li>Attach the snooping policy to an interface:
  <p>
     <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-    	<code style="font-size:110%">
+    	<code>
     		SW(config)#<b>interface g0/0</b><br>
     		SW(config-if)#<b>ipv6 snooping attach-policy SNOOP_POLICY</b><br>
   		</code>
@@ -581,7 +581,7 @@ based on neighbor binding table.
   <li>Configure the source guard policy:
   <p>
   <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-  <code style="font-size:110%">
+  <code>
   SW(config)#<b>ipv6 source-guard policy SG_POLICY</b><br>
   SW(config-sisf-sourceguard)#<b>permit link-local</b><br>
   SW(config-sisf-sourceguard)#<b>deny global-autoconf</b><br>
@@ -603,7 +603,7 @@ based on neighbor binding table.
    <li>On the interface:
     <p>
   <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-  <code style="font-size:110%">
+  <code>
   SW(config)#<b>interface g0/0</b><br>
   SW(config-if)#<b>ipv6 source-guard attach-policy SG_POLICY</b>
   </code></div>

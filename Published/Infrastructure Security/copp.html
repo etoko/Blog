@@ -1,8 +1,8 @@
 <h1>Control Plane Policing (CoPP)</h1>
 <p>
 CoPP is a QoS feature used in security that rate-limits the traffic handled by the 
-route processor(RP).
-CoPP a modular QoS CLI(MQC) policy to rate-limit, drop and granularly permit 
+route processor (RP).
+CoPP is a modular QoS CLI (MQC) policy to rate-limit, drop and granularly permit 
 traffic to or from the RP.
 
 The RP handles traffic that is categorized into three planes:
@@ -14,7 +14,7 @@ The RP handles traffic that is categorized into three planes:
 </p>
 <p>
 The control plane is a collection of processes that run at the process level on
-the route processor(RP). These processes collectively provide high-level control for 
+the route processor (RP). These processes collectively provide high-level control for 
 most IOS functions. All packets destined for the control plane pass through the central 
 switch engine before they are forwarded to the process level. The control-plane 
 and central switch engine are part of the RP.
@@ -34,7 +34,7 @@ Control-plane Policing (CoPP) provides rate-limiting and filtering capabilites t
 control the number of packets that have to be processed by the RP of a router or switch. 
 This helps in reducing the load on 
 a router’s RP at any given point in time. It helps protect the RP from 
-denial-of-service(DoS) attacks, and other flooding attacks, reconnaisance attacks.
+denial-of-service (DoS) attacks, and other flooding attacks, reconnaisance attacks.
 </p>
 <p>
 In CoPP, it is important to rate-limit traffic on all interfaces destined for the 
@@ -47,45 +47,45 @@ entering any interface to protect the RP.
 
 <h1>Configuring CoPP</h1>
 <p>
-CoPP is hardware-accelerated if the command <code><b>mls qos</b></code> is 
-applied.
-</p>
-<p>
 To implement CoPP, the following sequence of steps should be followed:
 <ol>
-  <li>Categorize network traffic into classes and apply the categorization using 
-  an Access Control List (ACL).</li>
+  <li>Categorize network traffic into classes using Access Control List (ACLs).</li>
 <li>Create a Class Map (CM) to identify traffic to be policed (rate-limited).</li>
 <li>Create a Policy Map (PM) to define the action to take on identified traffic 
 by implementing a defined policy.</li>
 <li>Create a Service Policy which specifies where to apply the policy map</li>
 </ol>
 </p>
+<p>
+CoPP is hardware-accelerated if the command <code><b>mls qos</b></code> is 
+applied.
+</p>
 
-<h2>Categorize Network Traffic using an ACL</h2>
+
+<h2>Categorize Network Traffic using ACLs</h2>
 <p>
 CoPP traffic needs to first be identified and grouped into different classes 
-based on importance and protocol type.
+based on importance, function or protocol type.
 </p>
 <p>
 ACLs are used to identify traffic to be policed. ACLs should be configured for 
 each of the classes categorized in the previous CoPP traffic classification stage.
-These classes included: BGP, IGP, critical applications, file management, 
-interactive management, monitoring, critical applications, and default. 
+These classes include: BGP, IGP, critical applications, file management, 
+interactive management, monitoring, and default. 
 Each ACL should permit all known protocols in its class. Traffic for the default 
 class should be configured to permit any type of traffic e.g 
 <code><b>permit ip any any</b></code>.
 </p>
 <p>
-Extended ACLs are usually used for identifying classified traffic as they can be 
-configured to match the classified traffic port/protocol numbers.
+Extended ACLs are usually used for classifying traffic as they can be 
+configured to match the traffic port/protocol numbers.
 </p>
 <p>
 When configuring ACLs for the identified categories, traffic for certain classes 
  such as SNMP, (T)FTP, GRE, is originated from known sources. In such cases, the 
  ACE entries in these ACLs should explicitly define the source IP address. If the 
- configured ports are also known on these traffic sources, then the ACEs should 
- be configured with these port numbers as well.
+ ports for these traffic sources is known, then the ACEs should 
+ be configured to permit traffic from these specific port numbers as well.
 </p>
 <p>
 The different traffic categories include:
@@ -148,8 +148,8 @@ R1(config-ext-nacl)#<b>40 permit icmp any any port-unreachable</b><br>
   </code></div>
   </p>
   </li>
-  <li><b>File Management:</b> this type of traffic is used for configuration 
-  maintenance. Protocols in this category include: TFTP, FTP.
+  <li><b>File Management:</b> this type of traffic is used for transfer of files
+ Protocols in this category include: TFTP, FTP.
   This type of traffic is usually high-volume.
   <p>
   <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
@@ -193,7 +193,7 @@ on how the match commands will be evaluated:
 </p>
 <p>
 <code><b>class-map &lt;match-any | match-all&gt; &lt;class-map-name&gt;</b></code><br>
-&nbsp;&nbsp;&nbsp;&nbsp;<code><b>match &lt;access-group | protocol | ip prec | ip dscp &gt;</b></code>
+&nbsp;&nbsp;&nbsp;&nbsp;<code><b>match &lt;access-group | protocol | ip prec | ip dscp&gt;</b></code>
 </p>
 
 <p>
@@ -205,9 +205,7 @@ configured for the default traffic ACL.
 
 <p>
 <ul>
-    <li><b>Access-group:</b> reference the access control list defined in 
-    <code><b>match</b></code> statement. ACL names are case sensitive.</li>
-    <li><b>Instruction:</b> <code><b>&lt;match-any | match-all&gt;</b></code></li>
+   <li><b>Instruction:</b> <code><b>&lt;match-any | match-all&gt;</b></code>
     <ul>
       <li><code><b>match-any:</b></code> traffic must match only one of the commands to be classified 
       as part of the traffic class.</li>
@@ -215,9 +213,17 @@ configured for the default traffic ACL.
       traffic class. Care must be taken with match-all keyword as the traffic 
       will have to match all characteristics in all the match commands.</li>
     </ul>    
+    </li>
+    <li><code><b>match</b></code>:
+      <ul>
+    <li><b>Access-group:</b> reference the access control list defined in 
+    <code><b>match</b></code> statement. ACL names are case sensitive.</li>
+    
     <li><b>Protocol:</b> You can match by protocol instead of ACL; for example 
     to match ARP packets; <code><b>match protocol arp</b></code></li>
     <li><b>IP Prec | IP dscp:</b> to match against only ip packet precedence or dscp</li>
+    </ul>
+    </li>
 </ul>
 </p>
 <p>
@@ -773,7 +779,7 @@ When troubleshooting ACLs for CoPP, focus on the following;
  <li><b>Protocol:</b> If the wrong protocol is specified in the ACL, the wrong 
  type of traffic will be matched.</li>
  <li><b>Source and destination:</b> the correct source and destination ACLs should 
- be applied. During troubleshooting, change IP address to any to see the effect.</li>
+ be applied. During troubleshooting, change IP address to <code><b>any</b></code> to see the effect.</li>
  <li><b>Operators and Ports:</b> Ensure correct ACL operator and port numbers are defined.</li>
  <li>Avoid log and log-input ACL keywords for CoPP due to unexpected results in CoPP functionality.</li>
 </ul>
