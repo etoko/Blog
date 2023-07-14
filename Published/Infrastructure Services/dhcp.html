@@ -1,13 +1,14 @@
 <h1>Introduction and Overview</h1>
 <p>
-Dynamic Host Configuration Protocol(DHCP) is an IP protocol used by hosts on a 
+Dynamic Host Configuration Protocol (DHCP) is an IP protocol used by hosts on a 
 TCP/IP network to receive IP configuration parameters such as IP address, default 
 gateway, DNS server addresses, domain name among others. 
 DHCP is used to assign IP configuration information to the clients automatically. 
 It works at layer 4 and is a client-server protocol.  DHCP uses UDP with 
 the <b>client using port 68</b> as the source port number and <b>67</b> as destination 
 port number which is used by the server. DHCP is based on the BootP protocol.
-DHCP server can be local within the subnet, in a remote server. It can also be the 
+DHCP server can be local within the subnet, in a remote server. 
+In relatively small networks, the DHCP server is usually the network  
 default gateway.
 </p>
 <p>
@@ -81,6 +82,7 @@ parameters to clients. These stages are: DHCPDISCOVER, DHCPOFFER, DHCPREQUEST,
 DHCPACK. These four stages are usually abbreviated as DORA. Most of the server 
 DHCP messages are sent in unicast while clients send broadcasts.
 </p>
+
 <h2>Discover</h2>
 <p>
 Devices that would like to receive addresses through DHCP should be configured 
@@ -432,7 +434,7 @@ A DHCP relay agent forwards the following:
 </p>
 
 <p>
-The command to configure the DHCP relay is <code><b>ip helper-address 10.10.10.10</b></code>.
+The command to configure the DHCP relay is <code><b>ip helper-address &lt;dhcp-server-ip-address&gt;</b></code>.
 
 </p>
 
@@ -490,7 +492,7 @@ following table;
 <table width="100%" cellspacing="0">
 <thead style="background: #d3d3d3; border-bottom: 1px solid; border-top: 1px solid;">
   <tr>
-    <td style="border-bottom: 1px solid; border-top: 1px solid;">Option Number</td>
+    <td style="border-bottom: 1px solid; border-top: 1px solid;" width="10%">Option Number</td>
     <td style="border-bottom: 1px solid; border-top: 1px solid;" width="15%">Value</td>
     <td style="border-bottom: 1px solid; border-top: 1px solid;">Description </td>
   </tr>        
@@ -733,10 +735,11 @@ To exclude a range
 addresses from being assigned to clients, use the command <code><b>
 ip dhcp excluded-address &lt;low-ip-address&gt; &lt;high-ip-address&gt;</b></code>.
 
-
-DHCP_SERVER(config)#ip dhcp excluded-address 192.168.1.2 192.168.1.20
-<code><b>ip dhcp excluded-address &lt;start&gt; &lt;end&gt;</b></code>
-  
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+DHCP_SERVER(config)#<b>ip dhcp excluded-address 192.168.1.2 192.168.1.20</b>
+</code></div></p>
   <p>
 Note that a router cannot issue an IP address for one of its interfaces even 
 if that address is not included in the range of the excluded addresses. This 
@@ -806,7 +809,7 @@ DHCP_SERVER(dhcp-config)#<b>lease 1 12 0</b>                                    
 </p>
 </li>
 <li>Configure any DHCP options using the command <code><b>option &lt;option-code&gt; 
-&lt;ascii | hex | instance | ip&gt; &lt;value&gt;</b></code>.
+[ascii | hex | instance | ip] &lt;value&gt;</b></code>.
 
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
@@ -826,8 +829,8 @@ DHCP_SERVER(config)#
 <ul>
  <li><b>option:</b> 15 is the DHCP option for domain name. Here it is 
  emmanueltoko.blogspot.com. The domain name could have easily been entered using 
- the move common command
- DHCP_SERVER(dhcp-config)#domain-name emmanueltoko.blogspot.com</li>
+ the more traditional command <code><b>domain-name emmanueltoko.blogspot.com</b></code>
+ </li>
 </ul>
 </p>
   </li>

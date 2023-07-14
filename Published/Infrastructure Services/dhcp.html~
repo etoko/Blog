@@ -113,7 +113,7 @@ The following is a Wireshark packet capture of a DHCPDISCOVER message:
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-  <code style="font-size:130%">
+  <code>
 Frame 321: 333 bytes on wire (2664 bits), 333 bytes captured (2664 bits) on interface -, id 0  <br>
 Ethernet II, Src: ca:07:06:8d:00:08 (ca:07:06:8d:00:08), Dst: Broadcast (ff:ff:ff:ff:ff:ff)    <br>
 Internet Protocol Version 4, Src: 0.0.0.0, Dst: 255.255.255.255                                <br>
@@ -188,7 +188,7 @@ the address.
 
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-  <code style="font-size:130%">
+  <code>
 Frame 37: 365 bytes on wire (2920 bits), 365 bytes captured (2920 bits) on interface -, id 0 <br>
 Ethernet II, Src: ca:01:05:ca:00:08 (ca:01:05:ca:00:08), Dst: Broadcast (ff:ff:ff:ff:ff:ff)  <br>
 Internet Protocol Version 4, Src: 172.30.1.1, Dst: 255.255.255.255                           <br>
@@ -272,7 +272,7 @@ usually processes the first offer and declines the others.
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-  <code style="font-size:130%">
+  <code>
   Frame 38: 345 bytes on wire (2760 bits), 345 bytes captured (2760 bits) on interface -, id 0    <br>
 Ethernet II, Src: ca:07:06:8d:00:08 (ca:07:06:8d:00:08), Dst: Broadcast (ff:ff:ff:ff:ff:ff)       <br>
 Internet Protocol Version 4, Src: 0.0.0.0, Dst: 255.255.255.255                                   <br>
@@ -338,7 +338,7 @@ static route with an administrative distance of 254.
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-  <code style="font-size:130%">
+  <code>
 
 Frame 39: 365 bytes on wire (2920 bits), 365 bytes captured (2920 bits) on interface -, id 0     <br>
 Ethernet II, Src: ca:01:05:ca:00:08 (ca:01:05:ca:00:08), Dst: Broadcast (ff:ff:ff:ff:ff:ff)      <br>
@@ -752,7 +752,7 @@ and offer it to the client.
   
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-  <code style="font-size:130%">
+  <code>
 DHCP_SERVER(dhcp-config)#<b>?</b>                                            <br>
 DHCP pool configuration commands:                                            <br>
 &nbsp;&nbsp;accounting&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Send Accounting Start/Stop messages                   <br>
@@ -810,7 +810,7 @@ DHCP_SERVER(dhcp-config)#<b>lease 1 12 0</b>                                    
 
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-  <code style="font-size:130%">
+  <code>
 DHCP_SERVER(dhcp-config)#<b>option 15 ? </b>                                        <br>
 &nbsp;&nbsp;ascii&nbsp;&nbsp;&nbsp;&nbsp; Data is an NVT ASCII string                                      <br>
 &nbsp;&nbsp;hex&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Data is a hexadecimal string                                     <br>
@@ -837,7 +837,7 @@ DHCP_SERVER(config)#
      is the MAC address.
      <p>
      <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-  <code style="font-size:130%">
+  <code>
   DHCP_SERVER(dhcp-config)#<b>address 10.3.1.2 hardware-address 0000.deaf.beaf</b>
   </code></div>
      </p>
@@ -854,7 +854,7 @@ number of times that a DHCP server pings an address before it offers the address
 using the command;
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-  <code style="font-size:130%">
+  <code>
 DHCP_SERVER(config)#<b>ip dhcp ping packets 5</b>
 </code></div>
 </p>
@@ -873,7 +873,7 @@ determined the conflict. In this case the conflict will the determined by pingin
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-  <code style="font-size:130%">
+  <code>
 DHCP_SERVER#  <br>
 DHCP_SERVER#  <br>
 *Jan 23 21:50:17.155: %DHCPD-4-PING_CONFLICT: DHCP address conflict:  server pinged 10.1.13.1.<br>
@@ -891,7 +891,7 @@ this value, issue the following command in global configuration mode;
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-  <code style="font-size:130%">
+  <code>
 DHCP_SERVER(config)<b>#ip dhcp ping timeout 200</b>
 </code></div>
 </p>
@@ -913,7 +913,7 @@ command makes this possible:
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-  <code style="font-size:130%">
+  <code>
 Router(config)#<b>interface gigabitEthernet0/0</b><br>
 Router(config-if)<b>ip address dhcp</b>
 </code></div>
@@ -935,7 +935,7 @@ interfaces through adding a static host route.
 To configure a local router as a DHCP relay, use the following command;
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-  <code style="font-size:130%">
+  <code>
 Router(config)#<b>interface gigabitEthernet0/0</b><br>
 Router(config-if)#<b>ip helper-address 10.1.14.2</b>
 </code></div>
@@ -960,7 +960,7 @@ To entirely disable a DHCP address conflict logging, run the command;
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-  <code style="font-size:130%">
+  <code>
 DHCP_SERVER(config)#<b>no ip dhcp conflict logging</b>
 </code></div>
 </p>
@@ -969,7 +969,7 @@ To export the DHCP bindings database to a database agent, enter the following co
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-  <code style="font-size:130%">
+  <code>
 DHCP_SERVER(config)#<b>ip dhcp database &lt;ip-address&gt;</b>
 </code></div>
 </p>
@@ -999,7 +999,7 @@ DHCP server, use the following command;
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-  <code style="font-size:130%">
+  <code>
 DHCP_SERVER(config)#<b>ip dhcp pool DHCP_POOL</b><br>
 DHCP_SERVER(dhcp-config)#<b>network 192.168.1.0 255.255.255.0</b><br>
 DHCP_SERVER(dhcp-config)#<b>import all</b>
@@ -1010,7 +1010,7 @@ DHCP_SERVER(dhcp-config)#<b>import all</b>
 <h2>Monitoring and Maintaining a DHCP Server</h2>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-  <code style="font-size:130%">
+  <code>
 Router#<b>clear ip dhcp binding &lt;ip-address | *&gt;</b><br>
 Router#<b>clear ip dhcp conflict </b><br>
 Router#<b>clear ip dhcp server statistics</b><br>
@@ -1022,7 +1022,7 @@ agent or clients using unnumbered interfaces:
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-  <code style="font-size:130%">
+  <code>
 Router#<b>clear ip route &lt;vrf-name&gt; dhcp &lt;ip_address&gt;</b>
 </code></div>
 </p>
@@ -1039,7 +1039,7 @@ Displays information about the allocated IP addresses and the lease period.
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-  <code style="font-size:130%">
+  <code>
 R1#<b>show ip dhcp binding</b><br>
 Bindings from all pools not associated with VRF:                               <br>
 IP address&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Client-ID/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Lease expiration&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Type       <br>
@@ -1066,7 +1066,7 @@ Displays details of configured DHCP database agents.
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-  <code style="font-size:130%">
+  <code>
 R1#<b>show ip dhcp database</b><br>
 URL&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: 172.17.1.1<br>
 Read&nbsp;&nbsp;&nbsp;&nbsp; : Never     <br>
@@ -1085,7 +1085,7 @@ Number of messages exchanged using DHCP.
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-  <code style="font-size:130%">
+  <code>
 R1#<p>show ip dhcp server statistics</p<br>    
 Memory usage&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 52771             <br>
 Address pools&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3                 <br>
@@ -1125,7 +1125,7 @@ Displays configured DHCP pools and their respective info.
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-  <code style="font-size:130%">
+  <code>
 R1#<b>show ip dhcp pool</b><br>                                                        
                                                                              <br>
 Pool POOL_172.30.1.0/24 :&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;            <br>
@@ -1177,7 +1177,7 @@ Verify DHCP IP parameters on the client.
 
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-  <code style="font-size:130%">
+  <code>
 R8#<b>show dhcp lease</b><br>
 Temp IP addr: 172.16.1.2&nbsp;&nbsp;for peer on Interface: GigabitEthernet0/0 <br>
 Temp&nbsp;&nbsp;sub net mask: 255.255.255.0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;           <br>
