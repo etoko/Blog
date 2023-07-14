@@ -166,7 +166,7 @@ No IP SLA responder configuration is needed on the target device.
 command <code><b>ip sla &lt;sla-number&gt;</b></code>.
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-  <code style="font-size:130%">
+  <code>
 R1(config)#<b>ip sla 100</b>
 </code></div>
 </p>
@@ -176,7 +176,7 @@ R1(config)#<b>ip sla 100</b>
 source-interface &lt;interface-name&gt;]</b></code>.
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-  <code style="font-size:130%">
+  <code>
 R1(config-ip-sla)#<b>icmp-echo 4.4.4.4 source-ip 1.1.1.1</b>
 </code></div>
 </p>
@@ -186,7 +186,7 @@ IP SLA ICMP-echo submode command <code><b>frequency &lt;1-604800&gt;</b></code>;
 the frequency value is in seconds:
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-  <code style="font-size:130%">
+  <code>
 R1(config-ip-sla-echo)#<b>frequency 10</b>
 </code></div>
 </p>
@@ -200,7 +200,7 @@ request packet. It is the timeout waiting period for the probe response. The
 timeout value cannot be greater than the frequency value.
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-  <code style="font-size:130%">
+  <code>
 R1(config-ip-sla-echo)#<b>timeout 10000</b>
 </code></div>
 </p>
@@ -220,7 +220,7 @@ threshold, we can consider the test to be a failure.
 
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-  <code style="font-size:130%">
+  <code>
 R1(config-ip-sla-echo)#<b>threshold 9000</b>
 </code></div>
 </p>
@@ -241,7 +241,7 @@ for instance such as VOIP traffic.
 start-time [&lt;hh:mm:ss&gt; &lt;month&gt; &lt;day&gt; | pending | after &lt;hh:mm:ss&gt;]</b></code>.
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-  <code style="font-size:130%">
+  <code>
 R1(config)#<b>ip sla schedule 100 start-time now life forever</b>
 </code></div>
 </p>
@@ -253,7 +253,7 @@ R1(config)#<b>ip sla schedule 100 start-time now life forever</b>
 <h4><code>show ip sla summary</code></h4>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-  <code style="font-size:130%">
+  <code>
 R1#<b>show ip sla summary</b>                                                     <br>
 IPSLAs Latest Operation Summary&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                           <br>
 Codes: * active, ^ inactive, ~ pending                                            <br>
@@ -272,7 +272,7 @@ unknown if probe is not wrong.
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-  <code style="font-size:130%">
+  <code>
 R1(config)#<b>do-exec show ip sla statistics</b><br>
 IPSLAs Latest Operation Statistics                          <br>
                                                             <br>
@@ -293,7 +293,7 @@ interface is closest to the destination.
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-  <code style="font-size:130%">
+  <code>
 R1(config)#<b>do-exec show ip sla configuration</b> <br>
 IP SLAs Infrastructure Engine-III                   <br>
 Entry number: 100                                   <br>
@@ -350,7 +350,7 @@ Configuration of the ICMP Path-Echo operation is similar to that of the ICMP ech
 operation.
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-  <code style="font-size:130%">
+  <code>
 R1(config)#<b>ip sla 200                                      </b> <br>
 R1(config-ip-sla)#<b>path-echo 4.4.4.4 source-ip 1.1.1.1      </b> <br>
 R1(config-ip-sla-path-echo)#<b>frequency 15                   </b> <br>
@@ -367,7 +367,7 @@ To verify ICMP Path Echo operation;
 <h4><code>show ip sla statistics</code></h4>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-  <code style="font-size:130%">
+  <code>
 R1#<b>show ip sla statistics 200 details</b>              <br>                                           
 IPSLAs Latest Operation Statistics                        <br>                                    
                                                           <br>                                    
@@ -388,7 +388,7 @@ Last time this entry was reset: Never                     <br>
 <h4><code>show ip sla configuration</code></h4>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-  <code style="font-size:130%">
+  <code>
 R1#<b>show ip sla configuration 200</b>                          <br>                                    
 IP SLAs Infrastructure Engine-III                         <br>                                    
 Entry number: 200                                         <br>                                    
@@ -463,7 +463,7 @@ No IP SLA responder is required to be configured on the destination or intermedi
   
   <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-  <code style="font-size:130%">
+  <code>
 R1(config)#<b>ip sla 300</b><br>
 R1(config-ip-sla)#<b>path-jitter 4.4.4.4 source-ip 1.1.1.1 num-packets 15 interval 20</b><br>
 R1(config-ip-sla-path-jitter)#<b>frequency 10</b><br>
@@ -482,7 +482,7 @@ are sent to the destination device only.
 <h4><code>show ip sla statistics</code></h4>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-  <code style="font-size:130%">
+  <code>
 R1#<b>show ip sla statistics 300</b>                       <br>
 IPSLAs Latest Operation Statistics                         <br>
                                                            <br>
@@ -541,7 +541,7 @@ R1#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                 
 <h4><code>show ip sla configuration</code></h4>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-  <code style="font-size:130%">
+  <code>
 R1#<b>show ip sla configuration 300</b>                           <br>
 IP SLAs Infrastructure Engine-III                          <br>
 Entry number: 300                                          <br>
@@ -609,7 +609,7 @@ number on which to listen:
   vrf &lt;vrf&gt;</b></code>. 
   <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-  <code style="font-size:130%">
+  <code>
   R4(config)#<b>ip sla responder udp-echo ipaddress 192.168.34.2 port 8080</b>
   </code></div></p>
   The UDP port may be required if SLA control protocol is disabled on the 
@@ -627,7 +627,7 @@ number on which to listen:
 <li><b>Define the IP SLA:</b>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-  <code style="font-size:130%">
+  <code>
 R1(config)#<b>ip sla 400</b>                                           <br>      
 </code></div>
 </p>
@@ -641,7 +641,7 @@ source-ip &lt;[ip-address | hostname]&gt; source-port &lt;port&gt; control [enab
 The UDP port is optional if the control protocol is enabled.
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-  <code style="font-size:130%">
+  <code>
 R1(config-ip-sla)#<b>udp-echo 1.1.1.1 8080 source-ip 4.4.4.4 control enable</b>   <br>                                                         
 R1(config-ip-sla-udp)#<b>frequency 60                          </b>  <br>                                                         
 R1(config-ip-sla-udp)#                                        <br> 
@@ -662,7 +662,7 @@ If the control protocol is disabled, the UDP port number must be configured on t
 operation as well as on the responder:
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-  <code style="font-size:130%">
+  <code>
   R1(config-ip-sla)#<b>udp-echo 1.1.1.1 8080 source-ip 4.4.4.4 control disable</b>   <br>                                                         
 R1(config-ip-sla-udp)#<b>frequency 60                          </b>  <br> 
   </code></div></p>
@@ -673,7 +673,7 @@ R1(config-ip-sla-udp)#<b>frequency 60                          </b>  <br>
 <li><b>Schedule the IP SLA operation:</b>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-  <code style="font-size:130%">
+  <code>
 R1(config)#<b>ip sla schedule 1 start-time now life forever    </b>  <br>                                                         
 </code></div>
 </p>
@@ -689,7 +689,7 @@ The following output shows the difference in RTT values as processed by ICMP-Ech
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-  <code style="font-size:130%">
+  <code>
 R1#<b>show ip sla statistics details</b>                   <br>
 IPSLAs Latest Operation Statistics                         <br>
                                                            <br>
@@ -725,7 +725,7 @@ R1#
 <h4><code>show ip sla responder</code></h4>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-  <code style="font-size:130%">
+  <code>
 R4#<b>show ip sla responder</b>                           <br>        
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;General IP SLA Responder on Control port 1967     <br> 
 General IP SLA Responder is: Enabled                      <br> 
@@ -754,7 +754,7 @@ R4#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp
 <p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-  <code style="font-size:130%">
+  <code>
 R1#<b>show ip sla configuration</b>                                           <br>
 IP SLAs Infrastructure Engine-III                                             <br>
 Entry number: 100                                                             <br>
@@ -869,7 +869,7 @@ ipaddress &lt;ip-address&gt; port &lt;port&gt; vrf &lt;vrf&gt;</b></code> respec
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-  <code style="font-size:130%">
+  <code>
 R4(config)#<b>ip sla responder</b>
 </code></div>
 </p>
@@ -893,7 +893,7 @@ response-data-size &lt;size&gt;</b></code> where:
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-  <code style="font-size:130%">
+  <code>
   R1(config)#<b>ip sla 500</b><br>
   R1(config-ip-sla)#<b>udp-jitter 192.168.32.2 32767 interval 20 num-packets 10 control enable</b><br>
   R1(config-ip-sla-jitter)#<b>frequency 60</b><br>
@@ -907,7 +907,7 @@ response-data-size &lt;size&gt;</b></code> where:
 <h4><code>show ip sla configuration</code></h4>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-  <code style="font-size:130%">
+  <code>
 R1#<b>show ip sla configuration</b>                                            <br>
 IP SLAs Infrastructure Engine-III                                              <br>
 Entry number: 500                                                              <br>
@@ -966,7 +966,7 @@ for purposes of comparison:
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-  <code style="font-size:130%">
+  <code>
 R1#<b>show ip sla statistics details</b>                                        <br>
 IPSLAs Latest Operation Statistics                                              <br>
                                                                                 <br>
@@ -1073,7 +1073,7 @@ R1#                                                                             
 <h4><code>show ip sla responder</code></h4>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-  <code style="font-size:130%">
+  <code>
 R4><b>show ip sla responder</b><br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;General IP SLA Responder on Control port 1967      <br>
 General IP SLA Responder is: Enabled                       <br>
@@ -1287,7 +1287,7 @@ operations are configured and how many are currently active, use the
 
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-  <code style="font-size:130%">
+  <code>
 R1#<b>show ip sla application</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                         <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;IP Service Level Agreements&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                         <br>
 Version: Round Trip Time MIB 2.2.0, Infrastructure Engine-III             <br>
@@ -1320,7 +1320,7 @@ to help troubleshoot IP SLA operation issues.
 
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-  <code style="font-size:130%">
+  <code>
 R1#<b>debug ip sla trace 100</b>                                                                                 <br>
 R1#                                                                                                              <br>
 *Mar 13 15:34:34.261: IPSLA-INFRA_TRACE:OPER:100 slaSchedulerEventWakeup                                         <br>
@@ -1373,8 +1373,5 @@ R1#
 
 <h2>References</h2>
 <ol>
-<li><a href="https://www.cisco.com/c/en/us/td/docs/ios-xml/ios/ipsla/configuration/xe-16/sla-xe-16-book/sla-overview.html?ysclid=lhheppfa70211374257#GUID-C2E58A98-D907-4EF2-949B-0AD59FD3D4D4">
-Cisco IP SLA</a></li>
-<li>https://www.cisco.com/c/en/us/td/docs/ios-xml/ios/ipsla/configuration/xe-16/sla-xe-16-book.pdf</li>
-
+<li><a href="https://www.cisco.com/c/en/us/td/docs/ios-xml/ios/ipsla/configuration/xe-16/sla-xe-16-book.pdf">https://www.cisco.com/c/en/us/td/docs/ios-xml/ios/ipsla/configuration/xe-16/sla-xe-16-book.pdf</a></li>
 </ol>

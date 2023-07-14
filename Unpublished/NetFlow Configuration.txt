@@ -1,0 +1,144 @@
+show ip cache flow
+configure terminal
+ip flow-cache entries 10000
+ip flow-cache timeout active 1
+ip flow-cache timeout inactive 30
+
+
+ip flow-top-talkers
+sort-by bytes
+top 10
+exit
+
+show ip flow top-talkers
+!Export configuration
+configure terminal
+interface g0/0
+ip flow ingress
+ip flow egress
+exit
+ip flow-export destination 192.168.1.1 9999
+ip flow-export source lo0
+ip flow-export version 5
+
+
+!Verification
+
+end
+
+show ip cache flow
+show ip cache verbose flow
+show ip flow export
+show ip flow interface
+show ip flow top-talkers
+
+clear ip flow stats
+
+
+!Version 9
+
+
+
+configure terminal
+interface g0/0
+ip flow ingress
+ip flow egress
+exit
+ip flow-export destination 192.168.1.10 9999
+ip flow-export version 9
+ip flow-export source lo0
+
+ip flow-export template timeout-rate 15
+ip flow-export template refresh-rate 10
+
+
+ip flow-capture vlan-id 
+ip flow-capture ttl
+ip flow-capture mac-addresses
+ip flow-capture fragment-offset
+ip flow-capture packet-length
+ip flow-capture icmp
+snmp-server ifindex persist
+
+
+
+!!FLOW SAMPLER
+end
+
+configure terminal
+flow-sampler-map FLOW_SAMPLER_ONETEN
+mode random out-out-of 10
+exit
+interface g0/1
+flow-sampler FLOW_SAMPLER_ONETEN
+
+
+
+!!POLICY MAP
+end
+  configure terminal
+	class-map match-all ICMP
+		match protocol icmp
+    policy-map PM_FLOW_SAMPLER
+       class ICMP
+          netflow-sampler FLOW_SAMPLER_ONETEN
+ 	class class-default
+		netflow-sampler FLOW_SAMPLER_ONETEN
+
+end
+show ip flow-export
+
+
+
+!!!FLEXIBLE NETFLOW | IPFIX
+!!!----------------------------------------------------------------------
+!FLOW RECORD
+flow record FR_ST
+match interface input
+match interface output
+match destination address
+match destination mask
+match source address
+match source mask
+match ipv4 protocol
+match ipv4 precedence
+match ipv4 ttl
+match ipv4 total-length
+match ipv4 tos
+collect counter bytes long
+collect counter packets long
+collect application name
+collect flow direction
+collect timestamp absolute first
+collect timestamp absolute last
+collect tcp flags
+exit
+
+ !!FLOW EXPORT
+flow export FE_ST
+destination 192.168.1.254 
+transport udp 9995
+export ipfix
+source g0/0
+
+!!FLOW MONITOR
+flow monitor FM_ST
+record FR_ST
+exporter FE_ST
+cache timeout active 1
+
+
+show flow monitor
+show flow monitor statistics
+show flow monitor cache
+show flow exporter
+show flow exporter templates
+show flow exporter statistics
+
+show flow record
+show ip flow interface
+show flow statistics
+
+
+
+

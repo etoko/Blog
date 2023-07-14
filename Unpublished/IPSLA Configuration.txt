@@ -1,0 +1,65 @@
+!!!---IP SLA-----------------------
+
+end 
+configure terminal
+    ip sla 100
+        icmp-echo 192.168.1.1 source-ip 1.1.1.1
+        frequency 30
+        threshold 6000
+        timeout 7000
+        exit
+
+    ip sla schedule 100 start-time after 3 life forever 
+    end
+
+show ip sla configuration
+show ip sla statistics
+show ip sla summary
+
+
+
+!!ICMP Path Echo Operations
+
+!!!! UDP-ECHO -----------------------------------------
+
+!!!udp-echo responder
+ip sla responder udp-echo ipaddress 192.168.1.1 port 9999
+
+!!UDP-Echo Source
+
+ip sla 100
+    udp-echo 1.1.1.1 source 2.2.2.2 control enable
+        frequency 60
+        timeout 20000
+        threshold 15000
+ ip sla schedule 100 start now life forever
+
+!!UDP-Jitter-------------------------------------------
+!Responder
+ip sla responder udp-echo ipaddress 2.2.2.2 port 80808
+
+!Source
+ip sla 100
+    udp-jitter 2.2.2.2 source-ip 1.1.1.1 num-packets 30 request-data-size 1000 response-data-size 200
+    
+
+!!TCP-CONNECT-------------------------------------------
+!Responder
+
+4
+ip sla responder tcp-connect ipaddress 192.168.1.1 port 80808 
+
+
+
+!Tracking interface state
+
+track 100 interface f0/0 line-protocol
+    delay 0 up 5
+    carrier delay
+
+track 101 interface f0/0 state
+
+!Track IP route----------------------------------------
+track 200 ip route 192.168.1./24 reachability 
+
+

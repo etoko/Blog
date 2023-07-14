@@ -1,0 +1,40 @@
+!!!----------------------SNMP----------------------------------------
+!!----------SNMPv2c Configuration--------------------
+
+
+configure terminal
+
+ip access-list standard ACL_SNMP_MGR
+ 10 permit host 192.168.1.5
+
+exit
+
+snmp-server community cisco123. rw ACL_SNMP_MGR
+snmp-server host 192.168.1.5 traps version 2c cisco123.
+snmp-server enable traps cpu threshold
+snmp-server enable traps vlandelete
+snmp-server enable traps memorypeak
+
+snmp-server chassis-id 1231231
+snmp-server location Block A MDF
+snmp-server contact xyz@example.com
+snmp-server ifindex persist
+	
+
+
+!!!SNMPv3-------------------------------------
+
+
+!!SNMP View
+
+snmp-server view mib2 mib-2 included
+snmp-server view mib2 ifEntry included
+
+!!SNMP Group
+snmp-server group group1 v3 priv write mib2
+
+!!SNMP User
+
+snmp-server user user1 group group1 v3 192.168.1.254 auth sha cisco123 priv aes 256 cisco321 
+
+snmp ifIndex persist

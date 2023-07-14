@@ -1,19 +1,20 @@
 <h1>Introduction and Overview</h1>
 <p>
 IP SLAs are used to measure and verify network performance. These measurements can 
-be leaveraged to influence routing decisions such as static routing, policy-based routing(PBR). 
+be leaveraged to influence routing decisions such as static routing, policy-based routing (PBR). 
 IP SLAs operate in real-time by generating simulated network traffic such as VoIP, ICMP (echo,
 jitter, path echo, path jitter), TCP Connection, UDP (echo, jitter, jitter for VoIP), 
 DNS, DHCP, HTTP, FTP. Network performance can then be determined by the statistics 
 generated from the network in response to the IP SLA traffic. Statistics generated 
-include; delay(round-trip and one-way), packet loss, jitter, voice quality scores etc.
-
+include; delay (round-trip and one-way), packet loss, jitter, voice quality scores etc.
+</p>
+<p>
 IP SLA stores this information in the CLI and SNMP MIBs.
 IP SLA collects data that can then be used by enhanced object tracking to take 
 a defined action. When the IP SLA is configured, object tracking can reference 
 the IP SLA to implement an action based on the outcome or status of the IP SLA operation.
 IP SLAs are used to collect information about: reachability, response times to 
-probes, one-way latency, jitter(inter-packet variation), voice quality scoring, etc.
+probes, one-way latency, jitter (inter-packet variation), voice quality scoring, etc.
 </p>
 <p>
 IP SLA consists of two distinct parts; a probe and schedule.
@@ -153,8 +154,8 @@ ICMP-Echo Request packet to a target device and receiving the ICMP-Echo reply.
 The response time calculated from the <code><b>icmp-echo</b></code> operation 
 provides a general picture of the response time. However, its results may not 
 necessarily be accurate because some systems may not prioritize the processing of 
-ICMP packets causing these delays. A better method to measure network performance 
-is through UDP traffic.
+ICMP packets causing these delays. UDP traffic is a better method to measure 
+network connectivity and response time.
 </p>
 <p>
 Any network device that supports ICMP echo protocol can be used as a destination. 
@@ -238,7 +239,7 @@ for instance such as VOIP traffic.
 
 <li>Schedule the IP SLA operation using the global configuration command 
 <code><b>ip sla schedule &lt;operation-number&gt; life [forever | seconds]  
-start-time [&lt;hh:mm:ss&gt; &lt;month&gt; &lt;day&gt; | pending | after &lt;hh:mm:ss&gt;]</b></code>.
+start-time [&lt;hh:mm:ss&gt; &lt;month&gt; &lt;day&gt; | now | pending | after &lt;hh:mm:ss&gt;]</b></code>.
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
   <code>
@@ -249,6 +250,9 @@ R1(config)#<b>ip sla schedule 100 start-time now life forever</b>
 </ol>
 
 <h3>Verification</h3>
+<p>
+
+</p>
 
 <h4><code>show ip sla summary</code></h4>
 <p>
@@ -335,7 +339,7 @@ An ICMP path echo operation measures the end-to-end and hop-by-hop response time
 between a Cisco device and other devices. 
 ICMP Path Echo is useful for determining network availability and for
 troubleshooting network connectivity issues between a device and the destination 
-or target of the icmp-path echo operation. 
+or target of the <code><b>icmp-path echo</b></code> operation. 
 In ICMP path-echo operation, a source 
 device uses traceroute to discover the path to the destination device. A ping is 
 then used to measure the response time between the source IP SLA device and each 
@@ -437,9 +441,9 @@ measurement statistics in network. ICMP path jitter can be used to supplement
 standard UDP jitter operations. For example, high jitter values from a UDP jitter
 operation could be used to trigger an ICMP path jitter operation that could be 
 used to troubleshoot the network path and determine if traffic is bottlenecking 
-in a particular segment along the path. ICMP Path Jitter default values include;
+in a particular segment along the path. ICMP Path Jitter default values are:
 <ul>
-<li>number of echo probes: 10</li>
+<li>Number of echo probes: 10</li>
 <li>Interval (time between echo probes (in milliseconds)): 20</li> 
 <li>frequency (seconds): 60</li>
 </ul>
@@ -454,7 +458,7 @@ No IP SLA responder is required to be configured on the destination or intermedi
    along the path in the packet. If the destination device does not prioritize 
    ICMP packets, the delay values may be higher.</li>
    <li>ICMP Path Jitter is not supported in RTTMON MIB for SNMP operation. So, 
-   cli commands have be be used.</li>
+   cli commands have to be used.</li>
    <li>ICMP Path Jitter does not support hourly statistics and hop information, 
    IP SLA History feature because of the large data volume generated during 
    jitter operations.</li>
@@ -478,6 +482,10 @@ are sent to the destination device only.
 </p>
 
 <h3>Verification</h3>
+<p>
+
+</p>
+
 
 <h4><code>show ip sla statistics</code></h4>
 <p>
@@ -674,18 +682,21 @@ R1(config-ip-sla-udp)#<b>frequency 60                          </b>  <br>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
   <code>
-R1(config)#<b>ip sla schedule 1 start-time now life forever    </b>  <br>                                                         
+R1(config)#<b>ip sla schedule 400 start-time now life forever    </b>  <br>                                                         
 </code></div>
 </p>
 </ol>
 </p>
 
 <h3>Verification</h3>
+<p>
+
+</p>
 
 <h4><code>show ip sla statistics</code></h4>
 <p>
-The following output shows the difference in RTT values as processed by ICMP-Echo 
-(IPSLA 100)operation and UDP-Echo operation(IPSLA 400).
+The following output shows the difference in RTT values as processed by ICMP-Echo  
+(IPSLA 100) operation and UDP-Echo operation (IPSLA 400).
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
@@ -1131,8 +1142,8 @@ The IP SLA responder for the TCP Connect operation is configured using the comma
 <p>
 <ol>
   <li>Configure the TCP Connect operation using the command <code><b>
-  tcp-connect &lt;destination-ip-address|destination-hostname&gt; &lt;destination
-  -port&gt; [source-ip &lt;ip-address|hostname&gt;] source-port &lt;port&gt; 
+  tcp-connect &lt;destination-ip-address|destination-hostname&gt;
+  &lt;destination-port&gt; [source-ip &lt;ip-address|hostname&gt;] source-port &lt;port&gt; 
   [control {enable|disable}]</b></code>.
   
   </li>
@@ -1180,27 +1191,24 @@ The DHCP operation can be configured as follows:
   <li>Configure the DHCP operation using the command <code><b>dhcp 
   &lt;destination-ip-address|destination-hostname&gt; [source-ip &lt;ip-address|hostname&gt;] 
   </b></code>
-  <p>
-  <div><code>
-   dhcp &lt;server-ip&gt;
-  </code></div>
-  </p>
+  
   </li>
   <li>Configure frequency</li>
   <li>Configure other optional features
   <p>
     <ul>
-      <li><b>tag</b>: Creates a user-specified identifier for an IP SLA operation.</li>
-      <li><b>threshold</b>: Sets the upper threshold value for calculating network 
+      <li><code><b>tag</b></code>: Creates a user-specified identifier for an IP SLA operation.</li>
+      <li><code><b>threshold</b></code>: Sets the upper threshold value for calculating network 
       monitoring statistics created by an IP SLA operation.</li>
-      <li><b>timeout</b>: Sets the amound of time an IP SLA operation waits 
+      <li><code><b>timeout</b></code>: Sets the amount of time an IP SLA operation waits 
       for a response from its request packet.</li>
-      <li><b>history filter {none | all | overThreshold | failures}</b>: Defines 
+      <li><code><b>history filter {none | all | overThreshold | failures}</b></code>: Defines 
       the type of information kept in the history table for an IP SLA operation.</li>
     </ul>
   </p>
   </li>
-  <li>Schedule the DHCP operation</li>
+  <li>Schedule the DHCP operation: <code><b>ip sla schedule &lt;sla-number&gt; start 
+  </li>
 </ol>
 </p>
 

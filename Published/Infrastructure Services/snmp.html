@@ -1,7 +1,7 @@
 <h1>Simple Network Management Protocol (SNMP)</h1>
 <p>
-SNMP is an open standard protocol for collecting and modifying information about 
-managed devices on IP networks. SNMP is an application layer protocol that 
+SNMP is an open standard protocol for collecting information about 
+managed devices and modifying configuration on the managed devices. SNMP is an application layer protocol that 
 supports message exchange in a specific format between SNMP managers and agents. 
 It is used for monitoring 
 and managing devices on a network. SNMP is able to retrieve data, modify SNMP 
@@ -18,7 +18,7 @@ SNMP components include; SNMP manager (NMS), SNMP agent and SNMP MIB.
   network devices for information. The manager runs as software on a computer/server.</li>
   <li><b>SNMP Agent:</b> is a software component that runs on the managed device. 
   It collects and stores information on the device. The agent responds to 
-  manager requests for information. The agent can send the manager unsolicited 
+  manager requests for information. The agent can send unsolicited 
   notifications (traps or informs) to notify the manager about conditions on the 
   managed device.</li>
   <li><b>MIB:</b> is a database of objects (information variables) that lists various 
@@ -102,6 +102,8 @@ and RFC 1452 with improvements to SNMPv1 in areas
 of performance, security and manager-to-device communications. It introduced 
 GetBulkRequest, an alternative to iterative GetNextRequests for retrieving large 
 amounts of management data in a single request. SNMPv2c sends the community strings in clear text.
+</p>
+<p>
 SNMPv2c includes detailed error reporting; this minimizes the number of round trips. 
 It includes expanded error codes that distinguish different types of errors. 
 SNMPv2c uses community strings for security.
@@ -120,7 +122,7 @@ manager can access.
 <h3>Configuration of SNMPv2c</h3>
 <p>
 
-To configure an SNMPv2 on a managed device, follow these steps:
+To configure SNMPv2 on a managed device, follow these steps:
 <ol>
 
 <!--
@@ -165,7 +167,6 @@ To define specific traps, add the type of traps to the above command:
 R1(config)#<b>snmp-server enable traps cpu threshold</b><br>
 R1(config)#<b>snmp-server enable traps vlancreate</b><br>
 R1(config)#<b>snmp-server enable traps vlandelete</b><br>
-R1(config)#<b>snmp-server enable traps cpu threshold</b><br>
 R1(config)#<b>snmp-server enable traps memory bufferpeak</b><br>
 R1(config)#<b>snmp-server enable traps power-ethernet group 1 threshold 80</b><br>
 R1(config)#<b>snmp-server enable traps power-ethernet police</b><br>
@@ -259,6 +260,7 @@ ifIndex object values (generated from the IF_MIB) will be retained across reboot
 </p>
 
 <h3>Verification</h3>
+<!----------------------
 <p>
 To verify the SNMP view created;
 </p>
@@ -268,7 +270,7 @@ To verify the SNMP view created;
 R1#<b>show snmp view</b>                                                                             <br>
 </code></div>
 </p>
-
+----->
 <h3><code>show snmp</code></h3>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
@@ -276,7 +278,7 @@ R1#<b>show snmp view</b>                                                        
 R1#<b>show snmp</b>                                        <br>                                                                                 
 </code></div>
 </p>
-<h4><code>show snmp host</code></h4>
+<h3><code>show snmp host</code></h3>
 <h3><code>show snmp community</code></h3>
 <h3><code>show snmp chassis</code></h3>
 <h3><code>show snmp contact</code></h3>
@@ -307,8 +309,11 @@ When troubleshooting SNMPv2, verify the following:
 The main improvement of SNMPv3 over SNMPv2c is the added security with 
 authentication and encryption.
 
-Poll messages for example GetRequest are sent using UDP161 and traps (GetResponse)
-on port 162. The three security levels used are;
+Poll messages for example GetRequest are sent still sent using UDP port 161 and traps (GetResponse)
+on UDP 162. 
+</p>
+<p>
+SNMPv3 defines three security levels:
 <ol>
  <li><b>NoAuthNoPriv:</b> no authentication, no privacy. Uses a username for 
  authentication and does not use encryption.</li>
@@ -369,6 +374,7 @@ To the mib2 view includes all objects in the MIB-II subtree.
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
   <code>
 R2(config)#<b>snmp-server view mib2 mib-2 included</b><BR>
+R2(config)#<b>snmp-server view mib2 ifEntry included</b><BR>
 R2(config)#<b>snmp-server view int-access ifEntry included</b>
 </code></div>
 </p>
@@ -418,8 +424,8 @@ of the user. To remove the configuration, you need to first reconfigure all SNMP
 <ol>
 <li>Step 1: Define the remote system engineID;
 <code><b>
-Device(config)#snmp-server engineID &lt;local engineID | remote ip-address 
-&lt;udp-port port-number&gt; &lt;vrf name&gt; engineID-string&gt;</b></code>
+snmp-server engineID &lt;local engineID | remote ip-address 
+&lt;udp-port port-number&gt; &lt;vrf name&gt; &lt;engineID-string&gt;</b></code>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
   <code>
@@ -428,7 +434,7 @@ R2(config)#<b>snmp-server engineID remote 192.168.3.10 800000090300CA0305F30006<
 </p>
 </li>
 <li>Step 2: Add a new user to a defined SNMP group;
-<code><b>snmp-server user &lt;username&gt; &lt;group-name&gt; &lt;remote ip_addr [udp-port 
+<code><b>snmp-server user &lt;username&gt; &lt;group-name&gt; &lt;remote ip_address&gt; [udp-port 
 &lt;port-number&gt;] [v1 | v2c | v3] encrypted&gt; [auth [md5 | sha]] &lt;auth-password&gt; 
 [priv [des56|3des|aes] &lt;shared-secret-key&gt;]
 &lt;access-acl&gt;
@@ -468,6 +474,9 @@ R2(config-std-nacl)#exit
 
 
 <h3>Verification</h3>
+<p>
+
+</p>
 
 <h4><code>show snmp user</code></h4>
 <p>
@@ -481,13 +490,14 @@ To verify the SNMPv3 view created;
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
   <code>
-R2#<b>show snmp view</b>                                       <br>
-
-R2#
+R2#<b>show snmp view</b>
 </code></div>
 </p>
 
 <h4><code>show snmp host</code></h4>
+<p>
+
+</p>
 
 <h4>SNMPv3 Groups</h4>
 

@@ -1,7 +1,7 @@
 <h1>Enhanced Object Tracking (SLA Track)</h1>
 
 <p>
-Object tracking allows you to track specific objects on the device, such as the 
+Enhanced Object tracking allows you to track specific objects on the device, such as the 
 interface line protocol state, IP routing, route reachability, and to take action 
 when the tracked object's state changes. This feature allows you to increase the 
 availability of the network and shorten recovery time if an object state goes 
@@ -21,7 +21,7 @@ The object values are reported as either up or down
 </p>
 
 <p>
-An object monitors the statistics and state the IP SLA instance and performs an 
+An object monitors the statistics and state of the IP SLA instance and performs an 
 action based on the status of the probe. This can be used for HSRP, VRRP to 
 change priority levels.
 </p>
@@ -30,85 +30,116 @@ change priority levels.
 You can configure a combination of tracked objects in a list and a flexible method for combining objects
 using Boolean logic. This functionality includes the following capabilities:
 <ul>
-<li>Threshold––The tracked list can be configured to use a weight or percentage threshold to measure the
+<li><b>Threshold:</b> The tracked list can be configured to use a weight or percentage threshold to measure the
 state of the list. Each object in a tracked list can be assigned a threshold weight. The state of the tracked
 list is determined by whether the threshold has been met.</li>
 <li>
-Boolean "and" function––When a tracked list has been assigned a Boolean "and" function, each object
+<b>Boolean "and" function:</b> When a tracked list has been assigned a Boolean "and" function, each object
 defined within a subset must be in an up state so that the tracked object can become up.
 </li>
 <li>
-Boolean "or" function––When the tracked list has been assigned a Boolean "or" function, at least one
+<b>Boolean "or" function:</b> When the tracked list has been assigned a Boolean "or" function, at least one
 object defined within a subset must be in an up state so that the tracked object can become up.
 </li>
 </ul>
 </p>
 
+
+<p>
+Enhanced Tracking Object can be used to track a variety of objects including:
+<ul>
+ <li>Interface line-protocol state</li>
+ <li>IP address</li>
+ <li>MAC address</li>
+ <li>Hostname</li>
+ <li>SNMP OID</li>
+</ul>
+</p>
+<p>
+ETO can be used to improve the performance and reliability of a variety of Cisco IOS features, including:
+<ul>
+ <li>HSRP</li>
+ <li>VRRP</li>
+ <li>GLPB</li>
+ <li>PIM </li>
+ <li>OSPF</li>
+ <li>BGP </li>
+</ul>
+</p>
+
+
 <h2>IP SLA Tracking</h2>
 <p>
+Enhanced Object Tracking can be used to track the status of an IP SLA; state or 
+reachability.
 To configure a tracking object:
 <ol>
-<li>Create an IP SLA probe</li>
+<li>Create an IP SLA probe:
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+R1(config)#<b>ip sla 100</b><br>
+R1(config-ip-sla)#<b>icmp-echo 192.168.12.2</b><br>
+R1(config-ip-sla-echo)#<b>frequency 10</b><br>
+R1(config-ip-sla-echo)#<b>exit</b><br>
+R1(config)#<b>ip sla schedule 100 start-time now life forever</b>
+</code></div></p>
+<p>
+Read more on details of the creation of <a href="https://emmanueltoko.blogspot.com/2021/05/cisco-ios-ip-slas.html">
+IP SLA</a>. 
+</p>
+</li>
   <li>Set up a tracking object based on that probe:
   Reference the IP SLA that will be tracked by the tracking object using 
-  the command <code><b>track &lt;ob-num&gt; ip sla &lt;sla-num&gt; [state | reachability]</b></code>.
+  the command <code><b>track &lt;obj-num&gt; ip sla &lt;sla-num&gt; [state | reachability]</b></code>.
   When configuring a tracking object, a boolean operation AND or OR can be specified 
-  where the results of a series of tracking objects can be compared 
+  where the results of a series of tracking objects can be compared.
+  <p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+  R1(config)#<b>track 100 ip sla 100 reachability</b>
+  </code></div></p>
+  
   </li>
-  <li>Configure  a delay on the object to regulate the flapping of the object using 
-  the command <code><b>delay [down &lt;seconds&gt; | up &lt;seconds&gt;]</b></code>.</li>
-  <li>Associate the obhect with a client process.</li>
+  <li>Configure a delay on the object to regulate the flapping of the object using 
+  the command <code><b>delay [down &lt;seconds&gt; | up &lt;seconds&gt;]</b></code>.
+  <p>
+  <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+  R1(config-track)#<b>delay down 3 up 3</b>
+  </code></div></p>
+  </li>
+  <li>Associate the tracking object with a client process. In the following 
+  subsection, the tracking object is associated with a static route.</li>
 </ol>
 </p>
 
 <p>
-<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-  <code style="font-size:130%">
-R1(config)#<b>track 100 ip sla 100</b><br>
-R1(config-track)#<br>
-*Mar 13 05:51:36.431: %DUAL-5-NBRCHANGE: EIGRP-IPv4 100: Neighbor 192.168.12.2 (GigabitEthernet0/0) is down: holding time expired<br>
-*Mar 13 05:51:38.043: %TRACKING-5-STATE: 100 ip sla 100 state Up->Down<br>
-*Mar 13 05:51:43.047: %TRACKING-5-STATE: 100 ip sla 100 state Down->Up<br>
-*Mar 13 05:51:51.547: %DUAL-5-NBRCHANGE: EIGRP-IPv4 100: Neighbor 192.168.12.2 (GigabitEthernet0/0) is up: new adjacency<br>
-R1(config-track)#<b>delay down 3 up 0</b><br>
-</code></div>
-
-<p>
-Enhanced Tracking Object can be used to track a variety of objects including:
-ETO can be used to track a variety of objects, including:
-    Interface line-protocol state
-    IP address
-    MAC address
-    Hostname
-    SNMP OID
-
-ETO can be used to improve the performance and reliability of a variety of Cisco IOS features, including:
-
-    HSRP
-    VRRP
-    GLPB
-    PIM
-    OSPF
-    BGP
-
-
+IP SLA tracking can be leveraged to improve the efficiency and reliability of 
+static routing, dynamic routing using OSPF, BGP.
 </p>
 
-<h2>Static Route Tracking</h2>
+<h3>Static Route Tracking</h3>
 <p>
 IP SLAs can be used in combination with static routes. IP SLA can be used to 
 install or remove a static route from the Routing Information Base (RIB) only if 
 certain conditions are met.
 
 A tracking object needs to be defined to track the results of the probe and 
-implement an action. It can also track other operations such as the state of an interface.
+implement an action.
+</p>
+<p>
+<b>Note:</b> When installing a tracked static route, install the tracked static route 
+after configuring the non-tracked static route.
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-  <code style="font-size:130%">
+  <code>
 R1(config)#<b>track 100 ip sla 100</b><br>
 R1(config-track)#<b>delay down 3 up 0</b><br>
-R1(config)#<b>ip route 4.4.4.4 255.255.255.255 192.168.13.2 track 100</b><br>
+R1(config-track)#<b>exit</b><br>
+R1(config)#<b>ip route 4.4.4.4 255.255.255.255 192.168.13.2 10</b><br>
+R1(config)#<b>ip route 4.4.4.4 255.255.255.255 192.168.12.2 track 100</b><br>
 </code></div></p>
 
 <h3>Verification</h3>
@@ -117,33 +148,100 @@ R1(config)#<b>ip route 4.4.4.4 255.255.255.255 192.168.13.2 track 100</b><br>
 <p>
 Verify a tracked object.
 </p>
-
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-  <code style="font-size:130%">
-R1(config-track)#                                                            <br>
-*Mar 13 10:29:22.858: %TRACKING-5-STATE: 100 ip sla 100 state Up-Down        <br>
-R1(config)#ip route 4.4.4.4 255.255.255.255 192.168.13.2 track 100           <br>
-R1(config)#                                                                  <br>
-R1(config)#<b>do show ip route 4.4.4.4</b>                                          <br>
-Routing entry for 4.4.4.4/32                                                 <br>
-&nbsp;&nbsp;Known via "eigrp 100", distance 90, metric 2580480, type internal          <br>
-&nbsp;&nbsp;Redistributing via eigrp 100                                               <br>
-&nbsp;&nbsp;Last update from 192.168.12.2 on GigabitEthernet0/0, 00:02:23 ago          <br>
-&nbsp;&nbsp;Routing Descriptor Blocks:                                                 <br>
-&nbsp;&nbsp;* 192.168.12.2, from 192.168.12.2, 00:02:23 ago, via GigabitEthernet0/0    <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Route metric is 2580480, traffic share count is 1                      <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Total delay is 5030 microseconds, minimum bandwidth is 1000000 Kbit    <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Reliability 255/255, minimum MTU 1500 bytes                            <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Loading 1/255, Hops 3                                                  <br>
-R1(config)#
-</code></div></p>
-<p>
-Caution: When installing a tracked static route, install the tracked static route 
-after configuring the non-tracked static route.
+  <code>
+R1#<b>show track</b>                     <br>
+Track 100                                <br>
+&nbsp;&nbsp;IP SLA 100 reachability                <br>
+&nbsp;&nbsp;Reachability is Down                   <br>
+&nbsp;&nbsp;&nbsp;&nbsp;4 changes, last change 00:00:19      <br>
+&nbsp;&nbsp;Delay up 3 secs, down 3 secs           <br>
+&nbsp;&nbsp;Latest operation return code: Timeout  <br>
+&nbsp;&nbsp;Tracked by:                            <br>
+&nbsp;&nbsp;&nbsp;&nbsp;STATIC-IP-ROUTING 0                  <br>
+</code></div>
 </p>
 
+<h4><code>show ip route</code></h4>
+<p>
+A tracked static route can be verified using the command <code><b>show ip route</b></code>.
+</p>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+R1#                                                                                   <br>
+*May 13 05:44:11.479: %TRACKING-5-STATE: 100 ip sla 100 reachability Up-&gt;Down      <br>
+R1#<b>show ip route</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;               <br>
+Codes: L - local, C - connected, S - static, R - RIP, M - mobile, B - BGP             <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; D - EIGRP, EX - EIGRP external, O - OSPF, IA - OSPF inter area&nbsp;&nbsp;               <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; N1 - OSPF NSSA external type 1, N2 - OSPF NSSA external type 2&nbsp;&nbsp;               <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; E1 - OSPF external type 1, E2 - OSPF external type 2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;               <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; i - IS-IS, su - IS-IS summary, L1 - IS-IS level-1, L2 - IS-IS level-2          <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ia - IS-IS inter area, * - candidate default, U - per-user static route        <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; o - ODR, P - periodic downloaded static route, H - NHRP, l - LISP              <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; + - replicated route, % - next hop override&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                <br>
+Gateway of last resort is 192.168.13.2 to network 0.0.0.0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;               <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                <br>
+S*&nbsp;&nbsp;&nbsp;&nbsp;0.0.0.0/0 [10/0] via 192.168.13.2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;               <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;192.168.12.0/24 is variably subnetted, 2 subnets, 2 masks&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;               <br>
+C&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;192.168.12.0/30 is directly connected, GigabitEthernet0/0&nbsp;&nbsp;&nbsp;&nbsp;                <br>
+L&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;192.168.12.1/32 is directly connected, GigabitEthernet0/0&nbsp;&nbsp;&nbsp;&nbsp;                <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;192.168.13.0/24 is variably subnetted, 2 subnets, 2 masks&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;               <br>
+C&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;192.168.13.0/30 is directly connected, GigabitEthernet1/0&nbsp;&nbsp;&nbsp;&nbsp;                <br>
+L&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;192.168.13.1/32 is directly connected, GigabitEthernet1/0&nbsp;&nbsp;&nbsp;&nbsp;                <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;192.168.24.0/30 is subnetted, 1 subnets&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;               <br>
+D&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;192.168.24.0 [90/3328] via 192.168.13.2, 00:00:19, GigabitEthernet1/0        <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;192.168.34.0/30 is subnetted, 1 subnets&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;               <br>
+D&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;192.168.34.0 [90/3072] via 192.168.13.2, 00:12:18, GigabitEthernet1/0        <br>
+*May 13 05:45:33.479: Track: 100 Up change delayed for 3 secs&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;               <br>
+R1#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;               <br>
+*May 13 05:45:36.479: Track: 100 Up change delay expired&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                <br>
+*May 13 05:45:36.479: Track: 100 Change #5 ip sla 100, reachability Down-&gt;Up       <br>
+R1#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;               <br>
+*May 13 05:45:36.483: %TRACKING-5-STATE: 100 ip sla 100 reachability Down-&gt;Up      <br>
+R1#<b>show ip route</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;               <br>
+Codes: L - local, C - connected, S - static, R - RIP, M - mobile, B - BGP             <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; D - EIGRP, EX - EIGRP external, O - OSPF, IA - OSPF inter area&nbsp;&nbsp;               <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; N1 - OSPF NSSA external type 1, N2 - OSPF NSSA external type 2&nbsp;&nbsp;               <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; E1 - OSPF external type 1, E2 - OSPF external type 2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;               <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; i - IS-IS, su - IS-IS summary, L1 - IS-IS level-1, L2 - IS-IS level-2          <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ia - IS-IS inter area, * - candidate default, U - per-user static route        <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; o - ODR, P - periodic downloaded static route, H - NHRP, l - LISP              <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; + - replicated route, % - next hop override&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                <br>
+Gateway of last resort is 192.168.12.2 to network 0.0.0.0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;               <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                <br>
+S*&nbsp;&nbsp;&nbsp;&nbsp;0.0.0.0/0 [1/0] via 192.168.12.2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;192.168.12.0/24 is variably subnetted, 2 subnets, 2 masks&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;               <br>
+C&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;192.168.12.0/30 is directly connected, GigabitEthernet0/0&nbsp;&nbsp;&nbsp;&nbsp;                <br>
+L&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;192.168.12.1/32 is directly connected, GigabitEthernet0/0&nbsp;&nbsp;&nbsp;&nbsp;                <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;192.168.13.0/24 is variably subnetted, 2 subnets, 2 masks&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;               <br>
+C&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;192.168.13.0/30 is directly connected, GigabitEthernet1/0&nbsp;&nbsp;&nbsp;&nbsp;                <br>
+L&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;192.168.13.1/32 is directly connected, GigabitEthernet1/0&nbsp;&nbsp;&nbsp;&nbsp;                <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;192.168.24.0/30 is subnetted, 1 subnets&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;               <br>
+D&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;192.168.24.0 [90/3072] via 192.168.12.2, 00:23:48, GigabitEthernet0/0        <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;192.168.34.0/30 is subnetted, 1 subnets&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;               <br>
+D&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;192.168.34.0 [90/3072] via 192.168.13.2, 00:23:44, GigabitEthernet1/0        <br>
+</code></div></p>
+
+
 <h4><code>debug track &lt;all&gt;</code></h4>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+R1#<b>debug track</b><br>
+Track debugging is on                                                         <br>
+R1#                                                                           <br>
+*May 13 05:45:33.479: Track: 100 Up change delayed for 3 secs                 <br>
+R1#                                                                           <br>
+*May 13 05:45:36.479: Track: 100 Up change delay expired                      <br>
+*May 13 05:45:36.479: Track: 100 Change #5 ip sla 100, reachability Down->Up  <br>
+R1#                                                                           <br>
+*May 13 05:45:36.483: %TRACKING-5-STATE: 100 ip sla 100 reachability Down->Up
+</code></div>
+</p>
 
 <h2>Interface State Tracking</h2>
 <p>
@@ -151,7 +249,7 @@ Enhanced tracking objects can be used to monitor the state of an interface. This
 is implemented using the command <code><b>track interface ip routing</b></code>.
 This enables the tracking of the following states on an interface:
 <ul>
-  <li>line protocol: </li>
+  <li>line protocol </li>
   <li>IP address</li>
   <li>IP routing: ability of an interface to route packets</li>
 </ul>
@@ -173,14 +271,26 @@ following steps:
   <li>Create a tracking list to track the state of the interface:
   <ul>
     <li><b>line-protocol:</b> using the command 
-  <code><b>track &lt;obj-num&gt; interface &lt;interface-id&gt; line-protocol</b></code>.</li>
+  <code><b>track &lt;obj-num&gt; interface &lt;interface-id&gt; line-protocol</b></code>.
+  <p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+  R4(config)#<b>track 200 interface gigabitethernet1/0 line-protocol</b>
+  </code></div></p>
+  </li>
     <li><b>ip routing:</b> tracks an IP route in the routing table and the ability
     of an interface to route IP packets.
      <code><b>track &lt;obj-num&gt; interface &lt;interface-id&gt; ip routing</b></code>.</li>
   </ul>
   </li>
   <li>Configure the delay period using command <code><b>delay up &lt;1-180&gt; 
-  down &lt;1-180&gt;</b></code>. The delay value is in seconds.</li>
+  down &lt;1-180&gt;</b></code>. The delay value is in seconds.
+  <p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+  R4(config-track)#<b>delay down 0 up 3</b>
+  </code></div></p>
+  </li>
   <li>(Optional) Let the tracking object consider the carrier delay timer when 
   tracking the interface status: <code><b>carrier delay</b></code>.</li>
   <li>(Optional) Configure the interval in which the tracking process polls the 
@@ -210,24 +320,68 @@ routing table entry exists for the route and the route is accessible.
 
 </p>
 
-<h2><code>show ip route track table</code></h2>
+<h2><code>show ip route track-table</code></h2>
 <p>
 Displays information about the IP route track table.
 </p>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+R1#<b>show ip route track-table</b><br>
+&nbsp;&nbsp;ip route 0.0.0.0 0.0.0.0 192.168.12.2 track 100 state is [up]<br>
+R1#
+</code></div></p>
 
 <h2><code>show track [object-number ]</code></h2>
 <p>
 Displays information about the all tracking lists or the specified list.
 </p>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+R4#<b>show track 200</b>                                 <br>
+Track 200                                                <br>
+&nbsp;&nbsp;Interface GigabitEthernet1/0 line-protocol   <br>
+&nbsp;&nbsp;Line protocol is Up                          <br>
+&nbsp;&nbsp;&nbsp;&nbsp;3 changes, last change 00:00:05  <br>        
+&nbsp;&nbsp;Delay up 3 secs                              <br>
+&nbsp;&nbsp;Tracked by:                                  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;STATIC-IP-ROUTING 0              <br>        
+</code></div></p>
 
 <h2><code>show track brief</code></h2>
 <p>
 Displays a single line of tracking information output.
 </p>
-<h2><code>show track interface [brief ]</code></h2>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+R1#<b>show track brief</b><br>
+Track&nbsp;&nbsp; Object&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Parameter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Value Last Change<br>
+100&nbsp;&nbsp;&nbsp;&nbsp; ip sla&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;100&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;reachability&nbsp;&nbsp;&nbsp;&nbsp; Up&nbsp;&nbsp;&nbsp;&nbsp;00:31:10&nbsp;&nbsp; <br>
+R1#
+</code></div></p>
+
+<h2><code>show track interface [brief]</code></h2>
 <p>
 Displays information about tracked interface objects.
 </p>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>                                                                         
+R4#<b>show track interface brief</b><br>                                                
+Track&nbsp;&nbsp; Object&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Parameter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Value Last Change <br> 
+200&nbsp;&nbsp;&nbsp;&nbsp; interface&nbsp;&nbsp; GigabitEthernet1/0&nbsp;&nbsp; line-protocol&nbsp;&nbsp;&nbsp;&nbsp;Down&nbsp;&nbsp;00:00:24    <br> 
+R4#<b>show track interface</b>                                              <br>        
+Track 200&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                             <br> 
+&nbsp;&nbsp;Interface GigabitEthernet1/0 line-protocol                                <br> 
+&nbsp;&nbsp;Line protocol is Down (hw admin-down)                                     <br> 
+&nbsp;&nbsp;&nbsp;&nbsp;2 changes, last change 00:00:29                                         <br> 
+&nbsp;&nbsp;Delay up 3 secs                                                           <br> 
+&nbsp;&nbsp;Tracked by:&nbsp;&nbsp;                                                             <br> 
+&nbsp;&nbsp;&nbsp;&nbsp;STATIC-IP-ROUTING 0                                                      
+R4#                                                                          
+</code></div></p>
 
 <h2><code>show track ip [object-number ] [brief ] route</code></h2>
 <p>
@@ -238,8 +392,31 @@ Displays information about tracked IP-route objects.
 <p>
 Displays the resolution of tracked parameters.
 </p>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+R1#<b>sho track resolution</b>  <br>
+Route type&nbsp;&nbsp;&nbsp;&nbsp; Metric Resolution<br>
+static&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 10&nbsp;&nbsp;             <br>
+EIGRP&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2560             <br>
+OSPF&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 1&nbsp;&nbsp;              <br>
+ISIS&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 10&nbsp;&nbsp;             <br>
+BGP&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2560             <br>
+</code></div></p>
 
 <h2><code>show track timers</code></h2>
 <p>
 Displays tracked polling interval timers.
 </p>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+R1#<b>show track timers</b>                    <br>
+Object type&nbsp;&nbsp; Poll Interval Time to next poll  <br>
+interface&nbsp;&nbsp;&nbsp;&nbsp; 1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; expired            <br>
+ip route&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;15&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;expired            <br>
+ip sla&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;5&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 3.716&nbsp;&nbsp;            <br>
+application&nbsp;&nbsp; 5&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; expired            <br>
+list&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; expired            <br>
+stub&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; expired            <br>
+</code></div></p>
