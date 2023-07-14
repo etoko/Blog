@@ -70,20 +70,20 @@ of the DNA modules:
 <ol>
   <li><b>Design:</b> design of the physical layout of the network is developed 
   including the addresses of the buildings, and geographical locations. Features that 
-  can be configured under network hierarch include:
+  can be configured under Design include:
     <ul>
       <li><b>Network Hierarchy:</b> create organizational hierarchies. Import and export 
       of hierarchies is supported. The two export options are sites or maps.</li>
       <li><b>Network Settings:</b> consists of the following: 
       <ul>
         <li><b>Network:</b>
-      Configure AAA, NTP and Image Distribution(SFTP) 
-      servers. Once devices are discovered, DNAC will depliy using these settings.
-      Other settings are DNS server, message of the day(MoTD) with the option to 
+      Configure AAA, NTP and Image Distribution (SFTP) 
+      servers. Once devices are discovered, DNAC will deploy using these settings.
+      Other settings are DNS server, message of the day (MoTD) with the option to 
       not override the device MoTD; default is to override the device MoTD. These 
-      settings can be applied to a site or to global(all sites).
+      settings can be applied to a site or to all sites (global).
       </li>
-      <li><b>Device Credentials:</b> credentials for CLI, SNMP(v2c and v3 - read
+      <li><b>Device Credentials:</b> credentials for CLI, SNMP (v2c and v3 - read
       and write), HTTP(S) - read and write.
       </li>                               
       <li><b>IP Address pools:</b> Address pools consist of the IP CIDR, gateway, 
@@ -109,8 +109,7 @@ of the DNA modules:
         </li>
       </ul>
       </li>
-      <li>Image Repository
-       Contains images (physical and virtual) for devices on the network.
+      <li>Image Repository: contains images for devices (physical and virtual) on the network.
       </li>
       <li>Network Profiles: profiles supported are for Firewall, NFVIS, Wireless, 
       Switching, Routing, Telemetry Appliance</li>
@@ -259,7 +258,7 @@ For devices to be managed, they must first be discovered. The discovery feature:
   device to discover other devices.</li>
   <li><b>IP address or range:</b> scans the designated IP address range with ICMP
   to identify responding devices.</li>
-  <li><b>LLDP:</b> operates similarly to LLDP.
+  <li><b>LLDP:</b> operates similarly to CDP.
   </li>
 </ul>
 </p>
@@ -330,8 +329,8 @@ DNAC. These settings are the same as Discovery credential sets:
 <ul>
   <li><b>CLI credentials:</b> username, password and enable password. This local 
   user should have a privilege level of 15.</li>
-  <li><b>SNMPv2:</b> v2 read/write community string(v3 is optional).</li>
-  <li><b>HTTPS(Optional):</b> read/write string, username, password and port.</li>
+  <li><b>SNMPv2:</b> SNMPv2 read/write community string (SNMPv3 is optional).</li>
+  <li><b>HTTPS (Optional):</b> read/write string, username, password and port.</li>
 </ul>
 </p>
 <p>
@@ -340,6 +339,8 @@ and instance specific credential sets, specified per container, for network devi
 in a discovery. Credentials in higher-level containers are inherited by lower level 
 containers. DNAC allows multiple credentials to be specified for a defined credential 
 type. Support for exceptions (non-common) credentials can be included in discovery.
+</p>
+<p>
 DNAC automation can add missing credential sets to devices upon discovery for example
 if the CLI credentials are available but SNMP configuration is not working, DNA 
 is able to access the device using the CLI credentials and enable SNMP with the 
@@ -493,10 +494,14 @@ discovery:
 </p>
 
 <h2>Telemetry Profile</h2>
+<p>
+
+</p>
+
 <h3>Device Provisioning</h3>
 <p>
-When device discovery is completed, the device is under the Global site and 
-categorized as under "unassigned devices". Unassigned devices not not have a 
+When device discovery is completed, a newly added device is placed under the Global site and 
+categorized under "unassigned devices". Unassigned devices not not have a 
 site allocation.
 Assurance requires devices to be assigned to a site in order to push telemetry.
 It is important to assign a device to a site. This is because network telemetry 
@@ -513,7 +518,7 @@ profiles can be added. The three default telemetry profiles for use in provision
 configurations include: maximal, optimal and disable.
 </p>
 <p>
-<table cellspacing="0" width="75%">
+<table cellspacing="0" width="100%">
   <thead style="background: #d3d3d3; font-weight: bold;">
     <tr>
       <td style="border-top: 1px solid; border-bottom: 1px solid;">Profile Name</td>
@@ -612,7 +617,18 @@ ignored, it is ignored for a specific time period. An issue can be resolved in
 two ways; by manually changing the status, or the auto-resolution mechanism. 
 Support for autoresolution is being added for more issues.
 </p>
+<p>
+Issues are classified according to priority. The options are:
+ <ul>
+   <li><b>P1:</b> A critical issue that needs immediate attention which can result 
+   in wider impact on network operations.</li>
+   <li><b>P2:</b> A major issue that can potentially impact multiple devices or clients.</li>
+   <li><b>P3:</b> A minor issue that has a localized or minimal impact.</li>
+   <li><b>P4:</b> A warning issue that may not be an immediate problem but 
+   addressing it can optimize the network performance.</li>
+ </ul>
 
+</p>
 
 <h1>Network Health</h1>
 <p>
@@ -818,7 +834,7 @@ It allows the standardization of software images for devices on the network.
 <p>
 An SMU is a package that provides point fixes and rolls security resolutions to 
 software images that have already been published. DNAC supports SMUs for IOS-XE 
-versions 16.x onwards).
+versions 16.x onwards.
 </p>
 <p>
 SMUs can be helpful:
@@ -838,9 +854,9 @@ SMUs can be helpful:
   <li><b>Base images:</b> all Cisco IOS, IOS-XE, AireOS, NX-OS iamges for supported devices</li>
   <li><b>Patches:</b> patches (or SMU) are only supported on IOS-XE</li>
   <li><b>ROMMON:</b>  ROMMON is a firmware image on Cisco devices</li>
-  <li><b>AP Device Pack(APDP):</b> APDP allows quick support for newer AP outside 
+  <li><b>AP Device Pack (APDP):</b> APDP allows quick support for newer AP outside 
   DNAC release using the patching framework.</li>
-  <li><b>AP Service Pack(APSP):</b> allows quick support for point patches outside of DNAC 
+  <li><b>AP Service Pack (APSP):</b> allows quick support for point patches outside of DNAC 
   release using the patching framework.</li>
   <li><b>Sub-package:</b> allows deployment of sub-technologies on devices.</li>
 </ul>
