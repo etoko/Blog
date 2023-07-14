@@ -1,6 +1,6 @@
-<!--<h1>Netflow: Overview and Introduction</h1> -->
+<!--<h1>NetFlow: Overview and Introduction</h1> -->
 <p>
-Netflow is a Cisco application that collects statistics on packets flowing through 
+NetFlow is a Cisco application that collects statistics on packets flowing through 
 a router. By analyzing the data provided by NetFlow, a 
 network administrator can determine the characteristics of network traffic such 
 as source, destination of traffic, class of service to get a hint on troubleshooting 
@@ -13,14 +13,14 @@ by default.
 </p>
 
 <p>
-Netflow provides the ability to view network traffic grouped by protocol. With 
+NetFlow provides the ability to view network traffic grouped by protocol. With 
 this feature, a baseline of network traffic can be performed before 
 the introduction of a new network service or implementation of traffic shaping.
 </p>
 <p>
-For Internet-facing routers that run NAT, it is recommended that Netflow be 
+For Internet-facing routers that run NAT, it is recommended that NetFlow be 
 configured on the router interface connecting to the local network i.e. before 
-NAT translations. If Netflow is configured on the Internet-facing interface, 
+NAT translations. If NetFlow is configured on the Internet-facing interface, 
 NAT will have been implemented and it becomes difficult to understand traffic 
 flow patterns of local devices as their local/internal IP addresses will already 
 have been translated by NAT.
@@ -51,11 +51,11 @@ destination. A flow is uniquely identified by the following characteristics:
   <li>Logical input interface: router or switch interface</li>
 </ul>
 The combination of these fields make a flow uniquely identifiable.
-Netflow is used on top of an existing switching path such a CEF.
+NetFlow is used on top of an existing switching path such as CEF.
 </p>
 
 <p>
-Traffic monitored by Netflow can be classified into the following categories:
+Traffic monitored by NetFlow can be classified into the following categories:
 <ul>
   <li><b>Device:</b> flow count, traffic and volume</li>
   <li><b>Interface:</b> bandwidth utilization, traffic, packets, and volume.</li>
@@ -101,8 +101,8 @@ The following are the scenarios under which NetFlow cache entries expire:
 <ul>
   <li>If a flow has been idle for 15 seconds by default.</li>
   <li>Flows that are continuous, such as routing protocol message exchanges, they 
-  are categorized as long lived flows. Long lived flows, by default, expire after 
-  a maximum of 30 minutes(cache timeout active configured value).</li>
+  are categorized as long-lived flows. Long-lived flows, by default, expire after 
+  a maximum of 30 minutes (cache timeout active configured value).</li>
   <li>If the NetFlow cache is full, the oldest flows get deleted.</li>
   <li>TCP connections that are ending with the FIN flag set or have been reset
   (with the RST flag) are expired.</li>
@@ -113,7 +113,7 @@ The following are the scenarios under which NetFlow cache entries expire:
 <h2>Collection Engine</h2>
 <p>
 The collection engine runs on the router or switch whose interface traffic is to be 
-monitored. The collection engine sends netflow data to a management collector 
+monitored. The collection engine sends NetFlow data to a management collector 
 with 1.5% export data overhead. Flows are exported to the NetFlow collector 
 periodically or when they expire using datagrams in UDP format. The UDP port 
 number is arbitary; there is no default UDP port specified on which the collector 
@@ -141,7 +141,19 @@ engine reverses the information behind the scenes without any additional
 configuration. 
 
 </p>
-
+<p>
+Information captured by NetFlow v5 includes the following:
+<ul>
+  <li>Source and destination ports</li>
+  <li>Packet counts</li>
+  <li>Byte counts</li>
+  <li>Flow duration</li>
+  <li>I/O interfaces</li>
+</ul>
+</p>
+<p>
+NetFlow v5 does not support multicast, IPSec and MPLS. Additionally 
+</p>
 
 <h2>Configuration</h2>
 <p>
@@ -149,12 +161,11 @@ To configure NetFlow version 5, the following configurations are made:
 </p>
 <p>
 <ol>
-<li><b>Enable flows on the interface:</b>
-In interface configuration mode: 
+<li><b>Enable flows on the interface:</b> in interface configuration mode: 
 <ul>
-  <li><code><b>ip flow ingress</b></code>: enables netflow for outbound traffic on 
+  <li><code><b>ip flow ingress</b></code>: enables NetFlow for inbound traffic on 
   an interface</li>
-  <li><code><b>ip flow egress</b></code>: enables Netflow for inbound traffic on 
+  <li><code><b>ip flow egress</b></code>: enables NetFlow for outbound traffic on 
   an interface.</li>
 </ul>
 </p>
@@ -178,7 +189,7 @@ in the device cache or exported to a NetFlow collector.
   <ul>
 <li><b>Local Retrieval:</b>
 
-Local retrieval is also known as stand-alone mode where netflow records are stored 
+Local retrieval is also known as stand-alone mode where NetFlow records are stored 
 in the local router memory. This information can be accessed using the CLI.
 The following commands enable monitoring of bandwidth based on bytes or packet count:
 <p>
@@ -193,8 +204,8 @@ R1(config-flow-top-talkers)#<b>sort-by bytes</b><br>
 To view the flows, use the command <code><b>show ip flow top-talkers</b></code>.
 </p>
 <p>
-Netflow is a heavy resource hungry feature. It is recommended not to enable 
-netflow on a router that is experiencing heavy resource constraints.
+NetFlow is a heavy resource hungry feature. It is recommended not to enable 
+NetFlow on a router that is experiencing heavy resource constraints.
 </p>
 </li>
 <li>
@@ -212,31 +223,33 @@ R1(config)#<b>ip flow-export destination 192.168.14.2 9999</b>
   </code></div>
   </p>
 <p>
-The Netflow records are exported by the Netflow exporter to the 
-collector using UDP. An IP address of a Netflow collector and a destination UDP port 
-have to be configured on the flow exporter. A router (netflow exporter) will maintain 
-a track of flow record which is already exported, hence if the Netflow packets are 
+The NetFlow records are exported by the NetFlow exporter to the 
+collector using UDP. An IP address of a NetFlow collector and a destination UDP port 
+have to be configured on the flow exporter. A router (NetFlow exporter) will maintain 
+a track of flow record which is already exported, hence if the NetFlow packets are 
 dropped in the event of packet corruption or network congestion.
-Netflow export also uses SCTP (stream control transmission protocol) 
+</p>
+<p>
+NetFlow export also uses SCTP (stream control transmission protocol) 
 to export the NetFlow records. This offers protection against the loss of packets.
-In the case of NetFlow version 9, SCTP ensures that the Netflow v9 template is 
-received by the collector before exporting the related record. The Netflow 
+In the case of NetFlow version 9, SCTP ensures that the NetFlow v9 template is 
+received by the collector before exporting the related record. The NetFlow 
 export only uses the network backbone link, packet loss can be negligible. 
 </p>
 <p>
-The netflow collector listens for Netflow records on UDP or SCTP. However, 
+The NetFlow collector listens for NetFlow records on UDP or SCTP. However, 
 the port is not explicitly defined. The administrator can configure a UDP port 
 of choice; the commonly configured port number is 9995, 9996 or 9999. It is 
-important to note that when configuring a Netflow collector 
-to collect netflow records from more than one netflow exporter, each netflow 
+important to note that when configuring a NetFlow collector 
+to collect NetFlow records from more than one NetFlow exporter, each NetFlow 
 exporter should be configured to export flow records to a different port number.
-Otherwise the netflow collector will aggregate the flow records. So it is 
-recommended to configure one port for one netflow exporter.
+Otherwise the NetFlow collector will aggregate the flow records. So it is 
+recommended to configure one port for one NetFlow exporter.
 </p>
 <p>
 </li>
   <li><code><b>ip flow-export version [5|9]</b></code>: specifies the format of 
-  exported Netflow records. It is possible to configure NetFlow version 5 and export 
+  exported NetFlow records. It is possible to configure NetFlow version 5 and export 
   Flow records in version 9.
   <p>
   <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
@@ -261,9 +274,9 @@ R1(config)#<b>ip flow-export version 5</b>
   </code></div>
   </p>
   <p>
-  This is particularly important in scenarios where, with multipathing, netflow 
+  This is particularly important in scenarios where, with multipathing, NetFlow 
   records from one device may have different source IP addresses due to the different egress 
-  interfaces that the netflow traffic may have used. This command ensures that the 
+  interfaces that the NetFlow traffic may have used. This command ensures that the 
   source IP address is consistent for all flow records from a device.
   </p>
   </li>
@@ -277,10 +290,13 @@ R1(config)#<b>ip flow-export version 5</b>
 </p>
 
 <h2>Verification</h2>
+<p>
+
+</p>
 
 <h2><code>show ip cache [verbose] flow</code></h2>
 <p>
-Displays basic Netflow statistics for netflow records that are stored locally in 
+Displays basic statistics for NetFlow records that are stored in 
 the router's local cache. 
 </p>
 <p>
@@ -386,7 +402,7 @@ Gi2/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;192.168.14.2&nb
 
 <h2><code>show ip flow export</code></h2>
 <p>
-Displays the Netflow data export configuration and statistics of netflow records 
+Displays the NetFlow data export configuration and statistics of NetFlow records 
 that are being exported.
 </p>
 <p>
@@ -412,7 +428,7 @@ R1#
 
 <h2><code>show ip flow interface</code></h2>
 <p>
-Displays the Netflow configuration for each interface
+Displays the NetFlow configuration for each interface
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
@@ -476,7 +492,7 @@ Gi2/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;192.168.14.2&nb
 
 <h2><code>clear ip flow stats</code></h2>
 <p>
-Clearing statistics to observer Netflow operations.
+Clearing statistics to observer NetFlow operations.
 </p>
 
 <h1>NetFlow Version 9</h1>
@@ -505,7 +521,7 @@ the export of data from main cache and aggregation cache.
 </p>
 <!--
 <p>
-Netflow v9 is modular supporting the creation of flow records and flow monitors.
+NetFlow v9 is modular supporting the creation of flow records and flow monitors.
 The monitor is applied to an interface indicating the type of statistics that the 
 device should compile.
 </p>
@@ -515,7 +531,19 @@ NetFlow v9 introduces the concept of "egress" flows. Traffic statistics on ingre
 flows are calculated before compression. This may be a problem if WAN links are 
 using compression of packets. Egress flow statistics are calculated after compression.
 </p>
-
+<p>
+In addition to information captured by NetFlow v5, the following information is 
+captured by NetFlow v9:
+<ul>
+  <li>Fragmentation flags</li>
+  <li>Other TCP flags/counters</li>
+  <li>Flow direction</li>
+  <li>DSCP info</li>
+  <li>ToS</li>
+  <li>ICMP and IGMP</li>
+  <li>TTL</li>
+</ul>
+</p>
 
 
 <h2>Configuration</h2>
@@ -534,15 +562,15 @@ source  &lt;interface&gt;</b></code>.
 </li>
 <li><b>Configure the export version:</b> <code><b>ip flow-export version 9</b></code>.
 </li>
-<li>The characteristics of the packets to be included in the Netflow records are 
+<li>The characteristics of the packets to be included in the NetFlow records are 
 defined using the template keyword which specifies that template specific 
 configurations follow.  Some template-defined parameters include the following:
 <p>
   <table width="100%" cellspacing="0">
-    <thead style="background-color:#d3d3d3;">
+    <thead style="background-color:#d3d3d3; font-weight: bold;">
     <tr>
       <td style="border-top: 1px solid black; border-bottom: 1px solid black;"
-      width="25%">Command</td>
+      width="40%">Command</td>
       <td style="border-top: 1px solid black; border-bottom: 1px solid black;">Description</td>
     </tr>
     </thead>
@@ -553,8 +581,8 @@ configurations follow.  Some template-defined parameters include the following:
         <p>
 Set the template timeout to one minute: <code><b>ip flow-export template timeout-rate 1</b></code>.
 This ensures that there are no data gaps if the network service or server restarts.
-The default setting for long active flows(long-lived flows) is 30 minutes. This 
-can cause high peaks wellabove circuit speeds. By breaking the cached flows into 
+The default setting for long active flows (long-lived flows) is 30 minutes. This 
+can cause high peaks well above circuit speeds. By breaking the cached flows into 
 one-minute fragments, we can avoid the high peaks by normalizing the data.
 </p>
         </td>
@@ -576,7 +604,7 @@ The default is 20.
       </tr>
 	  <tr>
 		<td style="border-bottom: 1px solid black;"><code><b>ip flow-capture fragment-offset  </b></code>  </td>
-		<td style="border-bottom: 1px solid black;">Caotyre the fragment offset  </td>
+		<td style="border-bottom: 1px solid black;">Capture the fragment offset information </td>
 	  </tr>
 	  <tr>
 		<td style="border-bottom: 1px solid black;"><code><b>ip flow-capture packet-length    </b></code>  </td>
@@ -589,7 +617,7 @@ The default is 20.
 
 	  <tr>
 		<td style="border-bottom: 1px solid black;"> <code><b>ip flow-capture vlan-id          </b></code> </td>
-		<td style="border-bottom: 1px solid black;">Capture the VLAN id  </td>
+		<td style="border-bottom: 1px solid black;">Capture the VLAN ID</td>
 	  </tr>
 	  <tr>
 		<td style="border-bottom: 1px solid black;"> <code><b>ip flow-capture icmp             </b></code> </td>
@@ -597,7 +625,7 @@ The default is 20.
 	  </tr>
 	  <tr>
 		<td style="border-bottom: 1px solid black;"> <code><b>ip flow-capture ip-id            </b></code> </td>
-		<td style="border-bottom: 1px solid black;">Capture the IP id  </td>
+		<td style="border-bottom: 1px solid black;">Capture the IP ID</td>
 	  </tr>
 	  <tr>
 		<td style="border-bottom: 1px solid black;">  <code><b>ip flow-capture mac-addresses    </b></code
@@ -669,7 +697,7 @@ The flow sampler can then be applied to the interface using the interface comman
 </p>
 <p>
 If ingress flow is configured on an interface and a flow sampler is applied to 
-the interface, an error message is generated <code><b>Warning: ingress netflow 
+the interface, an error message is generated <code><b>Warning: ingress NetFlow 
 will override the sampler</b></code>. The ingress flow command will have to be 
 removed. 
 </p>
@@ -678,7 +706,7 @@ removed.
   <code>
   R1(config-if)#<b>flow-sampler ONE_TEN ?</b><br>
 R1(config-if)#<b>flow-sampler ONE_TEN</b><br>
-*May 29 22:43:54.035: Warning: ingress netflow will override the sampler.<br>
+*May 29 22:43:54.035: Warning: ingress NetFlow will override the sampler.<br>
 R1(config-if)#<b>no ip flow ingress</b><br>
 *May 29 22:44:06.223: Warning: ingress sampler re-enabled.<br>
 </code></div>
@@ -713,9 +741,9 @@ traffic statistics. This can be accomplished using the following commands:
   <code>
    R1(config)#<b>policy-map PM_SAMPLER</b><br>
    R1(config-pmap)#<b>class ICMP</b><br>
-   R1(config-pmap-c)#<b>netflow-sampler ONE_TEN</b><br>
+   R1(config-pmap-c)#<b>NetFlow-sampler ONE_TEN</b><br>
    R1(config-pmap)#<b>class class-default</b><br>
-   R1(config-pmap-c)#<b>netflow-sampler ONE_ONE</b>
+   R1(config-pmap-c)#<b>NetFlow-sampler ONE_ONE</b>
     </code></div>
   </p> 
   <p>
@@ -735,7 +763,7 @@ traffic statistics. This can be accomplished using the following commands:
 </p>
 <p>
 To verify the traffic statistics, use the command <code><b>show policy-map interface</b></code>.
-The other netflow verification commands still apply.
+The other NetFlow verification commands still apply.
 </p>
 <p>
 On a remote device simulate ICMP traffic:
@@ -758,17 +786,23 @@ R1#<b>show policy-map interface g0/0 input</b><br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1000 packets, 114000 bytes  <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;5 minute offered rate 00<br>00 bps, drop rate 0000 bps<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Match: protocol icmp    <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;netflow-sampler: ONE_TEN<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;NetFlow-sampler: ONE_TEN<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                      <br>
 &nbsp;&nbsp;&nbsp;&nbsp;Class-map: class-default (match-any)<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;25 packets, 2350 bytes<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;5 minute offered rate 0000 bps, drop rate 0000 bps<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Match: any<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;netflow-sampler: ONE_ONE<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;NetFlow-sampler: ONE_ONE<br>
 R1#
 </code></div>
 </p>
+
+
 <h2>Verification</h2>
+<p>
+
+</p>
+
 
 <h3><code>show ip flow export</code></h3>
 <p>
@@ -862,7 +896,7 @@ depending on the sort by criteria.
 -->
 
 
-<h1>Flexible Netflow</h1>
+<h1>Flexible NetFlow</h1>
 <p>
 Flexible NetFlow improves on original NetFlow by adding the capability to customize 
 the traffic analysis parameters for your specific requirements. 
@@ -879,10 +913,10 @@ components.
 When configuring flexible NetFlow, consider the following:
 <ul>
   <li>Ensure that the source interface is a loopback interface. This is because 
-  this interface does not do down resulting in predictable source IP addresses
+  this interface does not go down resulting in predictable source IP addresses
   in the NetFlow records.</li>
   <li>Set the active timeout to 1 minute using the command <code><b>ip flow-cache 
-  timeout active</b></code>.
+  timeout active 1</b></code>.
 </ul>
 </p>
 <p>
@@ -891,7 +925,7 @@ different categories of traffic.
 </p>
 <h2>IPFIX</h2>
 <p>
-IPFIX(IP Flow Information eXport) is the standards-based method for exporting 
+IPFIX (IP Flow Information eXport) is the standards-based method for exporting 
 the flow information to a collector that was published by IETF. It is intended 
 to serve as a universal protocol for exporting flow information. IPFIX has extensive 
 flexibility in its configurations.
@@ -900,9 +934,9 @@ Cisco configuration commands will consider export format in IPFIX as NetFlow ver
 
 <h2>Configuration of Flexible NetFlow</h2>
 <p>
-To configure flexible netflow:
+To configure flexible NetFlow:
 <ol>
-  <li><b>Create a flow record:</b> A flow record explicitly specifies what exactly 
+  <li><b>Create a flow record:</b> a flow record explicitly specifies what exactly 
   we are sampling. This creates the template to match on. This template can be 
   modified using the <code><b>match</b></code> and <code><b>collect</b></code> 
   commands.
@@ -961,7 +995,7 @@ To configure flexible netflow:
   <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
   <code>
-  R3(config)#<b>flow record FLOW-RECORD-G00</b>
+  R3(config)#<b>flow record FLOW-RECORD-G00</b><br>
   R3(config-flow-record)#<b>description NetFlow Record for TTL, TOS, PACKET_LENGTH  </b> <br>
   R3(config-flow-record)#<b>match interface input                                   </b> <br>
   R3(config-flow-record)#<b>match interface output                                  </b> <br>
@@ -1069,7 +1103,7 @@ To configure flexible netflow:
       
       </li>
       <li>Specify the NetFlow export version: using the command <code><b>
-      export [ipfix | netflow-v5 | netflow-v9]</b></code>.
+      export [ipfix | NetFlow-v5 | NetFlow-v9]</b></code>.
       <p>
       <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
       <code>
@@ -1126,7 +1160,7 @@ To configure flexible netflow:
       <p>
       <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
       <code>
-      R3(config-flow-monitor)#<b>cache timeout active 60</b>
+      R3(config-flow-monitor)#<b>cache timeout active 1</b>
       </code></div></p>
       </li>
     </ol>
@@ -1136,6 +1170,14 @@ To configure flexible netflow:
   <code><b>ip flow monitor &lt;monitor-name&gt; [sampler &lt;sampler-name&gt;] 
   [input | output]</b></code>.
   The direction can be input or output.
+
+        <p>
+      <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+      <code>
+  R1(config)#<b>interface g2/0</b><br>
+  R1(config-if)#<b>ip flow monitor FLOW-MONITOR_G00 sampler ONETEN input</b><br>
+  R1(config-if)#<b>ip flow monitor FLOW-MONITOR_G00 sampler ONETEN output</b><br>
+</code></div></p>
   </li>
 </ol>
 </p>
@@ -1156,6 +1198,9 @@ A flow sampler can be added to the configuration as follows:
 </p>
 
 <h2>Verification</h2>
+<p>
+
+</p>
 
 <h3><code>show flow record</code></h3>
 <p>
@@ -1194,15 +1239,15 @@ flow record FLOW-RECORD-G00:<br>
 </code></div>
 </p>
 
-<h3><code>show flow record netflow ipv4 original-input</code></h3>
+<h3><code>show flow record NetFlow ipv4 original-input</code></h3>
 <p>
 Lists the builtin flow records templates in the IOS.
 </p>
 <p>
       <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
       <code>
-R3#<b>show flow record netflow ipv4 original-output </b>              <br>
-flow record netflow ipv4 original-output:                      <br>
+R3#<b>show flow record NetFlow ipv4 original-output </b>              <br>
+flow record NetFlow ipv4 original-output:                      <br>
 &nbsp;&nbsp;Description:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Traditional IPv4 output NetFlow with ASs <br>
 &nbsp;&nbsp;No. of users:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                  <br>
 &nbsp;&nbsp;Total field space:&nbsp;&nbsp;53 bytes                                 <br>
@@ -1229,7 +1274,7 @@ flow record netflow ipv4 original-output:                      <br>
 
     </code></div></p>
 
-    <h3><code>show flow record netflow ipv4 prefix</code></h3>
+    <h3><code>show flow record NetFlow ipv4 prefix</code></h3>
 <p>
 Displays NetFlow record template for collecting IPv4 prefix information from 
 packets. 
@@ -1238,8 +1283,8 @@ packets.
 <p>
       <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
       <code>
-    R3#<b>show flow record netflow ipv4 prefix</b><br>
-flow record netflow ipv4 prefix:<br>
+    R3#<b>show flow record NetFlow ipv4 prefix</b><br>
+flow record NetFlow ipv4 prefix:<br>
 &nbsp;&nbsp;Description:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Source and Destination Prefixes aggregation schemes<br>
 &nbsp;&nbsp;No. of users:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0&nbsp;&nbsp;                  <br>
 &nbsp;&nbsp;Total field space:&nbsp;&nbsp;38 bytes             <br>
@@ -1474,7 +1519,7 @@ R3#
 <p>
 <ul>
 <li>
-Consider the unidirectional nature of netflow traffic. Verify using the following 
+Consider the unidirectional nature of NetFlow traffic. Verify using the following 
 commands:
 <ul>
   <li><code><b>ip flow ingress</b></code></li>
@@ -1490,7 +1535,7 @@ interface</b></code>.
 Consider exporting to a collector: verify configured settings using <code><b>
 show ip flow export</b></code>. 
 </li>
-<li>Consider the source of netflow export packets; verify with the commands:
+<li>Consider the source of NetFlow export packets; verify with the commands:
 <ul>
   <li><code><b>ip flow-export source &lt;interface</b></code></li>
   <li><code><b>show ip flow export</b></code></li> 
