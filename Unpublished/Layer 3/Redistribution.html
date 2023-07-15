@@ -80,7 +80,7 @@ Redistribution can be implemented in two ways:
    <thead style="font-weight: bold; background: #A7A7A7;">
      <tr>
        <td width="15%">Route Source</td>
-       <td>Description</td>
+       <td style="border-bottom: 1px solid;">Description</td>
      </tr>
    </thead>
    <tbody>
@@ -260,11 +260,11 @@ In a way, the redistribution configuration command says:
 
 <h2>EIGRP</h2>
 <p>
-Any route that is in the EIGRP topology table is redistributed is a candidate 
+Any route that is in the EIGRP topology table is a candidate 
 for redistribution. Routes redistributed into EIGRP are given a default seed 
 metric of infinity. This prevents the routes from being installed into the EIGRP
 topology table. The exception to this is when redistributing routes from one 
-EIGRP autonomous system to another. In such as scenario, the path metric is maintained.
+EIGRP autonomous system to another. In such a scenario, the path metric is maintained.
 </p>
 
 <p>
@@ -278,11 +278,10 @@ system.
 Redistribution is configured under the EIGRP router command:
 </p>
 <p>
-<code><b>redistribute <i>source</i>  metric <i>bandwidth delay reliability load 
-mtu</i> route-map <i>route-map_name</i></b></code> 
+<code><b>redistribute &lt;source&gt;  &lt;metric&gt; &lt;bandwidth&gt; &lt;delay&gt; &lt;reliability&gt; &lt;load&gt; &lt;mtu&gt; route-map &lt;route-map_name&gt;</b></code> 
 </p>
 <p>
-where <code><b> <i>source</i> </b></code> is the source of the redistributed routes. 
+where <code><b> &lt;source&gt; </b></code> is the source of the redistributed routes. 
 </p>
 
 <p>
@@ -335,34 +334,34 @@ techniques such as MPLS tunneling.
 </p>
 <p>
 Redistribution of routers into EIGRP can be implemented using the following 
-EIGRP routing device command: <code><b>redistribute <i>source</i> metric 
-<i>bandwidth delay reliability load mtu</i></b></code>
+EIGRP routing device command: <code><b>redistribute &lt;source&gt; metric 
+&lt;bandwidth delay reliability load mtu&gt;</b></code>
 </p>
 
-<table>
+<table cellspacing="0" width="100%">
 <thead style="font-weight: bold;">
   <tr>
-    <td>Command</td>
-    <td>Description</td>
+    <td width="30%">Command</td>
+    <td style="border-bottom: 1px solid;">Description</td>
   </tr>
 </thead>
  <tbody>
    <tr>
-    <td>BGP</td>
-    <td>
+    <td style="border-bottom: 1px solid;">BGP</td>
+    <td style="border-bottom: 1px solid;">
     <p>
-    <code><b>redistribute bgp <i>ASN</i></b></code> where <code><b><i>ASN</i></b></code> is
+    <code><b>redistribute bgp &lt;ASN&gt;</b></code> where <code><b>&lt;ASN&gt;</b></code> is
 the BGP autonomous system number.
 </p>
 </td>
   </tr>
   <tr>
-    <td></td>
-    <td></td>
+    <td style="border-bottom: 1px solid;"></td>
+    <td style="border-bottom: 1px solid;"></td>
   </tr>
   <tr>
-    <td></td>
-    <td></td>
+    <td style="border-bottom: 1px solid;"></td>
+    <td style="border-bottom: 1px solid;"></td>
   </tr>
  </tbody>
 </table>
@@ -404,8 +403,8 @@ redistribute</b></code> is used.
 </p>
 <div>
 <code><b>
-redistribute <i>source</i> subnets metric <i>metric</i> metric-type (<i>1 | 2</i>)
-tag <i>0 - 4294967295</i> route-map <i>route-map-name</i>
+redistribute &lt;source&gt; subnets metric &lt;metric&gt; metric-type (&lt;1 | 2&gt;)
+tag &lt;0 - 4294967295&gt; route-map &lt;route-map-name&gt;
 </b></code>
 </div>
 <p>
@@ -484,19 +483,19 @@ However, as the routes are distributed within the OSPF domain, the metric does
 not increase.
 </p>
 
-<table>
+<table cellspacing="0" width="100%">
 <thead style="font-weight: bold;">
   <tr>
-    <td>Command</td>
-    <td>Description</td>
+    <td style="border-bottom: 1px solid;">Command</td>
+    <td style="border-bottom: 1px solid;">Description</td>
   </tr>
 </thead>
  <tbody>
    <tr>
-    <td>BGP</td>
-    <td>
+    <td style="border-bottom: 1px solid;">BGP</td>
+    <td style="border-bottom: 1px solid;">
     <p>
-    <code><b>redistribute bgp <i>ASN</i></b></code> where <code><b><i>ASN</i></b></code> is
+    <code><b>redistribute bgp &lt;ASN&gt;</b></code> where <code><b>&lt;ASN&gt;</b></code> is
 the BGP autonomous system number.
 </p>
 <p>
@@ -507,16 +506,16 @@ automatically added to the redistribution command.
 </td>
   </tr>
   <tr>
-    <td>EIGRP</td>
-    <td>
+    <td style="border-bottom: 1px solid;">EIGRP</td>
+    <td style="border-bottom: 1px solid;">
     <p>
      <code><b>redistribute eigrp</b></code>
     </p>
     </td> 
   </tr>
   <tr>
-    <td></td>
-    <td></td>
+    <td style="border-bottom: 1px solid;"></td>
+    <td style="border-bottom: 1px solid;"></td>
   </tr>
  </tbody>
 </table>
@@ -544,20 +543,20 @@ type-2 routes only.
 	
 </p>	
 
-<table>
+<table cellspacing="0" width="100%">
 <thead style="font-weight: bold;">
   <tr>
-    <td>Protocol</td>
-    <td>Command</td>
+    <td style="border-bottom: 1px solid;">Protocol</td>
+    <td style="border-bottom: 1px solid;">Command</td>
   </tr>
 </thead>
  <tbody>
    <tr>
-    <td>OSPF</td>
-    <td>
+    <td style="border-bottom: 1px solid;">OSPF</td>
+    <td style="border-bottom: 1px solid;">
     <p>
-    <code><b>redistribute ospf <i>process</i> </b></code> where 
-    <code><b><i>process</i> </b></code> is the OSPF process ID.
+    <code><b>redistribute ospf &lt;process&gt; </b></code> where 
+    <code><b>&lt;process&gt; </b></code> is the OSPF process ID.
     </p>
     <p>
     When redistributing OSPF routes into BGP, by default, only internal OSPF 
@@ -570,12 +569,12 @@ type-2 routes only.
     </td>
   </tr>
   <tr>
-    <td></td>
-    <td></td>
+    <td style="border-bottom: 1px solid;"></td>
+    <td style="border-bottom: 1px solid;"></td>
   </tr>
   <tr>
-    <td></td>
-    <td></td>
+    <td style="border-bottom: 1px solid;"></td>
+    <td style="border-bottom: 1px solid;"></td>
   </tr>
  </tbody>
 </table>
@@ -844,45 +843,45 @@ redistributing from protocol 1 to protocol 2 and then to protocol 3. For example
 when redistributing from OSPF into EIGRP and subsequently into RIP. The tag is 
 maintained when copying the routes from:
 </p>
-<table>
+<table cellspacing="0" width="100%">
 <caption>This may be IOS specific</caption>
   <thead>
     <tr>
-      <td>Source</td>
-      <td>Destination</td>
-      <td>Tag Maintained</td>
+      <td style="border-bottom: 1px solid;">Source</td>
+      <td style="border-bottom: 1px solid;">Destination</td>
+      <td style="border-bottom: 1px solid;">Tag Maintained</td>
     </tr>
   </thead>
   <tbody>
     <tr>
-      <td>RIP</td>
-      <td>OSPF</td>
-      <td>Yes</td>
+      <td style="border-bottom: 1px solid;">RIP</td>
+      <td style="border-bottom: 1px solid;">OSPF</td>
+      <td style="border-bottom: 1px solid;">Yes</td>
     </tr>
     <tr>
-      <td>RIP</td>
-      <td>OSPF</td>
-      <td>YES</td>
+      <td style="border-bottom: 1px solid;">RIP</td>
+      <td style="border-bottom: 1px solid;">OSPF</td>
+      <td style="border-bottom: 1px solid;">YES</td>
     </tr>
     <tr>
-      <td>EIGRP</td>
-      <td>RIP</td>
-      <td>NO</td>
+      <td style="border-bottom: 1px solid;">EIGRP</td>
+      <td style="border-bottom: 1px solid;">RIP</td>
+      <td style="border-bottom: 1px solid;">NO</td>
     </tr>
     <tr>
-      <td>OSPF</td>
-      <td>RIP</td>
-      <td>NO</td>
+      <td style="border-bottom: 1px solid;">OSPF</td>
+      <td style="border-bottom: 1px solid;">RIP</td>
+      <td style="border-bottom: 1px solid;">NO</td>
     </tr>
     <tr>
-      <td>EIGRP</td>
-      <td>OSPF</td>
-      <td>YES</td>
+      <td style="border-bottom: 1px solid;">EIGRP</td>
+      <td style="border-bottom: 1px solid;">OSPF</td>
+      <td style="border-bottom: 1px solid;">YES</td>
     </tr>
     <tr>
-      <td>OSPF</td>
-      <td>EIGRP</td>
-      <td>YES</td>
+      <td style="border-bottom: 1px solid;">OSPF</td>
+      <td style="border-bottom: 1px solid;">EIGRP</td>
+      <td style="border-bottom: 1px solid;">YES</td>
     </tr>
   </tbody>
 </table>
