@@ -154,7 +154,7 @@ for VRF names.</li>
 </p>
 <p>
 In VRF-lite, there is no need to specify the import and export route target (RT).
-and route distinguisher (RD).
+and route distinguisher (RD). RD was designed specifically for BGP.
 </p>
 
 <h2>Step 2: Apply VRF to the Interface</h2>
@@ -525,6 +525,12 @@ R2#                                                                             
 <h2><code>show ip interfaces vrf &lt;vrf-name&gt;</code></h2>
 <p>
 Display interfaces in specified VRF.
+</p>
+
+
+<h2><code>show ip vrf interfaces</code></h2>
+<p>
+Display interfaces and the VRFs that they reside in.
 </p>
 
 
