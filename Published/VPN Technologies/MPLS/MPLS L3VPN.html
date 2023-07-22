@@ -64,6 +64,8 @@ In the service provider core of an MPLS L3VPN, the P routers run MPLS over an
  <p>
  For purposes of providing MPLS L3VPN services, only PE routers run BGP and they 
  form an iBGP peering through the VPNv4 address family.
+ </p>
+ <p>
 	On the PE, a VRF is created for each customer. This ensures that each 
  customer has their prefixes in a separate routing table. 
 	In the VRF configuration, a route distinguisher (RD) is configured. This 
@@ -82,8 +84,11 @@ IP address:nn where ASN is the Autonomous system number and nn is any random
 number. RD is used by the PE to distinguish and uniquely identify the different 
 VRFs; to differentiate the multiple prefixes from different customers.
 This allows for overlapping IPv4 addresses between customers.
-It is locally significant and does not need to match on the remote PE. This is 
-very critical particularly when clients are using RFC 1918 prefixes. 
+It is locally significant and does not need to match on the remote PE.
+</p>
+<p>
+The RD is very critical to the successful operation of MPLS L3VPNs particularly 
+when clients are using RFC 1918 prefixes. 
 </p>
 
 <h3>VPNv4</h3>
@@ -173,9 +178,10 @@ same RT value used in the RT-import of the appropriate VRF on the remote egress 
 <p>
 The CE forms an IGP peer relationship with the PE. Through this peering, it 
 exchanges its prefixes with the PE. The PE isolates these prefixes received from 
-the CE into the VRF created for this customer. For ingress traffic, the PE 
-redistributes these customer prefixes from the IGP VRF table into MP-BGP VRF for 
-that customer. This configuration is implemented using the corresponding BGP VRF address-family.
+the CE into the VRF created for this customer using the configured RT import values.
+For ingress traffic, the PE redistributes these customer prefixes from the IGP VRF 
+table into MP-BGP VRF for that customer as defined by the export RT values. 
+This configuration is implemented using the corresponding BGP VRF address-family.
 For egress traffic, the prefixes are redistributed from MP-BGP VRF into the IGP.
     </p>
 <p>If the PE and CE routers have an eBGP peering, the prefixes are exchanged using 
@@ -1530,7 +1536,7 @@ R6>
 <p>
 <ul>
   <li>Is LDP actually enabled: <code><b>show mpls interfaces</b></code></li>
-  <li>Is LDP transport working: <code><b>dbug mpls ldp transport events</b></code></li>
+  <li>Is LDP transport working: <code><b>debug mpls ldp transport events</b></code></li>
   <li>Is LDP session authenticated: LDP(like BGP) uses TCP auth (option 19)</li>
 </ul>
 </p>
