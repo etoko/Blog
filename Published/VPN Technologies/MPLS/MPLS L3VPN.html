@@ -298,6 +298,11 @@ configuration takes precedence over any other similar configuration that may hav
 configured under the VRF sub-mode.
 </p>
 
+<h3 id="VERIFICATION">Verification</h3>
+<p>
+To verify the creation of VRFs, use the command <code><b>show vrf</b></code>.
+</p>
+
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
 <code>
@@ -339,12 +344,6 @@ Address family ipv6 not active                                                 <
                                                                                <br>
 R1(config)#                                                                    <br>
 </code></div>
-</p>
-
-<h3 id="VERIFICATION">Verification</h3>
-<p>
-To verify the creation of VRFs, use the command <code><b>show vrf</b></code> 
-as demonstrated above.
 </p>
 
 <h2>Step 3: Configure iBGP Peering between the PE routers using VPNv4 address-family</h2>
@@ -1266,13 +1265,13 @@ To configure OSPF sham-links:
   <li>Verify IP connectivity between the two /32 prefixes.</li>
   <li>Under the OSPF process, configure the sham-link
   <code><b>area 1 sham-link 8.8.8.8 3.3.3.3</b></code>. where 8.8.8.8 is the 
-  source(/32 of local device)and 3.3.3.3 is remote OSPF device. Do the same 
+  source (/32 of local device) and 3.3.3.3 is remote OSPF device. Do the same 
   but in the reverse direction on the remote device.
   
   </li>
   <li>Verify with the command <code><b>show ip ospf &lt;process-id&gt; neighbor</b></code>. It 
   shows neighborship over the sham-link.
-  routes that were previously learned thru BGP are now learned thru OSPF (because 
+  Routes that were previously learned through BGP are now learned thru OSPF (because 
   of lower AD); verify this on PE router using command: <code><b>show ip route</b></code>.
 </ol>
 </p>
