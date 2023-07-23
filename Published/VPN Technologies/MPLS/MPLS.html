@@ -130,6 +130,8 @@ the the same customer.
 middle of the MPLS domain. They are alternatively referred to as <b>P (provider) 
 routers</b>. Intermediate LSRs interconnect the edge LSRs and 
 forward network traffic primarily using labels.
+</p>
+<p>
 A <b>Label Switched Path  (LSP)</b> is the complete end-to-end path that the labeled packet
 will take through the MPLS domain  (unidirectional). The LSP for ingress traffic is 
 usually the same as the egress LSP unless asynchronous routing is implemented in 
@@ -167,7 +169,7 @@ MPLS domains consist of three types of devices:
   </li>
   <li><b>Provider (P):</b>
     <ul>
-     <li>Also referred to as label Switch Routers (LSR)</li>
+     <li>Also referred to as label switch routers (LSR)</li>
      <li>Core devices in the provider's network connecting the PEs.</li>
      <li>Switch traffic based on the labels.</li>
     </ul>
@@ -185,6 +187,7 @@ MPLS enabled devices (LSRs). This is accomplished using a label exchange mechani
 To operate effectively, MPLS requires the following; 
 <ul>
 <li>Routing table (RIB)</li>
+<li>CEF - Forwarding Information Base (FIB)</li>
 <li>Label Information Base  (LIB)</li>
 <li>Label Distribution Protocol (LDP)</li>
 <li>Label Forwarding Information Base (LFIB)</li>
@@ -203,6 +206,9 @@ headers of an IP packet.
 It is used to switch packets in the MPLS domain. It 
 is defined by <a href="https://www.ietf.org/rfc/rfc3032.txt" target="_blank">RFC 3032</a>. 
 It contains the following fields:
+<p>
+  <div class="separator" style="clear: both;"><a href="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEix2SdOCA5DcsN1hm2rJYKNjJ9LhbG8mkgy-pvlMHn66861GuzHYyQgmJvCWV8_BTtQeIEJyR3pz_1H7k-aD8Xim7gCHFLucMuH1bPO05IwKF7chbsoJqAkK68qD_KpirtffhMaoIoZS-P27-UHoyAmqn9u7X92bI5bDGkNT7tFyp6jWiyGulNACcgd2PU/s822/MPLS%20Label.png" style="display: block; padding: 1em 0; text-align: center; "><img alt="" border="0" width="600" data-original-height="102" data-original-width="822" src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEix2SdOCA5DcsN1hm2rJYKNjJ9LhbG8mkgy-pvlMHn66861GuzHYyQgmJvCWV8_BTtQeIEJyR3pz_1H7k-aD8Xim7gCHFLucMuH1bPO05IwKF7chbsoJqAkK68qD_KpirtffhMaoIoZS-P27-UHoyAmqn9u7X92bI5bDGkNT7tFyp6jWiyGulNACcgd2PU/s600/MPLS%20Label.png"/></a></div>
+</p>
 <ul>
 <li><b>Label:</b> 20-bit field used for the label number or ID and its value is locally significant.</li>
 <li><b>Exp (Experimental bits):</b> 3 bit field used for QoS operations (Class of Service - CoS)</li>
@@ -210,18 +216,21 @@ It contains the following fields:
 This directly indicates that more than one label is present on the MPLS packet.
 A label stack contains an ordered set of labels. The label close to the Layer 2
 header is called the outer label (or stack top label). The label close to the 
-Layer 3 header is called the stack bottom label or inner label. This label has 
-the S-bit set to 1. The S-bit field is also referred to as BoS 
+Layer 3 header is called the stack bottom label or inner label; this is the label
+that has the S-bit set to 1. The S-bit field is also referred to as BoS 
 (Bottom of Stack) field by some network equipment vendors. 
+
+<p>
+  <div class="separator" style="clear: both;"><a href="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjOhMDRHA8frXyHMnzoAPV-MSDzk_o4xCDKE-lSI1GnS6sYl2uoN8fSc1Hf-xhciLv37aujUaJKSoYT9TsaybqifZnFUjQQap8aw-WaCM0RKwjb5wUOyLYzILDINwguX26al7RMHo5F-YyhlS2pkX490ca5KJqE6Nvctsf73fDAm8m_pBPN-8ll3v4tySo/s1008/mpls_label_stack.png" style="display: block; padding: 1em 0; text-align: center; "><img alt="" border="0" width="600" data-original-height="113" data-original-width="1008" src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjOhMDRHA8frXyHMnzoAPV-MSDzk_o4xCDKE-lSI1GnS6sYl2uoN8fSc1Hf-xhciLv37aujUaJKSoYT9TsaybqifZnFUjQQap8aw-WaCM0RKwjb5wUOyLYzILDINwguX26al7RMHo5F-YyhlS2pkX490ca5KJqE6Nvctsf73fDAm8m_pBPN-8ll3v4tySo/s600/mpls_label_stack.png"/></a></div>
+
+</p>
 </li>
 <li><b>Time To Live (TTL):</b> 8-bits field indicating the time to live (TTL). 
 This field implements the same function as the TTL field in IP packets. It may 
 also contain the same value.</li>
 </ul>
 </p>
-<p>
-  <div class="separator" style="clear: both;"><a href="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEix2SdOCA5DcsN1hm2rJYKNjJ9LhbG8mkgy-pvlMHn66861GuzHYyQgmJvCWV8_BTtQeIEJyR3pz_1H7k-aD8Xim7gCHFLucMuH1bPO05IwKF7chbsoJqAkK68qD_KpirtffhMaoIoZS-P27-UHoyAmqn9u7X92bI5bDGkNT7tFyp6jWiyGulNACcgd2PU/s822/MPLS%20Label.png" style="display: block; padding: 1em 0; text-align: center; "><img alt="" border="0" width="600" data-original-height="102" data-original-width="822" src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEix2SdOCA5DcsN1hm2rJYKNjJ9LhbG8mkgy-pvlMHn66861GuzHYyQgmJvCWV8_BTtQeIEJyR3pz_1H7k-aD8Xim7gCHFLucMuH1bPO05IwKF7chbsoJqAkK68qD_KpirtffhMaoIoZS-P27-UHoyAmqn9u7X92bI5bDGkNT7tFyp6jWiyGulNACcgd2PU/s600/MPLS%20Label.png"/></a></div>
-</p>
+
 <p>
 MPLS labels are bound to forwarding equivalency class  (FEC). The FEC is the 
 binding between the IPv4 prefix and the MPLS label. 
@@ -231,10 +240,6 @@ loads, but a label represents only a single FEC on an LSR.
 Routers in the MPLS domain use the LFIB to switch traffic instead of the routing table.
 </p>
 
-<p>
-  <div class="separator" style="clear: both;"><a href="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjOhMDRHA8frXyHMnzoAPV-MSDzk_o4xCDKE-lSI1GnS6sYl2uoN8fSc1Hf-xhciLv37aujUaJKSoYT9TsaybqifZnFUjQQap8aw-WaCM0RKwjb5wUOyLYzILDINwguX26al7RMHo5F-YyhlS2pkX490ca5KJqE6Nvctsf73fDAm8m_pBPN-8ll3v4tySo/s1008/mpls_label_stack.png" style="display: block; padding: 1em 0; text-align: center; "><img alt="" border="0" width="600" data-original-height="113" data-original-width="1008" src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjOhMDRHA8frXyHMnzoAPV-MSDzk_o4xCDKE-lSI1GnS6sYl2uoN8fSc1Hf-xhciLv37aujUaJKSoYT9TsaybqifZnFUjQQap8aw-WaCM0RKwjb5wUOyLYzILDINwguX26al7RMHo5F-YyhlS2pkX490ca5KJqE6Nvctsf73fDAm8m_pBPN-8ll3v4tySo/s600/mpls_label_stack.png"/></a></div>
-
-</p>
 
 <p>
 PE and P devices perform the following operations:
@@ -258,9 +263,26 @@ routed using IP).</li>
 <p>
 All known networks are assigned a label locally identified by the label ID:
 <ul>
-  <li>The assignable label ID is in the range <b>16 – 1048575</b>.</li>
-  <li><b>Labels IDs 1-15</b> are reserved. These labels assigned to all known networks are usually referred 
-to as <b>transport labels</b>.</li>
+  <li>The assignable label ID is in the range <b>16 – 1048575</b>.
+  These labels assigned to all known networks are usually referred 
+to as <b>transport labels</b>.
+  </li>
+  <li><b>Labels IDs 1-15</b> are reserved. These label IDs are referred to as 
+  <a target="_blank" href="https://www.iana.org/assignments/mpls-label-values/mpls-label-values.xhtml">
+  special-purpose MPLS label values</a>.
+    <ul>
+      	<li>0 	IPv4 Explicit NULL Label 	[RFC3032]         </li>
+		<li>1 	Router Alert Label 	[RFC3032]                 </li>
+		<li>2 	IPv6 Explicit NULL Label 	[RFC3032]         </li>
+		<li>3 	Implicit NULL Label 	[RFC3032]             </li>
+		<li>4-6 	Unassigned 	                              </li>
+		<li>7 	Entropy Label Indicator (ELI) 	[RFC6790]     </li>
+		<li>8-12 	Unassigned 	                              </li>
+		<li>13 	Generic Associated Channel Label 	[RFC5586] </li>
+		<li>14 	OAM Alert Label 	[RFC3429]                 </li>
+		<li>15 	Extension Label (XL) 	[RFC7274][RFC9017]    </li>
+    </ul>
+  </li>
   <li><b>Label ID 0</b> is referred to as <b>explicit null</b> is used for Type of 
   Service (ToS) or Quality of Service (QoS).</li>
   <li><b>Label 3</b> is the <b>implicit null</b></li>
@@ -335,8 +357,7 @@ For example, given a packet B arriving in LSR R1:
 <ol>
 <li>The next hop is R2 and exit interface is g1/0 with the label 53</li>
 <li>The packet is then forwarded out the interface g1/0 to R2.</li>
-<li>In R2, the LFIB the next hop is R3 and exit interface G2/0 with 
-label 71.</li>
+<li>In R2's LFIB, the next hop is R3 and exit interface is G2/0 with label 71.</li>
 <li>When transmitting this packet, R2 will swap label 53 and replace it 
 with label 71.</li>
 </ol>
@@ -370,7 +391,8 @@ field. This field
 defines the address to use for the TCP session. This address usually defaults to 
 the LDP Router-ID which also defaults to the highest IP address of any loopback interface.
 The LDP sessions are TCP sessions formed using these transport addresses. These transport 
-addresses could be modified, but this is usually not necessary.
+addresses could be modified by changing the LDP ID or manually using the interface 
+configuration command <code><b>mpls ldp discovery transport-address [interface | &lt;ip-address&gt;]</b></code>.
 </p>
 <p>
 Once the LDP session is established, the label is advertised for FEC i.e., 
@@ -463,16 +485,16 @@ capture of an LDP Hello message:
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
  <code>
- Frame 43: 76 bytes on wire (608 bits), 76 bytes captured (608 bits) on interface -, id 0        <br>
-Ethernet II, Src: ca:04:04:6c:00:1c (ca:04:04:6c:00:1c), Dst: IPv4mcast_02 (01:00:5e:00:00:02)   <br>
-Internet Protocol Version 4, Src: 30.255.24.2, Dst: 224.0.0.2                                    <br>
-User Datagram Protocol, Src Port: 646, Dst Port: 646                                             <br>
-Label Distribution Protocol&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                              <br>
-&nbsp;&nbsp;&nbsp;&nbsp;Version: 1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                             <br>
-&nbsp;&nbsp;&nbsp;&nbsp;PDU Length: 30&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                             <br>
-&nbsp;&nbsp;&nbsp;&nbsp;LSR ID: 30.255.4.4&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                             <br>
-&nbsp;&nbsp;&nbsp;&nbsp;Label Space ID: 0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                              <br>
-&nbsp;&nbsp;&nbsp;&nbsp;Hello Message&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                              <br>
+&#129174;Frame 43: 76 bytes on wire (608 bits), 76 bytes captured (608 bits) on interface -, id 0        <br>
+&#129174;Ethernet II, Src: ca:04:04:6c:00:1c (ca:04:04:6c:00:1c), Dst: IPv4mcast_02 (01:00:5e:00:00:02)   <br>
+&#129174;Internet Protocol Version 4, Src: 30.255.24.2, Dst: 224.0.0.2                                    <br>
+&#129174;User Datagram Protocol, Src Port: 646, Dst Port: 646                                             <br>
+&#129175;Label Distribution Protocol&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                              <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Version: 1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                             <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;PDU Length: 30&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                             <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;LSR ID: 30.255.4.4&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                             <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Label Space ID: 0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                              <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&#129175;Hello Message&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                              <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0... .... = U bit: Unknown bit not set&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                             <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Message Type: Hello Message (0x100)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                              <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Message Length: 20&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                             <br>
@@ -1351,9 +1373,7 @@ as indicated by the message:
 <code><b>%Previously established sessions may not use the new holdtime.</b></code>
 </div>
 </p>
-<p>
-LDP sessions can be verified using the command <code><b>show mpls ldp neighbor</b></code>.
-</p>
+
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
   <code>
@@ -1381,16 +1401,21 @@ R7#                                                                       <br>
 </code></div>
 </p>
 
-
+<p>
+LDP sessions can be verified using the command <code><b>show mpls ldp neighbor</b></code>.
+</p>
 
 <h3>Building the MPLS Domain</h3>
 <p>
 MPLS runs with any routing protocol, though, Interior Gateway Protocols  (IGPs) specifically link-
 state routing protocols such as OSPF and IS-IS are recommended for optimum operation. MPLS is
 as fast as the convergence of routing protocols.
-
-A layer 2 data structure i.e. CEF FIB is a representation of the routing table. When MPLS is
-enabled, entries are made to the CEF table. Disabling CEF on a router breaks MPLS because labels
+</p>
+<p>
+ When MPLS is
+enabled, entries are made to the CEF table.
+A layer 2 data structure i.e. CEF FIB is a representation of the routing table.
+Disabling CEF on a router breaks MPLS because labels
 are assigned to every entry in the CEF table.
 
 From a client Cisco IOS device, to verify the MPLS operation, run the 
@@ -1505,22 +1530,94 @@ LDP supports authentication while TDP does not support authentication.
 
 <h3>Step 5: Enable MPLS</h3>
 <p>
-MPLS is enabled using the global command: <code><b>mpls ip</b></code> and on 
-the specific interfaces as well;
+MPLS is enabled using the interface command : <code><b>mpls ip</b></code>:
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
       	<code>
-R1(config)#<b>mpls ip</b>
+R1(config)#<b>interface g0/0</b><br>
+ R1(config-if)#<b>mpls ip</b>
 </code></div>
 </p>
 
-<h4>LDP Autoconfiguration</h4>
+<h3>Configuration Example</h3>
+<p>
+The configuration snippets are based on the following network;
+
+Configuration edge LSR R7, the following configuration activates MPLS on interfaces
+GigabitEthernet 2/0, GigabitEthernet 3/0 and FastEthernet6/0.
+
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+      	<code>
+R7(config)#<b>ip cef                             </b>  <br>
+R7(config)#<b>mpls ip                            </b>  <br>
+R7(config)#<b>mpls label protocol ldp            </b>  <br>
+R7(config)#<b>mpls label range 7000 7999         </b>  <br>
+R7(config)#<b>mpls ldp router-id Loopback10 force</b>  <br>
+R7(config)#<b>interface gigabitethernet 3/0   </b>     <br>
+R7(config-if)#<b>mpls ip                      </b>     <br>
+R7(config-if)#<b>interface gigabitethernet 2/0</b>     <br>
+R7(config-if)#<b>mpls ip                      </b>     <br>
+R7(config-if)#<b>interface fastethernet 6/0   </b>     <br>
+R7(config-if)#<b>mpls ip </b>
+</code></div>
+</p>
+
+<h2>MPLS Packet</h2>
+<p>
+The following Wireshark packet capture is of an MPLS packet:
+</p>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+      	<code>
+      	
+Frame 2032: 60 bytes on wire (480 bits), 60 bytes captured (480 bits) on interface -, id 0    <br>
+Ethernet II, Src: ca:01:04:35:00:1c (ca:01:04:35:00:1c), Dst: ca:03:04:5c:00:1c (ca:03:04:5c:00:1c)   <br>
+MultiProtocol Label Switching Header, Label: 3001, Exp: 6, S: 1, TTL: 255                             <br>
+&nbsp;&nbsp;&nbsp;&nbsp;0000 0000 1011 1011 1001 .... .... .... = MPLS Label: 3001 (0x00bb9)                              <br>
+&nbsp;&nbsp;&nbsp;&nbsp;.... .... .... .... .... 110. .... .... = MPLS Experimental Bits: 6                               <br>
+&nbsp;&nbsp;&nbsp;&nbsp;.... .... .... .... .... ...1 .... .... = MPLS Bottom Of Label Stack: 1                           <br>
+&nbsp;&nbsp;&nbsp;&nbsp;.... .... .... .... .... .... 1111 1111 = MPLS TTL: 255                                           <br>
+Internet Protocol Version 4, Src: 30.255.1.1, Dst: 30.255.6.6                                         <br>
+Transmission Control Protocol, Src Port: 54917, Dst Port: 179, Seq: 58, Ack: 77, Len: 0               <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Source Port: 54917&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                      <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Destination Port: 179&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                       <br>
+&nbsp;&nbsp;&nbsp;&nbsp;[Stream index: 4]&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                       <br>
+&nbsp;&nbsp;&nbsp;&nbsp;[Conversation completeness: Incomplete, DATA (15)]                                                <br>
+&nbsp;&nbsp;&nbsp;&nbsp;[TCP Segment Len: 0]&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                      <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Sequence Number: 58&nbsp;&nbsp;&nbsp;&nbsp;(relative sequence number)                                                 <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Sequence Number (raw): 3128650382&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                       <br>
+&nbsp;&nbsp;&nbsp;&nbsp;[Next Sequence Number: 58&nbsp;&nbsp;&nbsp;&nbsp;(relative sequence number)]                                          <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Acknowledgment Number: 77&nbsp;&nbsp;&nbsp;&nbsp;(relative ack number)                                                <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Acknowledgment number (raw): 932588975&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                      <br>
+&nbsp;&nbsp;&nbsp;&nbsp;0101 .... = Header Length: 20 bytes (5)&nbsp;&nbsp;&nbsp;&nbsp;                                                       <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Flags: 0x010 (ACK)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                      <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Window: 16308&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                       <br>
+&nbsp;&nbsp;&nbsp;&nbsp;[Calculated window size: 16308]&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                       <br>
+&nbsp;&nbsp;&nbsp;&nbsp;[Window size scaling factor: -2 (no window scaling used)]                                         <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Checksum: 0xc993 [unverified]&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                       <br>
+&nbsp;&nbsp;&nbsp;&nbsp;[Checksum Status: Unverified]&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                       <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Urgent Pointer: 0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                       <br>
+&nbsp;&nbsp;&nbsp;&nbsp;[Timestamps]&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                      <br>
+&nbsp;&nbsp;&nbsp;&nbsp;[SEQ/ACK analysis]&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                      <br>
+
+      	
+</code></div>
+</p>
+
+
+
+<h1 id="OPTIMIZATION">MPLS Optimization</h1>
+<p>
+
+</p>
+
+<h2>LDP Autoconfiguration</h2>
 <p>
 OSPF and IS-IS  (link-state protocols) support the activation of MPLS on interfaces 
 where OSPF/IS-IS has been enabled from within the routing
 protocol configuration. In OSPF router configuration mode, this is accomplished using the
-command; <code><b>mpls ldp autoconfig area &lt;area-id&gt;</b></code>. All interfaces
+command; <code><b>mpls ldp autoconfig [area &lt;area-id&gt;]</b></code>. All interfaces
 in the specified areas will have MPLS activated.
 </p>
 <p>
@@ -1583,7 +1680,7 @@ R7(config-if)#<b>mpls ip</b>
 </code></div>
 </p>
 
-<h4>LDP IGP Synchronization</h4>
+<h2>LDP IGP Synchronization</h2>
 <p>
 Synchronization between the IGP and LDP can be configured where the IGP advertises 
 a route only after LDP converges. Before LDP convergence, the route is advertised 
@@ -1592,7 +1689,7 @@ has not fully converged. The path through the unsynchronized link is only used
 if it is the only path.
 </p>
 <p>
-Synchronization can be enabled on in the following modes:
+Synchronization can be enabled through the following methods:
 <ul>
   <li><b>All IGP interfaces:</b> using the IGP mode command <code><b>mpls ldp sync</b></code>.
   This form of sychronization can be disabled for a particular interface using 
@@ -1653,7 +1750,7 @@ R1#                                            <br>
 </p>
 
 
-<h3>Targeted LDP Sessions</h3>
+<h2>Targeted LDP Sessions</h2>
 <p>
 LDP sessions can be configured for LDP peers that are not directly connected but 
 have IP connectivity. This can be accomplished in a number of ways:
@@ -1668,7 +1765,7 @@ have IP connectivity. This can be accomplished in a number of ways:
 </ol>
 </p>
 
-<h3>LDP Hello and Hold Timer Intervals</h3>
+<h2>LDP Hello and Hold Timer Intervals</h2>
 <p>
 The default interval for LDP neighbor discovery Hello timer is 5 seconds and hold timer is 15 seconds 
 as indicated in the output of the command <code><b>show mpls ldp parameters</b></code>.
@@ -1727,42 +1824,20 @@ LDP initial/maximum backoff: 15/120 sec                      <br>
 </code></div>
 </p>
 
-<h3>Configuration Example</h3>
-<p>
-The configuration snippets are based on the following network;
-
-Configuration edge LSR R7, the following configuration activates MPLS on interfaces
-GigabitEthernet 2/0, GigabitEthernet 3/0 and FastEthernet6/0.
-
-<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-      	<code>
-R7(config)#<b>ip cef                             </b>  <br>
-R7(config)#<b>mpls ip                            </b>  <br>
-R7(config)#<b>mpls label protocol ldp            </b>  <br>
-R7(config)#<b>mpls label range 7000 7999         </b>  <br>
-R7(config)#<b>mpls ldp router-id Loopback10 force</b>  <br>
-R7(config)#<b>interface gigabitethernet 3/0   </b>     <br>
-R7(config-if)#<b>mpls ip                      </b>     <br>
-R7(config-if)#<b>interface gigabitethernet 2/0</b>     <br>
-R7(config-if)#<b>mpls ip                      </b>     <br>
-R7(config-if)#<b>interface fastethernet 6/0   </b>     <br>
-R7(config-if)#<b>mpls ip </b>
-</code></div>
-</p>
-
 <h2 id="AUTHENTICATION">Authentication</h2>
 <p>
 LDP supports authentication for the LDP TCP session between peers. 
 By default, MD5 is used to hash the password. 
 The password can be configured:
 <ul>
-  <li>Per neighbor: using the global configuration command <code><b>mpls ldp neighbor 
+  <li><b>Per neighbor:</b> using the global configuration command <code><b>mpls ldp neighbor 
 &lt;ip-address&gt; password &lt;password&gt;</b></code></li>
-  <li>Per group of neighbors:  using the global configuration command 
+  <li><b>For a group of neighbors:</b>  using the global configuration command 
   <code><b>mpls ldp password option &lt;1-32767&gt; for &lt;ACL&gt; &lt;password&gt;</b></code>.
    <code><b>&lt;1-32767&gt;</b></code> represents the sequence number of the LDP password option.
+   The ACL contains the list of neighbors to whom the password is applicable.
   </li>
-  <li>As a default password for all neighbors: using the global configuration command 
+  <li><b>default password for all neighbors:</b> using the global configuration command 
   <code><b>mpls ldp password fallback &lt;password&gt;</b></code>.
   </li>
 </ul>
@@ -1808,7 +1883,7 @@ R1#
       	</code></div>
 </p>
 <p>
-The peer LSR(R2) does not have authentication configured:
+The peer LSR (R2) does not have authentication configured:
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
@@ -2022,55 +2097,12 @@ LDP session protection can be implemented in the following ways:
 </p>
 
 
-<h2>MPLS Packet</h2>
-<p>
-The following Wireshark packet capture is of an MPLS packet:
-</p>
-<p>
-<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-      	<code>
-      	
-Frame 2032: 60 bytes on wire (480 bits), 60 bytes captured (480 bits) on interface -, id 0    <br>
-Ethernet II, Src: ca:01:04:35:00:1c (ca:01:04:35:00:1c), Dst: ca:03:04:5c:00:1c (ca:03:04:5c:00:1c)   <br>
-MultiProtocol Label Switching Header, Label: 3001, Exp: 6, S: 1, TTL: 255                             <br>
-&nbsp;&nbsp;&nbsp;&nbsp;0000 0000 1011 1011 1001 .... .... .... = MPLS Label: 3001 (0x00bb9)                              <br>
-&nbsp;&nbsp;&nbsp;&nbsp;.... .... .... .... .... 110. .... .... = MPLS Experimental Bits: 6                               <br>
-&nbsp;&nbsp;&nbsp;&nbsp;.... .... .... .... .... ...1 .... .... = MPLS Bottom Of Label Stack: 1                           <br>
-&nbsp;&nbsp;&nbsp;&nbsp;.... .... .... .... .... .... 1111 1111 = MPLS TTL: 255                                           <br>
-Internet Protocol Version 4, Src: 30.255.1.1, Dst: 30.255.6.6                                         <br>
-Transmission Control Protocol, Src Port: 54917, Dst Port: 179, Seq: 58, Ack: 77, Len: 0               <br>
-&nbsp;&nbsp;&nbsp;&nbsp;Source Port: 54917&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                      <br>
-&nbsp;&nbsp;&nbsp;&nbsp;Destination Port: 179&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                       <br>
-&nbsp;&nbsp;&nbsp;&nbsp;[Stream index: 4]&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                       <br>
-&nbsp;&nbsp;&nbsp;&nbsp;[Conversation completeness: Incomplete, DATA (15)]                                                <br>
-&nbsp;&nbsp;&nbsp;&nbsp;[TCP Segment Len: 0]&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                      <br>
-&nbsp;&nbsp;&nbsp;&nbsp;Sequence Number: 58&nbsp;&nbsp;&nbsp;&nbsp;(relative sequence number)                                                 <br>
-&nbsp;&nbsp;&nbsp;&nbsp;Sequence Number (raw): 3128650382&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                       <br>
-&nbsp;&nbsp;&nbsp;&nbsp;[Next Sequence Number: 58&nbsp;&nbsp;&nbsp;&nbsp;(relative sequence number)]                                          <br>
-&nbsp;&nbsp;&nbsp;&nbsp;Acknowledgment Number: 77&nbsp;&nbsp;&nbsp;&nbsp;(relative ack number)                                                <br>
-&nbsp;&nbsp;&nbsp;&nbsp;Acknowledgment number (raw): 932588975&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                      <br>
-&nbsp;&nbsp;&nbsp;&nbsp;0101 .... = Header Length: 20 bytes (5)&nbsp;&nbsp;&nbsp;&nbsp;                                                       <br>
-&nbsp;&nbsp;&nbsp;&nbsp;Flags: 0x010 (ACK)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                      <br>
-&nbsp;&nbsp;&nbsp;&nbsp;Window: 16308&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                       <br>
-&nbsp;&nbsp;&nbsp;&nbsp;[Calculated window size: 16308]&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                       <br>
-&nbsp;&nbsp;&nbsp;&nbsp;[Window size scaling factor: -2 (no window scaling used)]                                         <br>
-&nbsp;&nbsp;&nbsp;&nbsp;Checksum: 0xc993 [unverified]&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                       <br>
-&nbsp;&nbsp;&nbsp;&nbsp;[Checksum Status: Unverified]&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                       <br>
-&nbsp;&nbsp;&nbsp;&nbsp;Urgent Pointer: 0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                       <br>
-&nbsp;&nbsp;&nbsp;&nbsp;[Timestamps]&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                      <br>
-&nbsp;&nbsp;&nbsp;&nbsp;[SEQ/ACK analysis]&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                      <br>
-
-      	
-</code></div>
-</p>
-
-
-<h2 id="VERIFICATION">Verification</h2>
+<h1 id="VERIFICATION">Verification</h1>
 <p>
 
 </p>
 
-<h3>LDP Operational State</h3>
+<h2>LDP Operational State</h2>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
       	<code>
@@ -2107,7 +2139,7 @@ following:
 </ul>
 </p>
 
-<h3>MPLS Interfaces</h3>
+<h2>MPLS Interfaces</h2>
 <p>
 The command to display interfaces on which LDP is configured is <code><b>show mpls interface</b></code>.
 </p>
@@ -2162,7 +2194,7 @@ Interface GigabitEthernet3/0:                                                   
       	</code></div>
 </p>
 
-<h3>Forwarding Information Base  (FIB)</h3>
+<h2>Forwarding Information Base  (FIB)</h2>
 <p>
 The FIB is created using data from the RIB and layer 2 sources such as the ARP 
 table. Its contents can be viewed using the command <code><b>show ip cef</b></code>.
@@ -2233,7 +2265,7 @@ R1><b>show ip cef 30.11.6.1/32 detail</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   
 </code></div>
 </p>
 
-<h3>Label Forwarding Information Base  (LFIB)</h3>
+<h2>Label Forwarding Information Base  (LFIB)</h2>
 <p>
 
 The LFIB table is built from Routing Information Base  (RIB), Forwarding Information Base  (FIB)
@@ -2323,7 +2355,7 @@ The "Pop label" value indicates that the label stack will be deleted. The
 <code><b>detail</b></code> keyword displays the label stack if available.
 </p>
 
-<h3>Trace the LSP</h3>
+<h2>Trace the LSP</h2>
 <p>
 The <code><b>traceroute</b></code> command can be used to confirm the end-to-end operation 
 of label switching.
@@ -2381,13 +2413,7 @@ VRF info: (vrf in name/id, vrf out name/id)    <br>
 </code></div>
 
 </p>
-<p>
-At the penultimate LSR, CEF does not show a label for the destination network; 
-the command <code><b>show mpls ldp binding</b></code> displays this as  <code><b>‘impl-null’</b></code> 
-label and <code><b>mpls forwarding-table</b></code> displays <code><b>‘Pop label’</b></code>.
 
-By default, the Layer 3 TTL value of a packet is copied to the MPLS header TTL section.
-</p>
 
 <h3>Label Information Base  (LIB)</h3>
 <p>
@@ -2463,8 +2489,15 @@ R1#<b>show mpls ldp bindings detail</b>                <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;remote binding: lsr: 30.255.2.2:0, label: 2007 
       	</code></div>
 </p>
+<p>
+At the penultimate LSR, CEF does not show a label for the destination network; 
+the command <code><b>show mpls ldp binding</b></code> displays this as  <code><b>‘impl-null’</b></code> 
+label and <code><b>mpls forwarding-table</b></code> displays <code><b>‘Pop label’</b></code>.
 
-<h3>LDP Discovery</h3>
+By default, the Layer 3 TTL value of a packet is copied to the MPLS header TTL section.
+</p>
+
+<h2>LDP Discovery</h2>
 <p>
 The command <code><b>show mpls ldp discovery</b></code> displays the LSR's LDP ID 
 and neighboring LSRs and the respective interfaces through which the neighbor LSR 
@@ -2493,7 +2526,7 @@ R1#<b>show mpls ldp discovery</b>           <br>
 </p>
 
 
-<h3>LDP Neighbors</h3>
+<h2>LDP Neighbors</h2>
 <p>
 LDP peers can be viewed using the command <code><b>show mpls ldp neighbor</b></code>.
 
@@ -2667,10 +2700,9 @@ R2#
 <li><code><b>show mpls interface</b></code>: to identify if MPLS is running</li>
 <li>traceroute</li>
 <li>Ensure that the LDP ID is reachable; of the local LSR or remote LSR.
-    To easily identify where MPLS is broken, go the one PE and <code><b>
+    To easily identify where MPLS is broken, from one PE use the command <code><b>
     ping mpls ipv4 </b></code> to the remote PE device. Status code of B indicates that the packet was sent 
-    using unLabeled output.
-    On affected LSR, use <code><b>show mpls interfaces</b></code>.
+    using unlabeled packets. On affected LSR, use <code><b>show mpls interfaces</b></code>.
     </li>
     </li>
 </ul>
