@@ -141,6 +141,10 @@ R1(config-ext-nacl)#
 
 
 <h2>Step 2: Configure a Route-map</h2> 
+<p>
+
+</p>
+
  <h3>Identification of Traffic</h3>
  <p>
  Traffic is identified in a route map using the <code><b>match</b></code> 
@@ -303,12 +307,17 @@ R1(config)#<b>ip local policy route-map RM_PBR_172.31.0.1</b>
 </p>
 </li>
 </ul>
+</p>
+
+
 <h1>Reliable and Dynamic Path Control using PBR</h1>
 <p>
 To monitor network performance and change specific traffic paths that are based 
 on the health of the network, you can use Cisco IP Service Level Agreement (IP SLA)
 in combination with PBR.
 </p>
+
+
 <h2>IP SLA</h2>
 <p>
 Create the probe using the command 
@@ -343,6 +352,8 @@ To apply the track in a route-map set command:
 #set ip next-hop verify-availability 10.1.13.2 13.1.14.2 1 track 1 
 </code>
 </p>
+
+
 <h3>Verification</h3>
 <p>
 show track. In the output, look out for section tracked by:
@@ -352,11 +363,16 @@ show track. In the output, look out for section tracked by:
 <p>
 PBR can be verified by the following list of commands:
 </p>
+
+
 <h2><code>ping <i>remote-ip-address</i></code></h2>
       <p>
         Tests PBR by generating traffic. Pings are usually sent using ICMP packets
         and these are matched in an extended ACL.
       </p>
+      
+      
+      <p>
       <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
         <code>
          user3@box:~$<b> ping 172.31.0.1</b>                    <br>
@@ -390,6 +406,8 @@ round-trip min/avg/max = 27.850/44.631/59.776 ms                <br>
 user3@box:~$
         </code>
       </div>
+    </p>
+    
 <h2><code>traceroute <i>remote-ip-address</i></code></h2>
     <p>
         Linux and IOS use UDP packets for traceroutes so these have to be configured 
@@ -404,6 +422,7 @@ traceroute to 172.31.0.1 (172.31.0.1), 30 hops max, 38 byte packets<br>
  3&nbsp;&nbsp;10.0.34.2 (10.0.34.2)&nbsp;&nbsp;47.604 ms&nbsp;&nbsp;48.801 ms&nbsp;&nbsp;52.973 ms         <br>
 user3@box:~$
       </code></div>
+      
     <h2><code>show route-map</code></h2>
       <p>
       Displays the number of policy matches in terms of number of packets and 
@@ -420,6 +439,8 @@ route-map RM_PBR_172.31.0.1, permit, sequence 10 <br>
 &nbsp;&nbsp;Policy routing matches: 70 packets, 5046 bytes <br>
 R1#
        </code></div>
+       
+       
     <h2><code>show ip policy</code></h2>
     <p>
      To view which route-map is applied to which interface.
@@ -437,6 +458,8 @@ The interface name "local" indicates that the route-map applies to PBR for local
 generated traffic. Any other interface name listed implies that PBR is configured 
 for incoming traffic
 </p>
+
+
     <h2><code>debug ip policy</code></h2>
       <p>
         After enabling debugging using debug ip policy, a traceroute command is
@@ -498,6 +521,8 @@ R1#rnet4/1), d=172.31.0.1, len 38, FIB policy match                             
 R1#.168.1.2 (FastEthernet4/1), d=172.31.0.1, len 38, PBR Counted                                                      <br>
 *Mar  5 02:51:31.067: IP: s=192.168.1.2 (FastEthernet4/1), d=172.31.0.1, g=10.0.13.2, len 38, FIB policy routed       <br>
 </code></div>
+
+
     <h2> <code>show cef interface <i>interface-name</i></code></h2>
    
       <p>
@@ -530,6 +555,8 @@ FastEthernet4/1 is up (if_number 9)                          <br>
 &nbsp;&nbsp;IP MTU 1500                                                <br>
 R1#                                                          <br>
 </code></div>
+
+
     <h2>
       <code>show ip interface <i>interface-name</i></code></h2>
       <p>
@@ -579,3 +606,7 @@ FastEthernet4/1 is up, line protocol is up                          <br>
 R1# 
 </code></div>
 
+ <h2><code>debug ip routing</code></h2>
+ <p>
+ 
+ </p>
