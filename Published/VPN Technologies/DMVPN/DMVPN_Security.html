@@ -24,9 +24,10 @@ IPSec security architecture is composed of the following;
 <p>
 Security protocols can be used individually or in combination. They include;
 <ol type="a">
- <li><b>Authentication Header (AH):</b> AH provides data integrity, authentication, replay protection.</li>
+ <li><b>Authentication Header (AH):</b> AH provides data integrity, authentication, 
+ replay protection. AH uses IP protocol number 51.</li>
  <li><b>Encapsulating Security Payload (ESP):</b> ESP provides data confidentiality, integrity, 
-     authentication and replay protection.</li>
+     authentication and replay protection. ESP uses IP protocol number 50.</li>
 </ol>
 
 <h1>Key Management</h1>
@@ -54,7 +55,7 @@ IPSec SA:
  <li><b>IPSec SA:</b> used for data plane functions to secure data transmitted 
  between two different sites. 
  IPSec SAs are unidirectional and require at least two IPSec SAs (one for inbound 
- traffic and another for outbout traffic) for a secure connection to a DMVPN peer.
+ traffic and another for outbound traffic) for a secure connection to a DMVPN peer.
  
  </li>
 </ul>
@@ -75,8 +76,12 @@ Traditional IPSec provides two modes of packet protection; tunnel and transport:
     on the transport (underlay) network. The GRE IP header adds an extra 20 bytes 
     of overhead, the GRE flags add an extra 4 bytes of overhead, the IPsec IP 
     header adds an extra 20 bytes of overhead, and depending on the encryption 
-    mechanism, a varying amount of additional bytes are added for the encrypted signature. 
-    These packets use the IP protocol field of ESP (50).
+    mechanism, a varying amount of additional bytes are added for the encrypted signature.
+    <!--
+    <p>
+    Tunnel mode can use AH or ESP as the protection suite.
+    </p>
+    -->
     <p>
     It is important to note that the use of IPsec tunnel mode for DMVPN networks
     does not add any perceived value and adds 20 bytes of overhead. It is 
@@ -98,10 +103,13 @@ Traditional IPSec provides two modes of packet protection; tunnel and transport:
     transport (underlay) network. The GRE IP header adds an extra 20 bytes of 
     overhead, the GRE flags add an extra 4 bytes of overhead, and depending on 
     the encryption mechanism, a varying amount of additional bytes are added for
-    the encrypted signature. These packets use the protocol field of ESP (50).
+    the encrypted signature. 
+    
+    </li>
+    
 </ol>
 
-<h1>IPSec Tunnel Protection</h1>
+<h1>DMVPN Tunnel Protection using IPSec</h1>
 <p>
 Enabling IPsec protection on a DMVPN network requires that all devices enable IPsec 
 protection. If some routers have IPsec enabled and others do not, devices will not
@@ -109,10 +117,14 @@ be able to establish a connection on the tunnel interfaces with each other.
 </p>
 <p>
 Key management and IPSec parameter negotiation is implemented using IKEv1 or IKEv2.
-IKEv1
 </p>
+
+
+<h2>IKEv1</h2>
 <p>
-Deploying IPsec tunnel protection using static pre-shared keys involves the creation of an: 
+Originally DMVPN tunnel protection was provided by IPSec IKEv1. 
+To enable DMVPN tunnel protection using IPsec static pre-shared keys involves 
+the creation of the following: 
 <ol>
  <li>ISAKMP policy</li>
  <li>ISAKMP key and addresses of remote hosts.</li>
@@ -121,16 +133,14 @@ Deploying IPsec tunnel protection using static pre-shared keys involves the crea
 </ol>
 </p>
 
-
-<h2>IKEv1</h2>
 <p>
-Originally DMVPN tunnel protection was provided by IKEv1. The configuration of 
+The configuration of 
 DMVPN tunnel protection using DMVPN follows:
 </p>
 
 <h3>Step 1: Create the IKEv1 policy:</h3>
 <p>
-This is used for phase 1 negotiations in IPsec which is used to generate the key 
+This is used for phase 1 negotiations (control-plane) in IPsec to generate the key 
 information used in phase 2 for the actual data-plane.
 </p>
 <p>
@@ -154,7 +164,8 @@ aes, 3des or des:
 <code><b>encryption &lt;aes | 3des | des&gt; &lt;128-256&gt;</b></code>
 <ul>
   <li>aes | 3des | des: are the synchronous encryption versions supported by the platform.</li>
-  <li>128 - 256: the supported encryption key sizes.</li>
+  <li>128 - 256: the supported encryption key sizes. More modern platforms 
+  support a larger key size. </li>
 </ul>
 </p>
 <p>
@@ -162,10 +173,6 @@ aes, 3des or des:
  <code>
 HUB(config-isakmp)#<b>encryption aes 256</b>
 </code></div>
-</p>
-<p>
-256 is the size of the encryption key. More modern platforms support a larger 
-key size.
 </p>
 
 <li><h4>Configure the authentication method</h4></li>
@@ -229,7 +236,7 @@ HUB(config-isakmp)#<B>hash sha512</b>
 The IKE key is defined using the command 
 <code><b>crypto isakmp key &lt;password&gt; address &lt;ip_address&gt;</b></code>. Use of the address 0.0.0.0 0.0.0.0 
 is not recommended as it allows a host with any IP address to connect. However, 
-it may be helpful only when many spokes connect to the hub and administration 
+it may be helpful only when many spokes connect to the hub and administrative  
 overhead is high with managing this scalability. Otherwise, to add additional 
 level of security, a key should be defined for each spoke whose IP address is 
 explicitly configured.
@@ -241,7 +248,7 @@ HUB(config)#<b>crypto isakmp key simplesimple address 0.0.0.0</b>
 </code></div>
 </p>
 <p>
-The recommended approach is to use public-key infrastructure(PKI); here a certificate 
+The recommended approach is to use public-key infrastructure (PKI); here a certificate 
 is issued to the spokes. The hub can verify that certificate with the certificate 
 authority when spokes attempt to register. 
 </p>
@@ -356,8 +363,8 @@ share the same key.
 <p>
 When a front-door VRF(FVRF) has been configured, to protect the tunnel using IPsec 
 requires a slightly different configuration particularly when defining the ISAKMP 
-key. Using the configuration sequence for IKEv1 above, the configuration of IPsec
-for a front-door VRF tunnel can be accomplished using the following procedure:
+key. Using the configuration process for IKEv1 above, the configuration of IPsec
+for a front-door VRF tunnel can be accomplished using the following sequence:
 </p>
 <h3>Step 2: Configure the IKEv1 key</h3>
 <p>
@@ -818,15 +825,18 @@ limited CPU resources.
 </p>
 <p>
 IKEv2 advantages over IKEv1 include:
-Protection against DoS attacks
-Support for new encryption algorithms for phase 2 (suite B).
+<ul>
+  <li>Protection against DoS attacks</li>
+  <li>Support for new encryption algorithms for phase 2 (suite B).</li>
+</ul>
 </p>
 <p> 
 With IKEv2, asymetric authentication methods are possible where one end uses 
 preshared keys and the other PKI.
 </p>
 <p>
-Deploying IPsec tunnel protection is with the use of a static pre-shared key involves the creation of an:
+DMVPN tunnel protection using IPSec IKEv2 through the use of a static pre-shared 
+key involves configuration of the following:
 <ol>
  <li>IKEv2 keyring</li>
  <li>IKEv2 profile</li>
@@ -1673,7 +1683,11 @@ network traffic being black-holed until the SA lifetime expires.
 </p>
 <p>
 The use of dead peer detection (DPD) helps detect the loss of connectivity to a 
-remote IPSec peer. When DPD is enabled in on-demand mode, the two routers check 
+remote IPSec peer. 
+</p>
+<p>
+Cisco supports two types of DPD: on-demand and periodic.
+When DPD is enabled in on-demand mode, the two routers check 
 for connectivity only when traffic needs to be sent and the peer’s liveliness is
 questionable. In such scenarios, the router sends a DPD R-U-THERE request to query 
 the status of the remote peer. If the remote peer does not respond, the requesting 
@@ -1681,9 +1695,13 @@ router starts to transmit additional R-U-THERE messages every retry interval for
 maximum of five retries. If no response is received, that peer is declared dead.
 </p>
 <p>
-DPD is configured with the command crypto ikev2 dpd interval-time retry-time 
-on-demand in the IKEv2 profile. It is recommended that the interval time be set 
-to twice that of the routing protocol hold time.
+ DPD is supported by IKEv1
+and IKEv2:
+<ul>
+  <li><b>IKEv2:</b> DPD is configured with the global configuration command 
+  <code><b>crypto ikev2 dpd &lt;interval-time&gt; &lt;retry-time&gt; [on-demand | periodic]</b></code>. 
+  DPD is also configured using the IKEV2 profile mode command <code><b>dpd  &lt;interval-time&gt; &lt;retry-time&gt; [on-demand | periodic]</b></code>.
+  It is recommended that the interval time be set to twice that of the routing protocol hold time.
 <p>
 <p>
 As it consumes CPU, it is recommended that DPD be configured on the spokes and 
@@ -1700,6 +1718,6 @@ within a specified period of time. It is configured on sopes because the routing
 protocol messages such as Hello and update messages between the hub and spoke 
 keeps the NAT state active whereas spoke to spoke tunnels do not maintain a 
 routing neighborship so NAT state is not maintained. NAT keepalives are enabled 
-with the command crypto isakmp nat keepalive seconds.
+with the command <code><b>crypto isakmp nat keepalive &lt;seconds&gt;</b></code>.
 </p>
 
