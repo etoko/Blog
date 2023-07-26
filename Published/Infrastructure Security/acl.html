@@ -153,15 +153,15 @@ i.e., 255.255.255.255 (/24).
 <p>
  If an 
  IP address 192.168.1.0 has a subnet mask of 255.255.255.0, then the wilcard 
- mask can be determined as follows:
-<div class="separator" style="clear: both;"><a href="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjF1Js_U6K2uu4fBaM4MZz2-PPkdJnNgTGpW_uplOQVMuAZ_XXzhoC2RCbSxgG_v-azsVVDPynkrYVj3giu2n4Uq52yVpJ1oS8rSvL0zI56oCBQ3nt1cUHfuXcwk0Pyo_mEvUOO-42IlQ1tW35ONR8ruYEv4QtieAs155YkXpXqux7DEVEQRdUn3ouesIA/s278/wildcard_bit.png" style="display: block; padding: 1em 0; text-align: center; "><img alt="" border="0" width="320" data-original-height="196" data-original-width="278" src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjF1Js_U6K2uu4fBaM4MZz2-PPkdJnNgTGpW_uplOQVMuAZ_XXzhoC2RCbSxgG_v-azsVVDPynkrYVj3giu2n4Uq52yVpJ1oS8rSvL0zI56oCBQ3nt1cUHfuXcwk0Pyo_mEvUOO-42IlQ1tW35ONR8ruYEv4QtieAs155YkXpXqux7DEVEQRdUn3ouesIA/s320/wildcard_bit.png"/></a></div>>
+ bits can be determined as follows:
+<div class="separator" style="clear: both;"><a href="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjF1Js_U6K2uu4fBaM4MZz2-PPkdJnNgTGpW_uplOQVMuAZ_XXzhoC2RCbSxgG_v-azsVVDPynkrYVj3giu2n4Uq52yVpJ1oS8rSvL0zI56oCBQ3nt1cUHfuXcwk0Pyo_mEvUOO-42IlQ1tW35ONR8ruYEv4QtieAs155YkXpXqux7DEVEQRdUn3ouesIA/s278/wildcard_bit.png" style="display: block; padding: 1em 0; text-align: center; "><img alt="" border="0" width="320" data-original-height="196" data-original-width="278" src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjF1Js_U6K2uu4fBaM4MZz2-PPkdJnNgTGpW_uplOQVMuAZ_XXzhoC2RCbSxgG_v-azsVVDPynkrYVj3giu2n4Uq52yVpJ1oS8rSvL0zI56oCBQ3nt1cUHfuXcwk0Pyo_mEvUOO-42IlQ1tW35ONR8ruYEv4QtieAs155YkXpXqux7DEVEQRdUn3ouesIA/s320/wildcard_bit.png"/></a></div>
 </div>
 </p>
 
 <h3>Example 2</h3>
 <p>
 Given an IP address 192.168.1.30 with a subnet mask of 255.255.255.224 (/27), the 
-wildcard bit can be determined as follows:
+wildcard bits can be determined as follows:
 </p>
 <p>
 <div class="separator" style="clear: both;"><a href="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEid0uVbClElmIYmRCWp4pIIqJ6eRCIqSWtpQ2j5hiZm61OaM1LH3lzGyqx-_5F7bM1__JHO3wYn9oX_UbVmKfxSnvl0OEsysgUa_iedFEjuzQCpdMFqV-6uzIBtF-Wotw4quX3la5yWXfPXnDw3vvfEnhdNFGwL0HAjsh2eqt8hs2JW7c0K0ffKokVThzE/s1600/wildcard_mask_2.png" style="display: block; padding: 1em 0; text-align: center; "><img alt="" border="0" data-original-height="196" data-original-width="278" src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEid0uVbClElmIYmRCWp4pIIqJ6eRCIqSWtpQ2j5hiZm61OaM1LH3lzGyqx-_5F7bM1__JHO3wYn9oX_UbVmKfxSnvl0OEsysgUa_iedFEjuzQCpdMFqV-6uzIBtF-Wotw4quX3la5yWXfPXnDw3vvfEnhdNFGwL0HAjsh2eqt8hs2JW7c0K0ffKokVThzE/s1600/wildcard_mask_2.png"/></a></div>
@@ -268,7 +268,7 @@ The ACL naming recommendations include the following:
   <li>Name cannot contain spaces or punctuation marks.</li>
   <li>ACL name cannot begin with a number</li>
   <li>ACL name must be unique; ACLs of different types cannot have the same name</li>
-  <li>ACL name can have a mixture alpahnumeric characters</li>
+  <li>ACL name can have a mixture alphanumeric characters</li>
   <li>Recommended that the ACL name be written in capital letters</li>
   <li>ACL names are locally significant. Multiple routers on the network can be 
   configured to have the same name</li>
@@ -436,7 +436,7 @@ thereafter the ACL can be deleted.
 
 <h4>Modifying Existing ACE</h4>
 <p>
-Only a numbered ACL created using the command <code><b>ip access-list standard &lt;acl-id | acl-name</b></code> 
+Only a numbered ACL created using the command <code><b>ip access-list standard &lt;acl-id | acl-name&gt;</b></code> 
 can have its ACEs modified.
 
 To modify a standard numbered ACL:
@@ -482,7 +482,7 @@ match against the default route in a standard ACL, use the ACE
 </p>
 
 
-<h3><code>show access-lists</code> and <code>show ip access-lists</code></h3>
+<h3><code>show access-lists</code> / <code>show ip access-lists</code></h3>
 <p>
 The command <code><b>show access-lists</b></code> or similar alternative 
 <code><b>show ip access-lists</b></code> displays configured ACLs. If 
@@ -695,7 +695,7 @@ or denied depending on the configured action.
 
 Session-layer(Layer-5) port numbers may be matched in a variety of ways:
 <ul>
-  <li><code><b>eq &lt;port-number&gt;:</b></code>: matching on an exact port number that "equals" 
+  <li><code><b>eq &lt;port-number&gt;</b></code>: matching on an exact port number that "equals" 
   the supplied value</li>
   <li><code><b>lt &lt;port-number&gt;</b></code>: matching on any value less than the supplied 
   value.</li>
@@ -748,13 +748,13 @@ following exchanges:
    <li>Receiver sets ACK flag</li>
    <li>Sender sets ACK</li>
    </ul>
-All subsequent traffic will contain ACK flags and reset flags set.
+All subsequent traffic will contain ACK flags or the RESET flag set.
 With this in mind, the traffic to a specific network/host can be permit to be 
 initiated from a specific host/network and blocked if it is initiated from a different network/host.
 The two potential solutions include:
 <ol>
-  <li>Matching on the ACK and reset flag.</li>
-  <li>Matching on the established keyword</li>
+  <li>Matching on the ACK and RESET flag.</li>
+  <li>Matching on the <code><b>established</b></code> keyword</li>
 </ol>
 The two options do the same thing.
 </p>
@@ -800,7 +800,7 @@ When matching networks in IGPs:
   <li><code><b>permit ip host 10.1.0.0 host 255.255.0.0 </b></code>: Permits 
   all networks in the 10.1.0.0/16 range</li>
   <li><code><b> permit host 10.1.1.1 </b></code>: Permits only the 10.1.1.1/32
-  network</li>
+  host</li>
 </ul>
 </p>
 
@@ -869,13 +869,11 @@ The time periods are a feature that is separate from ACLs and are defined using
 the global configuration command <code><b>time-range</b></code>. This configured 
 time period is then applied to an extended ACLs making it a time-based ACL.
 
-The time configured using the <code<b>time-range 
-</b></code> command can be periodic or absolute:
+The time configured using the <code><b>time-range</b></code> command can be periodic or absolute:
 <ul>
   <li><b>Periodic:</b> the ACE is activated at the scheduled time periods such 
-  as daily, specific days of the week, weekly, monthly, hourly, etc. The 
-  occurance of the activation of the ACE is depends on the value of the configured time 
-  period.</li>
+  as daily, specific days of the week, weekly, monthly, hourly, etc. The ACL gets 
+  re-activated based on the configured time.</li>
   <li><b>Absolute:</b> ACE gets activated for a specific duration and this occurs 
   only once.</li>
 </ul>
@@ -924,8 +922,8 @@ The non-time-based rule always overrides the duplicate time-based rule, as they 
 		</code></div>
 		</p>
 	  </li>
-	  <li><b>Time-range type:</b> Decide on absolute or periodic type where 
-	  absolute activates the ACE only once for the defined duration and does not 
+	  <li><b>Time-range type:</b> Decide on absolute or periodic type. 
+	  Absolute activates the ACE only once for the defined duration and does not 
 	  repeat. Periodic occurs repeatedly where the ACE is activated on the 
 	  specified period and for the defined duration. Time values are defined in 
 	  24-hour clock.
@@ -1782,7 +1780,77 @@ When sending ACL syslogs to logging buffer, one can filter one these identifiers
 
 <h1>IPv6 ACLs</h1>
 <p>
-IPv6 ACls are only named ACLs. They offer similar features to extended ACLs. 
+By default, IPv6 access-lists add permit statements that are necessary for IPv6 
+to function.
+IPv6 ACls are only named extended ACLs. They offer similar features to IPv4 extended ACLs.
+
+ 
 IPv6 ACLs use the prefix length instead of wilcard masks to match.
 The host keyword can also be used with IPv6 ACLs.
 </p>
+<p>
+They include an implicit deny statement at the end. IPv6 will automatically add 
+the following statements to any access-list (dies not show up in configuration):
+<ul>
+  <li><code><b>permit icmp any any nd-na</b></code></li>
+  <li><code><b>permit icmp any any nd-ns</b></code></li>
+  <li><code><b>permit icmp any any router-advertisement</b></code></li>
+  <li><code><b>permit icmp any any router-solicitation</b></code></li>
+</ul>
+</p>
+<p>
+The above statements allow the router to participate in the IPv6 equivalent of 
+ARP for IPv4.
+</p>
+<p>
+If using an explicity deny,
+make sure to manually include the ICMP traffic with permit statements.
+</p>
+<p>
+IPv6 ACLs do not support wildcard bits; instead prefix-length is used.
+</p>
+
+<h2>Configuration</h2>
+<p>
+<ol>
+  <li><b>Define the ACL:</b> using the command <code><b>ipv6 access-list &lt;ACL-NAME</b></code>
+  </li>
+  <li><b>Configure the ACE:</b> using the command <code><b>[permit | deny] 
+  &lt;protocol&gt; [&lt;source-address/prefix-length&gt; | any | host &lt;source-address] 
+  [operator &lt;port-number&gt;] [&lt;destination-address/prefix-length&gt; | 
+  any host &lt;destination-addres&gt;] [operator &lt;port-number&gt;]</b></code>
+  where:
+  <ul>
+    <li><code><b>deny | permit</b></code> specifies whether to permit or deny traffic</li>
+    <li><code><b>protocol</b> protocol name or number</code></li>
+    <li><code><b>source-ipv6-prefix|prefix-length</b></code></li>
+    <li><code><b>any</b></code>: is an abbreviation for IPv6 prefix ::/0 that matches all 
+    addresses</li>
+    <li><code><b> host</b></code>: specific IPv6 host address</li>
+    <li><code><b>operator</b></code>: (optional) an operand that compares the source 
+    or destination ports of the specified protocol. Operands include:
+      <ul>
+        <li><code><b>lt</b></code>: less than</li>
+        <li><code><b>gt</b></code>: greater than</li>
+        <li><code><b>eq</b></code>: equal to</li>
+        <li><code><b>neq</b></code>: not equal to </li>
+        <li><code><b>range</b></code>: range of protocol numbers </li>
+      </ul>
+    </li>
+    <li><code><b> </b></code></li>
+  </ul>
+  </li>
+  <li><b>Apply the ACL to the interface:</b> using the command <code><b>ipv6 traffic-filter &lt;ACL-NAME&gt; [in | out]</b></code>
+</ol>
+</p>
+
+<h2>Verification</h2>
+<p>
+
+</p>
+<h3><code>show ipv6 interface &lt;interface-id&gt;</code></h3>
+<p>
+
+</p>
+
+<h3><code>show access-lists</code></h3>
