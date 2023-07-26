@@ -1,4 +1,4 @@
-<h1>Control Plane Policing (CoPP)</h1>
+<h1>Overview of Control Plane Policing (CoPP)</h1>
 <p>
 CoPP is a QoS feature used in security that rate-limits the traffic handled by the 
 route processor (RP).
@@ -21,11 +21,11 @@ and central switch engine are part of the RP.
 </p>
 <p>
 Majority of traffic managed by the RP is handled by way of the control and 
-management planes. Such traffic includes;
+management planes. Such traffic includes:
 <ul>
   <li>Routing protocol updates (IGP, BGP)</li>
-  <li>Management traffic such as SNMP, SSH,Telnet, NTP, HTTP(S), etc.</li>
-  <li>Traffic destined for a local IP address of the switch/router where the 
+  <li>Management traffic such as SNMP, SSH, Telnet, NTP, HTTP(S), etc.</li>
+  <li>Traffic destined for a local IP address of the switch/router i.e., the 
   local router or switch is the destination of the traffic.</li>
 </ul>
 </p>
@@ -37,12 +37,11 @@ a router’s RP at any given point in time. It helps protect the RP from
 denial-of-service (DoS) attacks, and other flooding attacks, reconnaisance attacks.
 </p>
 <p>
-In CoPP, it is important to rate-limit traffic on all interfaces destined for the 
+When implementing CoPP, it is important to rate-limit traffic on all interfaces destined for the 
 local router. A logical interface exists on all routers called the control plane 
 interface. Rate-limiting packets on this interface applies the rate-limit to all 
-the physical interfaces that need to be processed by the RP. Quality of 
-Service (QoS) and policing on the control plane interface rate-limits packets 
-entering any interface to protect the RP.
+the physical interfaces. Quality of Service (QoS) and policing on the control 
+plane interface rate-limits packets entering any interface to protect the RP.
 </p>
 
 <h1>Configuring CoPP</h1>
@@ -64,14 +63,14 @@ applied.
 
 <h2>Categorize Network Traffic using ACLs</h2>
 <p>
-CoPP traffic needs to first be identified and grouped into different classes 
+Traffic to be rate-limited needs to first be identified and categorized into different classes 
 based on importance, function or protocol type.
 </p>
 <p>
-ACLs are used to identify traffic to be policed. ACLs should be configured for 
-each of the classes categorized in the previous CoPP traffic classification stage.
+ACLs are used to identify and classify traffic to be rate-limited.
 These classes include: BGP, IGP, critical applications, file management, 
-interactive management, monitoring, and default. 
+interactive management, monitoring, and default. A separate ACL should be configured 
+for each of these traffic categories. 
 Each ACL should permit all known protocols in its class. Traffic for the default 
 class should be configured to permit any type of traffic e.g 
 <code><b>permit ip any any</b></code>.
@@ -81,7 +80,7 @@ Extended ACLs are usually used for classifying traffic as they can be
 configured to match the traffic port/protocol numbers.
 </p>
 <p>
-When configuring ACLs for the identified categories, traffic for certain classes 
+During categorization of traffic, it is important to note that traffic for certain classes 
  such as SNMP, (T)FTP, GRE, is originated from known sources. In such cases, the 
  ACE entries in these ACLs should explicitly define the source IP address. If the 
  ports for these traffic sources is known, then the ACEs should 
@@ -91,7 +90,9 @@ When configuring ACLs for the identified categories, traffic for certain classes
 The different traffic categories include:
 <ul>
   <li><b>BGP:</b> For maintaining BGP operations such as neighbor formation and 
-  maintenance, prefix exchange.
+  maintenance, prefix exchange. BGP uses TCP port source port 179; when configuring 
+  ACE entries, the BGP port number or keyword <code><b>bgp</b></code> are valid 
+  high-level protocols for matching against.
   <P>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
   <code>
@@ -103,7 +104,10 @@ R1(config-ext-nacl)#<b>20 permit tcp any gt 1024 any eq bgp established</b><br>
 </P>
   </li>
   <li><b>IGP:</b> traffic for formation and maintenance of IGP protocols such as 
-  EIGRP, OSPF, RIP.
+  EIGRP, OSPF, RIP. OSPF uses IP protocol number 89 and IPv4 multicast addresses 
+  224.0.0.5 and 224.0.0.6 or IPv6 multicast address FF02::5 and FF02::6. EIGRP uses IP protocol number 88 and IPv4 multicast address 
+  224.0.0.10  IPv6 multicast address FF02::A. The IP protocols can also be matched 
+  using the keywords <code><b>eigrp</b></code> or <code><b>ospf</b></code>.
   
   <P>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
@@ -148,7 +152,7 @@ R1(config-ext-nacl)#<b>40 permit icmp any any port-unreachable</b><br>
   </code></div>
   </p>
   </li>
-  <li><b>File Management:</b> this type of traffic is used for transfer of files
+  <li><b>File Management:</b> this type of traffic is used to transfer files. 
  Protocols in this category include: TFTP, FTP.
   This type of traffic is usually high-volume.
   <p>
@@ -174,57 +178,62 @@ R1(config-ext-nacl)#<b>40 permit icmp any any port-unreachable</b><br>
   R1(config-ext-nacl)#<b>30 permit ip any host 22.0.0.2</b><br>
   </code></div>
   </p>
+  <p>
+  <code><b>bootpc</b></code> and <code><b>bootps</b></code> are the keywords for 
+  DHCP.
+  </p>
   </li>
   <li><b>Undesirable:</b> malicious traffic that should not be allowed to be 
-  processed by the RP. Such traffic may be generated by malware. ACLs can be 
-  used to deny this traffic.</li>
+  processed by the RP. Such traffic may be generated by malware. The port numbers, 
+  transport protocol used etc of malware can only be known if the malware has 
+  has been profiled .</li>
   <li><b>Default:</b> traffic that does not fit into any of the above categories.
   This traffic should be rate-limited until some specific types within this category 
-  can be classified and grouped into newer groups or classified under existing(above) 
-  mentioned groups.</li>
+  can be classified and grouped into newer groups or classified under existing
+  (above) listed groups.</li>
 </ul>
 </p>
 
 
 <h2>Create Class Maps to Define Traffic Class</h2>
 <p>
-Class map commands contain a name, one or more match commands and instructions 
-on how the match commands will be evaluated:
-</p>
-<p>
-<code><b>class-map &lt;match-any | match-all&gt; &lt;class-map-name&gt;</b></code><br>
-&nbsp;&nbsp;&nbsp;&nbsp;<code><b>match &lt;access-group | protocol | ip prec | ip dscp&gt;</b></code>
+Class maps are used to define classes of the traffic to be rate-limited.
+A class map may reference an ACL, protocol, IP Prec or IP DSCP values in a packet.
 </p>
 
 <p>
-A separate class-map should be configured for each of the configured ACLs for 
-each traffic categorization. Class-maps have a default class-map that deals with 
+A separate class-map should be created for each of the configured ACLs for 
+each traffic category. Class-maps have a default class-map that deals with 
 traffic that is not explicitly defined. A separate class-map should be explicitly 
 configured for the default traffic ACL.
 </p>
 
 <p>
+<ol>
+<li><b>Define the class map name:</b> using the command 
+<code><b>class-map &lt;match-any | match-all&gt; &lt;class-map-name&gt;</b></code>.
+The matching instruction is <code><b>match-any</b></code> or <code><b>match-all</b></code>
 <ul>
-   <li><b>Instruction:</b> <code><b>&lt;match-any | match-all&gt;</b></code>
-    <ul>
       <li><code><b>match-any:</b></code> traffic must match only one of the commands to be classified 
       as part of the traffic class.</li>
       <li><code><b>match-all:</b></code> traffic must match all the match commands to be part of the 
-      traffic class. Care must be taken with match-all keyword as the traffic 
+      traffic class. Care must be taken with <code><b>match-all</b></code> keyword as the traffic 
       will have to match all characteristics in all the match commands.</li>
-    </ul>    
-    </li>
-    <li><code><b>match</b></code>:
-      <ul>
-    <li><b>Access-group:</b> reference the access control list defined in 
+</ul>
+</li>
+<li><b>Specify how the traffic will be matched:</b> using the command 
+<code><b>match [access-group [&lt;acl-number&gt; | name &lt;acl&gt;] | protocol | ip prec | ip dscp]</b></code>
+<ul>
+    <li><b>Access-group:</b> reference the previously configured access control list  
     <code><b>match</b></code> statement. ACL names are case sensitive.</li>
     
     <li><b>Protocol:</b> You can match by protocol instead of ACL; for example 
     to match ARP packets; <code><b>match protocol arp</b></code></li>
-    <li><b>IP Prec | IP dscp:</b> to match against only ip packet precedence or dscp</li>
-    </ul>
-    </li>
+    <li><b>IP Prec | IP dscp:</b> to match against an IP packet's Precedence or 
+    DSCP fields</li>
 </ul>
+</li>
+</ol>
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
@@ -281,14 +290,16 @@ R1#<b>show class-map</b><br>
 <h2>Create Policy Maps to Define a Service Policy</h2>
 <p>
 Policy maps are used to associate the traffic class (defined with a class map) 
-with one or more policies resulting in a service policy. Its three main elements 
-are; name, traffic class and policy:
-<ul>
-  <li><code><b>policy-map &lt;service-policy-name&gt;</b></code></li>
-  <li><code><b>class &lt;traffic-class-name&gt;</b></code></li>
-  <li><code><b>police &lt;cir | rate&gt; conform-action &lt;transmit | drop &gt; 
-exceed-action &lt;transmit | drop &gt; violate-action &lt; transmit | drop &gt;</b></code></li>
-</ul>
+with one or more policies resulting in a service policy. To configure a policy map:
+<ol>
+  <li><b>Define the policy map name:</b> using the command 
+  <code><b>policy-map &lt;service-policy-name&gt;</b></code></li>
+  <li><b>Reference a configured class map:</b> using the command <code><b>class &lt;traffic-class-name&gt;</b></code></li>
+  <li><b>Define the rate-limit threshold and action:</b> at which traffic will 
+  be rate-limited, and action to take for conformal traffic, and rate-limit 
+  violation using the command <code><b>police &lt;cir | rate&gt; conform-action &lt;transmit | drop&gt; 
+exceed-action &lt;transmit | drop&gt; violate-action &lt;transmit | drop&gt;</b></code></li>
+</ol>
 </p>
 <p>
 Each class-map should be associated with a policy map that permits all traffic.
