@@ -1,3 +1,67 @@
+<h1>Authentication Authorization and Accounting</h1>
+<p>
+Authentication refers to the verification of the users accessing a device; it 
+seeks answers to the question "Who are you?". Authorization defines what resources 
+the user is allowed to access and which operations the user is allowed to perform.
+Accounting logs all user actions on the system.
+</p>
+<p>
+AAA is usually used for device access and metwork access. Device access provides 
+administrative access to network devices for administrative purposes.
+</p>
+<p>
+Application of AAA in network access can be used to segregate users between 
+employee access and guest access. Additionally, employees access can be further 
+refined such that some employees can access some departmental resources and others 
+should be unable to access network  resources in other departments.
+</p>
+
+<p>
+Authentication can of a user can be performed using a username and password 
+combination. Certificates (PKI) can also be used to authenticate users. The 
+user may be a network device.
+</p>
+
+<p>
+Authorization defines what resources the user has access to. It can also be 
+defined as what the user actions the user is allowed to perform on a device.
+</p>
+
+<h2>AAA Components</h2>
+<p>
+Consists of three components: supplicant, authenticator and authentication server.
+<ol>
+  <li><b>Supplicant:</b> device requesting access; this may be a laptop, printer,  
+  smartphone. The supplicant is either requesting for network access or device 
+  access.</li>
+  <li><b>Authenticator:</b> this is the device being accessed; it is the device 
+  that is enforcing authentication (NAD). With device access, this device can be 
+  any network-connected device such as router, switch, wireless LAN controller. 
+  If the access request is for network access, the device is usually a wireless 
+  LAN controller or switch for wireless and wired network access respectively.
+  </li>
+  <li><b>Authentication Server:</b> validates the identify of the client and 
+  notifies the authenticator if the client is authorized to access the network 
+  or device. This authentication uses username/password combination or certificates (PKI) 
+  to authenticate users. RADIUS is an example of an authentication services. 
+  Cisco systems offers Identity Services Engine (ISE) and Access Control System (ACS) 
+  to provide AAA services for a network.
+  </li>
+</ol>
+</p>
+
+<h2>Protocols</h2>
+<p>
+AAA can be used to authenticate users for device administration or network access:
+<ol>
+  <li><b>Device administration:</b> device access uses console, SSH, Telnet and  
+  HTTP(S). The network device then uses RADIUS or TACACS+ to authenticate the 
+  user's network access with the authentication server.</li>
+  <li><b>Network access:</b> For network access, users can be authenticated using 
+  protocols such as EAPoL, HTTP(S), SSL, IKEv1 and IKEv2. RADIUS, TACACS+ are 
+  used between NAD and authentication server.</li>
+</ol>
+</p>
 
 <h1>Privileges</h1>
 <p>
@@ -221,7 +285,8 @@ mode command <code><b>aaa new-model</b></code>.
 <p>
 When implementing AAA using the local database, the router authenticates the 
 username and password using the local database and the user is authorized to 
-access the network device based on the information in the local database.
+access the network device based on the information in the local database. Local 
+authentication is used on small networks and is not scalable.
 </p>
 <h3>Authentication with Local Database</h3>
 <p>
@@ -341,11 +406,25 @@ R1(config-line)#<b>authorisation exec local-author</b>
 </ol>
 </p>
 
+<p>
+The main drawbacks of local user authentication are:
+<ul>
+  <li>User credentials are stored locally i.e., on the device</li>
+  <li>Solution is not scalable if the network grows to hundreds of devices</li>
+  <li>More administrative overhead</li>
+  <li>No centralized control over authentication services</li>
+</ul>
+</p>
+<p>
+It is therefore recommended to deploy the services of external server-based 
+authentication such as ISE, ACS, or any other platform that supports RADIUS or 
+TACACS+ for network access control. These have the following strengths
+</p>
 
 <h2 id="RADIUS">RADIUS</h2>
 <p>
 RADIUS (Remote Authentication Dial-In User Service) is standards-based protocol 
-for implementing AAA. It combines authentication and authorization into a 
+for implementing AAA (RFC 2865). It combines authentication and authorization into a 
 single resource. It offers robust accounting features. The default ports for RADIUS 
 servers are 1645 for authentication and 1646 for accounting. The new RFC sets the 
 RADIUS ports on UDP ports 1812 for authentication and 1813 for accounting. 
@@ -376,6 +455,9 @@ the backup authentication method is used.
 A RADIUS server will not respond to an access request if the requester is not 
 configured as a client. This happens regardless of whether IP connectivity 
 between the client and the server exists.
+</p>
+<p>
+RADIUS uses MD5 to generate a digest of the user's password by default.
 </p>
 <p>
 If the RADIUS server does respond with an access denied message to an authentication 
@@ -648,12 +730,17 @@ servers in the server group are unreachable, so the backup authentication method
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
   <code>
-!!On R1
-
+!!On R1<br>
+<br>
 R1#<b>debug radius authentication</b><br>
+<br>
+<br>
 !--------------------------                                                                                                 <br>
+<br>
+
 !!On R2                                                                                                                     <br>
-R2#192.168.1.1                                                                                                              <br>
+<br>
+R2#<b>192.168.1.1</b>                                                                                                              <br>
 Trying 192.168.1.1 ... Open                                                                                                 <br>
                                                                                                                             <br>
 User Access Verification                                                                                                    <br>
@@ -918,9 +1005,16 @@ R1(config)#<b>aaa accounting commands 15 default start-stop group myauthserver</
 </p>
 
 
-<h2>TACACS</h2>
+<h2>TACACS+</h2>
 <p>
-
+Developed by Cisco systems, it is mainly used for device administration using 
+ACS servers. It uses TCP port 49 for both the client and server. TACACS+ does 
+not support EAPoL.
+</p>
+<p>
+In networks 
+supporting TACACS+ and RADIUS, it is common for TACACS+ to be used for device 
+administration and RADIUS for network access.
 </p>
 
 
@@ -944,7 +1038,7 @@ R1(config)#<b>aaa new-model</b>
 </p>
 </li>
 <li>
-Configure a TACACS+ server s
+Configure TACACS+ server settings on the client:
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
   <code>
@@ -967,6 +1061,17 @@ listening on a port that is not the default TCP port 49.
 R1(config-tacacs-server)#<b>port 65000</b>
 </code></div>
 </p>
+<p>
+Some prefer to configure TACACS+ server settings using the command 
+<code><b>tacacs-server host &lt;server-ip-address&gt;</b></code>. 
+</p>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+  R1(config)#<b>tacacs-server host 192.168.1.2</b><br>
+  R1(config)#<b>tacacs-server key complexpassword</b>
+  </code></div>
+  </p>
 </li>
 <li>
 Configure TACACS+ server groups;
@@ -1004,3 +1109,31 @@ R1(config-line)#<b>login authentication AAA_AUTHENTICATION</b>
 Telnet above router. What credentials were used and why?
 </li>
 </ol>
+
+<h1>Cisco Authentication Servers</h1>
+<p>
+Cisco offers access control system (ACS) and Identity Services Engine(ISE) servers 
+as physical hardware or virtual images to implement access authentication. 
+ACS and ISE support RADIUS and TACACS+:
+<ul>
+  <li><b>Access Control System (ACS):</b>
+    <ul>
+      <li>Used for both device access and network access</li>
+      <li>Supports both RADIUS and TACACS+ with TACACS+ particularly used for 
+      device access.</li>
+    </ul>
+  </li>
+  <li><b>Identity Services Engine (ISE):</b>
+    <ul>
+      <li>Mainly used for network access.</li>
+      <li>Mainly uses RADIUS. However, starting ISE 2.0, TACACS+ support has been 
+      added.</li>
+      <li>Supports RADIUS with Change of authorization (CoA).</li>
+      <li>Supports additional features such as profiling such as granting 
+      access to specific devices only, security posture 
+      assessment of the end-user device (device must meet certain minimum requirements), 
+      web portal services such as for guest user access.</li>
+    </ul>
+  </li>
+</ul>
+</p>

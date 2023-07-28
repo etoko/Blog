@@ -8,6 +8,7 @@
   <li><a href="#ACL_REF">Reflexive ACLs</a>
   <li><a href="#ACL_DYN">Dynamic ACLs</a>
   <li><a href="#ACL_OTHER">Other ACL Features</a>
+  <li><a href="#IPv6">IPv6</a>
 </ol>
 
 <h1 id="INTRO">Introduction and Overview</h1>
@@ -1778,7 +1779,7 @@ When sending ACL syslogs to logging buffer, one can filter one these identifiers
 </ol>
 </p>
 
-<h1>IPv6 ACLs</h1>
+<h1 id="IPv6">IPv6 ACLs</h1>
 <p>
 By default, IPv6 access-lists add permit statements that are necessary for IPv6 
 to function.
@@ -1854,3 +1855,12 @@ IPv6 ACLs do not support wildcard bits; instead prefix-length is used.
 </p>
 
 <h3><code>show access-lists</code></h3>
+<p>
+R2#show access-lists
+IPv6 access list ACL6_DENY1::2
+    deny tcp any eq www host 1::2 sequence 10
+    permit icmp any any (57 matches) sequence 20
+    permit 89 any any (425 matches) sequence 30
+    permit tcp any eq www host 1::1 sequence 40
+    permit tcp host 3::3 host 1::1 eq www (23 matches) sequence 50
+</p>
