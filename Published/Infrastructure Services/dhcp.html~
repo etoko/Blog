@@ -1,14 +1,18 @@
 <h1>Introduction and Overview</h1>
 <p>
-Dynamic Host Configuration Protocol(DHCP) is an IP protocol used by hosts on a 
+Dynamic Host Configuration Protocol (DHCP) is an IP protocol used by hosts on a 
 TCP/IP network to receive IP configuration parameters such as IP address, default 
 gateway, DNS server addresses, domain name among others. 
 DHCP is used to assign IP configuration information to the clients automatically. 
-It works at layer 4 and is a client-server protocol.  DHCP uses UDP with 
-the <b>client using port 68</b> as the source port number and <b>67</b> as destination 
-port number which is used by the server. DHCP is based on the BootP protocol.
-DHCP server can be local within the subnet, in a remote server. It can also be the 
-default gateway.
+It works at layer 4 and is a client-server protocol.  DHCP messages from the 
+<b>client use UDP port 68 as the source port number and 67 as destination 
+port number</b> which is used by the server. DHCP is based on the BootP protocol.
+</p>
+<p>
+The DHCP server can be local within the same subnet as the clients or in a remote 
+network. 
+In many networks, it is common for the network's default gateway to be the DHCP
+server.
 </p>
 <p>
 Components of DHCP:
@@ -32,10 +36,11 @@ DHCP is used to send IP configuration information to clients. Some of the IP
 configuration information that is issued by DHCP includes the following: 
 <ul>
   <li>IP address</li>
-  <li>subnet mask</li>
-  <li>default gateway IP address</li>
+  <li>Subnet mask</li>
+  <li>Default gateway IP address</li>
   <li>DNS server IP address</li>
-  <li>Other IP addressing information</li>
+  <li>Domain name</li>
+  <li>TFTP server address</li>
 </ul>
 </p>
 <p>
@@ -54,14 +59,24 @@ DHCP supports three mechanisms for IP address allocation:
 </p>
 <p>
 The lease period must be renewed if a device wants to continue using the assigned 
-IP configuration information. An infinite lease has the time set to 4294967295 seconds
-(136 years). The lease period must be renewed while it is still valid. Once a lease 
-expires, the address issued is returned to the address pool. The first attempt 
-to renew the lease period is at half the lease time. The second attempt occurs at 
-half the remaining time limit i.e., at 3/4 of the original lease time.
+IP configuration information. An infinite lease has the time set to (2 <sup>32</sup>) 
+seconds or 4294967295 seconds which is equivalent to 136 years. 
+The lease period must be renewed while it is still valid. Once a lease 
+expires, the address issued is returned to the address pool. 
+</p>
+To ensure that the lease on the issued IP address does not expire, DHCP has a process in 
+which the client requests for a renewal of a lease. The first attempt 
+to renew the lease period is at half the lease time with the client sending a 
+DHCP Request message containing the requested IP address in option 50. 
+When the DHCP server receives the DHCP Request message for the lease to be renewed, 
+it resets the lease timer on the address to the configured duration and responds 
+with a DHCP ACK message to the client containing the requested IP address and other 
+IP configuration parameters. If a client does not receive confirmation of a renewed 
+lease on an address, it sends a second DHCP Request message to renew the lease. 
+The second attempt is sent at half the remaining lease time i.e., at 3/4 of the original lease time.
 </p>
 <p>
-The lease can be terminated by the client or server:
+A lease on an IP address can be terminated by the client or server:
 <ul>
   <li><b>Client:</b> with the DHCPRELEASE message.</li>
   <li><b>Server:</b> with the DHCPFORCERENEW and DHCPNACK messages.</li>
@@ -72,7 +87,13 @@ In corporate networks, the lease should be made longer, say 24 hours or longer, 
 these users connect to the network frequently and routinely. For guest networks, the lease 
 should be made short as guests users are likely to be connected for a shorter time period. 
 </p>
-
+<p>
+However, if the address pool is not large and clients typically connect to the 
+network for short periods of time, it may be recommended to configure a lease 
+period of an hour. This ensures that leased addresses are not reserved for much 
+longer after a client has disconnected from the network and the addresses are 
+returned to the pool. 
+</p>
 
 <h1>IP Configuration Allocation by DHCP</h1>
 <p>
@@ -81,6 +102,7 @@ parameters to clients. These stages are: DHCPDISCOVER, DHCPOFFER, DHCPREQUEST,
 DHCPACK. These four stages are usually abbreviated as DORA. Most of the server 
 DHCP messages are sent in unicast while clients send broadcasts.
 </p>
+
 <h2>Discover</h2>
 <p>
 Devices that would like to receive addresses through DHCP should be configured 
@@ -89,9 +111,8 @@ DHCP services automatically. On IOS, interfaces are configured as
 DHCP clients using the command <code><b>ip address dhcp</b></code>.
 </p>
 <p>
- Network and server devices, should be configured 
-with static IP addresses or receive their IP addresses through DHCP manual 
-allocation.
+ Network devices and servers, should be configured with static IP addresses or 
+ should receive their IP addresses through DHCP manual allocation.
 </p>
 <p>
 A client sends a broadcast DHCPDISCOVER message onto the network using source port UDP port 68 
@@ -100,7 +121,7 @@ to the DHCPDISCOVER with an offer message. DHCP relays will receive the DHCP Dis
 and forward it to the remote DHCP server. 
 <ul>
   <li><b>Source IP:</b> 0.0.0.0</li>
-  <li><b>MAC:</b> client MAC</li>
+  <li><b>Source MAC:</b> client's interface MAC address</li>
   <li><b>Destination IP:</b> 255.255.255.255</li>
   <li><b>Destination MAC:</b> FFFF.FFFF.FFFF</li>
 </ul>
@@ -177,8 +198,10 @@ A DHCP server that receives a DHCP Discover message will reply to the Discover
 message with an offer message. The offer is sent to the broadcast address 
 255.255.255.255. Clients will identify the DHCPOFFER is intended for them because 
 the DHCP server includes the client MAC address that was in the DHCPDISCOVER 
-message received from the client.
-
+message received from the client. Additionally, this client MAC address is 
+contained in the "Client MAC address" field of the DHCP Offer message.
+</p>
+<p>
 For DHCPDISCOVER messages received from a DHCP relay, the appropriate address 
 pool is determined using the value of the <code><b>giaddr</b></code> field. 
 For a DHCPDISCOVER message received from a local subnet, the IP address of the interface 
@@ -260,8 +283,8 @@ forward the request to one or more secondary servers.
 If an offer contains invalid configuration parameters, a client can respond with
 a DHCPDECLINE message sent in broadcast. A server sends a DHCPNAK denial broadcast message 
 indicating that parameters are not assigned if an error occurred during the 
-parameter negotiation or client was slow in responding to the offer, particularly
-if the address was assigned to another client.
+parameter negotiation or client was slow in responding to the offer and the 
+address was subsequently assigned to another client.
 </p>
 
 <h2>Request</h2>
@@ -334,8 +357,9 @@ Dynamic Host Configuration Protocol (Request)                                   
 <p>
 DHCP servers acknowledge the IP configuration parameters that were offered to the client. 
 The DHCP process also sets the IP address of the gateway. This is usually  a 
-static route with an administrative distance of 254.
+static route with an administrative distance of 254. 
 </p>
+
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
   <code>
@@ -400,6 +424,16 @@ Dynamic Host Configuration Protocol (ACK)                                       
 </code></div>
 </p>
 
+<p>
+Some DHCP servers include the following parameters in the DHCP ACK message:
+<ol>
+ <li>Renewal time in DHCP Option 58</li>
+ <li>Rebinding time in DHCP Option 59</li>
+ <li>NTP servers in DHCP Option 42</li>
+</ol>
+</p>
+
+
 <h2>DHCP Relay</h2>
 <p>
 By default, routers block broadcast messages. So these messages do not get sent to a remote 
@@ -432,7 +466,7 @@ A DHCP relay agent forwards the following:
 </p>
 
 <p>
-The command to configure the DHCP relay is <code><b>ip helper-address 10.10.10.10</b></code>.
+The command to configure the DHCP relay is <code><b>ip helper-address &lt;dhcp-server-ip-address&gt;</b></code>.
 
 </p>
 
@@ -471,14 +505,14 @@ information for a remote client attaching to the access server.
 <h2>DHCP Options</h2>
 <p>
 The DHCP server and client exchange IP configuration parameters using DHCP options. 
-DHCP options are defined by a numeric variable and value. There are up to 255 DHCP options 
-available (from 0 to 254). These options can be categorized into options for:
+DHCP options are defined by a numeric variable and value. There are up to 256 DHCP options 
+available (from 0 to 255). These options can be categorized into options for:
 <ul>
-  <li>IP Layer parameters per host such as policy filters, maximum datagrame reassembly 
+  <li>IP Layer parameters per host such as policy filters, maximum dataframe reassembly 
   size, default IP TTL, path MTU aging timeout etc.</li>
   <li>IP Layer parameters per interface such as interface MTU, broadcast address, 
   router solicitation address etc.</li>
-  <li>TCP parameters suchas TCP keepalive interval, TCP keepalive garbage option</li>
+  <li>TCP parameters such as TCP keepalive interval, TCP keepalive garbage option</li>
   <li>Application and service parameters</li>
 </ul>
 Some DHCP options are configured on the server, others are included in DHCP messages 
@@ -490,7 +524,7 @@ following table;
 <table width="100%" cellspacing="0">
 <thead style="background: #d3d3d3; border-bottom: 1px solid; border-top: 1px solid;">
   <tr>
-    <td style="border-bottom: 1px solid; border-top: 1px solid;">Option Number</td>
+    <td style="border-bottom: 1px solid; border-top: 1px solid;" width="10%">Option Number</td>
     <td style="border-bottom: 1px solid; border-top: 1px solid;" width="15%">Value</td>
     <td style="border-bottom: 1px solid; border-top: 1px solid;">Description </td>
   </tr>        
@@ -533,6 +567,25 @@ following table;
     <td style="border-bottom: 1px solid">This option specifies the domain name 
     that client should use when resolving hostnames via the Domain Name System.</td>
   </tr>
+  <tr>
+    <td style="border-bottom: 1px solid">33 </td>
+    <td style="border-bottom: 1px solid">Static Route</td>
+    <td style="border-bottom: 1px solid">This option specifies that the client 
+    requests for a manually allocated address be assigned.</td>
+  </tr>
+   <tr>
+    <td style="border-bottom: 1px solid">43 </td>
+    <td style="border-bottom: 1px solid">Vendor-Specific Information</td>
+    <td style="border-bottom: 1px solid">This option specifies that the client 
+    requests for vendor specific information.</td>
+  </tr>
+   <tr>
+    <td style="border-bottom: 1px solid">44 </td>
+    <td style="border-bottom: 1px solid">NetBIOS over TCP/IP Name Server</td>
+    <td style="border-bottom: 1px solid">This option is sent by Microsoft clients. 
+     specifies that the client 
+    requests for vendor specific information.</td>
+  </tr>
    <tr>
     <td style="border-bottom: 1px solid"> 50</td>
     <td style="border-bottom: 1px solid">Requested IP Address</td>
@@ -541,7 +594,7 @@ following table;
    client to request that a particular IP address be assigned. 
    This DHCP option is used by a host computer when it previously connected to the 
    network and would like to reuse its previously assigned IP address.
-   New devices to not use this option.
+   New devices do not use this option.
     </td>
   </tr>
    <tr>
@@ -638,7 +691,7 @@ following table;
    identifier MUST be unique among the client-identifiers used on the
    subnet to which the client is attached.  Vendors and system
    administrators are responsible for choosing client-identifiers that
-   meet this requirement for uniqueness.
+   meet this requirement for uniqueness. More often, this value is the MAC address.
    </td>
   </tr>
   <tr>
@@ -700,7 +753,7 @@ is done using the command <code><b>service dhcp</b></code>.
 <h2>Server</h2>
 <p>
 The server is not bound to any network. It can issue IP addresses for many networks 
-if many DHCP pools are configured. Servers and relay agent features are enabled 
+if many DHCP pools are configured. DHCP server and relay agent features are enabled 
 by default. If disabled, re-enable using the global configuration command <code><b>
 service dhcp</b></code>.
 </p>
@@ -724,7 +777,7 @@ Features include:
 
 <p>
 <ol>
-  <li><b>Excluded Addresses:</b> 
+  <li><b>Configure the range of excluded Addresses:</b> 
   Before configuring the DHCP features, it is best to first configure addresses to
 be excluded from being assigned to clients. These are usually addresses reserved 
 for hosts to receive addresses through static configuration such as network devices, 
@@ -733,10 +786,11 @@ To exclude a range
 addresses from being assigned to clients, use the command <code><b>
 ip dhcp excluded-address &lt;low-ip-address&gt; &lt;high-ip-address&gt;</b></code>.
 
-
-DHCP_SERVER(config)#ip dhcp excluded-address 192.168.1.2 192.168.1.20
-<code><b>ip dhcp excluded-address &lt;start&gt; &lt;end&gt;</b></code>
-  
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+DHCP_SERVER(config)#<b>ip dhcp excluded-address 192.168.1.2 192.168.1.20</b>
+</code></div></p>
   <p>
 Note that a router cannot issue an IP address for one of its interfaces even 
 if that address is not included in the range of the excluded addresses. This 
@@ -744,11 +798,12 @@ command can be entered multiple times.
 </p>
   </li>
   <li>
-<b>DHCP Pool:</b> 
+<b>Define the DHCP address pool:</b> 
 A DHCP Pool is a range of addresses or scope that the DHCP server will use for assigning 
 IP addresses to clients. When a client sends out a DHCPDiscover message, the 
 server will pick an IP address from the pool (usually the lowest available address)
-and offer it to the client.  
+and offer it to the client. The command to define the DHCP address pool is 
+<code><b>ip dhcp pool &lt;pool-name&gt;</b></code>.
   
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
@@ -806,7 +861,7 @@ DHCP_SERVER(dhcp-config)#<b>lease 1 12 0</b>                                    
 </p>
 </li>
 <li>Configure any DHCP options using the command <code><b>option &lt;option-code&gt; 
-&lt;ascii | hex | instance | ip&gt; &lt;value&gt;</b></code>.
+[ascii | hex | instance | ip] &lt;value&gt;</b></code>.
 
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
@@ -826,8 +881,8 @@ DHCP_SERVER(config)#
 <ul>
  <li><b>option:</b> 15 is the DHCP option for domain name. Here it is 
  emmanueltoko.blogspot.com. The domain name could have easily been entered using 
- the move common command
- DHCP_SERVER(dhcp-config)#domain-name emmanueltoko.blogspot.com</li>
+ the more traditional command <code><b>domain-name emmanueltoko.blogspot.com</b></code>
+ </li>
 </ul>
 </p>
   </li>
@@ -940,8 +995,9 @@ Router(config)#<b>interface gigabitEthernet0/0</b><br>
 Router(config-if)#<b>ip helper-address 10.1.14.2</b>
 </code></div>
 </p>
-The IP address entered here is the address of the dhcp server. The ip helper-address 
-is entered under interface configuration mode of the interface connected to the 
+The IP address entered here is the address of the dhcp server. The <code><b>ip helper-address</b></code> 
+command 
+is entered in the interface configuration mode of the interface connected to the 
 subnet that contains the DHCP clients. This is the interface that will receive 
 the DHCPDiscover messages from the clients.
 </p>
@@ -1033,7 +1089,7 @@ Router#<b>clear ip route &lt;vrf-name&gt; dhcp &lt;ip_address&gt;</b>
 </p>
 
 
-<h2><code>show ip dhcp binding</code></h2>
+<h2><code>show ip dhcp binding &lt;ip-address&gt;</code></h2>
 <p>
 Displays information about the allocated IP addresses and the lease period.
 </p>
@@ -1115,7 +1171,7 @@ R1#
 
 <h2><code>show ip dhcp conflict</code></h2>
 <p>
-
+Displays a list of detected IP address conflicts detected through pings.
 </p>
 
 
@@ -1162,12 +1218,13 @@ R1#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp
 
 <h2><code>debug ip dhcp server events</code></h2>
 <p>
-
+Debugging of messages involving activities of a DHCP server from sending messages, 
+actions taken and response to received messages.
 </p>
 
 <h2><code>debug ip dhcp server packet</code></h2>
 <p>
-
+Debugging of DHCP messages sent and received. 
 </p>
 
 <h2><code>show dhcp lease</code></h2>
@@ -1203,9 +1260,10 @@ Routers, by default, do not forward broadcasts.
 <ul>
   <li>DHCP pool out of addresses: expand the scope of addresses or purge the old 
   leases. Issue shorter releases.</li>
-  <li>Misconfiguration</li>
-  <li>Duplicate address</li>
-  <li>Redundant DHCP services not communicating and handing out overlapping addresses</li>
+  <li>Misconfiguration of DHCP server options or other features.</li>
+  <li>Duplicate addresses</li>
+  <li>Redundant DHCP services not communicating/coordinating the issue of addresses 
+  resulting in issuance of overlapping addresses</li>
   <li>"Pull" nature of DHCP: DHCP server cannot initiate a change on the client
   if a problem is detected.</li>
   <li>Interface not configured with IP address in DHCP Pool. IP addresses should 
