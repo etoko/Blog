@@ -10,10 +10,16 @@ destinations, such as the logging buffer, terminal lines, syslog server.
 Messages are also sent to the console.
 These are then viewed using syslog, local logging, debugs, conditional 
 debugs. Logs are also used for forensics and compliance.
-It is important to note that the time must be consistent. This can be done by 
-configuring NTP to provide accurate datetime values. Troubleshooting 
+</p>
+<p>
+Log messages include a timestamp that indicates the time when the log was generated. 
+It is important to note that the time must be accurate. This can be done by 
+configuring NTP to provide accurate datetime values. The time must be consistent 
+across all network devices; troubleshooting 
 can be difficult if you cannot correlate timestamps across devices.
 </p>
+
+
 <h2>Logging Messages</h2>
 <p>
 Syslog messages can be output to the console, local buffer or remote syslog server.
@@ -27,9 +33,8 @@ Where:
   <li><b>FACILITY-SUBFACILITY:</b> protocol, module or process that 
   generated the message.</li>
   <li><b>SEVERITY:</b> This is a level from 0 - 7 that specifies how important 
-  the message is. When you enable logging for a specific level, it also enables 
-  all levels above it. For example, if you enable level 4(warnings), it also will 
-  enable levels 0 - 3.
+  the message is. The following table displays all the logging severity levels 
+  available:
   <p>
     <table cellspacing="0" width="100%">
       <thead style="background: #d3d3d3; font-weight:bold;">
@@ -93,6 +98,11 @@ Where:
       </tbody>
     </table>
     </p>
+    <p>
+     When you enable logging for a specific level, it also enables 
+  all levels above it. For example, if you enable level 4(warnings), it also will 
+  enable levels 0 - 3.
+    </p>
   </li>
   <li><b>MNEMONIC:</b> a code that identifies the action reported</li>
   <li><b>Message text:</b> A plain text description of the event</li>
@@ -131,11 +141,12 @@ The size of the buffer can be increased using the command:
 
 <h2>Logging Monitor</h2>
 <p>
-To enable logging to remote logins via SSH or telnet, use the command <code><b>
-logging monitor &lt;level&gt;</b></code>. The default logging severity is debugging.
-However, by default, the log messages do not appear in the login session of of SSH 
-or telnet. To view the log messages in the login session of a vty line, issue 
-the command <code><b>terminal monitor</b></code>.
+By default, the log messages do not appear in the login session of a remote connection 
+through SSH or telnet.
+To enable logging to remote logins via SSH or telnet, use the command 
+<code><b>terminal monitor</b></code>. 
+The default logging severity is debugging. To change the logging severity level 
+to a remote login session, use the command <code><b>logging monitor &lt;level&gt;</b></code>.
 </p>
 <p>
 Logging messages can be disabled from a vty login session using the command 
@@ -143,15 +154,21 @@ Logging messages can be disabled from a vty login session using the command
 </p>
 
 
-<h2><code>logging synchronous</code></h2>
+<h2>Logging Synchronous</h2>
 <p>
-The command <code><b>logging synchronous [level &lt;severity-level&gt;|all] | 
-limit &lt;0-2147483647&gt;</b></code>.
-Enables synchronous logging of messages. It can be configured to prevent logging 
-messages from interrupting the typing at a login session. 
+By default, logging messages in a login session are displayed in the console 
+session or VTY session including as you are typing. This can be a nuisance as 
+it can be distracting from what was being typed. The command 
+<code><b>logging synchronous [level &lt;severity-level&gt;|all] | 
+limit &lt;0-2147483647&gt;</b></code> enables synchronous logging of messages; 
+where log messages are displayed at the login session but a new line is created 
+for the logging messages so the logging messages do not appear in the middle of 
+a typing session; the command being typed is placed into a new line below the 
+displayed log message.
+
 The optional values:
 <ul>
-<li><b>severity-level:</b> indicates that messages with a severity 
+<li><b>level:</b> indicates that messages with a severity 
 level equal to or higher are printed asynchronously. The default is 2.</li>
 <li><b>limit:</b> specifies the number of buffers to be queued for the terminal 
 after which new messages are dropped. The default is 20. 
@@ -162,8 +179,7 @@ after which new messages are dropped. The default is 20.
 <p>
 Logs can be stored as files on flash memory. This is accomplished using the 
 command 
-<code><b>logging file flash:&lt;file-name&gt; &max-file-size&gt; &lt;min-file-size
-&gt; &lt;severity-level&gt;</b></code> where
+<code><b>logging file flash:&lt;file-name&gt; &lt;max-file-size&gt; &lt;min-file-size&gt; &lt;severity-level&gt;</b></code> where:
 <ul>
   <li>The maximum file size is in the range 4096 - 2147483647 bytes.</li>
   <li>The default size is 4096.</li> 
@@ -210,7 +226,7 @@ adj</b></code>.
 
 <h2>Debug using IP Access Lists</h2>
 <p>
- It allows debugging information that matches a configured IP access control list.
+ Debugging by referencing an IP ACL allows debugging information that matches a configured IP access control list.
  
 </p>
 <p>
@@ -226,9 +242,9 @@ Any debugs that do not match the access control list are not logged.
 
 <h1>Conditional Debugs</h1>
 <p>
-Generates detailed information about a specific object such as matching a specific 
-interface, username, MAC address, VLAN, etc.
-Limit the number of packets punted to the CPU.  Conditional debugs are configured using the command 
+Conditional debugs generate detailed information about a specific object such as 
+matching a specific interface, username, MAC address, VLAN, etc. Conditional 
+debugs limit the number of debugging messages punted to the CPU.  Conditional debugs are configured using the command 
 <code><b>debug condition &lt;interface&gt;</b></code>. Conditional debugs can be 
 stacked as such that the debugging messages that are displayed match all conditions 
 in the stack.
@@ -236,7 +252,7 @@ in the stack.
 <p>
 <div><code>
 <b>debug condition gigabitethernet1/0<br>
-debug condition ip 1092.168.1.1<br>
+debug condition ip 192.168.1.1<br>
 debug ip ospf hello</b>
 </code></div>
 </p>
@@ -256,15 +272,14 @@ permitted traffic in the acces-list.
 </p>
 <h3>Verification</h3>
 <p>
-show debug
-</p>
-<p>
-After disabling the debug, ensure that the debug condition is disabled as well.
+
 </p>
 
 <h3><code>show debug</code></h3>
 <p>
 Enabled debugging can be viewed using this command.
+After disabling the debug, ensure that the debug condition is disabled as well.
+
 </p>
 
 <h1>Syslog</h1>
@@ -295,6 +310,11 @@ using the command <code><b>logging trap &lt;severity&gt;</b></code>.
 </p>
 
 <h1>Filtering Logs</h1>
+<p>
+
+</p>
+
+
 <h2>Logging Discriminator</h2>
 <p>
 A logging discriminator can be used to filter generated logs based on the text in 
@@ -309,6 +329,11 @@ discriminator extensively before deploying it in a production environment. This
 will minimize the risk of filtering important messages.
 </p>
 
+<p>
+To configure a logging discriminator:
+<ol>
+  <li>Configure the logging discriminator name and filtering options:
+  
 <p>
 To create a syslog message discriminator, use the command <code><b>logging 
 discriminator &lt;discriminator-name&gt; &lt;facility&gt; &lt;mnemonics&gt; 
@@ -327,10 +352,6 @@ where:
 <li><b>msglimit:</b> (Optional) Integer in the range of 1 to 10000 that identifies the number of messages not to be exceeded.</li> 
 </ul>
 </p>
-<p>
-To configure a logging discriminator:
-<ol>
-  <li>Configure the logging discriminator name and filtering options:
   <p>
      <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
   <code>
@@ -367,10 +388,10 @@ Having logs and debug messages timestamped is extremely important when troublesh
 particularly across different devices. To enable timestamps on logging and debug 
 messages:
 <ul>
-  <li><code><b>service timestamps debug datetime msec</b></code>: Adds timestamps 
+  <li><b>Debugging messages:</b> the command <code><b>service timestamps debug datetime msec</b></code> adds timestamps 
   to debug messages including milliseconds. The datetime option includes the 
   date and the time.</li>
-  <li><code><b>service timestamps log datetime msec</b></code>: Adds the timestamps 
+  <li><b>Log messages:</b> the command <code><b>service timestamps log datetime msec</b></code> adds the timestamps 
   to logging messages. Options include:
     <ul>
       <li><b>datetime:</b> This option alone enables the date (day of month and 
