@@ -406,7 +406,7 @@ To configure SLAAC:
   <li><b>Enable IPv6 routing:</b>
   <p>
   <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-  <code style="font-size:130%">
+  <code>
   R1(config)#<b>ipv6 unicast-routing</b>
   </code></div>
   </p>
@@ -416,7 +416,7 @@ is set to 1. If it is disabled, enable it using the following command
 :
    <p>
   <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-  <code style="font-size:130%">
+  <code>
   R1(config)#<b>interface gigabitethernet0/0</b><br>
   R1(config-if)#<b>ipv6 address 2001:db8:cafe:1::1:1/64</b>
   </code></div>
@@ -433,7 +433,7 @@ on the interface:
 </p>
  <p>
   <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-  <code style="font-size:130%">
+  <code>
   R7(config-if)#<b>ipv6 address autoconfig</b>
   </code></div>
   </p>
@@ -550,7 +550,7 @@ and invalid.
 <h5><code>show ipv6 interface &lt;inteface-id&gt;</code></h5>
 <p>
   <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-  <code style="font-size:130%">
+  <code>
 R7#<b>show ipv6 interface g0/0</b><br>                          <br>                              
 GigabitEthernet0/0 is up, line protocol is up                   <br>                   
 &nbsp;&nbsp;IPv6 is enabled, link-local address is FE80::C807:6FF:FE8D:8  <br>                   
@@ -813,7 +813,7 @@ There are five steps to configure and verify a router as a stateless DHCPv6 serv
   global config command.
   <p>
   <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-  <code style="font-size:130%">
+  <code>
   R1(config)#<b>ipv6 dhcp pool POOL_2001:DB8:CAFE:2</b>
   </code></div>
   </p>
@@ -823,7 +823,7 @@ There are five steps to configure and verify a router as a stateless DHCPv6 serv
   servers, domain name:
   <p>
   <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-  <code style="font-size:130%">
+  <code>
 R1(config-dhcpv6)#<b>dns-server 2001:db8:cafe:a:1::1</b><br>
 R1(config-dhcpv6)#<b>domain-name emmanueltoko.blogspot.com</b>
 </code></div>
@@ -833,7 +833,7 @@ R1(config-dhcpv6)#<b>domain-name emmanueltoko.blogspot.com</b>
     &lt;pool-name&gt;</b></code> interface config command.
     <p>
      <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-  <code style="font-size:130%">
+  <code>
     R1(config)#<b>interface g2/0</b><br>
     R1(config-if)#<b>ipv6 address 2001:db8:cafe:2::1/64</b><br>
     R1(config-if)#<b>ipv6 dhcp server POOL_2001:DB8:CAFE:2</b>
@@ -846,7 +846,7 @@ R1(config-dhcpv6)#<b>domain-name emmanueltoko.blogspot.com</b>
     </p>
      <p>
      <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-  <code style="font-size:130%">
+  <code>
     R1(config-if)#<b>ipv6 nd other-config-flag</b>
    </code></div>
    </p>
@@ -872,7 +872,7 @@ from a DHCPv6 server:
   autoconfig</b></code> command.
   <p>
      <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-  <code style="font-size:130%">
+  <code>
   R5(config)#<b>interface g0/0</b><br>
   R5(config-if)#<b>ipv6 address autoconfig</b>
   </code></div>
@@ -883,7 +883,7 @@ from a DHCPv6 server:
   <code><b>show ipv6 interface &lt;interface-id&gt;</b></code> command.
    <p>
      <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-  <code style="font-size:130%">
+  <code>
   R5#<b>show ipv6 interface g0/0</b><br>
 GigabitEthernet0/0 is up, line protocol is up                  <br>
 &nbsp;&nbsp;IPv6 is enabled, link-local address is FE80::C805:6FF:FE6F:8 <br>
@@ -912,7 +912,7 @@ GigabitEthernet0/0 is up, line protocol is up                  <br>
   such as DNS server and domain name have been received by the client.
   <p>
      <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-  <code style="font-size:130%">
+  <code>
   R5#<b>show ipv6 dhcp interface g0/0</b><br>                     
 GigabitEthernet0/0 is in client mode             <br>    
 &nbsp;&nbsp;Prefix State is IDLE (1)                       <br>    

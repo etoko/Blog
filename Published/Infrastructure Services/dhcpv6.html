@@ -7,7 +7,7 @@
    flexibility.
    
 DHCPv6 is defined by <a href="https://www.ietf.org/rfc/rfc3315.txt" target="_blank">
-RFC 3315(Dynamic Host Configuration Protocol for IPv6 (DHCPv6)</a>.
+RFC 3315 (Dynamic Host Configuration Protocol for IPv6 (DHCPv6)</a>.
 
 </p>
 
@@ -29,30 +29,30 @@ IOS devices can be configured to operate as:
 
 <h2>Unique Identifiers</h2>
 <p>
-DHCPv6 servers, clients and relay agents have exactly one <b>DHCPv6 Unique Identifier(DUID)</b> that 
+DHCPv6 servers, clients and relay agents have exactly one <b>DHCPv6 Unique Identifier (DUID)</b> that 
 uniquely identifies the device. 
 </p>
 <p>
-An <b>Identity Association(IA)</b> is a collection of addresses assigned to a client. 
+An <b>Identity Association (IA)</b> is a collection of addresses assigned to a client. 
 Each client has at least one IA assigned for each interface using DHCPv6. For each 
-IA, the client assigns an an <b>Identity Association Identifier(IAID)</b> that 
+IA, the client assigns an <b>Identity Association Identifier (IAID)</b> that 
 uniquely identifies the IA. The IAID identifies a specific interface on the 
 client. Each interface on the DHCPv6 client or server is identified using an IAID.
 </p>
 
 <h1>IPv6 Global Unicast Address Assignment</h1>
 <p>
-IPv6 global unique addresses(GUA) are assigned to host devices using one of three 
+IPv6 global unique addresses (GUA) are assigned to host devices using one of three 
 methods:
 <ol>
-  <li>Stateless Address Autoconfiguration(SLAAC)</li>
+  <li>Stateless Address Autoconfiguration (SLAAC)</li>
   <li>SLAAC with DHCPv6 (Stateless DHCPv6)</li>
   <li>Stateful DHCPv6</li>
 </ol>
 </p>
 <p>
 The method used to receive IPv6 network configuration parameters is dictated by 
-the router advertisement(RA) messages sent by the local router. The RA messages 
+the router advertisement (RA) messages sent by the local router. The RA messages 
 contain flags that guide the host devices on how their IPv6 prefix, prefix-length, 
 DNS servers, domain-name can be obtained.
 </p>
@@ -62,7 +62,7 @@ DNS servers, domain-name can be obtained.
 How a client obtains an IPv6 GUA depends on the settings in the RA message. An 
 ICMPv6 RA message includes the following three flags:
 <ol>
-  <li><b>A-flag (address autoconfiguration):</b> notifies the device to use SLAAC 
+  <li><b>A-flag (Address autoconfiguration):</b> notifies the device to use SLAAC 
   to create an IPv6 GUA. The host uses the RA message for network configuration 
   parameters such as prefix, prefix-length. This is the default method used by 
   IOS devices to assign IPv6 prefixes to their interfaces.</li>
@@ -85,15 +85,14 @@ methods of dynamic IPv6 address assignment:
 </p>
 <p>
 <table width="100%" cellspacing="0">
-  <thead style="background:#d3d3d3;">
+  <thead style="background:#d3d3d3; font-weight: bold;">
     <tr>
       <td style="border-top: 1px solid; border-bottom: 1px solid;">RA Address 
       Allocation Method</td>
-      <td style="border-top: 1px solid; border-bottom: 1px solid;">A
-      (Address Autoconfiguration)
+      <td style="border-top: 1px solid; border-bottom: 1px solid;" width="15%">A
       </td>
-      <td style="border-top: 1px solid; border-bottom: 1px solid;">O</td>
-      <td style="border-top: 1px solid; border-bottom: 1px solid;">M</td>
+      <td style="border-top: 1px solid; border-bottom: 1px solid; width="15%"">O</td>
+      <td style="border-top: 1px solid; border-bottom: 1px solid; width="15%"">M</td>
     </tr>                              
   </thead>
   <tbody>
@@ -122,13 +121,13 @@ methods of dynamic IPv6 address assignment:
 <h2>Stateful DHCPv6</h2>
 <p>
 With stateful DHCPv6, a DHCPv6 server is managing the assignment of IPv6 network 
-configuration parameters. Router RA message M-flag informs hosts to contact a 
+configuration parameters. The router RA message M-flag informs hosts to contact a 
 DHCPv6 server or DHCPv6-enabled router for all configuration
 information except the default gateway address. Hosts contact a DHCPv6 server to 
 acquire all of their IPv6 configuration parameters except the default gateway 
 which they receive through router RA messages. Although host operating systems 
 follow the suggestion of the RA, the actual decision is ultimately up to the host.
-As the DHCPv6 server is stateful, it maintains a list of IPv6 address bndings.
+As the DHCPv6 server is stateful, it maintains a list of IPv6 address bindings.
 </p>
 <p>
 Most environments that implement stateful DHCPv6 have an addressing need 
@@ -136,7 +135,7 @@ Most environments that implement stateful DHCPv6 have an addressing need
   server. This makes it easier to manage and track IPv6 addresses on the network.
 </p>
 <p> 
-ICMPv6 RA messages are sent periodically by an IPv6 router(default is 200
+ICMPv6 RA messages are sent periodically by an IPv6 router (default is 200
   seconds) or when the router receives a router solicitation message from the 
   host device.
   When a host receives an RA message with the M-flag set, sends a DHCPv6 SOLICIT 
@@ -144,9 +143,9 @@ message seeking additional information from a stateful DHCPv6 server.
   </p>
 <p>
 Stateful DHCPv6 does not require SLAAC while stateless DHCPv6 does. When an RA 
-M-flag is set(to the value 1) indicating the use of stateful DHCPv6:
+M-flag is set (to the value 1) indicating the use of stateful DHCPv6; 
+when the host sends an RS message:
 <ul>
-  <li>The host sends an RS message.</li>
   <li>The router responds with an RA message.</li>
   <li>The host sends a DHCPv6 SOLICIT message.</li>
   <li>The DHCPv6 server responds with an ADVERTISE message.</li>
@@ -172,7 +171,7 @@ The RA message contains the following information:
 <p>
 The RA message sent by a router running a stateful DHCPv6 server includes:
 <ul>
-  <li><b>Destination IPv6 address:</b> FF02::1(All IPv6 devices multicast)</li>
+  <li><b>Destination IPv6 address:</b> FF02::1 (All IPv6 devices multicast)</li>
   <li><b>Source IPv6 address:</b> link-local address on interface</li>
   <li><b>Prefix:</b> prefix e.g., 2001:db8:cafe:2::</li>
   <li><b>Prefix-length:</b> /64</li>
@@ -186,13 +185,13 @@ The RA message sent by a router running a stateful DHCPv6 server includes:
 <p>
 The DHCPv6 address assignment process is similar to that of DHCP for IPv4 with 
 that uses DORA to assign IPv4 network configuration parameters. With DHCPv6, 
-the sequence consists of four stateges: SOLICIT, ADVERTISE, REQUEST, REPLY (SARR).
+the sequence consists of four stages: SOLICIT, ADVERTISE, REQUEST, REPLY (SARR).
 When a client sends an RS message on the link, an RA message is sent in reply 
 to the all devices IPv6 multicast address FF02::1:
 <ol>
   <li>The client sends a <b>SOLICIT</b> message on the local link requesting for network 
   configuration parameters.</li>
-  <li><b>ADVERTISE:</b> The server responds to the SOLICIT message with an ADVERTISE 
+  <li><b>ADVERTISE:</b> the server responds to the SOLICIT message with an ADVERTISE 
   message containing IPv6 configuration information.</li>
   <li><b>REQUEST or INFORMATION REQUEST:</b> REQUEST DHCPv6 message is sent by 
   clients using stateful DHCPv6. INFORMATION REQUEST DHCPv6 message is sent by 
@@ -239,7 +238,7 @@ DHCPv6 server:
     <li><code><b>address prefix 2001:db8:acad:1::/64</b></code>. This command 
     is what causes this DHCPv6 GUA assignment to be stateful in nature.</li>
     <li><code><b>domain-name EXAMPLE.COM</b></code></li>
-    <li>DNS server IP address</li>    
+    <li>DNS server IPv6 address</li>    
   </ul>
   </li>
   <li><b>Bind the interface to the pool:</b> using <code><b>ipv6 dhcp server &lt;pool-name&gt;</b></code> 
@@ -297,7 +296,7 @@ There are five steps to configure and verify a router as a stateless DHCPv6 clie
 </ol>
 </p>
 
-<h2>Stateless Assignment</h2>
+<h2>Stateless Address Assignment</h2>
 <p>
 Stateless address assignments involve assignment of prefixes and network configuration 
 information using stateless address autoconfiguration (SLAAC) and stateless DHCPv6.
@@ -378,7 +377,7 @@ on the operating system. Windows uses a randomly generated number by default.
 <p>
 The use of EUI-64 for generation of Interface ID values is considered by some 
 to be a security risk as the MAC address does not change. This results in the 
-Interface ID being predicable across the different IPv6 networks that the device 
+Interface ID being predictable across the different IPv6 networks that the device 
 may connect to. This makes tracking this device easier.
 </p>
 <p>
@@ -494,7 +493,7 @@ Generally, the most common command is:
 <h4>SLAAC Address Lifecycle</h4>
 <p>
 SLAAC addresses transition through various states: tentative, preferred, deprecated 
-and invalid.
+and valid.
 <ul>
   <li><b>Tentative Address:</b>
     <ul>
@@ -597,20 +596,18 @@ that:
   </li>
   <li><b>Advertised router preference:</b> 
    <ul>
-    <li>multiple routers may be present on a link. The default router 
+    <li>Multiple routers may be present on a link. The default router 
     preference(DRP) is used to set the preference of the 
   default router from the list of available routers.</li>
   <li>The default value sent to medium. Valid values include high, medium, low.</li>
   <li>Hosts can dynamically fill their default router list using the IPv6 
   addresses from the RA messages of the various routers on the link.</li>
   <li>
-  <p>
 Client devices maintain a list of default routers. When a client receives an RA, 
 id adds the link-local source address of the packet as one of the routers it can 
 use as a default gateway. Each entry has a timer, Router Lifetime, extracted from 
 the RA. This entry gets deleted when the Router Lifetime expires. The Router Lifetime 
 value is refreshed every 200 seconds when the RA advertisements are received.
-</p>
   </li>
   </ul>
   </li>
@@ -674,7 +671,7 @@ In this output, included is the:
 </ul>
 </p>
 
-<h3>SLAAC with DHCPv6 (Stateless DHCPv6)</h3>
+<h2>SLAAC with DHCPv6 (Stateless DHCPv6)</h2>
 <p>
 RA messages provide IPv6 configuration information to hosts such as prefix, 
 prefix length but inform them to contact a stateless DHCPv6 server for additional 
@@ -732,7 +729,7 @@ Because the address autoconfig flag(A-flag) is set to 1, the device creates its
 own Interface ID using EUI-64 or randomly generated. 
 </p>
 
-<h2>Host Process to Generate Interface ID</h2>
+<h3>Host Process to Generate Interface ID</h3>
 <p>
 Using SLAAC, a host acquires its 64-bit IPv6 subnet information from the router RA 
 and must generate the remainder 64-bit interface identifier using either:
@@ -740,7 +737,7 @@ and must generate the remainder 64-bit interface identifier using either:
   <l><b>Randomly generated:</b> the 64-bit interface identifier is randomly 
   generated by the client operating system(usually used by Windows 10).</l>
   <li><b>EUI-64:</b> the host creates an interface ID using its 48-bit MAC address and 
-  inserts the hex value of FFFE in the middle of the address. Some operating 
+  inserts the hex value of FF:FE in the middle of the address. Some operating 
   systems default to randomly generated interface ID instead of the EUI-64 method 
   due to privacy concerns. This is because the Ethernet MAC address of the host is 
   used by EUI-64 to create the interface ID.
@@ -750,7 +747,7 @@ Windows, Linux, and Mac OS allow for the user to modify the generation of the in
 ID to be either randomly generated or to use EUI-64.
 </p>
 
-<h2>Duplicate Address Detection(DAD)</h2>
+<h3>Duplicate Address Detection(DAD)</h3>
 <p>
 A SLAAC host may use the following DAD process to ensure that the IPv6 GUA is unique.
 <ul>
@@ -765,7 +762,7 @@ A SLAAC host may use the following DAD process to ensure that the IPv6 GUA is un
 
 <b>Note:</b> DAD is not really required because a 64-bit interface ID provides 
 infinite possibilites of an address. IETF recommends the use of DAD. Due to this,
-most host oerating systems perform DAD on all IPv6 unicast addresses, regardless of 
+most host operating systems perform DAD on all IPv6 unicast addresses, regardless of 
 how the address is configured.
 </p>
 
@@ -966,19 +963,20 @@ There are two modes of address allocation:
 <p>
 If the DHCPv6 server is located on a different network from the client, then 
 the IPv6 router can be configured as a DHCPv6 relay agent. 
-The realy agent creates a unicast RELAY-FORWARD message containing the original 
+The relay agent creates a unicast RELAY-FORWARD message containing the original 
 DHCPv6 message from the client and forwards the message to a server.
 
 The configuration of a 
-DHCPv6 relay agent is similar to the configuration of an IPv4 router as a DHCPv4 relay.
+DHCPv6 relay agent is similar to the configuration of an IPv4 router as a DHCPv4 relay
+and uses the interface mode command <code><b>ipv6 dhcp relay destination &lt;ipv6-address&gt; &lt;egress-interface&gt;</b></code>.
 This command is configured on the interface facing the DHCPv6 clients and specifies 
 the DHCPv6 server address and egress interface to reach the server. The egress interface
 is only required when the next-hop address is an LLA. 
-<code><b>ipv6 dhcp relay destination 2001:01010 &lt;egress-interface&gt;</b></code>.
+
 </p>
 <p>
 The relay address can be unicast or multicast. With a multicast address, multiple 
-DHCPv6 servers be be available. If a link-local unicast address is configured, 
+DHCPv6 servers can respond to the request. If a link-local unicast address is configured, 
 then the egress interface must be specified.
 </p>
 
