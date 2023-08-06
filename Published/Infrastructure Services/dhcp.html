@@ -476,8 +476,67 @@ A DHCP relay agent forwards the following:
 
 <p>
 The command to configure the DHCP relay is <code><b>ip helper-address &lt;dhcp-server-ip-address&gt;</b></code>.
-
 </p>
+<p>
+The DHCPDISCOVER message received from an DHCP relay is sent in unicast packets 
+with the source IP address being the DHCP relay interface IP address point to the 
+clients. Included in this DHCPDISCOVER message is the relay agent IP address 
+which is usually the same as the source IP address.
+</p>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+Frame 217: 333 bytes on wire (2664 bits), 333 bytes captured (2664 bits) on interface -, id 0       <br>
+Ethernet II, Src: ca:03:06:63:00:1c (ca:03:06:63:00:1c), Dst: ca:02:06:37:00:1c (ca:02:06:37:00:1c) <br>
+Internet Protocol Version 4, Src: 192.168.34.1, Dst: 192.168.23.1                                   <br>
+User Datagram Protocol, Src Port: 67, Dst Port: 67                                                  <br>
+Dynamic Host Configuration Protocol (Discover)                                                      <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Message type: Boot Request (1)                                                                  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Hardware type: Ethernet (0x01)                                                                  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Hardware address length: 6                                                                      <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Hops: 1                                                                                         <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Transaction ID: 0x000013e6                                                                      <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Seconds elapsed: 0                                                                              <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Bootp flags: 0x8000, Broadcast flag (Broadcast)                                                 <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1... .... .... .... = Broadcast flag: Broadcast                                             <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.000 0000 0000 0000 = Reserved flags: 0x0000                                                <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Client IP address: 0.0.0.0                                                                      <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Your (client) IP address: 0.0.0.0                                                               <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Next server IP address: 0.0.0.0                                                                 <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Relay agent IP address: 192.168.34.1                                                            <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Client MAC address: ca:04:06:72:00:08 (ca:04:06:72:00:08)                                       <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Client hardware address padding: 00000000000000000000                                           <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Server host name not given                                                                      <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Boot file name not given                                                                        <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Magic cookie: DHCP                                                                              <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Option: (53) DHCP Message Type (Discover)                                                       <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Length: 1                                                                                   <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;DHCP: Discover (1)                                                                          <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Option: (57) Maximum DHCP Message Size                                                          <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Length: 2                                                                                   <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Maximum DHCP Message Size: 1200                                                             <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Option: (61) Client identifier                                                                  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Length: 27                                                                                  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Type: 0                                                                                     <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Client Identifier: cisco-ca04.0672.0008-Gi0/0                                               <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Option: (12) Host Name                                                                          <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Length: 2                                                                                   <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Host Name: R4                                                                               <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Option: (55) Parameter Request List                                                             <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Length: 8                                                                                   <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Parameter Request List Item: (1) Subnet Mask                                                <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Parameter Request List Item: (6) Domain Name Server                                         <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Parameter Request List Item: (15) Domain Name                                               <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Parameter Request List Item: (44) NetBIOS over TCP/IP Name Server                           <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Parameter Request List Item: (3) Router                                                     <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Parameter Request List Item: (33) Static Route                                              <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Parameter Request List Item: (150) TFTP Server Address                                      <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Parameter Request List Item: (43) Vendor-Specific Information                               <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Option: (255) End                                                                               <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Option End: 255                                                                             <br>
+</code></div>
+</p>
+
 
 <h2>DHCP Messages</h2>
 <p>
@@ -995,7 +1054,9 @@ After receiving network configuration information, DHCP installs a static
 default route in the routing table. This route has a default administrative 
 distance of 254 which is the worst acceptable administrative distance.
 </p>
+<p>
 
+</p>
 
 <h2>Relay</h2>
 <p>
@@ -1017,6 +1078,48 @@ command
 is entered in the interface configuration mode of the interface connected to the 
 subnet that contains the DHCP clients. This is the interface that will receive 
 the DHCPDiscover messages from the clients.
+</p>
+<p>
+In addition to the default route, DHCP installs a host static route of the 
+remote DHCP server:
+</p>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+  R4#<b>show ip route</b>                                                             <br>          
+Codes: L - local, C - connected, S - static, R - RIP, M - mobile, B - BGP      <br>        
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; D - EIGRP, EX - EIGRP external, O - OSPF, IA - OSPF inter area          <br>        
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; N1 - OSPF NSSA external type 1, N2 - OSPF NSSA external type 2          <br>        
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; E1 - OSPF external type 1, E2 - OSPF external type 2                    <br>        
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; i - IS-IS, su - IS-IS summary, L1 - IS-IS level-1, L2 - IS-IS level-2   <br>        
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ia - IS-IS inter area, * - candidate default, U - per-user static route <br>        
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; o - ODR, P - periodic downloaded static route, H - NHRP, l - LISP       <br>        
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; + - replicated route, % - next hop override                             <br>        
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                                   <br>        
+Gateway of last resort is 192.168.34.1 to network 0.0.0.0                      <br>        
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                                   <br>        
+S*&nbsp;&nbsp;&nbsp;&nbsp;0.0.0.0/0 [254/0] via 192.168.34.1                                       <br>        
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;192.168.23.0/32 is subnetted, 1 subnets                                  <br>        
+S&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;192.168.23.1 [254/0] via 192.168.34.1, GigabitEthernet0/0             <br>        
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;192.168.34.0/24 is variably subnetted, 2 subnets, 2 masks                <br>        
+C&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;192.168.34.0/24 is directly connected, GigabitEthernet0/0             <br>        
+L&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;192.168.34.100/32 is directly connected, GigabitEthernet0/0           <br>        
+R4#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                                  <br>        
+R4#<b>show ip route 0.0.0.0</b>                                                       <br>        
+Routing entry for 0.0.0.0/0, supernet                                          <br>        
+&nbsp;&nbsp;Known via "static", distance 254, metric 0, candidate default path           <br>        
+&nbsp;&nbsp;Routing Descriptor Blocks:                                                   <br>        
+&nbsp;&nbsp;* 192.168.34.1                                                               <br>        
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Route metric is 0, traffic share count is 1                              <br>        
+R4#<b>show ip route 192.168.23.1</b>                                                  <br>        
+Routing entry for 192.168.23.1/32                                              <br>        
+&nbsp;&nbsp;Known via "static", distance 254, metric 0                                   <br>        
+&nbsp;&nbsp;Routing Descriptor Blocks:                                                   <br>        
+&nbsp;&nbsp;* 192.168.34.1, via GigabitEthernet0/0                                       <br>        
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Route metric is 0, traffic share count is 1                              <br>        
+R4#                                                                                     
+  
+  </code></div>
 </p>
 
 <h2>Database Agents</h2>
@@ -1243,6 +1346,79 @@ actions taken and response to received messages.
 <p>
 Debugging of DHCP messages sent and received. 
 </p>
+<p>
+The following output is from the commands <code><b>debug ip dhcp server events</b></code> 
+and <code><b>debug ip dhcp server events</b></code> :
+</p>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+*Aug&nbsp;&nbsp;6 13:03:53.111: DHCPD: checking for expired leases.            <br>
+*Aug&nbsp;&nbsp;6 13:04:55.987: DHCPD: client's VPN is .                       <br>
+*Aug&nbsp;&nbsp;6 13:04:55.987: DHCPD: No option 125                           <br>
+*Aug&nbsp;&nbsp;6 13:04:55.987: DHCPD: Sending notification of DISCOVER:       <br>
+*Aug&nbsp;&nbsp;6 13:04:55.991:&nbsp;&nbsp; DHCPD: htype 1 chaddr ca04.0672.0008         <br>
+*Aug&nbsp;&nbsp;6 13:04:55.991:&nbsp;&nbsp; DHCPD: remote id 020a0000c0a8170110000000    <br>
+*Aug&nbsp;&nbsp;6 13:04:55.991:&nbsp;&nbsp; DHCPD: circuit id 00000000                   <br>
+*Aug&nbsp;&nbsp;6 13:04:55.995: DHCPD: DHCPDISCOVER received from client 0063.6973.636f.2d63.6130.342e.3036.3732.2e30.3030.382d.4769.302f.30 through relay 192.168.34.1.*Aug  6 13:04:55.995: DHCPD: Seeing if there is an internally specified pool class:<br>
+*Aug&nbsp;&nbsp;6 13:04:55.999:&nbsp;&nbsp; DHCPD: htype 1 chaddr ca04.0672.0008                                                                                    <br>
+*Aug&nbsp;&nbsp;6 13:04:55.999:&nbsp;&nbsp; DHCPD: remote id 020a0000c0a8170110000000                                                                               <br>
+*Aug&nbsp;&nbsp;6 13:04:55.999:&nbsp;&nbsp; DHCPD: circuit id 00000000                                                                                              <br>
+*Aug&nbsp;&nbsp;6 13:04:56.003: DHCPD: Allocate an address without class information (192.168.34.0)                                                       <br>
+*Aug&nbsp;&nbsp;6 13:04:56.007: DHCPD: Allocated binding 692D215C                                                                                         <br>
+*Aug&nbsp;&nbsp;6 13:04:56.007: DHCPD: Adding binding to radix tree (192.168.34.1)                                                                        <br>
+*Aug&nbsp;&nbsp;6 13:04:56.011: DHCPD: Adding binding to hash tree                                                                                        <br>
+*Aug&nbsp;&nbsp;6 13:04:56.011: DHCPD: assigned IP address 192.168.34.1 to client 0063.6973.636f.2d63.6130.342e.3036.3732.2e30.3030.382d.4769.302f.30.    <br>
+*Aug&nbsp;&nbsp;6 13:04:56.011: DHCPD: Saving workspace (ID=0xD8000004)                                                                                   <br>
+*Aug&nbsp;&nbsp;6 13:04:56.063: %DHCPD-4-PING_CONFLICT: DHCP address conflict:  server pinged 192.168.34.1.                                               <br>
+*Aug&nbsp;&nbsp;6 13:04:56.063: DHCPD: removing ARP entry (192.168.34.1 vrf default).                                                                     <br>
+*Aug&nbsp;&nbsp;6 13:04:56.067: DHCPD: returned 192.168.34.1 to address pool DHCP_192.168.34.0.                                                           <br>
+*Aug&nbsp;&nbsp;6 13:04:56.071: DHCPD: Reprocessing saved workspace (ID=0xD8000004)                                                                       <br>
+*Aug&nbsp;&nbsp;6 13:04:56.071: DHCPD: Sending notification of DISCOVER:                                                                                  <br>
+*Aug&nbsp;&nbsp;6 13:04:56.075:&nbsp;&nbsp; DHCPD: htype 1 chaddr ca04.0672.0008                                                                                    <br>
+*Aug&nbsp;&nbsp;6 13:04:56.075:&nbsp;&nbsp; DHCPD: remote id 020a0000c0a8170110000000                                                                               <br>
+*Aug&nbsp;&nbsp;6 13:04:56.075:&nbsp;&nbsp; DHCPD: circuit id 00000000                                                                                              <br>
+*Aug&nbsp;&nbsp;6 13:04:56.079: DHCPD: DHCPDISCOVER received from client 0063.6973.636f.2d63.6130.342e.3036.3732.2e30.3030.382d.4769.302f.30 through relay 192.168.34.1.*Aug  6 13:04:56.079: DHCPD: Seeing if there is an internally specified pool class:<br>
+*Aug&nbsp;&nbsp;6 13:04:56.079:&nbsp;&nbsp; DHCPD: htype 1 chaddr ca04.0672.0008                                                                                     <br>
+*Aug&nbsp;&nbsp;6 13:04:56.079:&nbsp;&nbsp; DHCPD: remote id 020a0000c0a8170110000000                                                                                <br>
+*Aug&nbsp;&nbsp;6 13:04:56.079:&nbsp;&nbsp; DHCPD: circuit id 00000000                                                                                               <br>
+*Aug&nbsp;&nbsp;6 13:04:56.079: DHCPD: Allocate an address without class information (192.168.34.0)                                                        <br>
+*Aug&nbsp;&nbsp;6 13:04:56.079: DHCPD: Allocated binding 692D215C                                                                                          <br>
+*Aug&nbsp;&nbsp;6 13:04:56.079: DHCPD: Adding binding to radix tree (192.168.34.100)                                                                       <br>
+*Aug&nbsp;&nbsp;6 13:04:56.079: DHCPD: Adding binding to hash tree                                                                                         <br>
+*Aug&nbsp;&nbsp;6 13:04:56.079: DHCPD: assigned IP address 192.168.34.100 to client 0063.6973.636f.2d63.6130.342e.3036.3732.2e30.3030.382d.4769.302f.30.   <br>
+*Aug&nbsp;&nbsp;6 13:04:58.383: DHCPD: Reprocessing saved workspace (ID=0xD8000004)                                                                        <br>
+*Aug&nbsp;&nbsp;6 13:04:58.387: DHCPD: Sending notification of DISCOVER:                                                                                   <br>
+*Aug&nbsp;&nbsp;6 13:04:58.387:&nbsp;&nbsp; DHCPD: htype 1 chaddr ca04.0672.0008                                                                                     <br>
+*Aug&nbsp;&nbsp;6 13:04:58.387:&nbsp;&nbsp; DHCPD: remote id 020a0000c0a8170110000000                                                                                <br>
+*Aug&nbsp;&nbsp;6 13:04:58.387:&nbsp;&nbsp; DHCPD: circuit id 00000000                                                                                               <br>
+*Aug&nbsp;&nbsp;6 13:04:58.387: DHCPD: DHCPDISCOVER received from client 0063.6973.636f.2d63.6130.342e.3036.3732.2e30.3030.382d.4769.302f.30 through relay 192.168.34.1.*Aug  6 13:04:58.387: DHCPD: Seeing if there is an internally specified pool class:<br>
+*Aug&nbsp;&nbsp;6 13:04:58.391:&nbsp;&nbsp; DHCPD: htype 1 chaddr ca04.0672.0008                                                                                      <br>
+*Aug&nbsp;&nbsp;6 13:04:58.391:&nbsp;&nbsp; DHCPD: remote id 020a0000c0a8170110000000                                                                                 <br>
+*Aug&nbsp;&nbsp;6 13:04:58.391:&nbsp;&nbsp; DHCPD: circuit id 00000000                                                                                                <br>
+*Aug&nbsp;&nbsp;6 13:04:58.391: DHCPD: Sending DHCPOFFER to client 0063.6973.636f.2d63.6130.342e.3036.3732.2e30.3030.382d.4769.302f.30 (192.168.34.100).    <br>
+*Aug&nbsp;&nbsp;6 13:04:58.391: DHCPD: no option 125                                                                                                        <br>
+*Aug&nbsp;&nbsp;6 13:04:58.391: DHCPD: unicasting BOOTREPLY for client ca04.0672.0008 to relay 192.168.34.1.                                                <br>
+*Aug&nbsp;&nbsp;6 13:04:58.443: DHCPD: New packet workspace 0x6B212060 (ID=0xA9000005)                                                                      <br>
+*Aug&nbsp;&nbsp;6 13:04:58.443: DHCPD: client's VPN is .                                                                                                    <br>
+*Aug&nbsp;&nbsp;6 13:04:58.447: DHCPD: No option 125                                                                                                        <br>
+*Aug&nbsp;&nbsp;6 13:04:58.447: DHCPD: DHCPREQUEST received from client 0063.6973.636f.2d63.6130.342e.3036.3732.2e30.3030.382d.4769.302f.30.                <br>
+*Aug&nbsp;&nbsp;6 13:04:58.451: DHCPD: Sending notification of ASSIGNMENT:                                                                                  <br>
+*Aug&nbsp;&nbsp;6 13:04:58.451:&nbsp;&nbsp;DHCPD: address 192.168.34.100 mask 255.255.255.0                                                                           <br>
+*Aug&nbsp;&nbsp;6 13:04:58.451:&nbsp;&nbsp; DHCPD: htype 1 chaddr ca04.0672.0008                                                                                      <br>
+*Aug&nbsp;&nbsp;6 13:04:58.455:&nbsp;&nbsp; DHCPD: lease time remaining (secs) = 86400                                                                                <br>
+*Aug&nbsp;&nbsp;6 13:04:58.455: DHCPD: Appending default domain from pool                                                                                   <br>
+*Aug&nbsp;&nbsp;6 13:04:58.455: DHCPD: Using hostname 'R4.emmanueltoko.wordpress.com.' for dynamic update (from hostname option)                            <br>
+*Aug&nbsp;&nbsp;6 13:04:58.459: DHCPD: Sending DHCPACK to client 0063.6973.636f.2d63.6130.342e.3036.3732.2e30.3030.382d.4769.302f.30 (192.168.34.100).      <br>
+*Aug&nbsp;&nbsp;6 13:04:58.463: DHCPD: no option 125                                                                                                        <br>
+*Aug&nbsp;&nbsp;6 13:04:58.463: DHCPD: unicasting BOOTREPLY for client ca04.0672.0008 to relay 192.168.34.1.                                                <br>
+*Aug&nbsp;&nbsp;6 13:05:53.111: DHCPD: checking for expired leases.                                                                                         <br>
+*Aug&nbsp;&nbsp;6 13:07:53.111: DHCPD: checking for expired leases.                                                                                          <br>
+*Aug&nbsp;&nbsp;6 13:09:53.111: DHCPD: checking for expired leases.                                                                                          <br>
+*Aug&nbsp;&nbsp;6 13:11:53.111: DHCPD: checking for expired leases.                                                                                          <br>
+</code></div>
+</p>
+
 
 <h2><code>show dhcp lease</code></h2>
 <p>

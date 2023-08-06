@@ -41,6 +41,7 @@ configuration information that is issued by DHCP includes the following:
   <li>DNS server IP address</li>
   <li>Domain name</li>
   <li>TFTP server address</li>
+  <li>Many other IP services</li>
 </ul>
 </p>
 <p>
@@ -57,6 +58,8 @@ DHCP supports three mechanisms for IP address allocation:
   </li>
 </ol>
 </p>
+
+<h2>Address Lease</h2>
 <p>
 The lease period must be renewed if a device wants to continue using the assigned 
 IP configuration information. An infinite lease has the time set to (2 <sup>32</sup>) 
@@ -64,15 +67,16 @@ seconds or 4294967295 seconds which is equivalent to 136 years.
 The lease period must be renewed while it is still valid. Once a lease 
 expires, the address issued is returned to the address pool. 
 </p>
-To ensure that the lease on the issued IP address does not expire, DHCP has a process in 
-which the client requests for a renewal of a lease. The first attempt 
+To ensure that the lease on the issued IP address does not expire, when a client 
+is still using the address, DHCP has a process in which the client requests for 
+a renewal of a lease, if the still is still in need of the IP address. The first attempt 
 to renew the lease period is at half the lease time with the client sending a 
 DHCP Request message containing the requested IP address in option 50. 
 When the DHCP server receives the DHCP Request message for the lease to be renewed, 
 it resets the lease timer on the address to the configured duration and responds 
 with a DHCP ACK message to the client containing the requested IP address and other 
 IP configuration parameters. If a client does not receive confirmation of a renewed 
-lease on an address, it sends a second DHCP Request message to renew the lease. 
+lease on the address, it sends a second DHCP Request message to renew the lease. 
 The second attempt is sent at half the remaining lease time i.e., at 3/4 of the original lease time.
 </p>
 <p>
@@ -89,8 +93,8 @@ should be made short as guests users are likely to be connected for a shorter ti
 </p>
 <p>
 However, if the address pool is not large and clients typically connect to the 
-network for short periods of time, it may be recommended to configure a lease 
-period of an hour. This ensures that leased addresses are not reserved for much 
+network for short periods of time, it may be recommended to configure a shorter 
+lease period e.g. one hour. This ensures that leased addresses are not reserved for much 
 longer after a client has disconnected from the network and the addresses are 
 returned to the pool. 
 </p>
@@ -195,7 +199,9 @@ of zero.
 <h2>Offer</h2>
 <p>
 A DHCP server that receives a DHCP Discover message will reply to the Discover 
-message with an offer message. The offer is sent to the broadcast address 
+message with an offer message. The server reserves an IP address for this client 
+and sends the reserved IP address along with other IP configuration information 
+to the client. The offer is sent to the broadcast address 
 255.255.255.255. Clients will identify the DHCPOFFER is intended for them because 
 the DHCP server includes the client MAC address that was in the DHCPDISCOVER 
 message received from the client. Additionally, this client MAC address is 
@@ -272,9 +278,9 @@ Dynamic Host Configuration Protocol (Offer)                                     
 </p>
 
 <p>
-Because clients send broadcasts, any DHCP servers listening can respond to the 
+Because clients send DHCP messages through broadcasts, any DHCP servers listening can respond to the 
 client. A client usually accepts the first offer it receives. If a client does 
-not respond to a DHCPOffer message within a given amount of time the server can 
+not respond to a DHCPOFFER message within a given amount of time the server can 
 reclaim the IP addresses that it had reserved for the client.
 If a DHCP server cannot satisfy a DHCP request from its own database, it can 
 forward the request to one or more secondary servers.
@@ -436,10 +442,13 @@ Some DHCP servers include the following parameters in the DHCP ACK message:
 
 <h2>DHCP Relay</h2>
 <p>
-By default, routers block broadcast messages. So these messages do not get sent to a remote 
-DHCP server unless a DHCP relay has been configured. The DHCP relay takes the 
-DHCPDISCOVER broadcast message and sends a unicast DHCPDISCOVER meesage to the 
-DHCP server.
+Based on the network design, a DHCP server may be located in the local network 
+or a remote network. However, by default, DHCP clients send DHCPDiscover messages 
+in broadcast; but routers block broadcast messages. So these DHCPDISCOVER messages 
+get blocked by the local router and are not sent to a remote DHCP server unless 
+the DHCP relay feature has been has been configured on the local network gateway.
+The DHCP relay takes the DHCPDISCOVER broadcast message and sends a unicast 
+DHCPDISCOVER message to the DHCP server.
 </p>
 <p>
 The network that the DHCP relay (and client) reside in should be 
@@ -746,7 +755,7 @@ The entire list of DHCP options can be obtained from the RFC document defining D
 
 <h1>Configuration</h1>
 <p>
-To enable DHCP servers on a router or switch, the DHCP needs to be enabled. This 
+To enable DHCP services on a router or switch, the DHCP needs to be enabled. This 
 is done using the command <code><b>service dhcp</b></code>.
 </p>
 
@@ -777,7 +786,7 @@ Features include:
 
 <p>
 <ol>
-  <li><b>Configure the range of excluded Addresses:</b> 
+  <li><b>Configure the range of excluded IP addresses:</b> 
   Before configuring the DHCP features, it is best to first configure addresses to
 be excluded from being assigned to clients. These are usually addresses reserved 
 for hosts to receive addresses through static configuration such as network devices, 
@@ -805,6 +814,32 @@ server will pick an IP address from the pool (usually the lowest available addre
 and offer it to the client. The command to define the DHCP address pool is 
 <code><b>ip dhcp pool &lt;pool-name&gt;</b></code>.
   
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+
+DHCP_SERVER(config)#<b>ip dhcp pool DHCP_POOL_10.3.1.0/24</b>                       <br>
+DHCP_SERVER(dhcp-config)#<b>network 10.3.1.0 255.255.255.0</b>                      <br>
+DHCP_SERVER(dhcp-config)#<b>default-router 10.3.1.1 10.3.1.2</b>                    <br>
+DHCP_SERVER(dhcp-config)#<b>lease 1 12 0</b>                                        <br>
+</code></div></p>
+
+<p>
+<ul>
+<li>The DHCP pool has been defined using the name DHCP_POOL_10.3.1.0/24.</li>
+ <li><b>network:</b> The subnet is defined here alongside the subnet mask. 
+ Here, it is 10.3.1.0 with a subnetwork mask of 255.255.255.0</li>
+ <li><b>default-router:</b> defines the default gateway(s) for the subnet. More 
+ than one default gateway can be defined. Here, it is 10.3.1.1 and 10.3.1.2</li>
+ <li><b>lease:</b> Defines the lease. By default it is set to 1 day (24 hours). 
+ Here, it is configured for one day and twelve hours and zero minutes (36 hours)</li>
+ <li><b>dns-server:</b> the list of DNS servers with most preferred servers listed 
+ first.</li>
+</ul>
+</p>
+<p>
+Additional DHCP pool configuration options are available:
+</p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
   <code>
@@ -840,24 +875,7 @@ DHCP pool configuration commands:                                            <br
 &nbsp;&nbsp;utilization&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Configure various utilization parameters              <br>
 &nbsp;&nbsp;vrf&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Associate this pool with a VRF                        <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                     <br>
-DHCP_SERVER(config)#                                                         <br>
-DHCP_SERVER(config)#<b>ip dhcp pool DHCP_POOL_10.3.1.0/24</b>                       <br>
-DHCP_SERVER(dhcp-config)#<b>network 10.3.1.0 255.255.255.0</b>                      <br>
-DHCP_SERVER(dhcp-config)#<b>default-router 10.3.1.1 10.3.1.2</b>                    <br>
-DHCP_SERVER(dhcp-config)#<b>lease 1 12 0</b>                                        <br>
-</code></div></p>
-<p>
-<ul>
-<li>The DHCP pool has been defined using the name DHCP_POOL_10.3.1.0/24.</li>
- <li><b>network:</b> The subnet is defined here alongside the subnet mask. 
- Here, it is 10.3.1.0 with a subnetwork mask of 255.255.255.0</li>
- <li><b>default-router:</b> defines the default gateway(s) for the subnet. More 
- than one default gateway can be defined. Here, it is 10.3.1.1 and 10.3.1.2</li>
- <li><b>lease:</b> Defines the lease. By default it is set to 1 day (24 hours). 
- Here, it is configured for one day and twelve hours and zero minutes (36 hours)</li>
- <li><b>dns-server:</b> the list of DNS servers with most preferred servers listed 
- first.</li>
-</ul>
+</code></div>
 </p>
 </li>
 <li>Configure any DHCP options using the command <code><b>option &lt;option-code&gt; 
@@ -903,7 +921,7 @@ DHCP_SERVER(config)#
 <h3>DHCP Server Pinging an address before Offer to Client</h3>
 <p>
 Before a DHCP server offers an IP address to a client, the server first pings 
-the IP address to confirm that no other host has that address. By default, the 
+the IP address to confirm that no other host is using that address. By default, the 
 address is pinged twice before being issued. However, you can configure the 
 number of times that a DHCP server pings an address before it offers the address 
 using the command;
@@ -929,7 +947,6 @@ determined the conflict. In this case the conflict will the determined by pingin
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
   <code>
-DHCP_SERVER#  <br>
 DHCP_SERVER#  <br>
 *Jan 23 21:50:17.155: %DHCPD-4-PING_CONFLICT: DHCP address conflict:  server pinged 10.1.13.1.<br>
 DHCP_SERVER#<b>show ip dhcp conflict</b><br>
