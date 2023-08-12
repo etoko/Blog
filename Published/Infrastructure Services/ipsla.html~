@@ -1,20 +1,22 @@
 <h1>Introduction and Overview</h1>
 <p>
-IP SLAs are used to measure and verify network performance. These measurements can 
-be leaveraged to influence routing decisions such as static routing, policy-based routing (PBR). 
+IP SLAs are used to measure and verify network performance.  
 IP SLAs operate in real-time by generating simulated network traffic such as VoIP, ICMP (echo,
 jitter, path echo, path jitter), TCP Connection, UDP (echo, jitter, jitter for VoIP), 
 DNS, DHCP, HTTP, FTP. Network performance can then be determined by the statistics 
 generated from the network in response to the IP SLA traffic. Statistics generated 
 include; delay (round-trip and one-way), packet loss, jitter, voice quality scores etc.
+IP SLAs are used to collect information about: reachability, response times to 
+probes, latency ( one-way or round-trip), jitter (inter-packet variation), voice quality scoring, etc.
+These measurements can be leaveraged to influence routing decisions such as 
+static routing, policy-based routing (PBR).
 </p>
 <p>
 IP SLA stores this information in the CLI and SNMP MIBs.
 IP SLA collects data that can then be used by enhanced object tracking to take 
 a defined action. When the IP SLA is configured, object tracking can reference 
 the IP SLA to implement an action based on the outcome or status of the IP SLA operation.
-IP SLAs are used to collect information about: reachability, response times to 
-probes, one-way latency, jitter (inter-packet variation), voice quality scoring, etc.
+
 </p>
 <p>
 IP SLA consists of two distinct parts; a probe and schedule.
@@ -62,22 +64,52 @@ Use the command <code><b>show ip sla application</b></code> to verify the
 IP SLA operations supported by the IOS image.
 </p>
 <p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+R1#<b>show ip sla application</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                         <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;IP Service Level Agreements&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                         <br>
+Version: Round Trip Time MIB 2.2.0, Infrastructure Engine-III             <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                        <br>
+Supported Operation Types:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                        <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;icmpEcho, path-echo, path-jitter, udpEcho, tcpConnect, http       <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;dns, udpJitter, dhcp, ftp, VoIP, rtp, lsp Group, icmpJitter       <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;lspPing, lspTrace, 802.1agEcho VLAN, Port                         <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;802.1agJitter VLAN, Port, pseudowirePing, udpApp, wspApp          <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mcast, generic&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                        <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                        <br>
+Supported Features:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                         <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;IPSLAs Event Publisher&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                        <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                        <br>
+IP SLAs low memory water mark: 75481422&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                         <br>
+Estimated system max number of entries: 55284&nbsp;&nbsp;&nbsp;&nbsp;                         <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                        <br>
+Estimated number of configurable operations: 54925                        <br>
+Number of Entries configured&nbsp;&nbsp;: 1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                         <br>
+Number of active Entries&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: 1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                         <br>
+Number of pending Entries&nbsp;&nbsp;&nbsp;&nbsp; : 0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                         <br>
+Number of inactive Entries&nbsp;&nbsp;&nbsp;&nbsp;: 0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                         <br>
+Time of last change in whole IP SLAs: *15:05:44.253 UTC Sat Mar 13 2021   <br>
+                                                                          <br>
+R1#
+</code></div></p>
+<p>
 IP SLAs that are based on connectivity tests do not require a responder. However, 
 for IP SLA operations that do require a responder, this should be configured 
 first before scheduling the IP SLA operation.
 </p>
 
 
-<h2>An IP SLA responder and SLA Control Protocol</h2>
+<h2>IP SLA responder and SLA Control Protocol</h2>
 <p>
 An IP SLA responder is an active device in the network specifically configured  
 to interprete and respond to specific probes. Cisco devices configured as responders 
-use the IP SLA control protocol. It that allows the responder and sender to agree on various parameters such 
+use the IP SLA control protocol. The IP SLA control protocol allows the responder 
+and sender to agree on various parameters such 
 as port number and respond to IP SLA request packets. This results in IP SLA operations 
 having greater accuracy in measurements not available to standard ICMP-based probes. 
 The IP SLA responder listens on UDP port 1967 for control protocol messages
 sent by an IP SLA operation. Upon receipt of the control message, the responder 
-will enable the specified UDP or TCP port for the specified duration. During this 
+will enable the specified UDP or TCP port for the specified IP SLA operation. During this 
 time, the responder accepts the requests and sends responses.
 The responder disables the port after it responds to the IP SLA request or when 
 the specified time expires.
@@ -86,7 +118,7 @@ the specified time expires.
 <p>
 Time synchronization is required between the source and target device to prove accurate 
 measurements. NTP may be required to be configured on the source and target device 
-to ensure that two devices have the same time.
+to ensure that the two devices have their time synchronized.
 </p>
 
 <p>
@@ -94,7 +126,8 @@ Some IP SLA operations do not require the configuration of an IPSLA responder. T
 include HTTP, DHCP where the application itself acts as a responder to requests.
 </p>
 <p>
-MD5 authentication of control messages can be configured to increase security.
+MD5 authentication of control messages can be configured to provide security to 
+the SLA operation.
 </p>
 
 
@@ -110,8 +143,8 @@ times by using UDP instead of ICMP to test latency and jitter.
 IP SLA test packets use time stamping to more precisely calculate the processing delays.
 Responders have different types of timers:
 <ul>
-<li>T1 timer: this is the exit timer on request generated by the source router.</li>
-<li>T2 timer: timer on the target router that the request is received.</li>
+<li>T1: this is the exit timer on request generated by the source router.</li>
+<li>T2: timer on the target router that the request is received.</li>
 <li>T3: responder timer</li>
 <li>T4: time packet arrives at the source router.</li>
 </ul>
@@ -150,20 +183,21 @@ required for some IP SLA operations.</li>
 ICMP echo operations are useful for testing network connectivity and end-to-end 
 response time. 
 The response time is determined by measuring the time taken between sending an
-ICMP-Echo Request packet to a target device and receiving the ICMP-Echo reply.
+ICMP-Echo request packet to a target device and receiving the ICMP-Echo reply.
 The response time calculated from the <code><b>icmp-echo</b></code> operation 
 provides a general picture of the response time. However, its results may not 
 necessarily be accurate because some systems may not prioritize the processing of 
-ICMP packets causing these delays. UDP traffic is a better method to measure 
-network connectivity and response time.
+ICMP packets causing these delays. The use of the UDP-echo operation is a better 
+method to measure network connectivity and response time.
 </p>
 <p>
 Any network device that supports ICMP echo protocol can be used as a destination. 
-No IP SLA responder configuration is needed on the target device.
+No IP SLA responder configuration is needed on the target device. To configure 
+an ICMP echo operation:
 </p>
 <p>
 <ol>
-<li>Create the IP SLA with an operation number using the global configuration 
+<li>Configure the IP SLA with an operation number using the global configuration 
 command <code><b>ip sla &lt;sla-number&gt;</b></code>.
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
@@ -205,9 +239,7 @@ timeout value cannot be greater than the frequency value.
 R1(config-ip-sla-echo)#<b>timeout 10000</b>
 </code></div>
 </p>
-<p>
-The frequency is greater than the timeout which is greater than the threshold.
-</p>
+
 </li>
 
 <li><b>Threshold:</b> Define the threshold using the IP SLA ICMP echo sub mode command <code><b>threshold 
@@ -228,6 +260,9 @@ R1(config-ip-sla-echo)#<b>threshold 9000</b>
 <p>
 The threshold parameter can be used to trigger other IP SLA operations. Additionally, 
 the threshold value should be equal to or less than the timeout value.
+</p>
+<p>
+The value for frequency should be greater than the timeout which is greater than the threshold.
 </p>
 
 <li><b>TOS:</b> (Optional) Configure the <code><b>tos</b></code> value. This is the 
@@ -271,8 +306,8 @@ ID&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Type&nbsp;&nbsp;&
 
 <h4><code>show ip sla statistics</code></h4>
 <p>
-Shows the number of successes and failures and operation time to live. It shows 
-unknown if probe is not wrong.
+Displays the number of successes and failures and operation time to live. The 
+displayed results may be "unknown" if the probe is not operational.
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
@@ -347,7 +382,7 @@ subsequent hop in the path to the destination device.
 The IP SLAs ICMP Path Echo operation records statistics for each hop along the path that the IP SLAs
 operation takes to reach its destination. The ICMP Path Echo operation determines this hop-by-hop response
 time between a Cisco device and any IP device on the network by discovering the path using the traceroute
-facility
+facility.
 </p>
 <p>
 Configuration of the ICMP Path-Echo operation is similar to that of the ICMP echo 
@@ -444,7 +479,7 @@ used to troubleshoot the network path and determine if traffic is bottlenecking
 in a particular segment along the path. ICMP Path Jitter default values are:
 <ul>
 <li>Number of echo probes: 10</li>
-<li>Interval (time between echo probes (in milliseconds)): 20</li> 
+<li>Interval (time between echo probes in milliseconds): 20</li> 
 <li>frequency (seconds): 60</li>
 </ul>
 No IP SLA responder is required to be configured on the destination or intermediate devices.
@@ -844,11 +879,13 @@ between the source device and the target.
 UDP Jitter operation diagnoses network suitability for real-time traffic applications 
 such as VoIP, video over IP or real-time conferencing. These paramters can be 
 monitored to assess whether they are within acceptable thresholds.
+</p>
+<p>
 If multiple 
 packets are sent consecutively from a source to a
 destination, for example, 10 ms apart, and if the network is behaving ideally, the destination should receive
 the packets 10 ms apart. But if there are delays in the network (like queuing, arriving through alternate routes,
-and so on) the arrival delay between packets might be greater than or less than 10 ms. Using this example, a
+and so on), the arrival delay between packets might be greater than or less than 10 ms. Using this example, a
 positive jitter value indicates that packets arrived greater than 10 ms apart. If packets arrive 12 ms apart, then
 positive jitter is 2 ms; if packets arrive 8 ms apart, negative jitter is 2 ms. For delay-sensitive networks like
 VoIP, positive jitter values are undesirable, and a jitter value of 0 is ideal.
@@ -1207,7 +1244,7 @@ The DHCP operation can be configured as follows:
     </ul>
   </p>
   </li>
-  <li>Schedule the DHCP operation: <code><b>ip sla schedule &lt;sla-number&gt; start 
+  <li>Schedule the DHCP operation. 
   </li>
 </ol>
 </p>
@@ -1293,35 +1330,7 @@ operations are configured and how many are currently active, use the
 <code><b>show ip sla application</b></code> command.
 </p>
 
-<p>
-<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-  <code>
-R1#<b>show ip sla application</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                         <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;IP Service Level Agreements&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                         <br>
-Version: Round Trip Time MIB 2.2.0, Infrastructure Engine-III             <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                        <br>
-Supported Operation Types:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                        <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;icmpEcho, path-echo, path-jitter, udpEcho, tcpConnect, http       <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;dns, udpJitter, dhcp, ftp, VoIP, rtp, lsp Group, icmpJitter       <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;lspPing, lspTrace, 802.1agEcho VLAN, Port                         <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;802.1agJitter VLAN, Port, pseudowirePing, udpApp, wspApp          <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mcast, generic&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                        <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                        <br>
-Supported Features:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                         <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;IPSLAs Event Publisher&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                        <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                        <br>
-IP SLAs low memory water mark: 75481422&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                         <br>
-Estimated system max number of entries: 55284&nbsp;&nbsp;&nbsp;&nbsp;                         <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                        <br>
-Estimated number of configurable operations: 54925                        <br>
-Number of Entries configured&nbsp;&nbsp;: 1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                         <br>
-Number of active Entries&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: 1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                         <br>
-Number of pending Entries&nbsp;&nbsp;&nbsp;&nbsp; : 0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                         <br>
-Number of inactive Entries&nbsp;&nbsp;&nbsp;&nbsp;: 0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                         <br>
-Time of last change in whole IP SLAs: *15:05:44.253 UTC Sat Mar 13 2021   <br>
-                                                                          <br>
-R1#
-</code></div></p>
+
 <p>
 Use <code><b>debug ip sla trace</b></code> and <code><b>debug ip sla error</b></code> 
 to help troubleshoot IP SLA operation issues.
