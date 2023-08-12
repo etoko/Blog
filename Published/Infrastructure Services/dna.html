@@ -8,8 +8,9 @@ telemetry from existing multiple devices, applications and users, applies advanc
 uncover correlated insights and suggest remediation. This helps in minimizing  
 troubleshooting time by identifying the root cause of issues on the network. 
 DNAC generates health scores for client, network and applications in use; these 
-are complied from different metrics.  
-
+are compiled from different metrics.  
+</p>
+<p>
 With Cisco DNA:
 <ul>
   <li>One gains full visibility of the network</li>
@@ -25,8 +26,12 @@ The network health displays health summaries (in percentages) of switches, route
  of wireless and wired clients.
 </p>
 <p>
-Cisco DNA includes guided remediation provides suggestions for correcting a problem 
-
+Cisco DNA includes guided remediation which provides suggestions for correcting a problem 
+</p>
+<p>
+A demo version of Cisco DNA Center can be found at the URL 
+<a href="https://dcloud-dna-center-inst-rtp.cisco.com/dna/home">https://dcloud-dna-center-inst-rtp.cisco.com/dna/home</a>
+with the following credentials: <b>username:</b> demo <b>password:</b> demo1234!
 </p>
 
 <h1>SD-Access and DNA Setup</h1>
@@ -109,9 +114,9 @@ of the DNA modules:
         </li>
       </ul>
       </li>
-      <li>Image Repository: contains images for devices (physical and virtual) on the network.
+      <li><b>Image Repository:</b> contains images for devices (physical and virtual) on the network.
       </li>
-      <li>Network Profiles: profiles supported are for Firewall, NFVIS, Wireless, 
+      <li><b>Network Profiles:</b> profiles supported are for Firewall, NFVIS, Wireless, 
       Switching, Routing, Telemetry Appliance</li>
       <li>Authentication Template</li>
     </ul>
@@ -125,8 +130,8 @@ of the DNA modules:
        <li>Virtual Network</li>
      </ul>
   </li>
-  <li><b>Provision:</b> discover the network devices and onboard them and create the 
-  network access fabric.
+  <li><b>Provision:</b> discover the network devices and onboard them. 
+  Additionally, provision module enables the creation of the network access fabric.
     <ul>
       <li><b>Network Devices:</b>
         <ul>
@@ -263,6 +268,17 @@ For devices to be managed, they must first be discovered. The discovery feature:
 </ul>
 </p>
 <p>
+In DNA Center, device discovery can be run by accessing the <b>Tools</b> menu 
+and selecting <b>Discovery</b>   
+</p>
+<p>
+ <img alt="" src="images/dna/dna_discovery_dashboard.png" width="100%">
+</p>
+<p>
+To create a new discovery, select <b>Add Discovery</b>. The following page is 
+opened.
+</p>
+<p>
  <figure>
    <img alt="" src="images/dna/dna_add_discovery.png" width="100%">
    <figcaption style="text-align:center;">
@@ -329,7 +345,7 @@ DNAC. These settings are the same as Discovery credential sets:
 <ul>
   <li><b>CLI credentials:</b> username, password and enable password. This local 
   user should have a privilege level of 15.</li>
-  <li><b>SNMPv2:</b> SNMPv2 read/write community string (SNMPv3 is optional).</li>
+  <li><b>SNMPv2 / SNMPv3:</b> SNMPv2 read/write community string (SNMPv3 is optional).</li>
   <li><b>HTTPS (Optional):</b> read/write string, username, password and port.</li>
 </ul>
 </p>
@@ -340,11 +356,32 @@ in a discovery. Credentials in higher-level containers are inherited by lower le
 containers. DNAC allows multiple credentials to be specified for a defined credential 
 type. Support for exceptions (non-common) credentials can be included in discovery.
 </p>
+
+<p>
+In DNAC, these credentials can be added from the <b>Design</b> tab, under the 
+"Network Settings" menu and "Device Credentials" menu item. 
+</p>
+<p>
+  <img alt="" src="images/dna/dna_device_credentials.png" width="100%">
+</p>
+<p>
+The credentials can 
+be set for the Global site or lower site in the organizational hierarchy. Credentials configured
+ at the global level will be inherited by the sites under the Global location.
+ </p>
+ <p>
+  <img alt="" src="images/dna/dna_credentials_create_cli.png" width="100%">
+ </p>
+ <p>
+ If a list of credentials is available for a given site, select the appropriate 
+ credential that will be used by clicking the radio button of that corresponding 
+ credential.
+</p>
 <p>
 DNAC automation can add missing credential sets to devices upon discovery for example
 if the CLI credentials are available but SNMP configuration is not working, DNA 
 is able to access the device using the CLI credentials and enable SNMP with the 
-configuration what was not previously functional but entered into DNA during the 
+configuration that was not previously functional but entered into DNA during the 
 device enrolment.
 
 If multiple credentials are configured, DNA will start with the first credential, 
@@ -366,7 +403,7 @@ Different device types are managed through different credential types:
 For discovery to work, the required ports include:
 <ul>
   <li><b>Ping:</b> ICMP echo and reply.</li>
-  <li><b>SSH:</b>TCP port 22</li>
+  <li><b>SSH:</b> TCP port 22</li>
   <li><b>SNMP Poll:</b> UDP port 161</li>
   <li><b>SNMP Trap:</b> UDP port 162</li>
   <li><b>Syslog:</b> UDP port 514</li>
@@ -387,15 +424,6 @@ insecure nature of Telnet.
 </p>
 
 
-<p>
-In DNAC, these credentials can be added from the <b>Design</b> tab, under the 
-"Network Settings" menu and "Device Credentials" menu item. The credentials can 
-be set for the Global site or lower site in the organizational hierarchy. Credentials configured
- at the global level will be inherited by the sites under the Global location.
- If a list of credentials is available for a given site, select the appropriate 
- credential that will be used by clicking the radio button of that corresponding 
- credential.
-</p>
 
 
 
@@ -509,7 +537,22 @@ may not be received for the device if it is not assigned to a site.
 Assigning a device to a site does not push configuration to the device.
 </p>
 
-<h3>Telemetry Profiles</h3>
+<h3>Telemetry</h3>
+<p>
+Syslog, SNMP and NetFlow properties can be configured for DNA Center managed 
+devices. DNA Center will apply these configurations to the devices when they are 
+assigned to a site or provisioned. DNA Center can be configured to be the SNMP 
+tracp server, syslog server or NetFlow collector server. Optionally, external
+ servers can be configured in DNA Center for export of the telemetry data.
+</p>
+<p>
+<img alt="" src="images/dna/dna_telemetry1.png" width="100%">
+</p>
+<p>
+<img alt="" src="images/dna/dna_telemetry2.png" width="100%">
+</p>
+
+<h3>Device Telemetry Profiles</h3>
 <p>
 Telemetry profiles can be configured to send Syslog, and NetFlow configs to supported 
 devices. Telemetry profiles include two predefined profiles that send telemetry 
@@ -578,9 +621,9 @@ from that device.
 </p>
 
 
-<h2>Netflow</h2>
+<h2>NetFlow</h2>
 <p>
-Netflow is required for Application Health data. DNA provisioning of NetfFlow is 
+NetFlow data is required for Application Health data. DNA provisioning of NetfFlow is 
 only supported on routers running IOS v16 or newer. The current behaviour is for 
 NetFlow to be enabled on all interfaces of routers.
 </p>
@@ -595,9 +638,9 @@ The landing page of DNA Center is the DNA Dashboard. The information displayed i
 the dashboard is aggregated over the last 24 hours. 
 </p>
 
-<h2>DNA Issue Dashboard</h2>
+<h2>DNA Center Assurance Issue Dashboard</h2>
 <p>
-The DNAC issue dashboard is a centralized view of network issues allowing one to quicky identify 
+The DNAC Assurance issue dashboard is a centralized view of network issues allowing one to quicky identify 
 and diagnose network problems. It provides insights into problems and provides 
 recommendations on how to resolve the problems. By default, issue data is saved 
 for up to 30 days.
@@ -627,22 +670,72 @@ Issues are classified according to priority. The options are:
    <li><b>P4:</b> A warning issue that may not be an immediate problem but 
    addressing it can optimize the network performance.</li>
  </ul>
+</p>
+<p>
+The issues dashboard can be filtered to display issues detected for a specific 
+site
+</p>
+<p>
+  <img alt="" src="images/dna/dna_issues.png" width="100%">
+</p>
+<p>
+By default, the dashboard displays issues detected over the last 24 hours. 
+However, this can be filtered for a time range of 3 hours, 24 hours or 7 days. 
+Additionally, filtering can be done for a specified date range:
+</p>
+<p>
+  <img alt="" src="images/dna/dna_issues_filter.png" width="100%">
+</p>
+
+<p>
+The following images show how to resolve a detected issue:
+</p>
+<p>
+  <table width="100%">
+    <tr>
+      <td>
+        <img alt="" src="images/dna/dna_issue_1.png" width="100%">
+      </td>
+      <td>
+       <img alt="" src="images/dna/dna_issue_2.png" width="100%">
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <img alt="" src="images/dna/dna_issue_3.png" width="100%">
+      </td>
+      <td>
+       <img alt="" src="images/dna/dna_issue_4.png" width="100%">
+      </td>
+    </tr>
+  </table>
 
 </p>
 
-<h1>Network Health</h1>
+<h1>DNA Center Assurance Health</h1>
+<p>
+The DNA Center Assurance health section displays the health status of the network, 
+clients and applications. The health dashboard also displays the <b>Top 10 Issues</b>
+detected which are categorized by priority.
+</p>
+<p>
+  <img src="images/dna/dna_health.png" width="100%">
+</p>
+
+<h2>Network Health</h2>
 <p>
 The Network Health section of the DNA Assurance center displays the health status 
 of network equipment such as routers, switches, wireless LAN controllers(WLC), 
 and access points (AP). It gives a snapshot of the device health of the past 15 minutes 
-and 24 hours.
+and 24 hours. A score is provided for the current state of health of the network.
+
 Network devices are categorized based on their role or type i.e., wireless, 
 core, access, distribution switch, router.
 </p>
 
 <p>
-The Network Health page can be accessed via the Network Devices section of the DNA 
-Center Assurance. This view provides an aggregated score of the health of monitored 
+The Network Health page can be accessed via the <b>Assurance &rarr; Health</b>. 
+This view provides an aggregated score of the health of monitored 
 devices for the defined time range.
 </p>
 <p>
@@ -688,9 +781,14 @@ devices for the defined time range.
 </table>
   
 </p>
+<p>
+Selecting a particular device with detected issues opens up <b>Device 360</b> 
+where the details of detected issues are displayed with the option to resolve 
+the issues detected.
+</p>
 
 
-<h2>Device 360</h2>
+<h3>Device 360</h3>
 <p>
 Device 360 gives a full view of the device displaying the most detailed raw telemetry 
 data gained about a device. You can monitor and preview the health parameters 
@@ -751,6 +849,256 @@ intermediate devices are not managed e.g. MPLS, a cloud symbol is used to
 symbolize the unknown intermediate unmanaged devices.
 </p>
 
+<h2>Client Health</h2>
+<p>
+The client health page displays the health status of clients detected and monitored 
+network clients. The following information is displayed about the clients:
+<ul>
+  <li>Client devices are listed and segregated between wired clients and wireless clients.</li>
+  <li><b>Onboarding:</b> A broken-down view of every step of the onboarding process is displayed making it 
+possible to determine if the network infrastructure is causing the fault or the 
+network service such as AAA. Clients that failed the onboarding process are displayed.</li>
+  <li>For wireless networks, the following information is displayed:
+    <ul>
+      <li>Client count per SSID</li>
+      <li>Client roaming times</li>
+      <li>Connectivity RSSI</li>
+      <li>Connectivity SNR</li>
+    </ul>
+    </li>
+</ul>
+</p>
+
+<p>
+<table>
+  <tr>
+    <td>
+  <figure>
+    <img alt="" src="images/dna/dna_health_client_1.png" width="100%">
+    <figcaption style="text-align:center;">
+      <i>Client health status</i>
+    </figcaption>
+  </figure>  
+    </td>
+    
+    <td>
+    <figure>
+    <img alt="" src="images/dna/dna_health_client_2.png" width="100%">
+    <figcaption style="text-align:center;">
+      <i>Client network experience</i>
+    </figcaption>
+  </figure>
+    </td>
+  </tr>
+  <tr>
+    <td>
+    <figure>
+    <img alt="" src="images/dna/dna_health_client_3.png" width="100%">
+    <figcaption style="text-align:center;">
+      <i>List of clients</i>
+    </figcaption>
+  </figure>
+    </td>
+    
+    <td>
+    
+    </td>
+  </tr>
+</table>
+  
+</p>
+
+
+<h3>Client 360</h3>
+<p>
+From the list of clients displayed under the page <b>Health &rarr; Client</b>, 
+selecting a client opens up the Client 360 page for the client and it displays 
+the following information:
+<ul>
+  <li>
+</ul>
+<!--Displays details of a user's network connected devices and their user experience.-->
+</p>
+
+<p>
+<table>
+  <tr>
+    <td>
+  <figure>
+    <img alt="" src="images/dna/dna_health_client360_1.png" width="100%">
+    <figcaption style="text-align:center;">
+      <i>Client onboarding trend</i>
+    </figcaption>
+  </figure>  
+    </td>
+    
+    <td>
+    <figure>
+    <img alt="" src="images/dna/dna_health_client360_2.png" width="100%">
+    <figcaption style="text-align:center;">
+      <i>Client Onboarding stages and event viewer</i>
+    </figcaption>
+  </figure>
+    </td>
+  </tr>
+  <tr>
+    <td>
+    <figure>
+    <img alt="" src="images/dna/dna_health_client360_3.png" width="100%">
+    <figcaption style="text-align:center;">
+      <i>Client path trace and application experience</i>
+    </figcaption>
+  </figure>
+    </td>
+    
+    <td>
+    <figure>
+    <img alt="" src="images/dna/dna_health_client360_4.png" width="100%">
+    <figcaption style="text-align:center;">
+      <i>Client device information, connectivity, RF and iOS analytics</i>
+    </figcaption>
+  </figure>
+    </td>
+  </tr>
+</table>
+  
+</p>
+
+<h2>Application Health</h2>
+<p>
+Application health dashboard processes application data and gives an insight into
+application performance.
+Application Health page displays information about how your applications are 
+performing across the entire network. Applications are classified as business-relevant
+(such as Office 365 apps), business-irrelevant (such as Netflix), and default. 
+Cisco application visibility is used to classify 
+the applications. This classification is done based on the NBAR (Network-based 
+application recognition). Application Health enables the monitoring of application 
+statistics and application response. Application experience is based on NetFlow records 
+exported by the routers. It correlates KPIs sources of the network to identify 
+the problem domain faster and make issue resolution recommendations.
+
+Application health includes vital information such as business-class, traffic class, packet-loss 
+percentage and latency. 
+Application health can be accessed under DNA Assurance dashboards &rarr; Application Health.
+Some applications on the network can be defined as business relevant.
+</p>
+<p>
+To receive application telemetry, ensure that:
+<ol>
+  <li>DNA discovers the required network devices</li>
+  <li>Provision the device and assign it to a site</li>
+  <li>Enable NetFlow telemetry collection for the devices</li>
+</ol>
+</p>
+
+<p>
+<table>
+  <tr>
+    <td>
+  <figure>
+    <img alt="" src="images/dna/dna_health_application_1.png" width="100%">
+    <figcaption style="text-align:center;">
+      <i>Application health trend</i>
+    </figcaption>
+  </figure>  
+    </td>
+    
+    <td>
+    <figure>
+    <img alt="" src="images/dna/dna_health_application_2.png" width="100%">
+    <figcaption style="text-align:center;">
+      <i>Application health summary</i>
+    </figcaption>
+  </figure>
+    </td>
+  </tr>
+  <tr>
+    <td>
+    <figure>
+    <img alt="" src="images/dna/dna_health_application_3.png" width="100%">
+    <figcaption style="text-align:center;">
+      <i>Application average througput, packet loss, network latency, jitter etc</i>
+    </figcaption>
+  </figure>
+    </td>
+    
+    <td>
+    <figure>
+    <img alt="" src="images/dna/dna_health_application_4.png" width="100%">
+    <figcaption style="text-align:center;">
+      <i>Client device information, connectivity, RF and iOS analytics</i>
+    </figcaption>
+  </figure>
+    </td>
+  </tr>
+</table>
+</p>
+<p>
+By default, the application health dashboard displays application packet loss, 
+average throughput, network latency for business relevant applications.
+</p>
+
+<h3>Application 360</h3>
+<p>
+Selecting a specific application from the application health page displays the 
+<b>Application 360</b> page. The Application 360 page displays the details of 
+the network experience of an application; these include:
+<ul>
+  <li>Issues experienced by the application such as network latency including 
+  the total number of occurences.</li>
+  <li>Network devices exporting the application telemetry including:
+    <ul>
+      <li>Usage in bytes</li>
+      <li>Throughput in Kbps</li>
+      <li>Packet loss</li>
+      <li>Jitter</li>
+      <li>Network latency</li>
+      <li>Client network latency and server network latency</li>
+      <li>Application server latency</li>
+    </ul>
+  </li>
+  <li>Application endpoints i.e. client devices using the application. Selecting 
+  a client device opens up the Client 360 page for the client.</li>
+</ul>
+</p>
+<p>
+<table>
+  <tr>
+    <td>
+  <figure>
+    <img alt="" src="images/dna/dna_health_application360_1.png" width="100%">
+    <figcaption style="text-align:center;">
+      <i>Application details</i>
+    </figcaption>
+  </figure>  
+    </td>
+    
+    <td>
+    <figure>
+    <img alt="" src="images/dna/dna_health_application360_2.png" width="100%">
+    <figcaption style="text-align:center;">
+      <i>Application usage, throughput, packet loss</i>
+    </figcaption>
+  </figure>
+    </td>
+  </tr>
+  <tr>
+    <td>
+    <figure>
+    <img alt="" src="images/dna/dna_health_application360_3.png" width="100%">
+    <figcaption style="text-align:center;">
+      <i>Application end points</i>
+    </figcaption>
+  </figure>
+    </td>
+    
+    <td>
+    
+    </td>
+  </tr>
+</table>
+</p>
 
 <h1>SNMP Collector</h1>
 <p>
@@ -773,52 +1121,13 @@ appropriate modifications suitable for SD-WAN.
 TODO: Add screenshot of SNMP.
 </p>
 
-
-<h1>Client Health</h1>
-<p>
-To get a view of the health status of the clients. Client devices are segregated
-between wired clients and wireless clients.
-A broken-down view of every step of the onboarding process is displayed making it 
-possible to determine if the network infrastructure is causing the fault or the 
-network service such as AAA. 
-</p>
-
-<h2>Client 360</h2>
-<p>
-Displays details of a user's network connected devices and their user experience.
-</p>
-
-<h1>Application Health</h1>
-<p>
-Application health dashboard processes application data and gives an insight into
-application performance.
-Application Health page displays information about how your applications are 
-performing across the entire network. Applications are classified as business-relevant, 
-business-irrelevant, and default. Cisco application visibility is used to classify 
-the applications. This classification is done based on the NBAR (Network-based 
-application recognition). Application Health enables the monitoring of application 
-statistics and application response. Application experience is based on NetFlow records 
-exported by the routers. It correlates KPIs sources of the network to identify 
-the problem domain faster and make issue resolution recommendations.
-
-Application health includes vital information such as business-class, traffic class, packet-loss 
-percentage and latency. 
-Application health can be accessed under DNA Assurance dashboards and under Application Health.
-Some applications on the network can be defined as business relevant.
-</p>
-<p>
-To receive application telemetry, ensure that:
-<ol>
-  <li>DNA discovers the required network devices</li>
-  <li>Enable NetFlow telemetry collection for the devices</li>
-</ol>
-</p>
-
+<!--
 
 <h1>Wireless</h1>
 <p>
 
 </p>
+-->
 
 <h1>Software Image Management (SWIM)</h1>
 <p>
