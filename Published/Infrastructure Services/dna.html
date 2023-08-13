@@ -20,18 +20,19 @@ With Cisco DNA:
 </p>
 
 <p>
-The DNA Assurance landing page provides summaries of network and client health.
+The DNA Center Assurance landing page provides summaries of network and client health.
 The network health displays health summaries (in percentages) of switches, routers,
  wireless LAN controllers, and access points. The client health displays summaries 
  of wireless and wired clients.
 </p>
 <p>
-Cisco DNA includes guided remediation which provides suggestions for correcting a problem 
+Cisco DNA includes guided remediation which provides suggestions for correcting 
+a detected issue. 
 </p>
 <p>
 A demo version of Cisco DNA Center can be found at the URL 
-<a href="https://dcloud-dna-center-inst-rtp.cisco.com/dna/home">https://dcloud-dna-center-inst-rtp.cisco.com/dna/home</a>
-with the following credentials: <b>username:</b> demo <b>password:</b> demo1234!
+<a href="https://dcloud-dna-center-inst-rtp.cisco.com/dna/home">https://dcloud-dna-center-inst-rtp.cisco.com/dna/home</a>.
+Login access uses the following credentials: <b>username:</b> demo <b>password:</b> demo1234!
 </p>
 
 <h1>SD-Access and DNA Setup</h1>
@@ -70,7 +71,7 @@ network configuration anywhere on the network.
 </p>
 <p>
 The SD-fabric is created by DNA center. A guided workflow is used to setup the 
-entire SD-fabric. There are four in total. The following is a simplified sitemap
+entire SD-fabric. DNA Center is made up of four main modules. The following is a simplified sitemap
 of the DNA modules:
 <ol>
   <li><b>Design:</b> design of the physical layout of the network is developed 
@@ -135,8 +136,9 @@ of the DNA modules:
     <ul>
       <li><b>Network Devices:</b>
         <ul>
-          <li>Inventory</li>
-          <li>Plug and Play</li>
+          <li>Inventory: list of managed network devices and their sites of allocation</li>
+          <li>Plug and Play: detected network devices (through device discovery), 
+          can be assigned to a site and become managed devices</li>
           <li>Inventory Insights</li>
         </ul>
       </li>
@@ -268,8 +270,7 @@ For devices to be managed, they must first be discovered. The discovery feature:
 </ul>
 </p>
 <p>
-In DNA Center, device discovery can be run by accessing the <b>Tools</b> menu 
-and selecting <b>Discovery</b>   
+In DNA Center, to access the device discovery feature, <b>Tools &rarr; Discovery</b>   
 </p>
 <p>
  <img alt="" src="images/dna/dna_discovery_dashboard.png" width="100%">
@@ -295,7 +296,7 @@ opened.
  </figure>
 </p>
 <p>
-At least one CLI credential and one SNMP credential is required. Netconf is 
+At least one CLI credential and one SNMP credential is required. NETCONF is 
 required for 9800 series switches.
 </p>
 
@@ -328,7 +329,7 @@ are required when adding a new device:
 Select "View Inventory" to view the newly added devices. To add the device to a 
 site:
 Select "Actions", then Provision, then "Assign Device to Site". The serial 
-  number and device type are displayed to you to confirm the device and as well 
+  number and device type are displayed to confirm the device and as well 
   as the list of all sites.
 
 Discovered devices are added to the inventory by DNA. After initial discovery, 
@@ -358,8 +359,7 @@ type. Support for exceptions (non-common) credentials can be included in discove
 </p>
 
 <p>
-In DNAC, these credentials can be added from the <b>Design</b> tab, under the 
-"Network Settings" menu and "Device Credentials" menu item. 
+In DNAC, these credentials can be added from the <b>Design &rarr; Network Settings &rarr; Device Credentials</b>. 
 </p>
 <p>
   <img alt="" src="images/dna/dna_device_credentials.png" width="100%">
@@ -395,7 +395,7 @@ Different device types are managed through different credential types:
   <li><b>CLI:</b> standard Cisco devices.</li>
   <li><b>SNMP:</b> standard Cisco devices.</li>
   <li><b>HTTP(S):</b> NFVIS devices</li>
-  <li><b>NETCONF:</b></li>
+  <li><b>NETCONF:</b> all supported devices such as Cisco XE devices</li>
 </ul>
 </p>
 
@@ -455,16 +455,20 @@ automatically makes to WLCs:
     <li>Configure streaming telemetry service (WSA) </li>
   </ul>
 </p>
+<!--
 <p>
 <img alt="WLC Configuration" src="images/wlc_conf.png" width="100%">
 </p>
+-->
 <p>
 DNAC becomes the network assurance service for that WLC from the start.
 </p>
+<!-- 
 <p>
 <img alt="" src="images/wlc.png">
 </p>
 
+-->
 <h2>Configuration Changes on Switches</h2>
 <p>
 There are several changes that DNAC automatically makes to switches during 
@@ -473,23 +477,46 @@ discovery:
   <ul>
     <li>PKI</li>
     <li>IPDT</li>
-    <li>HTTP service source</li>
+    <li>HTTP server source interface is configured</li>
     <li>SNMP RO &amp; RW communities (if not configured).</li>
   </ul>
   </div>
-  <div>
-    <caption style="font-style:italic;">
-    <img alt="" src="images/dna_switch_conf.png">
-    Example configuration by DNAC on a switch
-    </caption>
-  </div>
+</p>
+
+<p>
+  <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+ <code>
+&nbsp;&nbsp;crypto pki trustpoint DNAC-CA <br>
+&nbsp;&nbsp;&nbsp;&nbsp;enrollment mode ra<br>
+&nbsp;&nbsp;&nbsp;&nbsp;enrollment terminal <br>
+&nbsp;&nbsp;&nbsp;&nbsp;usage ssl-client<br>
+&nbsp;&nbsp;&nbsp;&nbsp;revocation-check crl<br>
+&nbsp;&nbsp;crypto pki certificate chain DNAC-CA<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;snip&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;quit<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;device-tracking tracking<br>
+&nbsp;&nbsp;!<br>
+&nbsp;&nbsp;device-tracking policy IPDT_MAX_10<br>
+&nbsp;&nbsp;&nbsp;&nbsp;limit address-count 10<br>
+&nbsp;&nbsp;&nbsp;&nbsp;no protocol udp<br>
+&nbsp;&nbsp;&nbsp;&nbsp;tracking enable<br>
+&nbsp;&nbsp;&nbsp;&nbsp;!<br>
+&nbsp;&nbsp;interface &lt;ACCESS-INTERFACES&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;device-tracking attach-policy IPDT_MAX_10<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;ip http client source-interface Loopback0 <br>
+&nbsp;&nbsp;<br>
+&nbsp;&nbsp;snmp-server community &lt;RO-COMMUNITY&gt; ro<br>
+&nbsp;&nbsp;snmp-server community &lt;RW-COMMUNITY&gt; rw  
+  </code></div>
 </p>
 <p>
 If an ACL is configured for SNMP community string, DNAC may remove the ACL during 
 discovery. Remember to add the ACL after the DNAC discovery is complete.
 </p>
 
-<h2>Device Controllability in Host Tracking</h2>
+<h3>Device Controllability in Host Tracking</h3>
 <p>
 When device discovery is performed with "Device Controllability" enabled,
  DNAC will enable IP device tracking(IPDT) on discovered devices.  IPDT is 
@@ -517,11 +544,28 @@ discovery:
   <li>SNMP RO &amp; RW communities are enabled if not already configured.</li>
 </ul>
 </p>
+
 <p>
- <img alt="" src="images/dna_router_conf.png">
+  <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+ <code>
+&nbsp;&nbsp;crypto pki trustpoint DNAC-CA <br>
+&nbsp;&nbsp;&nbsp;&nbsp;enrollment mode ra<br>
+&nbsp;&nbsp;&nbsp;&nbsp;enrollment terminal <br>
+&nbsp;&nbsp;&nbsp;&nbsp;usage ssl-client<br>
+&nbsp;&nbsp;&nbsp;&nbsp;revocation-check crl<br>
+&nbsp;&nbsp;crypto pki certificate chain DNAC-CA<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;snip&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;quit<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;ip http client source-interface Loopback0 <br>
+&nbsp;&nbsp;<br>
+&nbsp;&nbsp;snmp-server community &lt;RO-COMMUNITY&gt; ro<br>
+&nbsp;&nbsp;snmp-server community &lt;RW-COMMUNITY&gt; rw  
+  </code></div>
 </p>
 
-<h2>Telemetry Profile</h2>
+
+<h2>Telemetry</h2>
 <p>
 
 </p>
@@ -542,8 +586,9 @@ Assigning a device to a site does not push configuration to the device.
 Syslog, SNMP and NetFlow properties can be configured for DNA Center managed 
 devices. DNA Center will apply these configurations to the devices when they are 
 assigned to a site or provisioned. DNA Center can be configured to be the SNMP 
-tracp server, syslog server or NetFlow collector server. Optionally, external
- servers can be configured in DNA Center for export of the telemetry data.
+trap server, syslog server or NetFlow collector server. Optionally, external
+ servers can be configured in DNA Center for export of the telemetry data. 
+ By default, DNA Center is the SNMP server for managed devices.
 </p>
 <p>
 <img alt="" src="images/dna/dna_telemetry1.png" width="100%">
@@ -556,7 +601,7 @@ tracp server, syslog server or NetFlow collector server. Optionally, external
 <p>
 Telemetry profiles can be configured to send Syslog, and NetFlow configs to supported 
 devices. Telemetry profiles include two predefined profiles that send telemetry 
-to DNA and one profile that does not send telemetry. Custom telemetry 
+to DNA Center and one profile that does not send telemetry. Custom telemetry 
 profiles can be added. The three default telemetry profiles for use in provisioning assurance 
 configurations include: maximal, optimal and disable.
 </p>
@@ -589,8 +634,8 @@ configurations include: maximal, optimal and disable.
 </table>
 </p>
 <p>
-Profiles can be assigned at site or device level. The default profile is Disable
-telemetry. The recommendation is to apply Maximal to routers and Optimal to switches.
+Profiles can be assigned at site or device level. The default telemetry profile 
+is Disable. The recommendation is to apply Maximal to routers and Optimal to switches.
 </p>
 <p>
 Custom telemetry profiles can also be created in exceptional use-cases where the 
@@ -610,7 +655,7 @@ gets pushed to DNAC immediately after being applied.
 </p>
 <p>
 Verify assurance dashboards are being populated with expected 
-telemetry data. DNA sets itself up as a syslog server to be able to collect data 
+telemetry data. DNAC sets itself up as a syslog server to be able to collect data 
 from that device.
 </p>
 <p>
@@ -623,7 +668,7 @@ from that device.
 
 <h2>NetFlow</h2>
 <p>
-NetFlow data is required for Application Health data. DNA provisioning of NetfFlow is 
+NetFlow data is required for Application Health data. DNA provisioning of NetFlow is 
 only supported on routers running IOS v16 or newer. The current behaviour is for 
 NetFlow to be enabled on all interfaces of routers.
 </p>
@@ -657,8 +702,12 @@ some issues are flagged as being identified by AI.
 <p>
 Issues have three types of status: open, resolved, and ignored. When the issue is 
 ignored, it is ignored for a specific time period. An issue can be resolved in 
-two ways; by manually changing the status, or the auto-resolution mechanism. 
-Support for autoresolution is being added for more issues.
+two ways: 
+<ol>
+  <li>Manually changing the status</li>
+  <li>Auto-resolution mechanism; support for autoresolution is available for some 
+  issues; others are continually being added.</li>
+</ol>
 </p>
 <p>
 Issues are classified according to priority. The options are:
@@ -712,25 +761,11 @@ The following images show how to resolve a detected issue:
 
 </p>
 
-<h1>DNA Center Assurance Health</h1>
+<h2>DNA Center Assurance Health</h2>
 <p>
 The DNA Center Assurance health section displays the health status of the network, 
 clients and applications. The health dashboard also displays the <b>Top 10 Issues</b>
 detected which are categorized by priority.
-</p>
-<p>
-  <img src="images/dna/dna_health.png" width="100%">
-</p>
-
-<h2>Network Health</h2>
-<p>
-The Network Health section of the DNA Assurance center displays the health status 
-of network equipment such as routers, switches, wireless LAN controllers(WLC), 
-and access points (AP). It gives a snapshot of the device health of the past 15 minutes 
-and 24 hours. A score is provided for the current state of health of the network.
-
-Network devices are categorized based on their role or type i.e., wireless, 
-core, access, distribution switch, router.
 </p>
 
 <p>
@@ -739,13 +774,28 @@ This view provides an aggregated score of the health of monitored
 devices for the defined time range.
 </p>
 <p>
+  <img src="images/dna/dna_health.png" width="100%">
+</p>
+
+<h3>Network Health</h3>
+<p>
+The Network Health section of the DNA Assurance center displays the health status 
+of network equipment such as routers, switches, wireless LAN controllers (WLC), 
+and access points (AP). It gives a snapshot of the device health over the past 15 minutes 
+and 24 hours. A score is provided for the current state of health of the network.
+
+Network devices are categorized based on their role or type i.e., wireless, 
+core, access, distribution switch, router.
+</p>
+
+<p>
 <table>
   <tr>
     <td>
   <figure>
     <img alt="" src="images/dna/dna_network_health.png" width="100%">
     <figcaption style="text-align:center;">
-      <i>Network Health Dashboard</i>
+      <i>Network Health Dashboard (1)</i>
     </figcaption>
   </figure>  
     </td>
@@ -754,7 +804,7 @@ devices for the defined time range.
     <figure>
     <img alt="" src="images/dna/dna_network_health2.png" width="100%">
     <figcaption style="text-align:center;">
-      <i>Network Health Dashboard</i>
+      <i>Network Health Dashboard (2)</i>
     </figcaption>
   </figure>
     </td>
@@ -764,7 +814,7 @@ devices for the defined time range.
     <figure>
     <img alt="" src="images/dna/dna_network_health3.png" width="100%">
     <figcaption style="text-align:center;">
-      <i>Network Health Dashboard</i>
+      <i>Network Health Dashboard (3)</i>
     </figcaption>
   </figure>
     </td>
@@ -773,7 +823,7 @@ devices for the defined time range.
     <figure>
     <img alt="" src="images/dna/dna_network_health4.png" width="100%">
     <figcaption style="text-align:center;">
-      <i>Network Health Dashboard</i>
+      <i>Network Health Dashboard (4)</i>
     </figcaption>
   </figure>
     </td>
@@ -791,17 +841,17 @@ the issues detected.
 <h3>Device 360</h3>
 <p>
 Device 360 gives a full view of the device displaying the most detailed raw telemetry 
-data gained about a device. You can monitor and preview the health parameters 
+data received from the device. You can monitor and preview the health parameters 
 of the network. Device 360 displays the following parameters:
 <ul>
   <li>The current health score of the device: DNA monitors various parameters of 
   a network device. These parameters include:
     <ul>
-      <li>Memory utilization.</li>
+      <li>Memory utilization</li>
       <li>CPU utilization</li>
       <li>Data-plane parameters:
       <ul>
-        <li> noise and air-quality for wireless.</li>
+        <li>Noise and air-quality for wireless</li>
         <li>Uplink availability</li>
         <li>Link errors</li>
       </ul>
@@ -851,8 +901,8 @@ symbolize the unknown intermediate unmanaged devices.
 
 <h2>Client Health</h2>
 <p>
-The client health page displays the health status of clients detected and monitored 
-network clients. The following information is displayed about the clients:
+The client health page displays the health status of detected network clients. 
+The following information is displayed about the clients:
 <ul>
   <li>Client devices are listed and segregated between wired clients and wireless clients.</li>
   <li><b>Onboarding:</b> A broken-down view of every step of the onboarding process is displayed making it 
@@ -964,7 +1014,7 @@ the following information:
   
 </p>
 
-<h2>Application Health</h2>
+<h3>Application Health</h3>
 <p>
 Application health dashboard processes application data and gives an insight into
 application performance.
@@ -980,8 +1030,7 @@ the problem domain faster and make issue resolution recommendations.
 
 Application health includes vital information such as business-class, traffic class, packet-loss 
 percentage and latency. 
-Application health can be accessed under DNA Assurance dashboards &rarr; Application Health.
-Some applications on the network can be defined as business relevant.
+Application health can be accessed under <b>DNA Assurance &rarr; Health &rarr; Application</b>.
 </p>
 <p>
 To receive application telemetry, ensure that:
@@ -1106,16 +1155,15 @@ DNA can also be used to collect SNMP traps and informs.
 DNA is the default SNMP collector. It pools network devices to gather telemetry 
 data. By default, the following information is collected by SNMP:
 <ul>
-  <li><b>Device health:</b> includes CPU utilizaiton, memory, environment temperature, 
+  <li><b>Device health:</b> includes CPU utilization, memory, environment temperature, 
   and device availability metrics. This information is gained through polling every 
   10 minutes by default.
   </li>
   <li><b>Interface health:</b> includes interface availability and metrics.
   </li>
-  <li><b>TCAM:</b> polled .
+  <li><b>TCAM:</b> polled 
 </ul>
-These features are 
-accessible via: Gears &rarr; Systems Settings &rarr; Data Platform (Tab) &rarr; Collectors.
+These SNMP configuration is accessible via: <b>Systems Settings &rarr; Data Platform &rarr; Collectors</b>.
 Select Collector-SNMP. The defaults are ok. If utilizing SD-WAN, then can make 
 appropriate modifications suitable for SD-WAN.
 TODO: Add screenshot of SNMP.
@@ -1160,7 +1208,7 @@ SMUs can be helpful:
 <h2>Images Supported in SWIM</h2>
 <p>
 <ul>
-  <li><b>Base images:</b> all Cisco IOS, IOS-XE, AireOS, NX-OS iamges for supported devices</li>
+  <li><b>Base images:</b> all Cisco IOS, IOS-XE, AireOS, NX-OS images for supported devices</li>
   <li><b>Patches:</b> patches (or SMU) are only supported on IOS-XE</li>
   <li><b>ROMMON:</b>  ROMMON is a firmware image on Cisco devices</li>
   <li><b>AP Device Pack (APDP):</b> APDP allows quick support for newer AP outside 
@@ -1196,7 +1244,7 @@ The image repository provides the following functions:
 </p>
 <p>
 DNAC manages software and VNF (virtualization network functions) images. It also 
-supports the management third-party images. DNAC image management feature is 
+supports the management of third-party images. DNAC image management feature is 
 accessible as a page under the Design module.
 </p>
 <p>
@@ -1221,7 +1269,7 @@ The following page displays image details with and without CCO configured:
 <p>
 With CCO configured, additional information about the image is provided compared 
 to images without CCO information.
-If the CCO credentials are provided, DNA provides guidance on the latest firmware 
+If the CCO credentials are provided, DNAC provides guidance on the latest firmware 
 updates and recommended images for a device.
 </p>
 <p>
@@ -1250,8 +1298,9 @@ of software images:
 <table width="100%" cellspacing="0">
   <tbody>
     <tr>
-      <td style="border-top: 1px solid; border-bottom: 1px solid;"><b>Latency</b></td>
-      <td style="border-top: 1px solid; border-bottom: 1px solid;">&lt;200ms between DNAC and devices</td>
+      <td style="border-top: 1px solid; border-bottom: 1px solid;" width="10%"><b>Latency</b></td>
+      <td style="border-top: 1px solid; border-bottom: 1px solid;">
+      Should be less than 200ms between DNAC and the network devices</td>
     </tr>
     <tr>
     <td style="border-bottom: 1px solid;"><b>Distribution server</b></td>
@@ -1297,7 +1346,7 @@ of software images:
 <p>
 The image upgrade process in DNAC is a granular one. It supports image distribution 
 and activation at once on demand. It allows the scheduling of these activities 
-on individual timeframes to go hand-in-hand with the organization's maintenance 
+on individual time-frames to go hand-in-hand with the organization's maintenance 
 windows. DNAC regularly monitors the network for compliance with the standardized 
 images and raises notifications for devices with images that deviate from the set standards. 
 DNAC makes pre and post installation/upgrade checks to ensure that 
@@ -1329,14 +1378,14 @@ Most of these steps happen automatically
     <li><b>Define Golden image by device family:</b> label a specific image as 
     the golden image for that device family. 
     </li>
-    <li><b>System identifies devices not in compliance:</b> DNA checks the inventory for all 
+    <li><b>System identifies devices not in compliance:</b> DNAC checks the inventory for all 
     devices that match that device family to establish the devices that are running 
-    that image and the ones that are not. DNA then lets you know which devices 
+    that image and the ones that are not. DNAC then lets you know which devices 
     are out-of-date.
     </li>
     <li><b>Precheck validation for disk and memory:</b> checks for hardware requirements 
     for the image upgrade. If any devices do not meet these minimum hardware 
-    requirements, the check fails and DNA generates notification messages and the 
+    requirements, the check fails and DNAC generates notification messages and the 
     upgrade will not proceed. These 
     checks are performed by custom Python precheck scripts. If the devices pass 
     the minimum hardware requirements, the device is labelled as outdated and is 
@@ -1348,8 +1397,8 @@ Most of these steps happen automatically
 </p>
 
 <p>
-Devices requiring image upgrades are can be viewed under the Inventory tab under 
-the Provisioning module with a focus of "Software Images".
+Devices requiring image upgrades can be viewed under
+<b>Provisioning &rarr; Inventory &rarr; Focus &rarr;Software Images</b>. 
 The list of devices in inventory displays devices that require software image 
 updates.
 </p>
