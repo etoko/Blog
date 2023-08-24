@@ -78,7 +78,7 @@ SNMP comes in three major versions: SNMPv1, v2c and v3. In SNMP v1, security is
 based on community strings. SNMPv1 is not recommended to be used in today's 
 networks and many network device vendors do not support it.
 In SNMP v2c, security is also based on community 
-strings. In SNMPv3, security is based on message integrity, authentication, encryption
+strings. In SNMPv3, security is based on message authentication, encryption
 algorithms.
 </p>
 
@@ -145,7 +145,7 @@ R1(config)#<b>snmp-server view interfaces ifEntry included</b>
 <li><b>Configure SNMP Community:</b> configure the read-only or 
 read-write community string using the command 
 <code><b>snmp-server community &lt;string&gt;  &lt;ro | rw &gt; 
-&lt;ipv6 nacl&gt; &lt;acl&gt;</b></code>. The ACL is an optional parameter but is 
+[&lt;ipv6 nacl&gt; | &lt;acl&gt;]</b></code>. The ACL is an optional parameter but is 
 recommended to be configured as it adds a layer of security to SNMPv2. 
 The community string has to match on both the manager and the agent.
 <p>
@@ -158,7 +158,8 @@ R1(config)#<b>snmp-server community ciscolab ro</b>
 
 
   <li><b>Enable sending of traps;</b> SNMPv2c is able to send traps using the 
-  command <code><b>snmp-server enable traps</b></code>. This enables the sending of all  available traps. 
+  command <code><b>snmp-server enable traps [&lt;mib-value&gt;]</b></code>. 
+  To send all  available SNMP traps, exclude the mib-value <code><b>snmp-server enable traps</b></code>. 
 To define specific traps, add the type of traps to the above command: 
 </p>
 <p>
@@ -306,7 +307,7 @@ When troubleshooting SNMPv2, verify the following:
 
 <h2>SNMPv3</h2>
 <p>
-The main improvement of SNMPv3 over SNMPv2c is the added security with 
+The main improvement of SNMPv3 over SNMPv2c is the added security through  
 authentication and encryption.
 
 Poll messages for example GetRequest are sent still sent using UDP port 161 and traps (GetResponse)
@@ -329,17 +330,15 @@ supports, groups and users must be configured.
 
 <h3>SNMPv3 Features</h3>
 <p>
-With the added security features, SNMPv3 structures its configuration into three
-main sections:
+SNMPv3 structures its configuration into three main sections:
 <ol>
-  <li><b>SNMP View:</b> Restricts the OIDs visible to the NMS. It defines 
+  <li><b>Views:</b> Restrict the OIDs visible to the NMS. It defines 
   what the manager is able to access/view on the device. This restriction can include 
-  access to interfaces or particular interface. The view can be associated with 
+  access to a particular interface. The view can be associated with 
   a group.</li>
-  <li><b>SNMP Group:</b> Used to associate a view with a group to specify the type 
-  of access i.e., whether read or write, as well as the type of security enabled 
-  for that.</li>
-  <li><b>SNMP User:</b> User credentials required to access a view based on a group.</li>
+  <li><b>Groups:</b> associated with a view to specify the type 
+  of access i.e., whether read or write, as well as the type of security enabled.</li>
+  <li><b>User:</b> specifies credentials required to access a view based on a group.</li>
 </ol>
 </p>
 
@@ -352,7 +351,7 @@ device that are to be monitored.</li>
 <li>Associate the view with the group which defines the type of access (whether 
 read-only or read-write) as well as the security type enabled for this access.</li>
 <li>Associate the group with a user. The user defines the username, password, 
-levels of encryption and authentication that is to be used.</li>
+encryption and authentication to be used.</li>
 </ol>
 </p>
 <p>
@@ -370,7 +369,6 @@ Create the view record using the command <code><b>snmp-server view
 case-sensitive. Use the SNMP Object Navigator for the correct object names or OID values.
 </p>
 <p>
-To the mib2 view includes all objects in the MIB-II subtree.
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
   <code>
 R2(config)#<b>snmp-server view mib2 mib-2 included</b><BR>
@@ -379,18 +377,21 @@ R2(config)#<b>snmp-server view int-access ifEntry included</b>
 </code></div>
 </p>
 <p>
-The MIB value for access to all interfaces and their features is ifIndex.
+From the above configuration:
+<ul>
+  <li>The mib2 view includes all objects in the MIB-II subtree.</li>
+  <li>The MIB value for access to all interfaces and their features is ifIndex.</li>
+</ul>
 </p>
 </li>
 <li>
 <b>Creating SNMP Groups</b>
 <p>
-An SNMP group maps users to views.
-Configure the SNMP server group to enable authentication for members permitted by the configured ACL.
-
+An SNMP group maps users to views using the command 
 <code><b>snmp-server group &lt;group-name&gt; [v1 | v2c | v3] [auth | noauth 
 | priv] [read &lt;read-view&gt;] [write &lt;write-view&gt;] [notify &lt;notify-view&gt;] [access &lt;acl&gt;]
 </b></code>.
+Configure the SNMP server group to enable authentication for members permitted by the configured ACL.
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
@@ -404,7 +405,7 @@ R2(config)#<b>snmp-server group group1 v3 auth read mib2</b>
 <li>
 <b>Configuring Users</b>
 <p>
-To configure a remote user, specify the IP address of the remote SNMP agent of 
+To configure a remote user, specify the IP address of the remote SNMP manager of 
 the device where the user resides. Before you configure remote users for a particular
 agent, configure the SNMP engine ID using the command <code><b>snmp-server engineID</b></code> with 
 remote option. The remote agent’s SNMP engine ID is required when computing the 

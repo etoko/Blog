@@ -28,11 +28,11 @@ have been translated by NAT.
 <p>
 A typical flow monitoring setup using NetFlow consists of three main components:
 <ul>
-  <li><b>Flow exporter:</b> aggregates packet data into flows and exports flow records 
-  to one or more flow collectors. This is usually a router.</li>
+  <li><b>Flow exporter:</b> identifies flows based on traffic characteristics and
+  exports flow records to one or more flow collectors. This is usually a router.</li>
   <li><b>Flow collector:</b> responsible for reception, storage and processing 
   of flow data received from a flow exporter.</li>
-  <li><b>NetFlow cache:</b> the record for each active flow is maintained 
+  <li><b>NetFlow cache:</b> the record for each active flow maintained 
   locally in the cache.
 </ul>
 </p>
@@ -98,7 +98,7 @@ on the interface.
 Flow entries are deleted from the cache when they expire. 
 The following are the scenarios under which NetFlow cache entries expire:
 <ul>
-  <li>If a flow has been idle for 15 seconds by default.</li>
+  <li>If a flow has been idle for 15 seconds by default (inactive NetFlow timeout period).</li>
   <li>Flows that are continuous, such as routing protocol message exchanges, they 
   are categorized as long-lived flows. Long-lived flows, by default, expire after 
   a maximum of 30 minutes (cache timeout active configured value).</li>
@@ -203,7 +203,7 @@ R1(config-flow-top-talkers)#<b>sort-by bytes</b><br>
 To view the flows, use the command <code><b>show ip flow top-talkers</b></code>.
 </p>
 <p>
-NetFlow is a heavy resource hungry feature. It is recommended not to enable 
+NetFlow is a resource-hungry feature. It is recommended not to enable 
 NetFlow on a router that is experiencing heavy resource constraints.
 </p>
 </li>
@@ -215,7 +215,7 @@ NetFlow on a router that is experiencing heavy resource constraints.
   <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
   <code>
-  R1(config)#<b>no ip flow-export destination 192.168.34.2 ?</b><br>
+  R1(config)#<b>ip flow-export destination 192.168.14.2 ?</b><br>
 &nbsp;&nbsp;&lt;1-65535&gt;  UDP/SCTP port number<br>
 <br>
 R1(config)#<b>ip flow-export destination 192.168.14.2 9999</b>
@@ -496,13 +496,13 @@ Clearing statistics to observer NetFlow operations.
 
 <h1>NetFlow Version 9</h1>
 <p>
-NetFlow version 9 is a flexible format, which provides the versatility needed for support 
+NetFlow version 9 is a flexible template-based format, which provides the versatility needed for support 
 of new fields and record types. It provides support for export of packet data from 
 IPv6, multicast, Multiprotocol Label Switching(MPLS), BGP next hop etc.
-NetFlow version 9 is template-based. Templates provide a means of extending the 
+Templates provide a means of extending the 
 record format, and ensures that NetFlow can be adapted to provide support for 
 new protocols. A template describes a NetFlow record format and attributes of the 
-fields within the record. The router assigns teach templete an ID, which is communicated 
+fields within the record. The router assigns teach template an ID, which is communicated 
 to the Collection Engine along with the template description. The template ID 
 is used for all further communication from the router to the Collection Engine.
 However, NetFlow records generated with version 9 are not backwards compatible 
@@ -556,7 +556,7 @@ In interface configuration mode:
 <li><b>Configure the flow export destination:</b> Define the export destination 
 using the command <code><b>ip flow-export destination &lt;ip-address&gt; &lt;port&gt; [sctp|udp]</b></code>.
 </li>
-<li>Define the source IP address:</li> using the command <code><b>ip flow-export 
+<li>Define the source IP address using the command <code><b>ip flow-export 
 source  &lt;interface&gt;</b></code>.
 </li>
 <li><b>Configure the export version:</b> <code><b>ip flow-export version 9</b></code>.

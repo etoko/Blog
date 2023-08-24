@@ -24,7 +24,7 @@ IP SLA consists of two distinct parts; a probe and schedule.
     <li><b>Probe:</b> consists of the operation that will be carried out on the network for
     example reachability test, measurement of delay, measurement of delay 
     variation (jitter). Response times of network services can be measured such as application behaviour 
-    of DNS, HTTP, DHCP. Different types of probes used depend on the application 
+    of DNS, HTTP, DHCP. The different types of probes used depend on the application 
     being monitored; the main types are ICMP, TCP and UDP.</li>
     <li><b>Schedule:</b> deals with when, how long and recurrence of this operation.
     When scheduling an IP SLA, default life of a probe is 3600 seconds (1 hour).
@@ -37,20 +37,20 @@ IP SLA consists of two distinct parts; a probe and schedule.
  IP SLA operations measure the following network parameters:
 <ul>
   <li>Delay (one-way or round-trip)</li>
-  <li>Jitter(direction)</li> 
+  <li>Jitter (direction)</li> 
   <li>Packet loss(direction)</li> 
   <li>Sequencing (packet order)</li>
-  <li>Path(per hop)</li> 
-  <li>Connectivity(directional)</li> 
+  <li>Path (per hop)</li> 
+  <li>Connectivity (directional)</li> 
   <li>Server load times</li> 
-  <li>Voice quality scores(MOS)</li>
+  <li>Voice quality scores (MOS)</li>
 </ul>
 </p>
 <p>
 These aforementioned parameters are measured using the following categories of IP SLA operations:
   <ul>
     <li>ICMP (echo, jitter)</li>
-    <li>UDP(echo, jitter)</li>
+    <li>UDP (echo, jitter)</li>
     <li>TCP connection: can be used to test the availability and response times 
     of an application rather than just reachability.</li>
     <li>DNS</li>
