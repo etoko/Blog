@@ -92,7 +92,7 @@ PBR can be configured to modify the next-hop for two types of traffic:
    Additionally, it may include pings, traceroutes from the local router.
    For locally-generated traffic, PBR is configured
       in global configuration mode using the command:
-      <code><b>ip local policy route-map <i>route-map-name</i></b></code>.
+      <code><b>ip local policy route-map &lt;route-map-name&gt;</b></code>.
       Some IOS versions do not have control plane checks.
    </li>
 </ol>
@@ -101,8 +101,10 @@ PBR can be configured to modify the next-hop for two types of traffic:
 <h1>Configuration of Policy-Based Routing (PBR)</h1>
 <p>
 PBR is configured through a series of steps:
+</p>
 
 <h2>Step 1: Define Traffic an Access Control List or Prefix-List.</h2>
+<p>
 <ul>
   <li><b>Standard Access Control List:</b> To match against only the packet source IP 
   address.</li>
@@ -161,7 +163,7 @@ What you can match on usually will depend on specifically how you are
     an ACL or prefix list can be used to match traffic by IP address.
     <ul>
       <li>To match traffic using an ACL, use the command: <code><b>match 
-  ip address <i>acl_name or number</i> </b></code>. Match all or match any based 
+  ip address &lt;acl_name or number&gt; </b></code>. Match all or match any based 
   on how the match statements are written in the clause. <code><b> match ip address 
   10, 20 - 30, MY_ACL,</b></code> match any.
   
@@ -173,7 +175,7 @@ R1(config-route-map)#<b>match ip address ACL_172.31.0.0/24</b><br>
   
   </li>
   <li>To match traffic using a prefix-list, use the command:
-  <code><b>match ip prefix-list <i>prefix-list-name</i> </b></code>.
+  <code><b>match ip prefix-list &lt;prefix-list-name&gt; </b></code>.
   </li>
   </ul>
   </li>
@@ -196,7 +198,7 @@ The conditions that can be modified by the <code><b>set</b></code> command is
 highly dependent on the platform and the IOS version; for PBR the action is 
 usually the <code><b>next-hop</b></code> keyword:
 <ul>
-  <li><code><b>set next-hop <i>ip_address</i></b></code>: the next hop is 
+  <li><code><b>set next-hop &lt;ip_address&gt;</b></code>: the next hop is 
   unconditionally used; the configured next-hop will be used to forward traffic 
   and the routing table will not be consulted.
   <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
@@ -204,7 +206,7 @@ usually the <code><b>next-hop</b></code> keyword:
 R1(config-route-map)#<b>set ip next-hop 10.0.13.2</b>
 </code></div>
   </li>
-  <li><code><b>set default next-hop <i>ip_address</i></b></code>: IP routing 
+  <li><code><b>set default next-hop &lt;ip_address&gt;</b></code>: IP routing 
   table is first consulted for the next hop before the configured next hop is 
   considered. If the specific destination network does not exist in the routing 
   table, then the PBR defined next hop is considered. The matching of routes in 
@@ -214,7 +216,7 @@ R1(config-route-map)#<b>set ip next-hop 10.0.13.2</b>
   next hop has to be directly connected to the local router. The recursive 
   keyword enables configuration of a next-hop that is not directly connected.
   </li>
-  <li><code><b>set interface <i>exit-interface</i></b></code>: The egress interface 
+  <li><code><b>set interface &lt;exit-interface&gt;</b></code>: The egress interface 
   for the matched packets is defined. PBR does not verify if the configured 
   egress interface is up or down. When configuring the exit interface, a warning 
   message is issued recommending that a P2P interface be configured such as a
@@ -222,12 +224,12 @@ R1(config-route-map)#<b>set ip next-hop 10.0.13.2</b>
   interface. If an interface in a broadcast environment such as FastEthernet or 
   GigabitEthernet is used, an ARP request is sent for each and every packet. If 
   the configured egress interface is down, the router will route traffic using the RIB.</li>
-  <li><code><b>set default interface <i>exit-interface</i></b></code>: The RIB 
+  <li><code><b>set default interface &lt;exit-interface&gt;</b></code>: The RIB 
   is consulted first to determine the egress-interface. If RIB does not have the 
   destination network, then the configured egress interface is used. 
   </li>
-  <li><code><b>set next hop verify-availability <i>ip-address</i> track 
-  <i>track-number</i></b></code>. Set the next hop if the IP SLA track is up.
+  <li><code><b>set next hop verify-availability &lt;ip-address&gt; track 
+  &lt;track-number&gt;</b></code>. Set the next hop if the IP SLA track is up.
   </li>
 </ul>
 </p>
@@ -247,18 +249,18 @@ following modifications to the header of IP packets;
   <ul>
     <li>0 (routine)         </li>
     <li>1 (priority)        </li>
-    <li>2(immediate)        </li>
-    <li>3(flash)            </li>
+    <li>2 (immediate)        </li>
+    <li>3 (flash)            </li>
     <li>4 (flash-override)  </li>
-    <li>5(critical)         </li>
-    <li>6(internet)         </li>
-    <li>7(network)          </li>
+    <li>5 (critical)         </li>
+    <li>6 (internet)         </li>
+    <li>7 (network)          </li>
   </ul>
   </li>
   <li><b>DF bit:</b> The IP header DF bit can be modified using the command 
-  <code><b>set ip df <i>df</i></b></code>.</li>
+  <code><b>set ip df &lt;df&gt;</b></code>.</li>
   <li><b>VRF:</b> The VRF of a packet can be configured using the command 
-  <code><b>set vrf <i>vrf</i></b></code>.</li>
+  <code><b>set vrf &lt;vrf&gt;</b></code>.</li>
  </ul>
 </p>
 <p>
@@ -281,7 +283,7 @@ though they are on separate route map statements of the same route map.f
 <p>
 <b>Inbound Traffic:</b>
 The route-map is applied with the interface configuration command: 
-<code><b>ip policy route-map <i>route-map-name</i></b></code>
+<code><b>ip policy route-map &lt;route-map-name&gt;</b></code>
 </p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
 <code>
@@ -293,7 +295,7 @@ R1(config-if)#<b>ip policy route-map RM_PBR_172.31.0.1</b>
 <p>
 <b>Locally-generated Traffic:</b> PBR for locally-generated traffic is 
 applied using the global configuration command: <code><b>ip local policy route-map  
-<i>route-map-name</i></b></code>.
+&lt;route-map-name&gt;</b></code>.
 </p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
 <code>
@@ -365,7 +367,7 @@ PBR can be verified by the following list of commands:
 </p>
 
 
-<h2><code>ping <i>remote-ip-address</i></code></h2>
+<h2><code>ping &lt;remote-ip-address&gt;</code></h2>
       <p>
         Tests PBR by generating traffic. Pings are usually sent using ICMP packets
         and these are matched in an extended ACL.
@@ -408,7 +410,7 @@ user3@box:~$
       </div>
     </p>
     
-<h2><code>traceroute <i>remote-ip-address</i></code></h2>
+<h2><code>traceroute &lt;remote-ip-address&gt;</code></h2>
     <p>
         Linux and IOS use UDP packets for traceroutes so these have to be configured 
         in the extended ACL.
@@ -523,7 +525,7 @@ R1#.168.1.2 (FastEthernet4/1), d=172.31.0.1, len 38, PBR Counted                
 </code></div>
 
 
-    <h2> <code>show cef interface <i>interface-name</i></code></h2>
+    <h2> <code>show cef interface &lt;interface-name&gt;</code></h2>
    
       <p>
         CEF interface settings for PBR.
@@ -558,7 +560,7 @@ R1#                                                          <br>
 
 
     <h2>
-      <code>show ip interface <i>interface-name</i></code></h2>
+      <code>show ip interface &lt;interface-name&gt;</code></h2>
       <p>
         Displays route-map configured for PBR.
         </p>
