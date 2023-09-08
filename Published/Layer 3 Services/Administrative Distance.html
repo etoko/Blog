@@ -16,11 +16,11 @@ the routing information source.
 <p>
 If a router learns about the path to a prefix from more than one source such as: 
 OSPF, EIGRP, BGP, static routes, routers use AD assigned to each of those sources
-to to rank the routes and decide which routes should be installed into the 
+to rank the routes and decide which routes should be installed into the 
 routing table and therefore used for routing traffic.
 The AD is a value that ranges from 0 to 255. The lower the AD of a route source,
-the more believable its routing information and more likely that its offered routes 
-will be installed into the routing table. Routes with an AD of 255 are not 
+the more believable its routing information and more likely that the routes offered 
+by this source will be installed into the routing table. Routes with an AD of 255 are not 
 installed in the routing table as they are considered unbelievable.
 The router will install into the routing table the route from the source with 
 the lowest AD.
