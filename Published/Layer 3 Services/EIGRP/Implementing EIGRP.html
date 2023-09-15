@@ -59,10 +59,10 @@ of the network compared to link-state routers which learn route information from
 EIGRP has features unique from other distance vector protocols:
 <ul>
 <li>It utilizes neighbors for sharing information and continuously monitors neighbor state</li>
-<li>Rapid convergence using precalculated loop-free backup paths</li>
-<li>EIGRP sends incremental and bounded updates; it doesn't send periodic updates; 
-updates are only sent when there's a topology change i.e. a new network is added or 
-an existing network is withdrawn due to link/device failure, change of path metric etc. 
+<li>Rapid convergence of EIGRP networks is enabled by using precalculated loop-free backup paths</li>
+<li>EIGRP sends incremental and bounded updates; it does not send periodic updates. 
+Updates are only sent when there is a topology change i.e. a new network is added or 
+an existing network is withdrawn due to link or device failure, change of path metric etc. 
 These updates are only sent to routers that require them.</li>
 <li>Uses a composite metric that, by default, consists of cumulative delay and lowest path bandwidth. EIGRP can be 
 configured to include additional parameters such as link load and reliability. </li>
@@ -72,7 +72,7 @@ configured to include additional parameters such as link load and reliability. <
 <p>
 A router can run multiple EIGRP processes. Each process operates under the context of an autonomous system, 
 which represents a common routing domain. Routers within the same domain use the same metric calculation formula and 
-exchange routes only with members of the same autonomous system. If there is a need/requirement for routes to be shared
+exchange routes only with members of the same autonomous system. If there is a need or requirement for routes to be shared
 between different autonomous systems, then redistribution will have to be configured.
 </p>
 
@@ -94,17 +94,20 @@ Once neighborships are formed, unicasts are used to synchronize the topology.
  </p>
  <p>
  EIGRP has an administrative distance of 90 for  internal EIGRP originated routes and 170 for routes that are
- redistributed into EIGRP from other sources such as OSPF. The following table shows the ADs of some common routing 
- protocols, on Cisco devices.
+ redistributed into EIGRP from other sources such as OSPF (external routes). 
+ The following table shows the ADs of some common routing  protocols.
  </p>
  <p>
  <div>
- <table>
+ <table cellspacing="0" width="60%">
+ <thead style="background:#d3d3d3;">
  <tr>
  <td width="50%" style="border-bottom:solid; border-top:solid; border-width:2px;"
  ><b>Routing Source</b></td>
  <td  style="border-bottom:solid; border-top:solid; border-width:2px"><b>Administrative Distance</b></td>
  </tr>
+ </thead>
+ <tbody>
  <tr>
  <td  style="border-bottom:solid; border-width:1px">Connected</td>
  <td  style="border-bottom:solid; border-width:1px">0</td>
@@ -141,7 +144,7 @@ Once neighborships are formed, unicasts are used to synchronize the topology.
  <td  style="border-bottom:solid; border-width:1px">iBGP</td>
  <td  style="border-bottom:solid; border-width:1px">200</td>
  </tr>
- 
+ </tbody>
  </table>
  </div></p>
 </p>
@@ -150,7 +153,7 @@ Once neighborships are formed, unicasts are used to synchronize the topology.
 <p>
 EIGRP supports two configuration modes: named and classic. The original EIGRP configuration mode was classic-mode.
 The named-mode was introduced in IOS versions 15.2.
-It is backward compatible with classic EIGRP; a router configured with named-mode can form a neighborship with an
+It is backward compatible with classic EIGRP; a router configured using named-mode can form a neighborship with an
 EIGRP peer whose configuration is in classic-mode.
 </p>
 
@@ -158,9 +161,9 @@ EIGRP peer whose configuration is in classic-mode.
 <p>
 In classic-mode, EIGRP configuration is split into two sections: 
 <ul>
- <li>EIGRP router configuration mode: general EIGRP configuration including 
+ <li><b>EIGRP router configuration mode:</b> general EIGRP configuration including 
  commands that affect the EIGRP topology table.</li>
- <li>Interface mode: interface-specific commands that are configured individually 
+ <li><b>Interface mode:</b> interface-specific commands that are configured individually 
  at the interface include authentication, hello interval, split-horizon and
  summary-route advertisements.</li>
 </ul>
@@ -187,12 +190,12 @@ Loopback12&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbs
 <p>
 To configure EIGRP using classic-mode:
 </p>
-<p>
-<b>Step 1:</b> Initialize the EIGRP routing process with the global configuration command 
+<ol>
+<li>
+<b>Initialize the EIGRP routing process</b> with the global configuration command 
 <code><b>router eigrp &lt;AS&gt;</b> </code> where AS is the autonomous system number and is in the range 1 - 65535.
-The autonomous system number must match for two devices to become EIGRP peers.
+The autonomous system number must match for two neighboring devices to become EIGRP peers.
 
-</p>
 
 <p><div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
 <code>
@@ -200,15 +203,28 @@ R1(config)#<b>router eigrp 1</b>                             <br />
 </code>
 </div></p>
 
- <p>
-<b>Step 2:</b> Identify the interfaces whose network addresses are to be advertised using the EIGRP router mode command 
-<code><b>network &lt;ip-address&gt; &lt;wildcard-mask&gt;</b></code>.  The optional mask can be omitted to enable interfaces 
-whose configured IP address is within the classful boundaries for that network statement.
+</li>
+<li>
+<b>Configure the EIGRP Router ID (RID):</b> The router ID is used to uniquely identify the device and its 
+advertised routes in the EIGRP autonomous system.
+
+<p>
+<p><div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+<code>
+R1(config-router)#<b>eigrp router-id 1.1.1.1</b>                              <br />
+</code>
+</div></p>
+</li>
+
+
+<li><b>Identify the interfaces whose network addresses are to be advertised</b> using the EIGRP router mode command 
+<code><b>network &lt;ip-address&gt; &lt;wildcard-mask&gt;</b></code>.  The optional 
+subnet mask can be omitted to advertise IP addresses of all interfaces that are subnets
+of the classful network for that network statement.
 </p>
 <p>
 <p><div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
 <code>
-R1(config-router)#<b>router-id 1.1.1.1           </b>              <br />
 R1(config-router)#<b>network 10.0.12.0 0.0.0.3   </b>              <br />
 R1(config-router)#<b>network 10.0.16.1 0.0.0.0   </b>              <br />
 R1(config-router)#<b>network 10.1.10.0 0.0.0.255 </b>              <br />
@@ -218,30 +234,25 @@ R1(config-router)#<b>network 10.1.12.0 0.0.0.255 </b>                           
 </div></p>
 </p>
 <p>
-The wildcard mask can be as specific as 0.0.0.0 where it identifies an interface by its exact IP address. It can be 
-as general as 0.0.0.3 where it identifies the network that a specific interface belongs to. It can also be as general as 
-0.0.255.255 where the last two octets can be ignored when matching the network address. With this type of wildcard mask, EIGRP can be activated on many 
-interfaces.
+The wildcard mask:
+<ul>
+  <li>Can be as specific as 0.0.0.0 where it identifies an interface by its exact IP address.</li> 
+  <li>It can be as general as 0.0.0.3 where it identifies the network that a 
+  specific interface belongs to.</li>
+  <li>It can also be as general as 0.0.255.255 where the last two octets can be 
+  ignored when matching the network address. With this type of wildcard mask, EIGRP can be activated on many 
+interfaces.</li>
+</ul>
 </p>
 <p>
 A subnet mask can be configured instead of the wildcard mask. However, the IOS will convert the subnet mask to 
-wildcard mask in the stored configuration. 
+wildcard mask in the saved configuration. 
 </p>
+</li>
+</ol>
+<p>
+Confirm the EIGRP configuration by issuing the privileged-mode command: <code><b>show ip protocols</b></code>.
 
-<p>
-<b>Step 3: </b>Configure the EIGRP Router ID (RID). The router ID is used to uniquely identify the device and its 
-advertised routes in the EIGRP autonomous system.
-</p>
-
-<p>
-<p><div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-<code>
-R1(config-router)#<b>eigrp router-id 1.1.1.1</b>                              <br />
-</code>
-</div></p>
-<p>
-<b>Step 4: </b>Confirm the EIGRP configuration by issuing the privileged-mode command: <code><b>show ip protocols</b></code>.
-</p>
 <p><div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
 <code>
 R1(config)#<b>do show ip protocols</b>                              <br />
@@ -284,7 +295,7 @@ R1(config)#                                                  <br />
 <h3>EIGRP Classic Metric Calculation</h3>
 <p>
 The EIGRP formula is based on the IGRP metric formula. However, calculated metric is then multiplied by 256 to 
-change it from 24-bits to 32-bits.
+change it from 24-bit to 32-bit.
 EIGRP uses multiple parameters to calculate the metric for a path hence the term composite metric. 
 Metric calculation uses bandwidth and delay by default but can be configured to include interface load and reliability too.
 EIGRP selects paths with the lowest composite metric based on the following parameters:
@@ -308,8 +319,6 @@ can also be retrieved from the configured interface bandwidth using command
 </p>
 <p>
 The bandwidth is scaled by inverse bandwidth  and 10<sup>7</sup> &times; 256. Delay is scaled by 256.
-</p>
-<p>
 The composite metric is computed as follows:
 </p>
 <div><code>
@@ -353,7 +362,8 @@ Unlike classic-mode, named-mode supports newer features such as wide metrics, IP
 <p>
 EIGRP named configuration makes it possible to run multiple instances (different 
 autonomous system numbers) under the same EIGRP process. EIGRP named-mode 
-provides a hierarchical configuration in three subsections:
+provides a hierarchical configuration in three subsections: address-family, 
+interface and topology.
 <ol>
 <li>
 <b>Address Family:</b> This submode contains settings that are relevant to the 
@@ -379,7 +389,7 @@ neighborship over a particular interface and interface specific settings such as
 	<li>bandwidth percentage</li>
 	<li>summary route</li>
 </ul>
-EIGRP interfaces can be configured in one of two places: 
+EIGRP interfaces can be configured in two places: 
 <ol type="a">
 <li><b>Specific interface</b>: commands configured for a specific interface  
 using the EIGRP address-family command <code><b>af-interface &lt;interface-name&gt; </b></code>.
@@ -492,9 +502,9 @@ R6(config-router-af)#<b>do show ip protocols </b>                               
 &nbsp;&nbsp;Default networks flagged in outgoing updates                             <br />
 &nbsp;&nbsp;Default networks accepted from incoming updates                          <br />
 &nbsp;&nbsp;<span style="background-color:#d3d3d3">EIGRP-IPv4 VR(EIGRP_NAMED) Address-Family Protocol for AS(1)</span>             <br />
-&nbsp;&nbsp;&nbsp;&nbsp;Metric weight K1=1, K2=0, K3=1, K4=0, K5=0 K6=0                        <br />
-&nbsp;&nbsp;&nbsp;&nbsp;Metric rib-scale 128                                                   <br />
-&nbsp;&nbsp;&nbsp;&nbsp;Metric version 64bit                                                   <br />
+&nbsp;&nbsp;&nbsp;&nbsp;<span style="background-color:#d3d3d3">Metric weight K1=1, K2=0, K3=1, K4=0, K5=0 K6=0 </span>                       <br />
+&nbsp;&nbsp;&nbsp;&nbsp;<span style="background-color:#d3d3d3">Metric rib-scale 128                            </span>                       <br />
+&nbsp;&nbsp;&nbsp;&nbsp;<span style="background-color:#d3d3d3">Metric version 64bit                            </span>                       <br />
 &nbsp;&nbsp;&nbsp;&nbsp;NSF-aware route hold timer is 240                                      <br />
 &nbsp;&nbsp;&nbsp;&nbsp;<span style="background-color:#d3d3d3">Router-ID: 6.6.6.6</span>                                                     <br />
 &nbsp;&nbsp;&nbsp;&nbsp;Topology : 0 (base)                                                    <br />
@@ -526,28 +536,31 @@ With named-mode, the metric weights include a new K-value, K6, which by default,
 K6 adds an extended attribute to measure jitter, energy, or other future parameter. 
 </p>
 <p>
-As long as K values K1 through K5 are the same and K6 is not set i.e. zero, 
-classic-mode configured devices are able to form neighborships with named-mode configured devices. 
+As long as K-values K1 through K5 are the same and K6 is not set i.e. zero, 
+devices configured using EIGRP classic mode are able to form neighborships with 
+devices configured using named-mode. 
 EIGRP is able to detect when a neighbor is configured using classic-mode. EIGRP unscales its 64-bit metric to 32-bit metric. 
 This conversion results in loss of clarity if routes pass through a mixture of classic metric and wide metric devices.
-It is best to configure devices with the same EIGRP mode. 
+It is best to configure devices using the same EIGRP configuration mode. 
 </p>
 
 <h3>EIGRP Wide Metric Calculation</h3>
 <p>
 The EIGRP metric calculation formula has been scaled to account for links above 10Gbps.
 </p>
-<p>In classic EIGRP:
-<div><code>
+<p>In classic EIGRP, bandwidth was calculated using the formula:
+<code>
 bandwidth = 10<sup>7</sup> &times; 256 &div; int_bw.
-</code></div></p>
+</code></p>
 <p>
 All links with a bandwidth of 10,000,000 or higher were given the same bandwidth value of 10Gbps. 
-As bandwidth increases, visibility is lost; 1GiE = 25560, 10GiE = 256, 20GiE = 256,
-40GiE = 256. EIGRP couldn't distinguish between these types of links to develop an accurate path to a destination. 
+As bandwidth increases, visibility is lost i.e., 1GiE = 25560, 10GiE = 256, 20GiE = 256,
+40GiE = 256. EIGRP couldn't distinguish between these types of links to select 
+the lowest metric path to a destination. 
 </p>
 <p>
-With the delay parameter of the composite metric calculation, minimum configurable delay is 10 microseconds. 
+When calculating the composite wide metric, the delay parameter has a minimum 
+configurable delay of 10 microseconds. 
 As bandwidth increases, delay visibility is lost as it does not change: 
 1GiE = 10 microseconds, 10GiE = 10 microseconds, 20GiE = 10 microseconds.
 </p>
@@ -586,37 +599,33 @@ Routing Protocol is "eigrp 1"                                              <br /
 </div></p>
 
 <p>
-The bandwidth problem is fixed by scaling it higher 
-<div><code>
-bandwidth = 10<sup>7 </sup> &times; 65536 &div; int_bw 
-</code></div></p>
+The bandwidth problem is fixed by scaling it higher: 
+<code><b>Bandwidth = 10<sup>7 </sup> &times; 65536 &div; int_bw </b></code>
+</p>
 <p>
-The delay problem is fixed by moving to picoseconds. : 
-
-<div><code>
-Wide metric EIGRP delay = delay(pico) &times; 65536 &div; 10<sup>7</sup> 
-</code></div>
+The delay problem is fixed by moving to picoseconds: 
+<code><b>Delay = delay(pico) &times; 65536 &div; 10<sup>7</sup> 
+</b></code>
 </p>
 
 <h3>EIGRP Wide Metric Formula</h3>
 <p>
 Bandwidth is referred to as throughput in wide metric calculation:
-</p>
-<div><code>
+
+<div><code><b>
 Throughout = K1 &times; (EIGRP bandwidth &times; EIGRP_WIDE_SCALE) &div; Interface Bandwidth in kbps
-</code></div></p>
+</b></code></div></p>
 
 <p>
 EIGRP_WIDE_SCALE is a constant with the value 65535.
 Delay is now referred to as latency in wide metric calculation. Latency is the total interface delay measured in picoseconds;</p>
-<div><code>
+<div><code><b>
 Latency = K3 &times; (Delay &times; EIGRP_WIDE_SCALE) &div; EIGRP_DELAY_PICO
-</code></div></p>
-<p>Default metric is still the same formula:</p>
-<div><code>
-metric = (K1 &times; min (throughput)) + (K3 &times; sum (latency))
-</div></p></code>
-
+</b></code></div></p>
+<p>Default metric is still the same formula:
+<code><b>
+Metric = (K1 &times; min (throughput)) + (K3 &times; sum (latency))</b></code>
+</p>
 <p>
 Wide metrics are backwards compatible with classic EIGRP. 
 </p>
@@ -624,9 +633,10 @@ Wide metrics are backwards compatible with classic EIGRP.
 <p>
 IOS Routing Information Base (RIB) only supports 32-bit metrics. After EIGRP DUAL, 
 the 64-bit EIGRP wide metric is scaled down to fit in the 32-bit RIB metric size 
-using the RIB-scale value in the formula <code><b>1 &divide; rib-scale</b></code>. 
-Using the default metric RIB-scale value of 128  the 64-bit metric is 
-scaled to 32-bit using the formula 1&divide;128. This default can be modified using the command: 
+using the RIB-scale value in the formula <code><b>32-bit metric = 64-bit metric &times; (1 &divide; rib-scale)</b></code>. 
+Using the default metric RIB-scale value of 128, the 64-bit metric is 
+scaled to 32-bit using the calculation <code><b>32-bit metric = 64-bit metric &times; (1 &divide; 128)</b></code>.
+This default can be modified using the command: 
 <code><b>metric rib-scale &lt;1 - 255&gt;</b></code> in EIGRP named-mode 
 address-family submode.
 </p>
@@ -708,7 +718,7 @@ modified.
 R7#<b>show ip eigrp topology 192.168.96.0</b>                                                                            <br />
 EIGRP-IPv4 VR(EIGRP_R7) Topology Entry for AS(1)/ID(7.7.7.7)                                                      <br />
 %Entry 192.168.96.0/24 not in topology table                                                                      <br />
-R7#show ip eigrp topology 192.168.96.0/20                                                                         <br />
+R7#<b>show ip eigrp topology 192.168.96.0/20</b>                                                                         <br />
 EIGRP-IPv4 VR(EIGRP_R7) Topology Entry for AS(1)/ID(7.7.7.7) for 192.168.96.0/20                                  <br />
 &nbsp;&nbsp;State is Passive, Query origin flag is 1, 1 Successor(s),<span style="background-color:#d3d3d3"> FD is 14713889, RIB is 114952 </span><br />
 &nbsp;&nbsp;Descriptor Blocks:                                                                                              <br />
@@ -4938,21 +4948,21 @@ such as:
 </ul> 
 </p>
 
-<h3 id="EIGRP_K-VALUES">Custom K Values</h3>
+<h3 id="EIGRP_K-VALUES">Custom K-values</h3>
 <p>
 If the design of the network requires that delay and load to be included in metric 
 calculation additional to 
 bandwidth and delay in metric calculations, modification of the K-values may be 
-required. K values for the path metric calculation are set with the command 
+required. K-values for the path metric calculation are set with the command 
 <code><b>metric weights TOS K1 K2 K3 K4 K5 [K6]</b></code> under the EIGRP process. 
 The TOS value always has a value of 0, and the K6 value is used for wide metric 
 calculation.
 K-values are either 1 or 0 where 1 activates the K-value and 0 deactivates it.
-To ensure consistent metric calculation in an EIGRP autonomous system, the K values 
+To ensure consistent metric calculation in an EIGRP autonomous system, the K-values 
 must match between EIGRP neighbors. 
-The K values are included in an EIGRP hello packet. 
+The K-values are included in an EIGRP hello packet. 
 
-The K values are displayed with the <code><b>show ip protocols</b></code> command.
+The K-values are displayed with the <code><b>show ip protocols</b></code> command.
 </p>
 
 <h3 id="MODIFYING_METRICS">Modifying Metric Values</h3>
