@@ -6500,9 +6500,10 @@ Note that the key number of the valid key must match on both EIGRP peers.
 R7(config-keychain)#<b>key 1 </b>
 </code></div></p>
 <p>
-<b>Step 3:</b> Specify the preshared password by using the command key-string password. 
+<b>Step 3:</b> Specify the preshared password by using the command 
+<code><b>key-string &lt;password&gt;</b></code>. 
 When defining the password, note that white space counts as a character. 
- Supports automatic key rotation.
+ Keychains support automatic key rotation.
 </p>
 <p><div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
 <code>
@@ -6613,8 +6614,9 @@ SHA digest is more secure than MD5 due to the key chain length.
 </p>
 
 <p>
-The named-mode configuration places the configurations under the EIGRP interface submode, under the af-interface default 
-or the af-interface interface-id.
+The named-mode configuration places the configurations under the EIGRP interface 
+submode configuration using either <code><b>af-interface default</b></code> 
+command or interface specific command <code><b>af-interface &lt;interface-id&gt;</b></code>.
 </p>
 
 <h3>EIGRP SHA Authentication Configuration</h3>
@@ -6798,6 +6800,33 @@ previously shutdown EIGRP instance.
 </p>
 
 
+<h2>EIGRP over VRF-Lite</h2>
+<p>
+EIGRP supports routing over a Virtual Routing and Forwarding - Lite (VRF-Lite) context.
+This routing is contextual to the router that it is configured on. EIGRP over 
+VRF-Lite is enabled in EIGRP named mode only.
+</p>
+<p>
+ To configure EIGRP over VRF-Lite:
+ <ol>
+   <li>Initialize the appropriate address family using the command 
+   <code><b>address-family ipv4 vrf &lt;vrf-name&gt; autonomous-system &lt;as-number&gt;</b></code>.
+ </ol>
+</p>
+
+<h3>EIGRP VRF-Lite Verification</h3>
+<p>
+The configuration and operational state of EIGRP VRF-Lite can be verified using 
+the following commands:
+<ul>
+<li><code><b>show ip eigrp vrf &lt;vrf-name&gt; interfaces</b></code></li> 
+<li><code><b>show ip eigrp vrf &lt;vrf-name&gt; neighbors</b></code></li>
+<li><code><b>show ip eigrp vrf &lt;vrf-name&gt; topology [&lt;network&gt; &lt;prefix-length&gt;]</b></code></li>
+<li><code><b>show ip route vrf &lt;vrf-name&gt;</b></code></li>
+<li><code><b>ping vrf &lt;vrf-name&gt; &lt;ip-address&gt;</b></code></li>
+<li><code><b>traceroute vrf &lt;vrf-name&gt; &lt;ip-address&gt;</b></code></li>
+</ul>
+</p>
 
 <h1 id="EIGRPv6">EIGRPv6</h1>
 <p>
