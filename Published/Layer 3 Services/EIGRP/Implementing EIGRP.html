@@ -6,23 +6,23 @@
   <li><a href="#RID">Router IDs</a>
   <li><a href="#EXCHANGE">How Information is Exchanged with EIGRP</a>
     <ol type="a">
-	  <li><a href="#NEIGHBOR_ESTABLISHMENT">Neighbor Establishment</a>
-	  <li><a href="#NEIGHBOR_TABLE">Neighbor Table</a>
-	  <li><a href="#INTER-ROUTER_COMMUNICATION">Inter-Router Communication</a>
-	  <li><a href="#EIGRP_PACKETS">Packet Types</a>
+	  <li><a href="#NEIGHBOR_ESTABLISHMENT">Neighbor Establishment</a></li>
+	  <li><a href="#NEIGHBOR_TABLE">Neighbor Table</a></li>
+	  <li><a href="#INTER-ROUTER_COMMUNICATION">Inter-Router Communication</a></li>
+	  <li><a href="#EIGRP_PACKETS">Packet Types</a></li>
 	</ol>  
-	<li><a href="#LOOP_PREVENTION">Loop Prevention</a>
-  <li><a href="#TOPOLOGY_TABLE">Topology Table</a>
-  <li><a href="#EIGRP_CONVERGENCE">EIGRP Convergence and Failure Detection</a>
-  <li><a href="#EIGRP_VERIFICATION">Verification</a>
-  <li><a href="#EIGRP_OPTIMIZATION">EIGRP Optimization</li>
+	<li><a href="#LOOP_PREVENTION">Loop Prevention</a></li>
+  <li><a href="#TOPOLOGY_TABLE">Topology Table</a></li>
+  <li><a href="#EIGRP_CONVERGENCE">EIGRP Convergence and Failure Detection</a></li>
+  <li><a href="#EIGRP_VERIFICATION">Verification</a></li>
+  <li><a href="#EIGRP_OPTIMIZATION">EIGRP Optimization
     <ol type="a">
       <li><a href="#TIMERS">Hello and Hold Timers</a></li>
-      <li><a href="#PASSIVE_INTERFACE">Passive Interfaces</a>
-      <li><a href="#SUMMARIZATION">Route Summarization</a>
-      <li><a href="#EIGRP_STUB">EIGRP Stub</a>
-      <li><a href="#CANDIDATE_DEFAULT">EIGRP Default Route Propagation</a>
-       <li><a href="#TRAFFIC_ENGINEERING">EIGRP Traffic Engineering</a>
+      <li><a href="#PASSIVE_INTERFACE">Passive Interfaces</a></li>
+      <li><a href="#SUMMARIZATION">Route Summarization</a></li>
+      <li><a href="#EIGRP_STUB">EIGRP Stub</a></li>
+      <li><a href="#CANDIDATE_DEFAULT">EIGRP Default Route Propagation</a></li>
+       <li><a href="#TRAFFIC_ENGINEERING">EIGRP Traffic Engineering</a></li>
     <ol type="i">
       <li><a href="#EIGRP_K-VALUES">Custom K-values</a>
       <li><a href="#MODIFYING_METRICS">Modifying Metrics</a>
@@ -1064,10 +1064,11 @@ R1# &nbsp;&nbsp;                                                                
 </div></p>
 
 
-<h1 id="EXCHANGE">Information Exchange in EIGRP</h1>
+<h1 id="EXCHANGE">Information Exchange</h1>
 <h2 id="NEIGHBOR_ESTABLISHMENT">Neighbor Establishment</h2>
  <p>
-EIGRP requires a neighbor relationship to form between EIGRP devices before prefix exchange. 
+EIGRP requires a neighbor relationship to form between EIGRP devices before prefix exchange 
+takes place. 
 EIGRP uses neighborships to form a trusted bond between two similarly configured devices. When a router receives an 
 EIGRP hello packet, it attempts to become the neighbor of the sender of the Hello packet.
 </p>
@@ -1097,16 +1098,13 @@ Each EIGRP process maintains a table of neighbors to ensure
  without data such as K-values. Acknowledgement packets are usually sent in unicast to the sender of the update.
  </p>
  
- <h2 id="NEIGHBOR_TABLE">EIGRP Neighbor Table</h2>
+ <h2 id="NEIGHBOR_TABLE">Neighbor Table</h2>
  
  <p>
  EIGRP neighbors are recorded in the neighbor table. The EIGRP neighbor table 
- can be viewed using the privileged mode command  <code><b>show ip eigrp neighbors detail</b> </code>
+ can be viewed using the privileged mode command  <code><b>show ip eigrp neighbors detail</b></code>.
+ The <code><b>detail</b></code> keyword is optional.
  </p>
- 
-<p>
-The command <code><b>show ip eigrp neighbors [interface-id] </b></code> displays the EIGRP neighbors for a router.
-</p>
 
 <p><div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
 <code>
@@ -1131,7 +1129,7 @@ R6#
 <td style="border-bottom:solid; border-top:solid; border-width:1px" width="13%"><b>H:</b></td>
 <td style="border-bottom:solid; border-top:solid; border-width:1px">
 Handle. An index number, starting from zero, assigned to a neighbor depending on when the neighborship was formed.
-The first neighbor is given a Handle value of zero (0), the second one (1) and so on sequentially.
+The first neighbor is has a Handle value of zero (0), the second one (1), and so on sequentially.
 </td>
 </tr>
 <tr>
@@ -1243,7 +1241,7 @@ EIGRP version information as reported by the neighbor.
 
 <p>
 To display only the neighbors formed via a specific interface, add the interface parameter to the command 
-<code><b>show ip eigrp neighbors &lt;interface-id &gt;</b></code>
+<code><b>show ip eigrp neighbors &lt;interface-id&gt;</b></code>.
 </p>
 
 <p><div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
@@ -1257,7 +1255,7 @@ H&nbsp;&nbsp;&nbsp;Address&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </code>
 </div></p>
 
-<h3>Static Configuration of EIGRP Neighbors</h3>
+<h3>Static Configuration of Neighbors</h3>
 
  <p>
   In environments where multicast traffic is not possible, neighborship formation is 
@@ -1268,7 +1266,7 @@ H&nbsp;&nbsp;&nbsp;Address&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
  Static neighborship configuration involves entering the following command:
  </p>
  <p><div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
- <code><b>neighbor &lt;neighbor-ip-address&gt; &lt;interface-id&gt;</b> </code>
+ <code><b>neighbor &lt;neighbor-ip-address&gt; &lt;interface-id&gt;</b></code>
  </div></p>
  <p>
  The interface ID is the interface connecting to the neighbor. 
@@ -1291,7 +1289,7 @@ H&nbsp;&nbsp;&nbsp;Address&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
  </code>
  </div></p>
  <p>
- and following log message will be displayed on the remote router whose neighborship is being terminated: 
+ The following log message will be displayed on the remote router whose neighborship is being terminated: 
  </p> 
  <p><div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
 <code>
@@ -1361,8 +1359,8 @@ R7#son: new if on tid 0                                                         
 <h3>EIGRP Packets</h3>
  
 <p>
-EIGRP uses five different packet types to communicate with other routers i.e. Hello, Update, Request, Reply, Query.  
-EIGRP uses  IP protocol 88. EIGRP uses multicast packets where possible to reduce bandwidth consumed on a link
+EIGRP uses five different packet types to communicate i.e. Hello, Update, Request, Reply, Query.  
+EIGRP sends packets using IP protocol 88. EIGRP uses multicast packets where possible to reduce bandwidth consumed on a link
 (one packet to reach multiple devices); it uses unicast packets when necessary. 
 Communication between routers is done with multicast using the group address 
 <code><b>224.0.0.10</b></code> and the MAC address <code><b>01:00:5e:00:00:0a</b></code> when possible. 
@@ -1382,7 +1380,7 @@ necessary to send hello packets reliably to all neighbors individually. Therefor
 multicast hello with an indication in the packet informing the receivers that the packet need not be
 acknowledged using sequence number of zero (0). 
 A sequence number is included in each EIGRP packet. The packet that has a sequence 
-number of zero does not require a response from the recepient EIGRP router; 
+number of zero does not require a response from the recipient EIGRP router; 
 all other values require an ACK packet that includes the original sequence number
 of the packet that they are acknowledging.
 Other types of packets (such as updates) require acknowledgment, which is indicated in
@@ -1410,8 +1408,8 @@ of varying speed links.
  <h5>INIT</h5>
  <p>
  Used in initial establishment of communications with a new neighbor. It ensures that unicast bidirectional communication 
- operates correctly. It also is used to instruct the new neighbor to advertise their full set of known routes. If correct 
- acknowledgement is received, the neighbor will begin to send over its list of routes. These routes are not the complete 
+ operates correctly. It also is used to instruct the new neighbor to advertise 
+ their full set of known routes. If acknowledgement is received, the neighbor will begin to send over its list of routes. These routes are not the complete 
  content of its topology table but only the current successors that it is actively using.
  </p>
  <h5>Conditionally Received (CR)</h5>
@@ -1424,7 +1422,7 @@ of varying speed links.
  <h5>Restart Flag (RS)</h5>
  <p>
  Often used in two different conditions: soft reset of a device and graceful restart occuring. A similar behaviour is 
- expected in both conditions; the adjacency remains in both scenarios but the full information from neighbors is 
+ expected in both conditions; the adjacency is maintained in both scenarios but the full information from neighbors is 
  requested again. Typically, the INIT flag is set when the Restart flag is set and possibly EOT flag along with the full 
  routing information. It reduces the packets required compared to starting from the beginning.
  </p>
@@ -1459,13 +1457,14 @@ of varying speed links.
  (TLV) format. Multiple combinations are possible.
 </p>
 
-<h3 id="EIGRP_PACKETS">EIGRP Message Packet Types</h3>
+<h3 id="EIGRP_PACKETS">Packet Types</h3>
  <p>
  OpCode is used to indicate the message type inside a packet. Message type is another term for packet type.
  </p>
  <h4>1. Hello Packet</h4>
  <p>
- Hello packets are used primarily for neighbor discovery and keepalive. The hello-interval controls the 
+ Hello packets are used primarily for neighbor discovery and maintenance (as 
+ keepalive messages). The hello-interval controls the 
  number of times that the hello packets are sent from an interface. By default, the hello interval is 5 seconds.
  The Hello packet body contains sender's K-values, hold time and TLV (Type, Length Value) of the EIGRP version and TLV
  version used. Hello packets are often sent to multicast 224.0.0.10 on IPv4 
@@ -1553,7 +1552,8 @@ of varying speed links.
  mixed environments.
  </p>
  <p>
- TLVs typically used are: parameter (0x0001), software version (0x0004).
+ TLVs typically used are: parameter (0x0001), software version (0x0004), and 
+ authentication.
  </p>
  <ul>
  <li><b>Parameter TLV: </b>includes local device's K-values and hold timer value. These are used to determine compatibilitiy 
@@ -1617,12 +1617,13 @@ of varying speed links.
  <h5>IPv4 TLVs</h5>
  <p>
  Multiple TLVs can be used to advertise the same types of networks depending on the specific EIGRP implementation. 
- Originally, IPv4 prefixes were advertised in two types of TLV depending on whether the route originated inside the EIGRP
+ Originally, IPv4 prefixes were advertised in two types of TLV depending on whether 
+ the route originated inside the EIGRP
  or whether it originated outside EIGRP (0x0102 - Internal and 0x0103 - External) respectively.
  </p>
  <h5>IPv6 TLVs</h5>
  <p>
- IPv6 prefixes that were originally advertised using EIGRP (internal) were given the TLV value of x0402 and 
+ IPv6 prefixes that were originally advertised using EIGRP (internal) were given the TLV value of 0x0402 and 
  redistributed prefixes (external) 0x0403. Cisco used these TLV values in older software versions prior to TLV v1.5. Older 
  TLVs have been deprecated in favor of multi-protocol TLVs not specific to the protocol type. When using these protocol 
  independent TLVs 0x0602 is used for IPv4 and IPv6 internal routes and 0x0603 for external.
@@ -1631,7 +1632,7 @@ of varying speed links.
  
  <h4>2. Update Packet</h4>
  <p>
-EIGRP Update packets are used to send new or updated information on different routes to a device's neighbor. 
+EIGRP Update packets are used to exchange new or updated information on different routes. 
 The EIGRP update packet includes path attributes associated with each prefix. The EIGRP path attributes can include 
 hop count, cumulative delay, minimum bandwidth. The attributes are updated by each hop along the way, 
 allowing each router to independently identify the shortest path.
@@ -1765,7 +1766,7 @@ allowing each router to independently identify the shortest path.
  </ul>
  </p>
  <p>
- The use of multiple query packets is possible for a single event such as the failure of a neighbor. In such as scenario, 
+ The use of multiple query packets is possible for a single event such as the failure of a neighbor. In such a scenario, 
  multiple routes may have been affected and gone active at the same time. Under such circumstances 
  multiple query packets may be sent to the same destination neighbors but with different lists of active routes if all 
  the active routes can not be fitted in a single packet. 
@@ -2247,7 +2248,7 @@ in the Query packet that use the local router as a next hop.
  <code><b>metric maximum-hops &lt;1 - 255&gt;</b></code>
  </p>
  
-<h1 id="TOPOLOGY_TABLE">EIGRP Topology Table</h1>
+<h1 id="TOPOLOGY_TABLE">Topology Table</h1>
 
 <p>
 EIGRP&#39;s topology table is a vital data structure in the operation of EIGRP 
@@ -2397,11 +2398,12 @@ R8#                                                                             
 Feasibility condition is used to select loop-free backup paths. 
  A path entry is considered not feasible if the advertised distance is equal to or greater 
  than the feasible distance of the lowest metric path.
-EIGRP uses the feasibility condition to prevent the formation of routing loops. This is used in addition to split horizon. 
+EIGRP uses the feasibility condition to prevent the formation of routing loops. 
+This is used in addition to split horizon. 
 </p>
 
 <p>
-The feasibility condition follows the following sequence of steps during path selection;
+The feasibility condition follows this sequence of steps during path selection:
 <ol>
 <p><b>Step 1:</b> Find the best path i.e. the path with the lowest metric; take the metric of the best path as 
 reported by the neighbor as X.</p>
@@ -2704,19 +2706,19 @@ Routing Protocol is "eigrp 1"                                                <br
  <p>
  It is important to note that EIGRP is currently using only one path for the destination 10.7.12.0/24. EIGRP is capable of 
  using multiple paths to route traffic to a destination. Optimizing EIGRP to utilise multiple paths including unequal
- cost paths is covered under traffic engineering section below.  
+ cost paths is covered under <a href="#TRAFFIC_ENGINEERING">Traffic Engineering</a> section.  
  </p>
  
-<h2 id="EIGRP_CONVERGENCE">EIGRP Reconvergence and Failure Detection</h2>
+<h2 id="EIGRP_CONVERGENCE">Reconvergence and Failure Detection</h2>
 <p>
 When EIGRP detects that it has lost its successor for a network, a reconvergence process starts to identify 
 an alternate path to the network. The reconvergence process differs for paths with or 
 without a FS.
 
 
- <h3>For paths without a feasible successor</h3>
+ <h3>Paths without a feasible successor</h3>
 <p>
- Loss of successor results a route going into Active state. DUAL must perform a new route calculation.
+ Loss of a successor results in a route going into the Active state. DUAL must perform a new route calculation.
  The route state changes from passive (P) to active (A) in the EIGRP topology table. 
 
 The router detecting the topology change sends out Query packets to all neighbors except through the interface to 
@@ -2802,7 +2804,8 @@ The active timer can be disabled or modified with the command
 With classic configuration mode, the command runs directly under the EIGRP process, and with named-mode configuration, 
 the command runs under the topology base.
 </p>
-<p><div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
 <code>                                                                                                                                                      <br />
 R7(config)#<b>do show ip protocols</b>                                                                                                                             <br />
 *** IP Routing is NSF aware ***                                                                                                                             <br />
@@ -3017,11 +3020,11 @@ The columns of the command <code><b>show ip eigrp interfaces</b></code> are expl
 <table width="100%" cellspacing="0">
 <tr>
 <td style="border-bottom:solid; border-top:solid; border-width:1px" width="20%"><b>Interface: </b></td>
-<td style="border-bottom:solid; border-top:solid; border-width:1px">interfaces on which EIGRP is enabled on.</td>
+<td style="border-bottom:solid; border-top:solid; border-width:1px">Interfaces on which EIGRP is enabled on.</td>
 </tr>
 <tr>
 <td style="border-bottom:solid; border-width:1px"><b>Peers:</b> </td> 
-<td style="border-bottom:solid; border-width:1px">number of EIGRP neighborships formed through that interface.</td>
+<td style="border-bottom:solid; border-width:1px">Number of EIGRP neighborships formed through that interface.</td>
 </tr>
 <tr>
 <td style="border-bottom:solid; border-width:1px"><b>Xmt Queue<br />Un/Reliable: </b></td>
@@ -3866,8 +3869,8 @@ R3#                                                                             
 
 <h1 id="EIGRP_OPTIMIZATION">EIGRP Optimization</h1>
 <p>
-While the default EIGRP configurations work, some changes to EIGRP default behaviour improve its performance and 
-provide additional security to the network.
+While the default EIGRP configurations work, some changes to EIGRP default behaviour improves its performance and 
+provides additional security to the network.
 </p>
 
 
@@ -4157,7 +4160,7 @@ Manual summarization supports any bit boundary including 0.0.0.0/0. It automatic
 It is still possible to advertise constituent networks even after configuring summarization. This can be done using 
 a leak-map. Manual summarization can be implemented; in classic-mode at the under the interface configuration mode
 using the command <code><b>ip summary-address eigrp </b></code>. In named-mode manual summarization is configured under the 
-af-interface mode. <code><b>summary-address</b></code>.
+af-interface mode: <code><b>summary-address</b></code>.
 </p>
 <p>
 <b>Note:</b> In named-mode, manual summarization can not be configured under the default interface.
@@ -4194,7 +4197,7 @@ Every time a matching component route for the summary aggregate is added or remo
 route is still using the attributes from the path with the lowest metric.
 The fluctuation in the path metric is resolved by configuring a static metric for 
 the summary route with the command
-<code><b>summary-metric network {/prefix-length | subnet-mask} bandwidth delay reliability load MTU administrative_distance</b></code>. 
+<code><b>summary-metric &lt;network&gt; {/&lt;prefix-length&gt; | &lt;subnet-mask&gt;} &lt;bandwidth&gt; &lt;delay&gt; &lt;reliability&gt; &lt;load&gt; &lt;MTU&gt; &lt;administrative_distance&gt;</b></code>. 
 The metric is statically defined per summary in the topology base configuration mode for named EIGRP and under router 
 eigrp process mode for classic EIGRP.
 </p>
@@ -4214,19 +4217,20 @@ network boundary.
 The summary aggregate prefix is not advertised until a prefix matches it. 
 Interface-specific summarization can be performed in any section of the network topology. 
 The advertisement of summary routes occurs on an interface-by-interface basis. 
-Summary routes are always advertised based on the outgoing interface.
+Configuration of summary routes should be done on the outgoing interface.
 </p>
+
  <h4>Classic Mode</h4>
  <p>
  In classic-mode, EIGRP summary is configured using the interface mode command 
  <code><b>ip summary address eigrp &lt;as&gt; &lt;network&gt; &lt;subnet-mask&gt; [leak-map &lt;route-map-name&gt;] </b></code>.
+ The leak-map option allows the advertisement of the component routes of the 
+summary route identified in the route map.
+</p>
+<p>
  The following configuration shows the routing table of a downstream device R8 before and after the 
  configuration of summarization on device R3. 
  </p>
- <p>
-The leak-map option allows the advertisement of the component routes of the 
-summary route identified in the route map.
-</p>
 
 <p><div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
 <code>
@@ -4343,7 +4347,7 @@ R3#                                                                             
 It is important to note that if redistribution is implemented on a network and 
 route summarization is not configured on the redistributing router but instead 
 the external routes are summarized by a downstream router, routers receiving the 
-summary address will view the summary address as an internal route.
+summary address of the redistributed routes will consider the summary address as an internal route.
 </p>
 <p>
 When implementing summarization, EIGRP poisons component routes of the summary; the summarizing router sends updates of the
@@ -4387,7 +4391,7 @@ R4(config-if)#                                                                  
 EIGRP installs a discard route on the summarizing routers as a routing loop prevention mechanism. 
 A discard route is a route that matches the summary aggregate prefix with the destination Null0. This prevents routing loops where portions of the summarized network range do not have a more specific entry in the Routing Information Base (RIB) on the summarizing router. 
 The AD for the Null0 route is 5 by default. You view the discard route by using the 
-command <code><b>show ip route &lt;network subnet-mask&gt;</b></code>. 
+command <code><b>show ip route &lt;network&gt; &lt;subnet-mask&gt;</b></code>. 
 
 </p>
 
@@ -4409,7 +4413,8 @@ R3(config-if)#
 
 <h3>EIGRP Leak-maps</h3>
 <p>
-Leak-maps allow selective advertisement of subnets in a summary. Can be used for longest match traffic engineering.
+Leak-maps allow selective advertisement of selected component subnets of a 
+summary route. They can be used for longest match traffic engineering.
 Leak-maps are applied through a route-map.
 </p>
 
@@ -4559,7 +4564,7 @@ Stub feature can help reduce EIGRP bandwidth utilization over WAN links.
 
 <h3>Stub Options</h3>
 <p>
-EIGRP Stub options include the following:
+When configuring an EIGRP stub, the following stub options are available:
 <ul>
   <li><b>Connected:</b> advertises directly connected networks.
   <li><b>Summary:</b> advertises summary routes.
@@ -4575,10 +4580,11 @@ In the configuration file i.e. running-configuration and startup-configuration, 
 additional options is saved as <code><b>eigrp stub connected summary </b></code>.
 </p>
 
-<h3>EIGRP Stub Configuration</h3>
+<h3>Stub Configuration</h3>
 <p>
 The EIGRP stub router announces itself as a stub within the EIGRP hello packet. 
-Neighboring routers detect the stub TLV field and update the EIGRP neighbor table to reflect the router&#39;s stub status. 
+Neighboring routers detect the stub TLV field and update the EIGRP neighbor table to 
+reflect the router&#39;s stub status. 
 If a route goes active, EIGRP does not send EIGRP queries to an EIGRP stub router.
 </p>
 <p>
@@ -4740,10 +4746,7 @@ R9(config-router-af)#<b>eigrp stub connected summary static redistributed  </b> 
 The above configuration advertises connected, summary, statically configured and redistributed prefixes.
 </p>
 
-
-
-
-<h3>EIGRP Stub-Site</h3>
+<h3>Stub-Site</h3>
 <p>
 The EIGRP stub site feature builds on EIGRP stub capabilities that allow a router to advertise itself as a stub to peers 
 only on the specified WAN interfaces but allow it to exchange routes learned on LAN interfaces with other routers 
@@ -4757,7 +4760,7 @@ EIGRP stub sites provide the following key benefits:
   <li>The EIGRP stub site feature prevents the EIGRP stub site route from being a transit site.
 </ul>
 </p>
-<h4>EIGRP Stub Site Config</h4>
+<h4>Stub Site Config</h4>
 <p>
 The EIGRP stub-site feature is available in named EIGRP configuration mode only.
 The stub-site feature is configured on devices/routers that are connected to WAN link on the branch.  
@@ -4777,11 +4780,10 @@ command configured in the address family
 interface configuration mode. On the identified interfaces, neighbors treat WAN interfaces as stub. 
 </p>
 
-
 <p>
 The WAN interfaces are configured with the <code><b>stub-site wan-interface</b></code> command. 
 The stub site function and identifier are enabled with the command 
-<code><b>eigrp stub-site &lt;as-number:identifier &gt;</b></code>. 
+<code><b>eigrp stub-site &lt;as-number:identifier&gt;</b></code>. 
 The <code><b>as-number:identifier</b></code> must remain the same for all devices in a site. 
 Remote prefixes that are learned through the WAN interface are tagged with the EIGRP stub site 
 attribute.
@@ -4801,7 +4803,7 @@ R9(config-router-af-interface)#<b> stub-site wan-interface              </b><br 
 R9(config-router-af-interface)#<b> end                                  </b><br />
 </code></div></p>
 
-<h4>EIGRP Stub Router Flags</h4>
+<h4>Stub Router Flags</h4>
 <p>
 A major benefit to the EIGRP stub site feature is that the stub functionality can be passed to a branch site that has 
 multiple edge routers. As long as each router is configured with the EIGRP stub site feature and maintains the same 
@@ -4950,11 +4952,10 @@ such as:
 
 <h3 id="EIGRP_K-VALUES">Custom K-values</h3>
 <p>
-If the design of the network requires that delay and load to be included in metric 
-calculation additional to 
-bandwidth and delay in metric calculations, modification of the K-values may be 
+If the design of the network requires that delay and load be included in metric 
+calculation in addition to bandwidth and delay in metric calculations, modification of the K-values may be 
 required. K-values for the path metric calculation are set with the command 
-<code><b>metric weights TOS K1 K2 K3 K4 K5 [K6]</b></code> under the EIGRP process. 
+<code><b>metric weights &lt;tos&gt; &lt;K1&gt; &lt;K2&gt; &lt;K3&gt; &lt;K4&gt; &lt;K5&gt; [&lt;K6&gt;]</b></code> under the EIGRP process. 
 The TOS value always has a value of 0, and the K6 value is used for wide metric 
 calculation.
 K-values are either 1 or 0 where 1 activates the K-value and 0 deactivates it.
@@ -4969,8 +4970,10 @@ The K-values are displayed with the <code><b>show ip protocols</b></code> comman
 <p>
 Default EIGRP composite metric is based on bandwidth and delay. Bandwidth is the lowest bandwidth along the path on a 
 per prefix basis. Delay is cumulative on a hop-by-hop basis. It is recommended to influence path selection by 
-modifying the interface delay. The interface delay is mostly used by EIGRP unlike other variables such as bandwidth that 
-may be used by other processes running on the router such as OSPF. 
+modifying the interface delay. The interface delay is mostly used by EIGRP for 
+metric calculation unlike other variables such as bandwidth that 
+may be used by other processes running on the router such as OSPF in their route 
+metric calculation. 
 </p>
 
 <p>
@@ -4979,7 +4982,7 @@ Modifying the delay only affects EIGRP. The delay can be configured with the int
 tens of microseconds.
 </p>
 <p>
-In the output below, EIGRP selectes the route path via interface GigabitEthernet1/0 to the network 10.8.10.0/24.
+In the output below, EIGRP selects the route path via interface GigabitEthernet1/0 to the network 10.8.10.0/24.
 The path via this interface has a cumulative delay of 32 microseconds.
 </p>
 <p><div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
@@ -5130,7 +5133,7 @@ R3(config-if)#                                                                 <
  </p>
  <h4>Unequal Cost Load Balancing: variance</h4>
  <p>
- Only EIGRP supports unequal cost load-balancing. 
+ EIGRP is the only IGP today that supports unequal cost load-balancing. 
  The <code><b>variance &lt;multiplier&gt;</b></code> command of EIGRP controls it's ability to support 
  equal-cost or unequal cost load balancing. A variance multiplier value of one(1) causes EIGRP to perform equal-cost 
  load-balancing. By default, the variance multiplier is one (1).
@@ -5622,7 +5625,7 @@ R8#
 <p>
 EIGRP load balancing provides the option to control the traffic sharing behaviour when multiple paths to the 
 same destination network are installed in the routing table. The command to control the traffic distribution across
-various paths is <code><b>traffic-share (balanced | min )</b></code>.  
+various paths is <code><b>traffic-share [balanced | min]</b></code>.  
 </p>
 <p>
 To control how traffic is distributed among routes when there are multiple routes to the same destination network that 
@@ -5646,7 +5649,7 @@ convergence times.
 
 <p>
 EIGRP supports filtering of routes as they are received into or advertised out an interface.
-Filtering of routes can be done using:
+Filtering of routes can be accomplished using:
 <ul>
  <li>Access control lists (ACLs)</li>
  <li>IP prefix lists</li>
@@ -5672,12 +5675,17 @@ and the routes are installed into the local RIB of the advertising router.
 Outbound filtering affects the advertisement of prefixes to neighbors.
 </p>
 <p>
-Filtering is accomplished with the command 
+Filtering is accomplished with the command:
+</p>
+<p>
 <code><b>distribute-list {acl-number | acl-name | prefix prefix-list-name | route-map route-map-name | 
-gateway prefix-list-name} {in | out} [interface-id]</b></code>. 
+gateway prefix-list-name} {in | out} [interface-id]</b></code>
+</p>
+<p>
 EIGRP classic configuration places the command under the EIGRP process, while named-mode configuration places the command 
 under topology base configuration mode. 
-Prefixes that match against deny statements are filtered, and prefixes that match against a permit are passed.
+Prefixes that match against deny statements are filtered, and prefixes that match 
+against a permit statement are passed.
 </p>
 <p>
 If the distribute-list filtering is applied without referencing an interface, then it gets applied to all interfaces. 
