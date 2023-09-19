@@ -64,19 +64,19 @@ compiles a database of all the links in the network, the OSPF routers on those
 links and the cost of the links. This database is the same on all routers in an OSPF area.
 Each router independently determines their best path to the destinations in this 
 database. OSPF runs Dijkstra's algorithm to calculate the shortest path to any 
-destination network in the OSPF domain. Dijkstra's algorithm is core to all 
-link state routing alogrithms.
+destination network in the OSPF domain. Dijkstra's algorithm is used by all 
+link state routing alogrithms to calculate the shortest path to a destination.
 </p>
 
 <p>
-OSPF uses IP protocol number 89 provides its own transport layer protocol services.
+OSPF uses IP protocol number 89 and provides its own transport layer protocol services.
 The current versions of OSPF are OSPFv2 that supports IPv4 and OSPFv3 that supports 
 IPv4 and IPv6. The two versions of OSPF are not compatible i.e., routers running OSPFv3 cannot form an 
 IPv4 adjacency with routers running OSPFv2. This entire article discusses OSPFv2.
 </p>
 
 <P>
-In Cisco IOS, to configure OSPF issue the global config mode command 
+In Cisco IOS, to configure OSPF, issue the global config mode command 
 <code><b>router ospf &lt;process-id&gt;</b></code> where 
 process-id is a value between 1 - 65535:
 </p>
@@ -175,17 +175,16 @@ The following are the adjacency preconditions:
   must not be in an OSPF passive state. Additionally, the interface and line 
   protocol must be up.</li>
   <li><b>Common Subnet: </b>Interfaces must share a common subnet on the primary IP address. 
-  By default, OSPF advertises the secondary IP address of an interface if it is enabled 
-  in the OSPF router mode or interface mode.
+  By default, OSPF advertises the primary and secondary IP addresses of an interface
+  if enabled.
   This precondition for a common subnet between potential OSPF neighbors 
-  does not exist for OSPFv3 as IPv6 implementation does not require a common 
-  subnet. In OSPFv3, adjacent devices communicate using IPv6 link local addresses.
+  does not exist for OSPFv3 as adjacent devices communicate using IPv6 link local addresses.
   
   </li>
   <li><b>Matching MTU:</b> Interface MTU must match. The MTU controls the size 
   of packets that are sent out of interfaces. The default MTU value is 1500. 
 <p>
-<b>Troubleshooting Tip:</b> If a neighborship formation stops at <b>EXSTART</b>
+<b>Troubleshooting tip:</b> If a neighborship formation stops at <b>EXSTART</b>
 phase of adjacency formation, then it is probable that the IP MTUs are mismatched. 
 </p>
 <p>
@@ -261,7 +260,7 @@ few packets and the neighbor may be unable to process these large packets.
 <h2 id="ADVERTISING_NETWORKS">Advertising Networks</h2>
 <p>
 For OSPF to advertise connected networks, it has to be enabled on the directly 
-connected interfaces with configured networks. The area that the 
+connected interfaces with configured IP addresses. The area that the 
 network will be resident in has to be added to the configuration. 
 A network can only reside in one area. This can be done in two ways: using the 
 OSPF <code><b>network</b></code> command or using the <code><b>ip ospf &lt;process-id&gt;</b></code> 
@@ -485,7 +484,7 @@ The header contains the following fields:
 
 <p>
 Of the values in the OSPF packet header, the OSPF version, area ID, authentication 
-type, and authentication data must match to partially satisfy the adjacency 
+type, and authentication data must match to satisfy some of the adjacency 
 preconditions.
 </p>
 
@@ -550,7 +549,8 @@ preconditions.
   <ul>
   <li><b>Network mask:</b> contains the subnet mask that is configured on the 
   interface. OSPF uses the network mask value to determine if the potential 
-  neighbor is on the same subnet. From the above packet capture, a mask of 255.255.255.248.
+  neighbor is on the same subnet. From the above packet capture, the value of  
+  the subnet mask is 255.255.255.248.
   Based on the IP header, the IP address of the sender is 10.255.1.27. OSPF can 
   then deduce that the sender's IP address and network mask is 10.255.1.27/29.
   </li>
@@ -1514,7 +1514,7 @@ the duration of the dead-interval in this state.
 </ol>
 <p>
 To view the OSPF adjacency stages in real-time, run the privileged-exec command
-<code><b>debug ospf adj</b></code>:
+<code><b>debug ip ospf adj</b></code>:
 
 </p>
 
