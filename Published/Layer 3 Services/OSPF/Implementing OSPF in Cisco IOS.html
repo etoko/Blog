@@ -58,12 +58,17 @@ Another example of a link state routing protocol is Intermediate System to Inter
 System (IS-IS). Like all link state routing protocols, OSPF is a classless 
 routing protocol that includes the subnet mask in OSPF packets exchanged between
 neighbors.
+</p>
+<p>
 OSPF is classified as an Interior Gateway Protocol routing within a single 
 autonomous system. As a link state routing protocol, a router running OSPF 
 compiles a database of all the links in the network, the OSPF routers on those 
 links and the cost of the links. This database is the same on all routers in an OSPF area.
 Each router independently determines their best path to the destinations in this 
-database. OSPF runs Dijkstra's algorithm to calculate the shortest path to any 
+database. 
+</p>
+<p>
+OSPF runs Dijkstra's algorithm to calculate the shortest path to any 
 destination network in the OSPF domain. Dijkstra's algorithm is used by all 
 link state routing alogrithms to calculate the shortest path to a destination.
 </p>
@@ -96,20 +101,20 @@ of the routers in the OSPF domain.
 
 <p>
 For a router to learn and exchange routes with other OSPF routers in 
-the OSPF domain, the router transitions through 
+the OSPF domain, the OSPF transitions through 
 various stages to present accurate routing information to the global/VRF routing
 information base (RIB) or routing table. These stages include:
 
 <ul>
-  <li><b>Step 1: Neighbor Adjacency;</b> this involves the discovery of neighbors 
+  <li><b>Neighbor adjacency:</b> this involves the discovery of neighbors 
   and formation of neighbor relationships known as adjacencies. Once formed, 
   the adjacent neighbors exchange all their learned routes.</li>
-  <li><b>Step 2: Best Path Selection; </b> each router creates a local database of learned routes, known as the 
+  <li><b>Best path selection: </b> each router creates a local database of learned routes, known as the 
   link state database (LSDB). Using the information from the LSDB, 
 OSPF generates a shortest path first tree (SPT) in which the local 
   router is at the root of the tree. The shortest path to each node in the tree 
   is determined and then presented to the global RIB for installation.</li>
-  <li><b>Step 3: Neighbor and Topology Maintenance;</b> each router continually monitors the state 
+  <li><b>Neighbor and topology maintenance:</b> each router continually monitors the state 
   of its neighbors and their links to ensure that its knowledge of
   the network is up-to-date.</li>
 </ul>
@@ -174,9 +179,8 @@ The following are the adjacency preconditions:
   through which the adjacency is to be formed must have OSPF enabled on it and 
   must not be in an OSPF passive state. Additionally, the interface and line 
   protocol must be up.</li>
-  <li><b>Common Subnet: </b>Interfaces must share a common subnet on the primary IP address. 
-  By default, OSPF advertises the primary and secondary IP addresses of an interface
-  if enabled.
+  <li><b>Common subnet: </b>Interfaces must share a common subnet on the primary IP address. 
+  By default, OSPF advertises the primary and secondary IP addresses of an interface.
   This precondition for a common subnet between potential OSPF neighbors 
   does not exist for OSPFv3 as adjacent devices communicate using IPv6 link local addresses.
   
@@ -184,8 +188,8 @@ The following are the adjacency preconditions:
   <li><b>Matching MTU:</b> Interface MTU must match. The MTU controls the size 
   of packets that are sent out of interfaces. The default MTU value is 1500. 
 <p>
-<b>Troubleshooting tip:</b> If a neighborship formation stops at <b>EXSTART</b>
-phase of adjacency formation, then it is probable that the IP MTUs are mismatched. 
+<b>Troubleshooting tip:</b> if a neighbor adjacency formation stops at the <b>EXSTART</b>
+phase, then it is probable that the IP MTUs are mismatched. 
 </p>
 <p>
 OSPF can be configured to ignore this precondition using the interface mode 
@@ -208,23 +212,34 @@ few packets and the neighbor may be unable to process these large packets.
   </li>
   
   <li><b>Matching OSPF network type:</b> 
-  OSPF defines the following network types: broadcast, non-broadcast, point-to-point,
-  point-to-multipoint and loopback. OSPF configures the network type on the 
-  interface automatically depending on the connection medium(layer 2). The OSPF network type
-  should match for a neighbor adjacency to form. Usually, the hello and dead-interval 
-  timers for OSPF on the interfaces are also determined by the OSPF network type.
+  OSPF defines the following network types: 
+  <ul>
+    <li>Broadcast</li>
+    <li>Non-broadcast</li>
+    <li>Point-to-point</li>
+    <li>Point-to-multipoint</li>
+    <li>Loopback</li>
+  </ul>
   <p>
-  Relatedly, the need for DR on a network segment is dictated by the OSPF network 
-  type.
-  The broadcast and non-broadcast OSPF network types require a Designated Router 
-  (DR) while the point-to-point and point-to-multipoint network types do not require a DR.
+  OSPF configures the network type on the 
+  interface automatically depending on the connection medium (layer 2). The OSPF network type
+  should match for a neighbor adjacency to form. 
+  The OSPF network type determines the following parameters of OSPF:
+  <ul>
+    <li>Hello and dead-interval timers for OSPF.</li>
+    <li>The need for DR on a network segment: the broadcast and non-broadcast 
+    OSPF network types require a Designated Router (DR) while the point-to-point 
+    and point-to-multipoint network types do not require a DR.
   This requirement or non-requirement of a DR must match on the interfaces of the 
-  two routers for them to form an adjacency.
+  two routers for them to form an adjacency.</li>
+  </ul>
+  
   </p>
+ 
   <p>
   There may be instances where the OSPF neighborships may successfully form even 
   when the OSPF network types of the connecting neighbors are different but with 
-  matching timers such as broadcast and point-to-point. It has been noticed that 
+  matching timer values such as broadcast and point-to-point. It has been noticed that 
   the adjacency state transitions up to FULL with LSAs being stored in the LSDB. 
   However, these LSAs do not have the routing-bit set i.e. are not moved from 
   the LSDB to the routing table even though the routing table does not have a 
@@ -270,7 +285,8 @@ interface command.
 <p>
 The OSPF router mode command 
 <code><b>network &lt;network-address&gt; &lt;wild-card&gt; area &lt;area-id&gt;</b></code>
-is used to specify networks to be advertised. When configured, any interfaces 
+is used to specify networks to be advertised and the areas that the networks 
+reside in. When configured, any interfaces 
 whose IP address is a subnet of the network configured will have OSPF enabled 
 and its network advertised. The area ID can be any value from 0 to 65,535.
 </p>
@@ -373,7 +389,7 @@ OSPF uses five types of packets:
 The hello packet is used to communicate adjacency parameters during neighborship 
 formation and to maintain the neighborship. The other packet types are used to exchange 
 link state database information. Together, these packets ensure that the 
-information in the neigbor table and the LSDB is accurate and regularly updated.
+information in the neighbor table and the LSDB is accurate and regularly updated.
 </p>
 <p>
 OSPF routers exchange prefix information using unicast, multicast packets or both
@@ -468,7 +484,7 @@ The header contains the following fields:
  of the router that sent the OSPF packet. In the above packet capture, the 
  OSPF device that sent the hello packet has a RID of 7.7.7.7</li>
  <li><b>Area ID:</b> areas are used to define a hierarchy and control the size 
- of the flooding domain. From the capture output, the interface of the router is 
+ of the flooding domain. From the packet capture output, the interface of the router is 
  in area 7. The area ID was configured using the dotted decimal notation.</li>
  <li><b>Checksum:</b> used to verify the integrity of the packet.</li>
  <li><b>Authentication type:</b> contains the type of authentication used in 
@@ -605,7 +621,7 @@ preconditions.
   OSPF uses the DBD to communicate a summary of the link state information 
   in the LSDB. This is not the detailed link state information itself but a 
   summary of the known information.
-  If the DBD packet from a neighbor contains information that the device does 
+  If the DBD packet from a neighbor contains information that the local OSPF device does 
   not have, the local device requests for additional information using a 
   link state request packet.
   </p>
@@ -1418,10 +1434,11 @@ Its format is similar to the DBD packet.
 <h2 id="ADJACENCY_STATES">OSPF Adjacency States</h2>
 
 <p>
-When forming neighbor adjacencies with each other, OSPF neighbor adjacencies 
-transition through up to eight to nine states (depending on 
-the network type). In some OSPF network types, the number of stages may be less:
-DOWN, ATTEMPT, WAIT, INIT, 2WAY, EXSTART, EXCHANGE, LOADING, FULL.
+When OSPF devices are forming neighbor relationships with each other, the state 
+of this OSPF neighbor adjacency transition through up to eight to nine states 
+depending on the OSPF network type; these include DOWN, ATTEMPT, WAIT, INIT, 
+2WAY, EXSTART, EXCHANGE, LOADING, FULL. In some OSPF network types, the number of stages may be less:
+
 <ol>
   <li><b>DOWN:</b> Initial state of any neighborship. It indicates that no 
   OSPF packets have been sent to or received from any neighbor. 
@@ -1464,7 +1481,8 @@ the duration of the dead-interval in this state.
   <ul>
     <li>Devices begin the process to exchange complete link state information.</li>
 	<li>The master/slave relationship is developed with the master being the router with 
-	  the higher RID. The interface priority is not used in the determination of 
+	  the higher RID.</li>
+	  <li>The interface priority is not used in the determination of 
 	  the master/slave relationship.</li>
 	<li>The master controls aspects of the adjacency formation by choosing the 
 	starting sequence number for the database descriptor packets (DDP or DBD) 
@@ -1475,7 +1493,7 @@ the duration of the dead-interval in this state.
 	the master. These packets contain the matching link state sequence number 
 	of the packets from the master.</li>
 	<li>The master/slave role applies only to the local network segment between
-	the neighbors and does not influence the DR/BDR/DROther roles.</li>
+	the neighbors and does not influence the DR, BDR, DROther roles.</li>
 	<li>Unicast hello packets are exchanged with devices in the 'Active Neighbor' field.</li>
 	</ul>
 </li>
@@ -1610,7 +1628,7 @@ Neighbor ID&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Pri&nbsp;&nbsp;&nbsp;State&nbsp;&nbsp;&
 From the output, the following can be learned:
 <ul>
   <li><b>Neighbor ID:</b> The RID of the neighbor. From the command output, it 
-  can be noted that the local OSPF router has formed a neighborship with neighbors 
+  can be noted that the local OSPF router has formed an adjacency with devices  
   with RID 9.9.9.9 and 2.2.2.2 over two interfaces.</li>
   <li><b>Pri:</b> the priority of the interface of the neighbor through which 
   this neighbor relationship was formed. The priority of the neighbors has the default 
@@ -1722,14 +1740,19 @@ Neighbor ID&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Pri&nbsp;&nbsp;&nbsp;State&nbsp;&nbsp;&
 
 <h1 id="NETWORK_TYPES">OSPF Media Dependencies and Network Types</h1>
 <h2>OSPF Network Types</h2>
-Different network types are defined to deal with different network media characteristics.
+OSPF defines different network types to handle packet exchange with neighbors 
+connected through different types of network media and their different 
+associated characteristics.
 OSPF network types control:
 <ul>
 <li>When hello packets and updates are sent.</li>
 <li>Who forms an adjacency</li>
 <li>How the next-hop is calculated.</li>
 </ul>
-The OSPF network type does not need to match to form an adjacency but it does 
+<p>
+By default, adjacency formation criteria requires that OSPF neighbors be connected 
+through the same OSPF network type. Technically, the OSPF network type 
+does not need to match to form an adjacency but it does 
 need to be compatible such as a common need for a DR/BDR for the segment and 
 the hello and dead interval timers. OSPF network types include the following:
 <ul>
