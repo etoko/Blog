@@ -65,7 +65,10 @@ The adjacencies between BGP peers is known as BGP sessions or peering.
 BGP does not use hello packets to discover neighbors and due to this,  
 BGP routers can not discover each other dynamically. Neighbor relationships need to be configured manually.
 BGP is able to form neighbor relationships across many hops; what is commonly referred to as 
-a multihop relationship. This is possible because BGP uses TCP as the transport 
+a multihop relationship.
+</p>
+<p>
+This is possible because BGP uses TCP as the transport 
 protocol. BGP updates are incremental and triggered.
 </p>
 <p>
@@ -85,11 +88,13 @@ first in the network.
 
 <p>
 BGP provides high scalability and flexibility that does not compare to interior 
-gateway protocols. BGP can support millions of prefixes. As of this writing, the <a href="https://bgp.potaroo.net/" target="_blank">Internet routing 
-  table</a> size is approximately 940,000+ (Jan 2023) prefixes and counting.
+gateway protocols. BGP can support millions of prefixes. As of this writing, the
+IPv4 <a href="https://bgp.potaroo.net/" target="_blank">Internet routing 
+  table</a> contains approximately 940,000+ (Jan 2023) prefixes and counting.
 </p>
 <p>
-  <div class="separator" style="clear: both;"><a href="https://bgp.potaroo.net/bgprpts/bgp-active.png" style="display: block; padding: 1em 0; text-align: center; "><img alt="" border="0" width="600" data-original-height="538" data-original-width="800" src="https://bgp.potaroo.net/bgprpts/bgp-active.png"/></a></div></p>
+  <div class="separator" style="clear: both;">
+  <a href="https://bgp.potaroo.net/bgprpts/bgp-active.png" style="display: block; padding: 1em 0; text-align: center; "><img alt="" border="0" width="600" data-original-height="538" data-original-width="800" src="https://bgp.potaroo.net/bgprpts/bgp-active.png"/></a></div></p>
 </p>
 <p>
 Path selection is based on the multiple path attributes associated with each prefix
@@ -158,7 +163,7 @@ an ISP. Private ASNs should be used if an autonomous system is only required to
 communicate using BGP with a single service provider as the routing policy 
 between the provider and the autonomous system will not be visible on the public 
 Internet.
-A private ASN received from a LIR cannot be retained if the organization migrates 
+A private ASN received from a local Internet registry (LIR) cannot be retained if the organization migrates 
 to another service provider. A public ASN is required only when an autonomous 
 system is exchanging routing information with other autonomous systems on the 
 public Internet i.e. all routes originating from an autonomous system are visible
@@ -279,9 +284,9 @@ There are three ways of representing 32-bit autonomous system numbers:
   is represented as 1.33. Conversion between decimal and asdot+ notation can be 
   done from the <a href="https://submit.apnic.net/cgi-bin/convert-asn.pl"> APNIC site</a></li>
   <li><b>asdot</b> is a mixture of asdot+ and as-plain notations. Any autonomous 
-  system number in the 16-bit(2 byte) range i.e. 
-  0 - 65535 is written in asplain as 65535 and any autonomous system number above
-  that range is written in asdot+. To enable asdot notation, enter the command: 
+  system number in the 16-bit(2 byte) range i.e. 0 - 65535 is written in asplain 
+  notation as 65535 and 32-bit ASNs are written in asdot+ notation. To enable 
+  asdot notation, enter the command: 
   <code><b>bgp asnotation dot</b></code> under BGP router 
   configuration mode.</li>
 </ol>
@@ -294,9 +299,8 @@ dual-homed, multi-homing, and dual multi-homed.
 
 <ol> 
 <li><b>Single-homed:</b> 
-AS has a single connection to one ISP i.e. single exit point from the AS. This  
-type of connectivity is convenient for an AS that does not depend heavily on the 
-Internet or WAN connectivity. The sharing of prefixes by the AS is usually through 
+AS has a single connection to one ISP i.e. single exit point from the AS.  
+The sharing of prefixes by the AS with the ISP is usually through 
 static routes and the ISP advertises a default route.
 </li>
 <li><b>Dual-homed:</b>
@@ -324,8 +328,8 @@ BGP is recommended to be used in multihomed and dual multihomed type of connecti
 It is important to note that unless the enterprise network provides transit 
 capability, multihomed connections, if not carefully configured, may provide 
 transit capability resulting in transit traffic consuming bandwidth. Ensure that 
- the BGP configuration for a multihomed connectivity does not provide transit 
- capability.
+ the BGP configuration for a multihomed connectivity to the enterprise AS 
+ does not provide transit capability.
 </p>
 
 <h2 id="ISP_PREFIX_SHARING">BGP Route Reception from ISPs</h2>
@@ -336,9 +340,9 @@ i.e. full BGP table.
 
 <ol>
   <li><b>Default route from ISP:</b> the ISP shares a default route with the 
-  AS only. Path manipulation is not possible. Is a good option with the AS does 
-  not have the requisite resources. Good for small and medium sized AS.</li>
-  <li><b>Default route and specific routes:</b> receive a specific subset of 
+  AS only. Path manipulation is not possible. This is a good option with the AS does 
+  not have the requisite resources such as small and medium sized AS.</li>
+  <li><b>Default route and specific routes:</b> the AS receives a specific subset of 
   prefixes from the ISPs. This subset may be for destinations of interest to the 
   AS. Path manipulation can be implemented for these specific prefixes such as 
   exit through a specific link and all other traffic uses the default route.
@@ -427,7 +431,8 @@ message types depending on the amount of information to be transmitted.
 
 <h3>OPEN</h3>
 <p>
-The BGP open message is used to establish a BGP adjacency and advertise local 
+The BGP open message is used to establish a BGP adjacency. It is used to advertise
+the local 
 ASN, timer values, BGP identifier, BGP capabilities such as: 
 multi-protocol support, route refresh capability, support for 4-octet ASNs.
 4 byte ASNs support is negotiated during capability exchange. The old BGP speakers 
@@ -457,16 +462,20 @@ peering session will be iBGP or eBGP.</td>
 <tr>
 <td style="border-bottom:solid; border-width:1px;"><b>Hold time:</b></td>
 <td style="border-bottom:solid; border-width:1px;">
+<p>
 Contains sender's hold time, the recipient compares this hold timer value with 
 its configured (or default) hold timer and uses the smaller hold timer value for
 the peering. The minimum hold timer value needs to be either zero or at least 
 three seconds. 
+</p>
+<p>
 Monitoring of the hold timer values can be disabled by configuring a holdtimer value of zero. This also disables
 the transmission of keepalive messages.
 For Cisco devices, the default hold time is 180 seconds. When the hold time expires, 
 the BGP session is torn down and prefixes originated by the unreachable peer are 
 purged from the BGP table. An update with a route withdrawal is sent to other 
 BGP peers for the affected prefixes.
+</p>
 </td>
 </tr>
 <tr>
@@ -548,7 +557,7 @@ They are used for advertising any feasible routes, withdrawals of previously
 advertised routes or both. UPDATE messages include  Network Layer Reachability 
 Information (prefix) and associated path attributes when advertising prefixes. 
 Withdrawn prefixes only include the prefix and prefix length of prefixes 
-previously advertised but now being withdrawn. An UPDATE can act as a keepalive 
+previously advertised but now being withdrawn. An UPDATE message can act as a keepalive 
 to reduce unnecessary traffic. UPDATE messages are sent until the complete BGP 
 table has been fully exchanged.
 </p>
@@ -664,7 +673,7 @@ Total Path Attribute Length: 0                                                  
 </code>
 </div></p>
 <p>
-BGP updates are sent to manually defined neighbors as unicast.
+BGP updates are sent to neighbors as unicast messages.
 </p>
 
 <h3>NOTIFICATION</h3>
@@ -678,7 +687,7 @@ They contain the following fields:
 </p>
 <div>
 <table cellpadding="0" cellspacing="0" width="100%">
-  <thead>
+  <thead style="background: #d3d3d3;">
    <tr>
    <td width="20%" style="border-top: 1px solid; border-bottom: 1px solid; font-weight:bold;">Field</td>
    <td style="border-top: 1px solid; border-bottom: 1px solid; font-weight:bold;">Description</td>
