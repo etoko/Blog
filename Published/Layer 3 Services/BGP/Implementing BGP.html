@@ -94,7 +94,7 @@ IPv4 <a href="https://bgp.potaroo.net/" target="_blank">Internet routing
 </p>
 <p>
   <div class="separator" style="clear: both;">
-  <a href="https://bgp.potaroo.net/bgprpts/bgp-active.png" style="display: block; padding: 1em 0; text-align: center; "><img alt="" border="0" width="600" data-original-height="538" data-original-width="800" src="https://bgp.potaroo.net/bgprpts/bgp-active.png"/></a></div></p>
+  <a href="https://bgp.potaroo.net/bgprpts/bgp-active.png" style="display: block; padding: 1em 0; text-align: center; "><img alt="" border="0" width="100%" data-original-height="538" data-original-width="800" src="https://bgp.potaroo.net/bgprpts/bgp-active.png"/></a></div></p>
 </p>
 <p>
 Path selection is based on the multiple path attributes associated with each prefix
@@ -1415,12 +1415,12 @@ If the default BGP IPv4 address family is enabled, then activation of a neighbor
 
 <h2>BGP Session Resets</h2>
 <p>
-If a policy configuration change is made to the BGP, such as a change in routing  
+If a policy configuration change is made to BGP, such as a change in routing  
 policy, after a BGP device forms a peering with another BGP device the BGP 
 session may need to be reset for the changes to take effect. 
 BGP supports two methods of cleaning a session; hard reset and soft reset:
 <ul>
-<li><b>Hard reset:</b> tears down a BGP session and removes routes from a peer. 
+<li><b>Hard reset:</b> tears down a BGP session and removes prefixes received from a peer. 
 When a hard reset is initiated, BGP ends the session by closing the TCP connection to the BGP peer. It does this by 
 sending a TCP message with the connection finish flag set (FIN) and a TCP handshake to end the connection is 
 initiated. No ROUTE-REFRESH messages are exchanged with a hard reset.
@@ -1432,7 +1432,7 @@ session is to be reset. The "*" refers to all BGP peers.
   <ul>
     <li><code><b>clear bgp ipv4 unicast &lt;*&gt;</b></code>:
       <ul>
-        <li>The BGP sessions with all peers are reset. BGP sessions transition 
+        <li>The BGP sessions with all peers are reset. The BGP session transitions 
         from Established to Idle and the re-establishment of peering starts again.</li>
         <li>The entire BGP table is flushed.</li>
         <li>All NLRI is learned again.</li>
@@ -1442,7 +1442,7 @@ session is to be reset. The "*" refers to all BGP peers.
      </li>
      <li><code><b>clear bgp ipv4 unicast &lt;ip-address&gt;</b></code>
        <ul>
-         <li>Resets the BGP session with the specified peer.</li>
+         <li>Resets the BGP session with the BGP peer idenfied by the IP address.</li>
          <li>High impact on network but less severe than <code><b>
          clear bgp ipv4 unicast &lt;*&gt;</b></code>.</li>
        </ul>
@@ -1450,18 +1450,21 @@ session is to be reset. The "*" refers to all BGP peers.
   </ul>
 
 A hard reset is not recommended in production networks as it clears the entire 
-Loc-RIB table which may be massive and may additionally have a cascading effect.
+Loc-RIB table which may be massive; additionally, it may have a cascading effect.
 </p>
 </li>
 <li><b>Soft Reset: </b>invalidates the cache and requests full advertisement 
 without tearing down the TCP connection and BGP session.
 <code><b>clear bgp ipv4 unicast &lt;ip-address&gt; soft</b></code>.
 This option is highly recommended when changing routing policy.
-<p>
+</li>
+</ul>
+
 <p>
 <h3>BGP Route Refresh Capability</h3>
 <p>
-Route refresh capacity is negotiated shared OPEN message during the intial stages 
+Route refresh capability between BGP peers is negotiated through OPEN messages 
+exchanged during the initial stages 
 of formation of a BGP session. The TCP connnection between the peers
 is not torn down. A BGP router can request a peer to send an update without 
 having to hard reset the session. Route refresh capacity does not consume memory
@@ -1477,12 +1480,13 @@ The route refresh capability is
 negotiated for each address family when the
 session is established. Performing a soft refresh on sessions that support route refresh capability actually initiates a 
 route refresh. Soft resets can be performed for a specific address family with the command:
-<code><b>clear bgp afi safi &lt;ip-address&gt; soft [in | out]</b></code>
+<code><b>clear bgp &lt;afi&gt; &lt;safi&gt; &lt;ip-address&gt; soft [in | out]</b></code>
 </p>
 </p>
-<b>Soft reconfiguration: </b>   
+<h4>Soft Reconfiguration </h4>
+<p>
 We can configure a neighbor to support soft reconfiguration for inbound updates.
-For outbound soft reconfig is supported by default. Soft reconfiguration can be 
+For outbound updates soft reconfiguration is supported by default. Soft reconfiguration can be 
 enabled for a neighbor using the BGP address family command <code><b>neighbor 
 &lt;ip-address&gt; soft-reconfiguration inbound</b></code>. For Outbound soft 
 reconfiguration, no neighbor manipulation in configuration is required as the 
@@ -4344,7 +4348,7 @@ The BGP device that is reflecting prefixes is known as a <b>route reflector (RR)
 Route reflectors are defined by <a href="https://www.ietf.org/rfc/rfc1966.txt">
 RFC 1966</a> and updated by <a href="https://www.rfc-editor.org/rfc/rfc4456">
 RFC 4456</a>. Through route reflectors, BGP devices are able to advertise prefixes to iBGP 
-peers by "reflecting" the prefixes; RR only reflects its best path. 
+peers by "reflecting" the prefixes; the RR only reflects its best path. 
 Route reflection eliminates the need for full mesh. iBGP peers only need to peer 
 with the route reflector. This is similar in context to the operation of the OSPF 
 designated router (DR) where updates are sent to the RR which then sends the update 
@@ -4352,7 +4356,19 @@ to route reflector clients. The RR does not modify other attributes when reflect
 routes.
 The BGP device that is receiving reflected prefixes is referred to as a <b>route reflector client (RRC)</b>. 
 A route reflector will not modify the next-hop ip address for the routes that are advertised from iBGP peers.
-In more recent BGP designs, the RR is not included in the data path.
+In more recent BGP designs, the RR does not have to be in the data path.
+</p>
+
+
+<p>
+A route reflector can have three types of peers:
+<ul>
+  <li>eBGP peers</li>
+  <li>iBGP client peers</li>
+  <li>iBGP non-client peers</li>
+</ul>
+</p>
+<p>
 Route reflectors are guided by three rules:
 <ol>
   <li><b>Rule 1: </b>If route reflector receives a prefix from a BGP peer that 
@@ -4368,19 +4384,8 @@ Route reflectors are guided by three rules:
 The placement of the RR in the topology should be guided by these rules.
 </p>
 
-
 <p>
-A route reflector can have three types of peers:
-<ul>
-  <li>eBGP peers</li>
-  <li>iBGP client peers</li>
-  <li>iBGP non-client peers</li>
-</ul>
-</p>
-
-
-<p>
-The operation of route reflectors (RR) in effect ignore the iBGP split horizon 
+The operation of route reflectors (RR), in effect, ignore the iBGP split horizon 
 rule.
 BGP Route reflection is a BGP policy command and so it is configured under the 
 address-family and is configured only on route reflector devices with the 
@@ -4670,13 +4675,13 @@ Border Gateway Protocol - UPDATE Message                          <br>
 <h3>Large Scale Route Reflection</h3>
 <p>
 Large scale BGP designs should not be serviced by a single RR. RR clusters allow 
-redundancy and hierarch. A cluster is defined by the clients an RR serves. RRs 
+redundancy and hierarchy. A cluster is defined by the clients an RR serves. RRs 
 in the same cluster use the same cluster-ID. Per address-family RR pairs; this 
 avoids the "fate sharing" of services.
 </p>
 <h4>Inter-cluster Peerings</h4>
 <p>
-Inter-cluster peerings between RRs can be client for non-client peerings; depending  
+Inter-cluster peerings between RRs can be client to non-client peerings; depending  
 on redundancy design, there could be duplicate routes and more processing. However, 
 loops are prevented by the cluster-ID. The cluster-ID is based on the Router-ID; 
 by default, all route reflectors are in separate cluster. If the same cluster-ID 
@@ -4685,7 +4690,7 @@ updates.
 </p>
 <h3>Virtual Route Reflectors</h3>
 <p>
-RRs generally does not need to be in the data path. A high memory/CPU VM can 
+RRs generally do not need to be in the data path. A high memory/CPU VM can 
 serve as a RR. IOS-XRv, CSR1000v and Quagga can be used as virtual RRs. With 
 virtual RR, there's no need to install the 900K+ routes in the RIB/FIB if the 
 RR is not in the data path. The selective RIB download feature can be considered:
@@ -4747,7 +4752,7 @@ R4(config-router)#<b>bgp router-id 4.4.4.4</b>
 <p>
 <b>Step 2: </b>Identify the BGP confederation with the command  
 <code><b>bgp confederation identifier &lt;asn&gt;</b></code>.
-The AS number will be known to external BGP peers i.e. peers not part of the confederation.
+This AS number will be known to external BGP peers i.e. peers not part of the confederation.
 </p>
 <p><div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
 <code>
@@ -4816,9 +4821,9 @@ R4#<b>show ip protocols</b><br>
 Routing Protocol is "bgp 65000"<br>
 &nbsp;&nbsp;Outgoing update filter list for all interfaces is not set<br>
 &nbsp;&nbsp;Incoming update filter list for all interfaces is not set<br>
-&nbsp;&nbsp;<span style="background-color:gray;">BGP confederation consists of ASs: 64512 65500</span><br>
+&nbsp;&nbsp;<span style="background-color:#d3d3d3;">BGP confederation consists of ASs: 64512 65500</span><br>
 &nbsp;&nbsp;<br>
-&nbsp;&nbsp;<span style="background-color:gray;">BGP confederation advertised as AS 112</span><br>
+&nbsp;&nbsp;<span style="background-color:#d3d3d3;">BGP confederation advertised as AS 112</span><br>
 &nbsp;&nbsp;IGP synchronization is disabled<br>
 &nbsp;&nbsp;Automatic route summarization is disabled<br>
 &nbsp;&nbsp;Neighbor(s):<br>
@@ -4841,7 +4846,7 @@ R4#
 R4#<b>show bgp ipv4 unicast neighbor 7.7.7.7</b>             <br>
 BGP neighbor is 7.7.7.7,  remote AS 65500, external link     <br>
 &nbsp;&nbsp;BGP version 4, remote router ID 7.7.7.7                    <br>
-&nbsp;&nbsp;Neighbor under common administration                       <br>
+&nbsp;&nbsp;<span style="background-color:#d3d3d3;">Neighbor under common administration </span><br>
 &nbsp;&nbsp;BGP state = Established, up for 00:23:08                   <br>
 &nbsp;&nbsp;Last read 00:00:05, last write 00:00:27, hold time is 180, keepalive interval is 60 seconds<br><br>
 &nbsp;&nbsp;.....<br><br>
@@ -4856,8 +4861,8 @@ BGP neighbor is 7.7.7.7,  remote AS 65500, external link     <br>
 <p>
 New path attributes were created to prevent loop formation such as 
 <b>AS_CONFED_SEQUENCE</b> and <b>AS_CONFED_SET</b>. The following 
-Wireshark packet capture of link traffic between R1 and R2 showing a BGP Update message with the AS_CONFED_SEQUENCE 
-path attribute containing AS_CONFED_SEQUENCE 
+Wireshark packet capture of link traffic between R1 and R2 showing a BGP Update 
+message with the AS_CONFED_SEQUENCE path attribute: 
 </p>
 
 <p><div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
@@ -5120,8 +5125,9 @@ circumstances as its configuration results in the dropping of existing peer
 sessions. The potential scenarios under which confederations could be 
 implemented include the following:
 <ul>
-  <li>Company aquisitions or mergers.</li>
-  <li>Distributed autonomous control i.e., where the single AS is sub-divided into 
+  <li>Company acquisitions or mergers.</li>
+  <li>Distributed administrative control of the same autonomous system i.e., 
+  where the single AS is sub-divided into 
   based on department, geography and each sub-AS has its own administrative 
   unit.</li>
 </ul>
@@ -5133,7 +5139,7 @@ BGP communities are an optional transitive BGP attribute that can traverse from
 autonomous system to autonomous system. 
 A BGP community is a 32-bit value that can be included with a prefix in an update
 message. 
-By default, BGP communities are not included in BGP updates. It is a recommended 
+By default, BGP communities are not included in BGP update messages. It is a recommended 
 best practice to enable the sending of BGP communities to peers during BGP configuration.
 BGP communities provide the capability to tag routes for the purpose of 
 modifying BGP routing policy of upstream and downstream BGP devices. 
@@ -5201,7 +5207,7 @@ for <code><b>ip bgp new-format</b></code>.
 To set communities in a route-map, use the command <code><b>set community 
 {community-number [additive] [well-known-community] | none}</b></code>. 
 Setting of BGP communities values is not additive by default. BGP community values 
-can be deleted by setting to value to <code><b>none</b></code> in a route-map.
+can be deleted by setting the value to <code><b>none</b></code> in a route-map.
 </p>
 <h2>Matching communities using Community Lists</h2>
 <p>
@@ -5212,16 +5218,28 @@ list can be configured through the following steps:
   or an extended list.
   <ul>
   <li><b>Standard community list:</b> matches community name or number: 
-  <code><b>ip community-list 1 standard permit no-export</b></code>. 
+  <p><div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+<code>
+  <code><b>ip community-list 1 standard permit no-export</b></code>
+  </code></div></p>
   </li>
-  <li><b>Extended community list:</b> matches regular expression: <code>
-  <b>ip community-list expanded AS100 permit 100:[0-9]+</b></code>.</li>
+  <li><b>Extended community list:</b> matches regular expression: 
+  <p><div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+<code>
+  <code>
+  <b>ip community-list expanded AS100 permit 100:[0-9]+</b></code>
+  </code></div></p>
+  </li>
 </ul>
 </li>
  
   <li>Reference the configured community list from a route-map using the <code>
   <b>match community &lt;community-list&gt;</b></code> statement: 
-  <code><b>match community AS100</b></code>.</li>
+  <p><div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+<code>
+  <code><b>match community AS100</b></code>
+  </code></div></p>
+  </li>
 </ol>
 </p>
 
@@ -5245,8 +5263,8 @@ values are still added.
 
 <h2>Sending BGP Communities</h2>
 <p>
-BGP communities can be appended, removed, or modified selectively on each 
-attribute as a prefix is advertised from device to device. Additionally, one 
+BGP communities can be appended, removed, or modified selectively as a prefix 
+is advertised from device to device. Additionally, one 
 prefix can have many BGP communities added.
 </p>
 
@@ -5475,6 +5493,11 @@ Border Gateway Protocol - UPDATE Message                               <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;NLRI prefix: 10.109.1.0                                    <br>
 </code></div></p>
 
+<p>
+One of the several ways in which as AS can be prevented from becoming a transit 
+AS is to set the NO_EXPORT community on prefixes that are not local to the AS.
+</p>
+
 
 <h4
 3>NO_EXPORT_SUBCONFED (0xFFFFFF03)</h3>
@@ -5684,7 +5707,16 @@ To implement this feature, configure a community list:
 
 <h1 id="OPTIMIZATION">BGP Optimization</h1>
 <p>
+Optimization of BGP helps improve the performance of BGP through the configuration 
+of:
+<ul>
+	<li>Peer groups or peer templates</li>
+	<li>Prefix summarization</li>
+	<li>Prefix filtering</li>
+	<li>Failure detection using BFD</li>
+	<li>CPU tuning and memory utilization</li>
 
+</ul>
 </p>
 
 <h2 id="PEER_GROUPS">Peer Groups</h2>
@@ -5696,7 +5728,7 @@ generated once per peer group.
 Peer groups simplify BGP configuration and reduce system resource use (CPU and memory)
 by grouping BGP peers together 
 into BGP update groups. Configuration of multiple neighbors can be done in one place.
-BGP update groups enable a BGP device to perform outbound routing policy processing one time and then replicate the 
+BGP update groups enable a BGP device to perform outbound routing policy processing once and then replicate the 
 update to all members. All members in the peer group are in the same update group and therefore must be of the same 
 session type i.e. iBGP or eBGP but not mixed up.
 </p>
@@ -5778,7 +5810,7 @@ BGP configurations can be categorized as session commands and policy commands.
    </ul>
    <li><b>Policy commands:</b>
      <ul>
-       <li>Are per address family.</li>
+       <li>Per address family.</li>
      </ul>
 </ul>
 BGP peer templates can inherit configurations from other peer templates.
@@ -5922,12 +5954,13 @@ R6#
 </code></div></p>
 
 <p>
-<b>Note:</b> A BGP peer cannot inherit from a peer-policy template or peer-session 
-template and be configured as a peer group member at the same time. BGP templates 
+<b>Note:</b> A BGP peer that is a member of a peer group cannot inherit configurations
+from a peer-policy template or peer-session template. BGP templates 
 and BGP peer groups are mutually exclusive.
 </p>
 <p>
-The peer session and peer policy templates configured for a BGP peer can be verified using the privileged mode command: 
+The peer session and peer policy templates configured for a BGP peer can be 
+verified using the privileged mode command: 
 <code><b>show bgp ipv4 unicast neighbor &lt;ip-address&gt;</b></code>
 </p>
 
@@ -6076,7 +6109,7 @@ requirement is that the subnet must exist in BGP table.
 <p>
 Network prefix summarization is extremely important with BGP due to the large 
 number of network prefixes that BGP can hold. The Internet routing table has 
-over 950,000+ IPv4 prefixes. Summarization conserves router resources and accelerates
+over 1,000,000 IPv4 prefixes (as at 1/1/2023). Summarization conserves router resources and accelerates
 best path calculation by reducing the size of the BGP table on downstream routers. 
 Summarization provides the benefit of stability  by hiding route flaps from 
 downstream routers thereby reducing routing churn. Route summarization can reduce 
@@ -6098,8 +6131,8 @@ routes are present in the Loc-RIB, the router will create an aggregate prefix.
 <ul>
   <li><code><b>summary-only:</b></code> suppress more specific routes</li>
   <li><code><b>suppress-map:</b></code> suppress subset of more specific routes</li>
-  <li><code><b>as-set:</b></code> un-order list of AS numbers and communities 
-  are associated with the aggregate; inherited from more specific routes.</li>
+  <li><code><b>as-set:</b></code> an ordered list of AS numbers and communities 
+  associated with the aggregate that is inherited from the component routes.</li>
   <li><code><b>advertise-map:</b></code> attributes of prefix or prefixes matched 
   with advertised-map are inherited in aggregate address. When used in 
   conjunction with <code><b>as-set</b></code> prevents a specific AS from being included 
@@ -6116,8 +6149,8 @@ routes are present in the Loc-RIB, the router will create an aggregate prefix.
 </p>
 <p>
 In both methods, a new network prefix with a shorter prefix length is advertised 
-into BGP. Because the aggregated prefix is a new route, the summarizing router 
-is the originator for the new aggregate route. Dynamic aggregation does not 
+into BGP. The summarizing router becomes the originator of the aggregate 
+route because it is considered a new route. Dynamic aggregation does not 
 suppress the component routes by default. The <code><b>summary-only</b></code>
 keyword is required to suppress the component prefixes. The suppressed component 
 prefixes have a status code of 's' for suppressed in the BGP table. 
@@ -6414,8 +6447,16 @@ The following command can be used to filter locally originated prefixes
 <h1 id="FILTERING">Route Filtering</h1>
 <p>
 BGP update filtering occurs on a per peer basis. 
-Cisco IOS provides the following  methods of filtering updates: distribute-lists, 
-prefix-list, filter-lists, and route-maps. Filtering is implemented at inbound 
+Cisco IOS provides the following  methods of filtering updates: 
+<ol type="a">
+  <li>Distribute-lists</li> 
+  <li>Prefix-list</li>
+  <li>Filter-lists</li>
+  <li>Route-maps</li>
+</ol>
+</p>
+<p>
+  Filtering is implemented at inbound 
 route policy state for incoming prefixes and outbound routing policy stage for 
 outgoing updates. It is recommended to use a route-map to avoid an order of 
 operations issue where for example a distribute-list and filter-list are applied 
@@ -6427,7 +6468,7 @@ to the same peer and it is not clear which is implemented first.
 Distribute-lists allow for the filtering of network prefixes on a neighbor-by-neighbor 
 basis using standard or extended Access Control Lists (ACLs). They are configured 
 in address-family mode: <code><b>neighbor &lt;ip-address&gt; 
-distribute-list &lt;acl&gt; [in | out]</b></code>
+distribute-list &lt;acl&gt; [in | out]</b></code>.
 </p>
 
 <p><div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
@@ -6496,11 +6537,13 @@ R3(config)#
 
 
 <p>
-
+Prefix filtering using the <code><b>distribute-list</b></code> command can be 
+implemented using the following commands:
 </p>
 
 <p>
-<b>Step 1:</b> Create an access control list (ACL)
+<b>Step 1:</b> Create an access control list (ACL) with the list of prefixes to 
+be permitted or denied:
 </p>
 <p><div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
 <code>
@@ -6514,7 +6557,7 @@ R3(config-std-nacl)#<b>20 permit any              </b>
 </code></div></p>
 
 <p>
-<b>Step 2:</b> Apply the access control list using the distribute-list command.
+<b>Step 2:</b> Apply the ACL to a peer using the <code><b>distribute-list</b></code> command:
 </p>
 <p><div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
 <code>
@@ -6524,7 +6567,7 @@ R3(config-router-af)#<b>neighbor 9.9.9.9 distribute-list ACL_10.1.10.0 out</b>
 </code></div></p>
 
 <p>
-<b>Step 3:</b> Apply a soft-reconfiguration.
+<b>Step 3:</b> Reset the BGP session to enforce the prefix filtering:
 </p>
 <p><div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
 <code>
@@ -6652,8 +6695,8 @@ Total number of prefixes 36                                                     
 <p>
 Extended ACLs provide extensive filtering capability that is comparable to 
 prefix-lists. Filtering using extended ACLs in BGP behave differently from the way they do in 
-OSPF or EIGRP; the destination section of the extended ACL maps to the prefix-length 
-and the source section of the ACL maps to the prefix.
+OSPF or EIGRP; the source section of the ACL maps to the prefix  
+and the destination section of the extended ACL maps to the prefix-length.
 </p>
 <p>
 The general structure of an extended ACL is: <code><b>&lt;sequence&gt; &lt;permit|deny&gt; 
@@ -7167,7 +7210,6 @@ ORF has the following features:
 <p>
 When implementing ORF;
 <ul>
-
   <li>On the upstream router;
       <ul>
         <li>Enable ORF capability for the downstream peer:
@@ -7206,7 +7248,7 @@ When implementing ORF;
       	R6(config-router-af)#<b>neighbor 77.255.7.7 prefix-list PL_88.1.0.0/22 in</b>
       	</code></div></p>	
       </li> 
-      <li>Clear the process using the command 
+      <li>Reset the BGP session: 
       <p><div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
       	<code>
       	R6#<b>clear ip bgp 77.255.7.7 soft in prefix-filter</b></code>.
@@ -7260,7 +7302,7 @@ AS Path Access Control List, which uses regular expressions for matching.
 The following table shows regular expression characters that can be used in the
 AS Path ACLs:
 <table cellspacing="0" width="100%">
-  <thead>
+  <thead style="font-weight: bold;">
     <tr>
       <td style="background: #D3D3D3; border-top: 1px solid;">Character</td>
       <td style="background: #D3D3D3; border-top: 1px solid;">Usage</td>
@@ -7314,7 +7356,7 @@ AS Path ACLs:
 <p>
 Examples:
 <table cellspacing="0" width="100%">
-  <thead>
+  <thead style="font-weight: bold;">
     <tr>
       <td style="background: #D3D3D3; border-top: 1px solid;">Expression</td>
       <td style="background: #D3D3D3; border-top: 1px solid;">Meaning</td>
@@ -7350,7 +7392,7 @@ Examples:
 
 </p>
 <p>
-Filtering of prefixes from a BGP neighbor by using the AS_PATH requires the 
+Filtering of prefixes from a BGP neighbor using the AS_PATH requires the 
 definition of an AS_PATH ACL. Processing is performed in a sequential top-down 
 order and the first qualifying match processes against the appropriate permit or deny
 action. An implicit deny exists at the end of the AS_PATH ACL. IOS supports up 
@@ -7448,7 +7490,7 @@ R3(config-router-af)#<b>end</b>
 </code></div></p>
 
 <p>
-<b>Step 3:</b> Implement a soft reset of the BGP neighborship with the BGP peer
+<b>Step 3:</b> Reset the BGP session:
 </p>
 <p><div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
 <code>
@@ -7572,9 +7614,11 @@ Route-maps can be used to filter prefixes by referencing access control lists or
 prefix lists. Route-maps can also be used to manipulate prefix path attributes 
 of routes matched by the referenced access control lists or prefix-lists. A 
 different route map can be used for each direction.
+</p>
+<p>
 The following configuration causes the BGP device R6 to not advertise prefixes 
-10.1.0.0 /17 and any subnets to its BGP peer 10.67.1.2. Prior to configuration 
-of the route-map, BGP device as advertising the following prefixes to its peer 10.67.1.2:
+10.1.0.0 /17 and any subnets to its BGP peer 10.67.1.2. The following table shows 
+the Loc-RIB table before the configuration of the route-map:
 </p>
 
 <p><div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
@@ -7679,7 +7723,7 @@ R6(config-router-af)#<b>neighbor 10.67.1.2 route-map RM_DENY_10.1.0.0/17 out</b>
 </code></div></p>
 
 <p>
-<b>Step 4:</b> Soft reset the BGP session.
+<b>Step 4:</b> Reset the BGP session:
 </p>
 <p><div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
 <code>
@@ -7769,7 +7813,7 @@ BGP does not react to a flapping route:
 
 <h2>Fast External Fallover</h2>
 <p>
-BGP fast external fallover is critical for failovers for eBGP peers. It allows 
+BGP fast external fallover is critical for failovers of eBGP peers. It allows 
 BGP to instantly detect failures of eBGP peers such as link failure between eBGP 
 peers. It is not applicable to iBGP peers. It is enabled by default. If disabled, 
 BGP fast external fallover can be enabled in the BGP configuration using the command
@@ -7780,12 +7824,15 @@ BGP fast external fallover can be enabled in the BGP configuration using the com
 
 <h2>Bidirectional Forwarding Detection (BFD)</h2>
 <p>
- BFD is used to ensure a link between any two devices is truly bidirectional i.e., 
+ BFD is used to ensure that a link between any two devices is truly bidirectional i.e., 
  the transmit and receive links are functional. Bi-directional link failure 
  occurs particularly in fibre optic links where two separate fibers are used with 
  one for transmit and the second for receiving. If the forward link functions and
  the return link does not function, this can break the connectivity between the 
- two BGP peers. BFD operates in two modes; async mode or demand mode.  In Async mode, 
+ two BGP peers.
+ </p>
+ <p>
+ BFD operates in two modes; async mode or demand mode.  In async mode, 
  hello packets flow between the two devices continuously. The echo feature makes 
  sure the CPU is not involved in the BFD process.
 </p>
@@ -7793,9 +7840,9 @@ BGP fast external fallover can be enabled in the BGP configuration using the com
 Configuring BFD is a two stage process:
 <ol>
   <li>Enable BFD globally using the command <code><b>bfd interval &lt;milliseconds&gt; 
-min_rx &lt;milliseconds&gt; multiplier value</b></code>.</li>
+min_rx &lt;milliseconds&gt; multiplier &lt;value&gt;</b></code></li>
   <li>Enabling BFD in BGP using the command 
-  <code><b>neighbor &lt;ip-address&gt; fall-over bfd</b></code>.</li>
+  <code><b>neighbor &lt;ip-address&gt; fall-over bfd</b></code></li>
 </ol>
 </p>
 
@@ -7876,8 +7923,10 @@ The above configuration sets the maximum number of prefixes from BGP neighbor wi
 messages issued when the number of received prefixes from the BGP peer is at 75% the maximum prefix configured. 
 Additionally, warning messages are issued after the number of received prefixes exceeds the configured maximum.
 A warning is not generated before the prefix limit is reached. By adding a warning percentage, 
-you can have a warning message sent when the percentage is exceeded. The maximum prefix 
-behavior of closing the BGP session can be changed by using the optional keyword 
+you can have a warning message sent when the percentage is exceeded. 
+</p>
+<p>
+The default action to end the BGP session can be changed by using the optional keyword 
 <code><b>warning-only</b></code> so that a warning message is generated instead. 
 When the threshold has been reached, additional prefixes are discarded.
 
@@ -7891,16 +7940,17 @@ When the threshold has been reached, additional prefixes are discarded.
 If the <code><b>warning-only</b></code> keyword is not added when configuring the maximum-prefix, 
 when a peer advertises more routes than the maximum prefix count:
 <ol>
-  <li>the peer moves the neighbor to the idle state in the BGP finite-state machine (FSM),</li> 
-  <li>closes the BGP session, </li>
-  <li>and sends out the appropriate syslog message.</li>
+  <li>The peer moves the neighbor to the idle state in the BGP finite-state machine (FSM),</li> 
+  <li>Closes the BGP session, </li>
+  <li>And sends out the appropriate syslog message.</li>
   <li>The BGP session is not automatically reestablished by default.</li>
   <li>If you want to restart the BGP session after a certain amount of time, you can use the optional 
   keyword <code><b>restart &lt;minutes&gt;</b></code>.</li>
  </ol>
 </p>
 <p>
-Enabling the maximum prefix feature takes effect immediately and does not require the reset of the BGP neighborship.
+Enabling the maximum prefix feature takes effect immediately and does not require 
+the reset of the BGP session.
 </p>
 
 <h2>Tuning CPU and Memory</h2>
@@ -7972,10 +8022,13 @@ routes. Processing these BGP Update messages increases the router's CPU load.
 eBGP neighbors going down/up is not considered a flap.
 Route flap dampening was introduced as a method to prevent the installation of 
 flapping routes into the BGP table and lower the CPU load.   
-BGP route flap dampening is thought to affect the stability of BGP tables.
-
+BGP route flap dampening tries to ensure a stable BGP table from flapping routes.
+</p>
+<p>
 The routers today have greater processing capacity to handle many BGP updates. As 
 a result, BGP route flap dampening is not commonly used today.
+</p>
+<p>
 Route dampening aims to reduce the scope of route flap propagation. Prefixes with 
 a history of flapping have the label 'h' in the output of the Loc-RIB table.
 </p>
@@ -7991,7 +8044,8 @@ Route flap dampening operation involves the following:
 
 Route flap dampening is only applied to inbound announcements from eBGP peers; 
 alternate paths are still usable.
-
+</p>
+<p>
 When a route flap occurs for a prefix:
 <ul>
   <li>If a BGP withdrawal message is received, penalty on the prefix is increased by 1000 
@@ -8004,7 +8058,7 @@ When a route flap occurs for a prefix:
   <li>Once prefix is stable, it will be suppressed according to the decay rate given 
   by the half life time.</li>
   <li>Penalty value is decayed every 5 seconds. Decay rate is same whether 
-  prefix is or is not in the BGP table.</li>
+  prefix is in the BGP table or is not in the BGP table.</li>
   <li>Once penalty reaches reuse-limit, prefix is reannounced.</li>
   <li>Once penalty is less than half reuse-limit, penalty is reset to zero.</li>
   <li>If the router receives an update about a route with a penalty, the half-life 
@@ -8122,7 +8176,7 @@ Some verification commands include the following:
 
 <h2>Peering Using Loopback Addresses</h2>
 <p>
-BGP sessions are sourced by the primary IP address of the outbound interface 
+BGP messages use the primary IP address of the outbound interface 
 toward the BGP peer by default. When configuring a BGP neighbor, the IP address 
 of one of the neighbor's interfaces is entered in the configuration. If the IP 
 address of the BGP open message does not match with the neighbor's configured IP 
@@ -8136,9 +8190,9 @@ the peering session stays up and the IGP finds another path to the loopback addr
 in essence, turning a single hop iBGP session into a multi-hop iBGP session.
 </p>
 <p>
-BGP processes BGP messages from devices that it has a peer session with.
+BGP processes messages from peers that it has an existing BGP session.
 If a BGP message source does not match an entry in the neighbor table, the BGP 
-message cannot be associated to a neighbor and it is therefore discarded. The 
+message cannot be associated to a peer and it is therefore discarded. The 
 source IP address of the BGP message still reflects the IP address of the outbound 
 interface. The source IP address of BGP messages needs to be explicitly configured
 for each neighbor with the command:
@@ -8148,15 +8202,18 @@ using the command:
 <code><b>show bgp ipv4 unicast neighbors &lt;ip-address&gt;</b></code>
 </p>
 <p>
-For peering using a loopback interface, the IP address or network of the loopback 
-interface should be in the routing table of the eBGP peer. In production networks, 
+For eBGP peering using a loopback interface, the IP address or network of the loopback 
+interface should exist in the routing table of the eBGP peer. In production networks, 
 usually a static route is configured. Scenarios exist where an IGP is configured 
 between eBGP peers. Here, the IP address of the loopback interface is advertised 
 into the IGP. This will result in the peer session between the two prefixes to 
 flap as the eBGP route (with AD of 20) is installed into the routing table. 
 This results in the IGP route (with its higher AD) not being installed into the 
 RIB. However, as the IGP route is not in the RIB, the eBGP route is again 
-removed because it is not in the RIB. One solution to this is to advertise the 
+removed because it is not in the RIB.
+</p>
+<p>
+One solution to this is to advertise the 
 IP address loopback of the loopback with the added keyword <code><b>backdoor</b></code>.
 For example <code><b>network 192.168.0.1 mask 255.255.255.255 backdoor</b></code>.
 </p>
@@ -8179,15 +8236,19 @@ BGP configuration in more recent IOS versions, by default, includes the command
 <code><b>no bgp synchronization</b></code>.
   BGP Synchronization is a legacy black-hole prevention technique.
  BGP synchronization was an attempt to eliminate traffic blackholes in an iBGP multihop topology where 
- intermediate routers are not running BGP. The essence of BGP synchronization was 
- that prefixes would only be advertised to iBGP peers only if they are available 
+ intermediate routers are not running BGP. 
+ </p>
+ <p>
+ With BGP synchronization, prefixes are advertised to iBGP peers only if they are available 
  in the IGP as well. This would ensure that any intermediate non-BGP routers would 
  be able to forward the traffic to/from prefixes that are advertised in BGP.
-
-BGP synchronization is not used because redistributing the large number of prefixes 
+</p>
+<p>
+BGP synchronization is not commonly used because redistributing the large number of prefixes 
 in the BGP table may overwhelm the IGP. Additionally, BGP synchronization is not 
 used today because of the use of iBGP scalability techniques such as full mesh, 
-route reflection, and BGP confederations.
+route reflection, and BGP confederations reduces possibilites of traffic being 
+black-holed.
 </p>
 
 
