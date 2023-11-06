@@ -194,9 +194,10 @@ which are usually ISPs.
 The following table displays ASNs that are reserved for special purposes and are not 
 to be used on Internet facing BGP configurations:
 </p>
+<p>
 <table id="table-special-purpose-as-numbers" class="sortable" width="100%" 
 cellspacing="0">
-      <thead style="background-color:D3D3D3;">
+      <thead style="background-color:D3D3D3; text-align:left;">
         <tr>
           <th  style="border-top: 1px  solid;">AS Number</th>
           <th  style="border-top: 1px  solid;">Reason for Reservation</th>
@@ -251,6 +252,7 @@ cellspacing="0">
         </tr>
       </tbody>
     </table>
+</p>
 
 <h2 id="TYPES_OF_AS">Types of Autonomous Systems</h2>
 <p>
@@ -259,7 +261,7 @@ There are three different kinds of Autonomous Systems:
    <li><b>Stub AS:</b> connects to only one other AS, though it may have its own
    private connections not visible to the rest of the Internet. A corporate 
    network connected to an ISP may be considered to have the same ASN as the ISP 
-   it is connected to. An example is a lower-tier ISP that gets its service from
+   it is connected to. Another example is a lower-tier ISP that gets its service from
    another ISP.</li>
    <li><b>Multi-homed AS:</b> connects to two or more ASes. This allows the AS 
    to maintain its Internet connection should one AS connection fail. 
@@ -272,20 +274,24 @@ There are three different kinds of Autonomous Systems:
 </p>
 <h2>Representation of 32-bit Autonomous System Numbers (ASNs)</h2>
 <p>
-There are three ways of representing 32-bit autonomous system numbers:
+In BGP configuration, there are three ways of representing 32-bit autonomous system numbers:
 <ol>
   <li><b>as-plain</b> is a simple decimal representation 0 - 4294967295. This is 
   the default AS notation used in Cisco IOS. </li>
-  <li><b>asdot +</b> breaks the number up into low-order and high-order 16-bit 
+  <li><b>asdot+</b> breaks the number up into low-order and high-order 16-bit 
   values separated by a dot. All of the older 16-bit autonomous system numbers 
   can be represented in the low-order value with the high-order value set to 
   zero for example: 65535 = 0.65535. 65536 is outside the range of the low-order
   values and is therefore represented as 1.0. 65537 is represented as 1.1. 65680
-  is represented as 1.33. Conversion between decimal and asdot+ notation can be 
-  done from the <a href="https://submit.apnic.net/cgi-bin/convert-asn.pl"> APNIC site</a></li>
-  <li><b>asdot</b> is a mixture of asdot+ and as-plain notations. Any autonomous 
+  is represented as 1.33. 
+  <p>
+  Conversion between decimal and asdot+ notation can be 
+  done from the <a href="https://networkers-online.com/tools/bgp-asn-4byte-converter/"></a>.
+  </p>
+  </li>
+  <li><b>asdot</b> consists of both asdot+ and as-plain notations; any autonomous 
   system number in the 16-bit(2 byte) range i.e. 0 - 65535 is written in asplain 
-  notation as 65535 and 32-bit ASNs are written in asdot+ notation. To enable 
+  notation and 32-bit ASNs are written in asdot+ notation. To enable 
   asdot notation, enter the command: 
   <code><b>bgp asnotation dot</b></code> under BGP router 
   configuration mode.</li>
@@ -294,8 +300,8 @@ There are three ways of representing 32-bit autonomous system numbers:
 
 <h2 id="ISP_CONNECTIONS">AS Connections to ISPs</h2>
 <p>
-An AS can be connected to an ISP through four possible ways: single homed, 
-dual-homed, multi-homing, and dual multi-homed.
+An AS can be connected to an ISP through four possible options: single-homed, 
+dual-homed, multi-homed, and dual multi-homed.
 
 <ol> 
 <li><b>Single-homed:</b> 
@@ -311,20 +317,20 @@ advertise prefixes through static configuration and a default route is received
 from the ISP. The use of BGP may not be recommended in this scenario.
 </li>
 <li>
-<b>Multihoming:</b> connection to more than one ISP at the same time. This provides  
+<b>Multi-homed:</b> connection to more than one ISP at the same time. This provides  
 increased redundancy and backup if one ISP fails. Path manipulation is possible
 providing better performance for traffic by ensuring that critical traffic transits 
 through one ISP and other traffic is sent through a second ISP. This type of 
 connectivity ensures that path manipulation is ISP-independent. BGP is typically 
-used with multihomed connections.
+used with multi-homed connections.
 </li>
-<li><b>Dual-multihomed:</b> The AS connects to the multihomed ISPs using more than 
+<li><b>Dual-multi-homed:</b> The AS connects to the multi-homed ISPs using more than 
 one connection. Here, BGP is used to share prefixes with the ISPs and potentially 
 internally within the AS as well.</li>
 </ol>
 </p>
 <p>
-BGP is recommended to be used in multihomed and dual multihomed type of connections.
+BGP is recommended to be used in multihomed and dual multi-homed type of connections.
 It is important to note that unless the enterprise network provides transit 
 capability, multihomed connections, if not carefully configured, may provide 
 transit capability resulting in transit traffic consuming bandwidth. Ensure that 
@@ -334,14 +340,14 @@ transit capability resulting in transit traffic consuming bandwidth. Ensure that
 
 <h2 id="ISP_PREFIX_SHARING">BGP Route Reception from ISPs</h2>
 <p>
-There are three different types of BGP route reception options; default route 
-from provider(s), some routes together with the default route, and all routes 
-i.e. full BGP table.
+ISPs can share prefixes with the enterprise network using BGP; three options are 
+possible:
 
 <ol>
-  <li><b>Default route from ISP:</b> the ISP shares a default route with the 
-  AS only. Path manipulation is not possible. This is a good option with the AS does 
-  not have the requisite resources such as small and medium sized AS.</li>
+  <li><b>Default route from ISP:</b> the ISP shares a default route only with the 
+  enterprise AS. Path manipulation is not possible. This is a preferred option 
+  with an enterprise AS that does not have the requisite resources such as small 
+  and medium sized enterprise AS.</li>
   <li><b>Default route and specific routes:</b> the AS receives a specific subset of 
   prefixes from the ISPs. This subset may be for destinations of interest to the 
   AS. Path manipulation can be implemented for these specific prefixes such as 
@@ -349,7 +355,8 @@ i.e. full BGP table.
   Good for medium AS.
   </li>
   <li><b>Full BGP table:</b> entire BGP table is shared between the ISPs and the 
-  AS. Requires extensive high-end routers. Appropriate for large AS such as ISPs.
+  AS. This option requires extensive high-end routers at the enterprise AS. This 
+  option is appropriate for large AS such as ISPs or large enterprise networks.
   </li>
 </ol>
 </p>
@@ -722,7 +729,7 @@ Border Gateway Protocol - NOTIFICATION Message                   <br>
 <p>
 BGP peers exchange keepalive messages to maintain the TCP session.
 Keepalive messages are exchanged every one third of the hold timer agreed upon 
-between the two routers (default is 60 seconds). A hold timer of zero 
+between the two peers (default is 60 seconds). A hold timer of zero 
 disables the transmission of KEEPALIVE messages. A KEEPALIVE message consists of 
 a BGP header with no body.
 </p>
@@ -846,7 +853,8 @@ A BGP peer state may remain in active due to the following potential reasons:
   <li>The neighbor is peering with the wrong address.</li>
   <li>Neighbor does not have a neighbor statement for this router.</li>
   <li>AS number mismatch.</li>
-  <li>Neighbor does not have a route to the source IP address of the Open packet.
+  <li>Neighbor does not have a route to the source IP address of the Open packet
+  received from the connecting BGP device.
   </li>
 </ul>
 </p>
@@ -887,7 +895,7 @@ If the holdtimer expires, a stop or reset event occurs or a NOTIFICATION message
 </p>
 <h2>Established</h2>
 <p>
-BGP session has been fully established their peering relationship and neighbors can exchange routes. All neighbor 
+BGP session has been fully established and neighbors can exchange routes. All neighbor 
 parameters match and the peers can now exchange updates. The BGP neighbor adjacency is complete. BGP routers send UPDATE 
 packets to exchange routing information. BGP resets the hold timer every time a keepalive is received or update is received.
 If a NOTIFICATION message is received, the state transitions to idle state.
@@ -1268,7 +1276,7 @@ R8(config-router-af)#<b>network 10.8.11.0 mask 255.255.255.0</b> <br>
 
       
   </li>
-  <li><b>Redistribution:</b> To redistribute IGP prefixes into OSPF, use the 
+  <li><b>Redistribution:</b> To redistribute IGP prefixes into BGP, use the 
   BGP command <code><b>redistribute &lt;igp-protocol&gt; &lt;process | asn&gt;</b></code>. 
   <ul>
      <li>Prefixes originated through redistribution have the value of 
@@ -1313,7 +1321,7 @@ It originates subnets(s) from a summary route for purpose of longest match traff
 engineering. This is the opposite of aggregation.
 
 <p>
-Prefix origination using inject-map command can be configured using the following 
+Prefix origination using <code><b>inject-map</b></code> command can be configured using the following 
 command: <code><b>bgp inject-map &lt;inject-map&gt; 
 exist-map &lt;exist-map&gt; [copy-attributes]
 </b></code>. 
@@ -1327,8 +1335,8 @@ specifies the aggregate route to match. If the route in the exist-map is matched
 the route in the inject-map will be advertised.
 </li>
 </ul>
-In the route-map referenced by 
-the exist-map, two matches need to be done;
+In the route-map referenced by the  <code><b>exist-map</b></code> keyword, two 
+matches need to be done;
 <ol type="i">
   <li>Match the prefix using the <code><b>match ip address</b></code> command.</li>
   <li>Match the source using a <code><b>match ip route-source</b></code> command.</li>
@@ -1352,15 +1360,15 @@ advertise a component route 150.1.1.0/24.
   <li><b>Step 4:</b> Configure route-map that is the inject-map:<br>
   <code><b>
   route-map INJECT_MAP<br>
-  set ip address prefix-list R1_LOOPBACK<br>
+  &nbsp;&nbsp;set ip address prefix-list R1_LOOPBACK<br>
   route-map EXIST_MAP<br>
-  match ip address prefix-list AGGREGATE<br>
-  match ip route-source prefix-list ROUTE_SOURCE</b></code>.
+  &nbsp;&nbsp;match ip address prefix-list AGGREGATE<br>
+  &nbsp;&nbsp;match ip route-source prefix-list ROUTE_SOURCE</b></code>.
   </li>
   <li><b>Step 5:</b> Apply the inject-map and exist-map;<br>
   <code><b>
   router bgp 801.1<br>
-  bgp inject-map INJECT_MAP exist-map EXIST_MAP<br>
+  &nbsp;&nbsp;bgp inject-map INJECT_MAP exist-map EXIST_MAP<br>
   </b></code>.
   </li>
 </ul>
@@ -1719,7 +1727,11 @@ neighbors are directly connected.
 <h2>First ASN in path must be neighbor's ASN</h2>
 <p>
 The BGP command <code><b>bgp enforce-first-as</b></code> 
- can be configured to enforce additional security. This helps provide an 
+ can be configured to enforce additional security. 
+ This command ensures that the ASN of the eBGP peer is the first in the AS_PATH 
+ prefix attribute of the received prefix from the eBGP peer. If this is not the 
+ case, then the received prefixes from this eBGP peer are droppped.  
+ This helps provide an 
 added layer of security to BGP.
 </p>
 
@@ -2630,14 +2642,6 @@ from the large number of ASNs (4,294,967,295).
       </td>
       <td style="border-bottom: 1px solid;">
         <code><b>show bgp ipv4 unicast regexp [^_]</b></code>
-      </td>
-    </tr>
-    <tr>
-      <td style="border-bottom: 1px solid;">
-        Display locally originated prefixes.
-      </td>
-      <td style="border-bottom: 1px solid;">
-        <code><b>show bgp ipv4 unicast regexp ^$</b></code>
       </td>
     </tr>
     <tr>
@@ -3652,7 +3656,7 @@ throughout an autonomous system. IGPs typically use metric to identify the short
 provide the scalability of BGP. BGP uses the autonomous system to identify a single domain of control for a routing 
 policy. BGP does not use the path metric due to scalability issues combined with the notion that each autonomous system 
 may use a different policy to calculate the metrics. AIGP provides the ability for BGP to maintain and calculate a 
-conceptual path metric in environments that use multiple autonomous systems with unique IGP routing domains in each 
+conceptual path metric in environments with multiple autonomous systems using unique IGP routing domains in each 
 AS. AIGP path attribute exchanges must be agreed upon between the BGP peers and AIGP metrics are only included in prefix 
 advertisements between AIGP-enabled peers. AIGP metrics are enabled for a BGP neighbor with the BGP address family config
 command <code><b>neighbor &lt;ip-address&gt; aigp</b></code>
