@@ -142,7 +142,7 @@ the MPLS header.
 <h3>Route Target (RT)</h3>
 <p>
 A route-target (RT) is a 64-bit value similar in format to the RD i.e. ASN:nn or 
-IP addess:nn. It is used by MP-BGP to determine the VRF into which the different 
+IP address:nn. It is used by MP-BGP to determine the VRF into which the different 
 customer prefixes should be installed. RT is defined by 
 <a href="https://www.ietf.org/rfc/rfc4360.txt" target="_blank">RFC 4360 (BGP extended communities attribute)</a>.
 
@@ -223,10 +223,9 @@ global routing table (RIB). The RT and RD are then configured under each VRF.
 
 There are two ways to create a VRF; 
 <ol>
-  <li><code><b>ip vrf &lt;vrf-name&gt;</b></code> (older method).
-   <p>
-   This command creates VRFs that for the IPv4 address family only.
-   </p>
+  <li><code><b>ip vrf &lt;vrf-name&gt;</b></code> (older method):
+   creates VRFs for IPv4 address family only.
+   
   <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
       	<code>
@@ -272,7 +271,7 @@ is an important command to
 use particularly when introducing VRFs in IPv6 in a network where IPv4 VRFs are 
 operational. It has been previously mentioned that the <code><b>
 vrf definition &lt;vrf-name&gt;</b></code> command supports creation IPv6 VRFs. 
-If the VRFs were created like in following configuration;
+If the VRFs were created as below:
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">

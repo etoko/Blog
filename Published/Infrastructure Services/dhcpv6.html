@@ -143,15 +143,15 @@ message seeking additional information from a stateful DHCPv6 server.
   </p>
 <p>
 Stateful DHCPv6 does not require SLAAC while stateless DHCPv6 does. When an RA 
-M-flag is set (to the value 1) indicating the use of stateful DHCPv6; 
-when the host sends an RS message:
-<ul>
+M-flag is set (to the value 1) indicating the use of stateful DHCPv6:  
+<ol type="a">
+  <li>The host sends an RS message</li>
   <li>The router responds with an RA message.</li>
   <li>The host sends a DHCPv6 SOLICIT message.</li>
   <li>The DHCPv6 server responds with an ADVERTISE message.</li>
-  <li>The host responds to the DHCPv6 server with a REQUEST message. </li>
+  <li>The host responds to the ADVERTISE message with a REQUEST message. </li>
   <li>The DHCPv6 server sends a REPLY message.</li>
-</ul>
+</ol>
 <b>Note:</b> Server to client DHCPv6 messages use UDP destination port 546 while 
 client to server DHCPv6 messages use destination port UDP 547.
 </p>
@@ -214,7 +214,7 @@ The rapid-commit option sends the initial DHCPv6 SOLICIT message. However,
 this SOLICIT message has the rapid-commit option set. This informs the server 
 that it wants to shorten the exchange from 4 messages to 2. 
 
-The use of the rapid-commit option on the server can be enabled using the interface 
+<code><b>rapid-commit</b></code> option can be enabled on the server using the interface 
 configuration command: 
 <code><b>ipv6 dhcp server &lt;dhcpv6-pool&gt; rapid-commit</b></code>. This is enabled 
 on the interface connecting to the clients.
@@ -935,12 +935,11 @@ GigabitEthernet0/0 is in client mode             <br>
 <p>
 There are two modes of address allocation: 
 <ul>
-  <li>Two-message exchange: The DHCPv6 client requests for an address and other 
+  <li><b>Two-message exchange:</b> The DHCPv6 client requests for an address and other 
   network configuration parameters from the server. The server allocates an 
   address and other network configuration parameters to the client. This mode 
   applies to a network with only one DHCPv6 server. </li>
-  <li>
-  Four-message exchange: When there are multiple 
+  <li><b>Four-message exchange:</b> When there are multiple 
   IPv6 DHCPv6 servers, all of them can allocate addresses and other configuration 
   parameters to requesting clients. The client may waste address space. In this 
   case the four-message exchange is used to allocate addresses. 

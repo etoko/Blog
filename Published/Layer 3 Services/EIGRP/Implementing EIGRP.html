@@ -411,7 +411,7 @@ router&#39;s RIB. Configurations that can be done under the topology base sectio
 <ul>
   <li>route redistribution</li>
   <li>administrative distance</li> 
-  <li>unequal-cost load-balancing settings using <code><b>variance</b></code> command</li>
+  <li>unequal-cost load-balancing using <code><b>variance</b></code> command</li>
   <li>maximum-paths settings for load-balancing</li>
   <li>offset-lists for traffic engineering</li>
   <li>route filtering using distribute-lists</li>
@@ -889,7 +889,7 @@ EIGRP classic-mode:
 </code></div></p>
 <p>
 The conversion results in a graceful restart of the EIGRP process without the loss 
-of neighborship or route information. Conversion is automated as of 15.45.
+of neighborship or route information. Conversion is automated as of IOS version 15.45.
 </p>
 
 <h2 id="RID">EIGRP Router IDs</h2>
@@ -1103,7 +1103,7 @@ Each EIGRP process maintains a table of neighbors to ensure
  <h2 id="NEIGHBOR_TABLE">Neighbor Table</h2>
  
  <p>
- EIGRP neighbors are recorded in the neighbor table. The EIGRP neighbor table 
+ EIGRP neighbors are listed in the neighbor table. The EIGRP neighbor table 
  can be viewed using the privileged mode command  <code><b>show ip eigrp neighbors detail</b></code>.
  The <code><b>detail</b></code> keyword is optional.
  </p>
@@ -1131,7 +1131,7 @@ R6#
 <td style="border-bottom:solid; border-top:solid; border-width:1px" width="13%"><b>H:</b></td>
 <td style="border-bottom:solid; border-top:solid; border-width:1px">
 Handle. An index number, starting from zero, assigned to a neighbor depending on when the neighborship was formed.
-The first neighbor is has a Handle value of zero (0), the second one (1), and so on sequentially.
+The first neighbor has a Handle value of zero (0), the second one (1), and so on sequentially.
 </td>
 </tr>
 <tr>
@@ -1192,30 +1192,30 @@ The command <code><b>show ip eigrp neighbors detail</b></code> displays more inf
 <p><div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
 <code>
 R6#<b>show ip eigrp neighbors detail </b>                                           <br />              
-EIGRP-IPv4 VR(EIGRP_R6) Address-Family Neighbors for AS(1)                          <br />      
-H&nbsp;&nbsp; Address                 Interface              Hold Uptime   SRTT&nbsp;&nbsp; RTO  Q  Seq <br />      
- &nbsp;&nbsp;                                                (sec)         (ms)&nbsp;&nbsp;     Cnt Num <br />      
-6&nbsp;&nbsp; 10.100.1.2              Fa3/1                     9 00:40:52  167&nbsp;&nbsp;1002&nbsp;0&nbsp;&nbsp;14  <br />      
- &nbsp;&nbsp;Version 10.0/2.0, Retrans: 1, Retries: 0, Prefixes: 14            &nbsp;&nbsp;    &nbsp; &nbsp;&nbsp;    <br />      
- &nbsp;&nbsp;Topology-ids from peer - 0                                        &nbsp;&nbsp;    &nbsp; &nbsp;&nbsp;    <br />      
-5&nbsp;&nbsp; 10.100.0.2              Gi0/0                    10 00:40:52   76&nbsp;&nbsp; 684&nbsp;0&nbsp;&nbsp;13  <br />      
- &nbsp;&nbsp;Version 10.0/2.0, Retrans: 2, Retries: 0, Prefixes: 4             &nbsp;&nbsp;    &nbsp; &nbsp;&nbsp;    <br />      
- &nbsp;&nbsp;Topology-ids from peer - 0                                        &nbsp;&nbsp;    &nbsp; &nbsp;&nbsp;    <br />      
-4&nbsp;&nbsp; 10.100.1.3              Fa3/1                    10 00:42:39  124&nbsp;&nbsp; 744&nbsp;0&nbsp;&nbsp;19  <br />      
- &nbsp;&nbsp;Version 10.0/2.0, Retrans: 1, Retries: 0, Prefixes: 14            &nbsp;&nbsp;    &nbsp; &nbsp;&nbsp;    <br />      
- &nbsp;&nbsp;Topology-ids from peer - 0                                        &nbsp;&nbsp;    &nbsp; &nbsp;&nbsp;    <br />      
-3&nbsp;&nbsp; 10.100.0.3              Gi0/0                    11 00:42:39   91&nbsp;&nbsp; 546&nbsp;0&nbsp;&nbsp;17  <br />      
- &nbsp;&nbsp;Version 10.0/2.0, Retrans: 1, Retries: 0, Prefixes: 4             &nbsp;&nbsp;    &nbsp; &nbsp;&nbsp;    <br />      
- &nbsp;&nbsp;Topology-ids from peer - 0                                        &nbsp;&nbsp;    &nbsp; &nbsp;&nbsp;    <br />      
-2&nbsp;&nbsp; 10.100.1.4              Fa3/1                    14 00:51:03  846&nbsp;&nbsp;5000&nbsp;0&nbsp;&nbsp;32  <br />      
- &nbsp;&nbsp;Version 10.0/2.0, Retrans: 1, Retries: 0, Prefixes: 8             &nbsp;&nbsp;    &nbsp; &nbsp;&nbsp;    <br />      
- &nbsp;&nbsp;Topology-ids from peer - 0                                        &nbsp;&nbsp;    &nbsp; &nbsp;&nbsp;    <br />      
-1&nbsp;&nbsp; 10.0.16.1               Fa3/0                    14 00:51:03  104&nbsp;&nbsp; 624&nbsp;0&nbsp;&nbsp;29  <br />      
- &nbsp;&nbsp;Version 10.0/2.0, Retrans: 2, Retries: 0, Prefixes: 15            &nbsp;&nbsp;    &nbsp; &nbsp;&nbsp;    <br />      
- &nbsp;&nbsp;Topology-ids from peer - 0                                        &nbsp;&nbsp;    &nbsp; &nbsp;&nbsp;    <br />      
-0&nbsp;&nbsp; 10.0.26.1               Gi1/0                     8 00:51:03  837&nbsp;&nbsp;5000&nbsp;0&nbsp;&nbsp;30  <br />      
- &nbsp;&nbsp;Version 10.0/2.0, Retrans: 1, Retries: 0, Prefixes: 14                     &nbsp;&nbsp;    <br />      
- &nbsp;&nbsp;Topology-ids from peer - 0                                                 &nbsp;&nbsp;    <br />      
+EIGRP-IPv4 VR(EIGRP_R6) Address-Family Neighbors for AS(1)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+H&nbsp;&nbsp; Address&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Interface&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Hold Uptime&nbsp;&nbsp; SRTT&nbsp;&nbsp; RTO&nbsp;&nbsp;Q&nbsp;&nbsp;Seq <br />      
+ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(sec)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (ms)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Cnt Num <br />      
+6&nbsp;&nbsp; 10.100.1.2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Fa3/1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 9 00:40:52&nbsp;&nbsp;167&nbsp;&nbsp;1002&nbsp;0&nbsp;&nbsp;14  <br />      
+ &nbsp;&nbsp;Version 10.0/2.0, Retrans: 1, Retries: 0, Prefixes: 14&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;    <br />      
+ &nbsp;&nbsp;Topology-ids from peer - 0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;    <br />      
+5&nbsp;&nbsp; 10.100.0.2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Gi0/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10 00:40:52&nbsp;&nbsp; 76&nbsp;&nbsp; 684&nbsp;0&nbsp;&nbsp;13  <br />      
+ &nbsp;&nbsp;Version 10.0/2.0, Retrans: 2, Retries: 0, Prefixes: 4&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;    <br />      
+ &nbsp;&nbsp;Topology-ids from peer - 0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;    <br />      
+4&nbsp;&nbsp; 10.100.1.3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Fa3/1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10 00:42:39&nbsp;&nbsp;124&nbsp;&nbsp; 744&nbsp;0&nbsp;&nbsp;19  <br />      
+ &nbsp;&nbsp;Version 10.0/2.0, Retrans: 1, Retries: 0, Prefixes: 14&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;    <br />      
+ &nbsp;&nbsp;Topology-ids from peer - 0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;    <br />      
+3&nbsp;&nbsp; 10.100.0.3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Gi0/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;11 00:42:39&nbsp;&nbsp; 91&nbsp;&nbsp; 546&nbsp;0&nbsp;&nbsp;17  <br />      
+ &nbsp;&nbsp;Version 10.0/2.0, Retrans: 1, Retries: 0, Prefixes: 4&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;    <br />      
+ &nbsp;&nbsp;Topology-ids from peer - 0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;    <br />      
+2&nbsp;&nbsp; 10.100.1.4&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Fa3/1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;14 00:51:03&nbsp;&nbsp;846&nbsp;&nbsp;5000&nbsp;0&nbsp;&nbsp;32  <br />      
+ &nbsp;&nbsp;Version 10.0/2.0, Retrans: 1, Retries: 0, Prefixes: 8&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;    <br />      
+ &nbsp;&nbsp;Topology-ids from peer - 0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;    <br />      
+1&nbsp;&nbsp; 10.0.16.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Fa3/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;14 00:51:03&nbsp;&nbsp;104&nbsp;&nbsp; 624&nbsp;0&nbsp;&nbsp;29  <br />      
+ &nbsp;&nbsp;Version 10.0/2.0, Retrans: 2, Retries: 0, Prefixes: 15&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;    <br />      
+ &nbsp;&nbsp;Topology-ids from peer - 0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;    <br />      
+0&nbsp;&nbsp; 10.0.26.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Gi1/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 8 00:51:03&nbsp;&nbsp;837&nbsp;&nbsp;5000&nbsp;0&nbsp;&nbsp;30  <br />      
+ &nbsp;&nbsp;Version 10.0/2.0, Retrans: 1, Retries: 0, Prefixes: 14&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br />      
+ &nbsp;&nbsp;Topology-ids from peer - 0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br />      
 R6#                                                                                        
 </code>
 </div></p>
@@ -1465,8 +1465,8 @@ of varying speed links.
  </p>
  <h4>1. Hello Packet</h4>
  <p>
- Hello packets are used primarily for neighbor discovery and maintenance (as 
- keepalive messages). The hello-interval controls the 
+ Hello packets are used primarily for neighbor discovery and maintenance of the 
+ neighbor relationship where they act as keepalive messages. The hello-interval controls the 
  number of times that the hello packets are sent from an interface. By default, the hello interval is 5 seconds.
  The Hello packet body contains sender's K-values, hold time and TLV (Type, Length Value) of the EIGRP version and TLV
  version used. Hello packets are often sent to multicast 224.0.0.10 on IPv4 
@@ -1972,8 +1972,10 @@ allowing each router to independently identify the shortest path.
 
 </code></div></p> 
 <p>
-From the packet capture of the EIGRP Query packet, the delay parameter is set to infinity and bandwidth to the maximum 
-bandwidth value of 4294967295 (2<sup>32</sup>) i.e. unreachable. These indicate that local device has poisoned all paths to the prefixes 
+From the packet capture of the EIGRP Query packet, the delay parameter is set to 
+infinity and bandwidth to the maximum bandwidth value of 4294967295 (2<sup>32</sup>) 
+i.e. unreachable, and hop count is set to maximum at 255. These indicate that the local 
+device has poisoned all paths to the prefixes 
 in the Query packet that use the local router as a next hop.
 </p>
  <h4>4. Reply Packet</h4>
@@ -2231,7 +2233,7 @@ in the Query packet that use the local router as a next hop.
  the hub's connecting interface in a hub and spoke DMVPN topology. To disable 
  split horizon, in interface mode, enter the command: 
  <code><b>no split-horizon eigrp &lt;autonomous-system&gt;</b></code>. In this 
- command, if the EIGRP and autonomous-system number are not entered, then 
+ command, if the EIGRP keyword and autonomous-system number are excluded, then 
  split-horizon is disabled for RIP.
  </p>
  <h3>Poison Reverse</h3>
@@ -2408,8 +2410,8 @@ This is used in addition to split horizon.
 The feasibility condition follows this sequence of steps during path selection:
 <ol>
 <p><b>Step 1:</b> Find the best path i.e. the path with the lowest metric; take the metric of the best path as 
-reported by the neighbor as X.</p>
-<p><b>Step 2:</b> Find all alternate backup paths to a network and retrieve the metric reported by the neighbor; 
+as X.</p>
+<p><b>Step 2:</b> Find all alternate backup paths to the same network and retrieve the metric reported by the neighbor; 
 any one path with a metric reported by the neighbor that is less than X is close to the destination.</p>
 <p><b>Step 3:</b> Exclude all other paths with a metric reported by the neighbor greater than or equal to X.</p>
 </ol>  
@@ -2780,7 +2782,8 @@ EIGRP waits half of the active timer value (90 seconds) for a reply to this quer
  
 If the router does not receive a response within 90 seconds, the originating router sends a stuck in active (SIA) 
 query to EIGRP neighbors that did not respond.
-
+</p>
+<p>
 Upon receipt of an SIA query, the router should respond within 90 seconds with an SIA
 reply. An SIA reply contains the route information or provides information on the query process itself. 
 
@@ -3884,7 +3887,7 @@ provides additional security to the network.
   <li>To discover new neighbors</li>
   <li>Act as a keepalive messages</li>
   <li>Communicate K-values and hold-timer value.</li>
-  <li>Acknowledges other packet types when reliability is important.</li>
+  <li>Acknowledge other packet types when reliability is important.</li>
  </ul>
  </p>
  
@@ -3989,13 +3992,13 @@ solution would be to leave the EIGRP timer values at their defaults and configur
 
 <h2 id="PASSIVE_INTERFACE">Passive Interfaces</h2>
 <p>
-Passive interfaces in EIGRP allow the network of an interface to be advertised 
+Passive interfaces in EIGRP allow the network configured on an interface to be advertised 
 but prevent neighbor adjacencies from forming on those interfaces because hello packets are 
 not sent. Hello packets received on passive interfaces are not processed.
 </p>
 <p>
 Configuration of passive interfaces can be good from a security perspective. As Hello packets are not sent out 
-passive interfaces, a packet sniffer listening in the interface will not be able 
+passive interfaces, a packet sniffer will not be able 
 to view routing information off of these interfaces.
 </p>
 <p>
@@ -4152,15 +4155,19 @@ such as core layer or distribution layer of a two-tier/three-tier network topolo
 
 <p>
 EIGRP supports auto-summarization where networks are summarized at classful network address boundaries. 
-If a network design implements Variable Length Subnet Mask IP address allocation, then auto-summarization needs to be 
+If a network design implements Variable Length Subnet Mask IP address allocation, 
+then auto-summarization needs to be 
 disabled. Auto-summary is disabled in newer IOS versions. 
-It can be enabled with <code><b>auto-summary</b></code> command at the process-level in classic EIGRP and base topology in named EIGRP.
+It can be enabled with <code><b>auto-summary</b></code> command at the 
+process-level in classic EIGRP and base topology in named EIGRP.
 </p>
 
 <p>
-Manual summarization supports any bit boundary including 0.0.0.0/0. It automatically suppresses subnet advertisements.
-It is still possible to advertise constituent networks even after configuring summarization. This can be done using 
-a leak-map. Manual summarization can be implemented; in classic-mode at the under the interface configuration mode
+Manual summarization is supported at any bit boundary including 0.0.0.0/0. It 
+automatically suppresses subnet advertisements.
+It is still possible to advertise constituent subnets even after configuring 
+summarization using a leak-map. Manual summarization can be implemented; in 
+classic-mode under interface configuration mode
 using the command <code><b>ip summary-address eigrp </b></code>. In named-mode manual summarization is configured under the 
 af-interface mode: <code><b>summary-address</b></code>.
 </p>
@@ -4174,7 +4181,7 @@ af-interface mode: <code><b>summary-address</b></code>.
    <li>Limits individual route knowledge.</li>
    <li>Limits query range:
      <ul>
-       <li>Limits the amount of networks to be individually processed for example core devices do not need to know details 
+       <li>Limits the number of networks to be individually processed for example core devices do not need to know details 
        of the access layer networks. Here, access-layer summarization can be done at the distribution layer. </li>
        <li>Limits query scope; if a summarizing router receives a query for a specific route that is a subnet of the summary, 
        it replies indicating that it does not have an available route and does not send a query out for the route.</li>
@@ -4218,14 +4225,13 @@ network boundary.
  A summary aggregate is configured for the EIGRP interface. 
 The summary aggregate prefix is not advertised until a prefix matches it. 
 Interface-specific summarization can be performed in any section of the network topology. 
-The advertisement of summary routes occurs on an interface-by-interface basis. 
 Configuration of summary routes should be done on the outgoing interface.
 </p>
 
  <h4>Classic Mode</h4>
  <p>
  In classic-mode, EIGRP summary is configured using the interface mode command 
- <code><b>ip summary address eigrp &lt;as&gt; &lt;network&gt; &lt;subnet-mask&gt; [leak-map &lt;route-map-name&gt;] </b></code>.
+ <code><b>ip summary-address eigrp &lt;as&gt; &lt;network&gt; &lt;subnet-mask&gt; [leak-map &lt;route-map-name&gt;] </b></code>.
  The leak-map option allows the advertisement of the component routes of the 
 summary route identified in the route map.
 </p>
@@ -4771,7 +4777,8 @@ The configuration of stub site ID is done in EIGRP address family mode using the
 The stub site ID is applied to all incoming routes on WAN interfaces. 
 </p>
 <p>
-The <code><b>eigrp stub-site</b></code> command is mutually exclusive with the eigrp stub command. You cannot execute both commands on a 
+The <code><b>eigrp stub-site</b></code> command is mutually exclusive with the 
+<code><b>eigrp stub</b></code> command. You cannot execute both commands on a 
 device. 
 This <code><b>eigrp stub-site</b> </code> command resets the peers on WAN interfaces and initiates relearning of routes from WAN neighbors.
 </p>
@@ -5240,7 +5247,7 @@ R8#                                                                             
  
  <p>
 EIGRP allows load distribution over unequal paths. Only FS are candidates for load-balancing. Unequal cost load-balancing is 
-controlled by variance command. For a path to be considered for unequal cost load balancing, its feasible distance must be 
+controlled by <code><b>variance</b></code> command. For a path to be considered for unequal cost load balancing, its feasible distance must be 
 less than the product of the  feasible distance of the successor and variance multiplier.
 Traffic share is automatically calculated over the links based on a ratio proportional to their composite metrics.
 Actual load-balancing still controlled by switching paths e.g. CEF per flow.
@@ -5686,8 +5693,8 @@ gateway prefix-list-name} {in | out} [interface-id]</b></code>
 <p>
 EIGRP classic configuration places the command under the EIGRP process, while named-mode configuration places the command 
 under topology base configuration mode. 
-Prefixes that match against deny statements are filtered, and prefixes that match 
-against a permit statement are passed.
+Prefixes that match against <code><b>deny</b></code> statements are filtered, and prefixes that match 
+against a <code><b>permit</b></code> statement are passed.
 </p>
 <p>
 If the distribute-list filtering is applied without referencing an interface, then it gets applied to all interfaces. 
@@ -5763,9 +5770,8 @@ D EX&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;192.168.18.1                                  
 <p>
 Access Control Lists (ACLs) can be used to identify the prefixes to be filtered (inbound or outbound).
 The following sequence of configurations guide on how to filter prefixes using an ACL: 
-<ul>
-<p>
-Step 1: Identify the Prefixes to be Filtered Using an Access Control List (ACL):
+<ol>
+<li> Identify the Prefixes to be Filtered Using an Access Control List (ACL):
 <p><div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
 <code>
 R2(config)#<b>ip access-list standard ACL_19216816_2           </b><br />
@@ -5774,10 +5780,10 @@ R2(config-std-nacl)#<b>20 permit any                           </b><br />
 R2(config-std-nacl)#<b>exit                                    </b><br />
 R2(config)#                                                 </b><br />
 </code></div></p>
-</p>
+</li>
 
-<p>
-Step 2: Apply the filter using the <code><b>distribute-list</b></code> command 
+<li>
+Apply the filter using the <code><b>distribute-list</b></code> command 
 and reference the ACL created in Step 1:
 <h4>Named mode</h4>
 <p><div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
@@ -5839,23 +5845,22 @@ D EX&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;192.168.18.1                                  
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[170/168960] via 10.100.1.17, 00:01:16, GigabitEthernet2/0                      <br />
 R2(config)#
 </code></div></p>
-</p>
-</ul>
+</li>
+</ol>
 </p>
 <h3>Filtering using Prefix Lists</h3>
 <p>
 Route filtering can be implemented using Prefix Lists.
 </p>
-<ul>
-<p>Step 1: Define the prefix list
+<ol>
+<li>Define the prefix list
 <p><div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
 <code>
 R9(config)#<b>ip prefix-list PL_DENY_1921681617 seq 10 deny 192.168.16.0/23 le 32 </b><br />
 R9(config)#<b>ip prefix-list PL_DENY_1921681617 seq 20 permit 0.0.0.0/0 le 32     </b><br />
 </code></div></p>
-</p>
-<p>
-Step 2: Apply the prefix-list filter using the <code><b>distribute-list</b></code> command;
+</li>
+<li>Apply the prefix-list filter using the <code><b>distribute-list</b></code> command;
 <h4>Named mode</h4>
 <p><div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
 <code>
@@ -5864,14 +5869,15 @@ R9(config-router)#<b>address-family ipv4 unicast autonomous-system 1            
 R9(config-router-af)#<b>topology base                                                              </b><br />
 R9(config-router-af-topology)#<b>distribute-list prefix PL_DENY_1921681617 in Gigabitethernet0/0   </b><br />
 </code></div></p>
+
 <h4>Classic mode</h4>
 <p><div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
 <code>
 R9(config)#<b>router eigrp 1                                                             </b><br />
 R9(config-router)#<b>distribute-list prefix PL_DENY_1921681617 in Gigabitethernet0/0   </b><br />
 </code></div></p>
-</p>
-</ul>
+</li>
+</ol>
 
 <h4>Verification</h4>
 <p>
@@ -5982,9 +5988,8 @@ R9#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp
 Route-maps reference Access Control Lists or prefix lists to identify traffic of interest.
 To configure route filtering using route maps, follow these steps:
 </p>
-<ul>
-<p>
-Step 1: Identify the traffic of interest using an ACL or prefix list<br />
+<ol>
+<li><b>Identify the traffic of interest using an ACL or prefix list:</b>
 In this demonstration, we use a prefix list to identify redistributed EIGRP routes 192.168.0.0/16. 
 Note that the prefix-list
 uses the permit statement to identify the network to be filtered if the route map 
@@ -5993,9 +5998,8 @@ control statement is deny.
 <code>
 R8(config)#<b>ip prefix-list PL_DENY_19216800 seq 10 permit 192.168.0.0/16 le 32</b>
 </code></div></p>
-</p>
-<p>
-Step 2: Create a route map and reference the prefix list<br />
+</li>
+<li><b>Create a route map and reference the prefix list:</b>
 The route-map uses the deny statement to filter the network address that has been identified by the prefix-list.
 The permit statement (second route-map statement) permits other routes that have not been denied.
 
@@ -6016,9 +6020,8 @@ route-map RM_DENY_19216800, permit, sequence 20                           <br />
 &nbsp;&nbsp;Policy routing matches: 0 packets, 0 bytes                              <br />
 R8(config)#                                                               <br />
 </code></div></p>
-</p>
-<p>
-Step 3: Apply the filter to EIGRP using the distribute-list command;<br />
+</li>
+<li><b>Apply the filter to EIGRP using the <code>distribute-list</code> command:</b>
 <p><div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
 <code>
 R8(config)#<b>router eigrp EIGRP_NAMED                                         </b>                                                                                                                                                                                                <br />
@@ -6030,8 +6033,8 @@ R8(config-router-af-topology)#<b>distribute-list route-map RM_DENY_19216800 in <
 *Oct 10 22:33:24.303: %DUAL-5-NBRCHANGE: EIGRP-IPv4 1: Neighbor 10.100.1.20 (FastEthernet4/1) is resync: route configuration changed                                                                                                                                        <br />
 R8(config-router-af-topology)#
 </code></div></p>
-</p>
-</ul>
+</li>
+</ol>
 <h4>Verification</h4>
 <p><div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
 <code>
@@ -6306,7 +6309,14 @@ internal, external or per route.
 
 If the AD of one or more routes is modified, EIGRP's Diffusing Update ALgorith 
 (DUAL) is executed to recalculate the best path. The EIGRP neighbor relationship may be reset as 
-well.
+well. EIGRP supports the modification of the administrative distance of the 
+following:
+<ul>
+  <li>All internal and external routes</li>
+  <li>Routes from specific neighbors</li>
+  <li>Specific routes</li> 
+  <li>Summary routes</li>
+</ul>
 
 <h3>Modifying the AD of Internal and External Routes</h3>
 <p>
@@ -6877,7 +6887,7 @@ FF02::A.
     <td style="border-bottom: 1px solid;">Update</td>
     <td style="border-bottom: 1px solid;">Link-local address</td>
     <td style="border-bottom: 1px solid;">Link-local address</td>
-    <td style="border-bottom: 1px solid;">Adjancency forming</td>
+    <td style="border-bottom: 1px solid;">Adjacency forming</td>
   </tr>
   <tr>
     <td style="border-bottom: 1px solid;">Update</td>

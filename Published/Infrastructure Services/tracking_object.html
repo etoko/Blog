@@ -1,4 +1,4 @@
-<h1>Enhanced Object Tracking (SLA Track)</h1>
+<h1>Overview</h1>
 
 <p>
 Enhanced Object tracking allows you to track specific objects on the device, such as the 
@@ -8,9 +8,9 @@ availability of the network and shorten recovery time if an object state goes
 down.
 </p>
 <p>
-The Enhanced Object Tracking feature provides complete separation between the objects to be tracked and
+The enhanced object tracking feature provides complete separation between the objects to be tracked and
 the action to be taken by a client when a tracked object changes. Thus, several clients such as HSRP, VRRP,
-or GLPB can register their interest with the tracking process; several clients 
+or GLBP can register their interest with the tracking process; several clients 
 can register to track the state of the same object.
 Each client is notified when the tracking object changes state, and each can 
 take different action when the object state changes.
@@ -21,13 +21,13 @@ a specific object.
 <p>
 The tracking process periodically polls the tracked objects and notes any change 
 in value. The changes in the
-tracked object are communicated to interested client processes, either immediately or after a specified delay.
+tracked object are communicated to registered client processes, either immediately or after a specified delay.
 The object values are reported as being either up or down
 </p>
 
 <p>
 An object monitors the statistics and state of the IP SLA instance and performs an 
-action based on the status of the probe. This can be used for HSRP, VRRP to 
+action based on the status of the probe. This can be used by HSRP, VRRP to 
 change priority levels.
 </p>
 
@@ -125,13 +125,17 @@ IP SLA</a>.
   
   <li><b>Associate the tracking object with a client process:</b>
   IP SLA tracking can be leveraged to improve the efficiency and reliability of 
-static routing, dynamic routing using OSPF, BGP. </li>
-</ol>
-</p>
-
+static routing, dynamic routing using OSPF, BGP. 
 <p>
-In the following 
-  subsection, the tracking object is associated with a static route.
+In the following subsections, the tracking object is associated with:
+  <ul>
+    <li>Static routes</li>
+    <li>Interface state</li>
+    <li>IP reachability</li>
+  </ul>
+</p>
+</li>
+</ol>
 </p>
 
 <h3>Static Route Tracking</h3>
@@ -157,7 +161,7 @@ R1(config)#<b>ip route 4.4.4.4 255.255.255.255 192.168.13.2 10</b><br>
 R1(config)#<b>ip route 4.4.4.4 255.255.255.255 192.168.12.2 track 100</b><br>
 </code></div></p>
 
-<h3>Verification</h3>
+<h4>Verification</h4>
 <p>
 
 </p>

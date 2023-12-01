@@ -1311,7 +1311,7 @@ only for actively used labels. This uses less memory.
 LDP operates in downstream unsolicited mode. This means that the LSR doesn’t wait 
 for its LDP neighbor to request a label for a FEC. The LSR sends bindings
 for all routes to all of its LDP peers.
-In comparison, RSVP-TE operates in downstream on demand mode. .
+In comparison, RSVP-TE operates in downstream-on-demand mode.
 </p>
 <p>
 
@@ -1324,7 +1324,7 @@ In comparison, RSVP-TE operates in downstream on demand mode. .
 When MPLS is enabled, LDP Hello messages start being sent out of configured interfaces.
 The LSRs attempt to form a TCP session.
 The LSR with a higher LDP ID becomes the active router and initiates the TCP 
-three-way handshake to start the formation of a TCP session i.e. it initiates the TCP session..
+three-way handshake to start the formation of a TCP session i.e. it initiates the TCP session.
 LSRs form TCP sessions with each other using port 646.
 Communication between any two LSRs to form an adjacency is done using the LDP ID
 as the source IP address of one LSR and destination IP address destination LDP 

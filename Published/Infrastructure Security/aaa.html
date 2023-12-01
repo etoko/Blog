@@ -6,18 +6,18 @@ the user is allowed to access and which operations the user is allowed to perfor
 Accounting logs all user actions on the system.
 </p>
 <p>
-AAA is usually used for device access and metwork access. Device access provides 
+AAA is usually used for device access and network access. Device access provides 
 administrative access to network devices for administrative purposes.
 </p>
 <p>
 Application of AAA in network access can be used to segregate users between 
-employee access and guest access. Additionally, employees access can be further 
+employee access and guest access. Additionally, employee access can be further 
 refined such that some employees can access some departmental resources and others 
 should be unable to access network  resources in other departments.
 </p>
 
 <p>
-Authentication can of a user can be performed using a username and password 
+Authentication of a user can be performed using a username and password 
 combination. Certificates (PKI) can also be used to authenticate users. The 
 user may be a network device.
 </p>
@@ -29,7 +29,7 @@ defined as what the user actions the user is allowed to perform on a device.
 
 <h2>AAA Components</h2>
 <p>
-Consists of three components: supplicant, authenticator and authentication server.
+AAA consists of three components: supplicant, authenticator and authentication server.
 <ol>
   <li><b>Supplicant:</b> device requesting access; this may be a laptop, printer,  
   smartphone. The supplicant is either requesting for network access or device 
@@ -40,7 +40,7 @@ Consists of three components: supplicant, authenticator and authentication serve
   If the access request is for network access, the device is usually a wireless 
   LAN controller or switch for wireless and wired network access respectively.
   </li>
-  <li><b>Authentication Server:</b> validates the identify of the client and 
+  <li><b>Authentication server:</b> validates the identity of the client and 
   notifies the authenticator if the client is authorized to access the network 
   or device. This authentication uses username/password combination or certificates (PKI) 
   to authenticate users. RADIUS is an example of an authentication services. 
@@ -54,10 +54,10 @@ Consists of three components: supplicant, authenticator and authentication serve
 <p>
 AAA can be used to authenticate users for device administration or network access:
 <ol>
-  <li><b>Device administration:</b> device access uses console, SSH, Telnet and  
+  <li><b>Device administration:</b> device access is possible through console, SSH, Telnet and  
   HTTP(S). The network device then uses RADIUS or TACACS+ to authenticate the 
   user's network access with the authentication server.</li>
-  <li><b>Network access:</b> For network access, users can be authenticated using 
+  <li><b>Network access:</b> users can be authenticated using 
   protocols such as EAPoL, HTTP(S), SSL, IKEv1 and IKEv2. RADIUS, TACACS+ are 
   used between NAD and authentication server.</li>
 </ol>
@@ -115,8 +115,8 @@ level is not assigned to a line or user, then the default privilege is used.
 <p>
 When configuring allowable commands to privilege levels, higher privilege levels 
 inherit commands allowed in lower privilege levels. For example assigning a 
-privilege level of 7 to a user allows the user to run commands that have been 
-allowed to be run in privilege levels 0 – 6 in addition to level 7.
+privilege level of 7 to a user grants the user privileges to run commands that have been 
+defined in privilege levels 0 – 6 in addition to level 7.
 </p>
 
 <p>
@@ -423,11 +423,11 @@ TACACS+ for network access control. These have the following strengths
 
 <h2 id="RADIUS">RADIUS</h2>
 <p>
-RADIUS (Remote Authentication Dial-In User Service) is standards-based protocol 
+RADIUS (Remote Authentication Dial-In User Service) is a standards-based protocol 
 for implementing AAA (RFC 2865). It combines authentication and authorization into a 
 single resource. It offers robust accounting features. The default ports for RADIUS 
 servers are 1645 for authentication and 1646 for accounting. The new RFC sets the 
-RADIUS ports on UDP ports 1812 for authentication and 1813 for accounting. 
+RADIUS ports on UDP to 1812 for authentication and 1813 for accounting. 
 RADIUS uses both TCP and UDP as the transport protocol.
 With RADIUS, only the password is encrypted. 
 RADIUS combines authentication and authorization features. It offers robust 

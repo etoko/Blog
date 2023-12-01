@@ -109,6 +109,8 @@ R1(config-if)#<b>ip verify unicast source reachable-via any</b>
 </code></div>
 </p>
 
+<h2>uRPF with Access Control Lists</h2>
+
 <p>
 To permit traffic that fails a uRPF check and is permitted by an access control list:
 <ol>
@@ -138,11 +140,14 @@ R1#                                                                             
 </p>
 
 <h1>Verification</h1>
+<p>
+
+</p>
 
 <h2><code>show ip interface &lt;interface-id&gt;</code></h2>
 <p>
 The following information can be learned from the output of the command 
-<code>show ip interface &lt;interface-id&gt;</code>: 
+<code><b>show ip interface &lt;interface-id&gt;</b></code>: 
 <ul>
   <li>The number of packets dropped by the action of uRPF.</li>
   <li>uRPF is confirmed as being operational</li>
@@ -191,7 +196,7 @@ GigabitEthernet0/0 is up, line protocol is up              <br>
 &nbsp;&nbsp;IPv4 WCCP Redirect outbound is disabled                  <br>       
 &nbsp;&nbsp;IPv4 WCCP Redirect inbound is disabled                   <br>       
 &nbsp;&nbsp;IPv4 WCCP Redirect exclude is disabled                   <br>       
-&nbsp;&nbsp;IP verify source reachable-via ANY, ACL 10               <br>       
+&nbsp;&nbsp;<span style="background:#d3d3d3;">IP verify source reachable-via ANY, ACL 10</span>               <br>       
 &nbsp;&nbsp; <span style="background:#d3d3d3;">5 verification drops</span>                                    <br>       
 &nbsp;&nbsp; <span style="background:#d3d3d3;">5 suppressed verification drops</span>                         <br>       
 &nbsp;&nbsp; 0 verification drop-rate
@@ -275,7 +280,7 @@ packets can degrade performance of the device.
 
 <h1>Per-Interface Statistics</h1>
 <p>
-Per-inteface statistics allow tracking of uRPF drops and uRPF suppressed drops. 
+Per-interface statistics allow tracking of uRPF drops and uRPF suppressed drops. 
 These statistics help identify the interface that is the entry point of the attacks.
 Unicast suppressed drops are the count of packets that failed uRPF check but were 
 permitted by ACLs.

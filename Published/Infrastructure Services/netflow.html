@@ -8,7 +8,7 @@ network problems such as the causes of congestion.
 NetFlow provides insights into the state of network traffic and this information 
 can be utilized in network and security monitoring, network planning, traffic 
 analysis, application monitoring, capacity planning, and IP accounting.
-Most NetFlow devices support export versions 1, 5, and 9.
+Most NetFlow devices support export versions 1, 5, 9, and flexible NetFlow.
 </p>
 
 <p>
@@ -73,13 +73,15 @@ storage. About 4 MB of DRAM are required for a cache with the default number of 
 increase or decrease the number of entries maintained in the cache, if required.
 To obtain 
 information on your flow traffic, use the command <code><b>show ip cache flow</b></code>.
-A NetFlow cache can be resized depending on the platform and the amount of DRAM 
-on a line card using the command  <code><b>ip flow-cache entries &lt;number&gt;</b></code>.
 </p>
 
 <p>
 Parameters of the NetFlow cache can be modified using the following commands:
 <ul>
+  <li><code><b>ip flow-cache entries &lt;number&gt;</b></code>: 
+  A NetFlow cache can be resized depending on the platform and the amount of DRAM 
+on a line card.
+  </li>
   <li><code><b>ip flow-cache timeout active &lt;1-60&gt;</b></code>: the value is 
   in minutes. This specifies the number of minutes that an active flow remains 
   in the cache before the flow times out. The default is 30.</li>

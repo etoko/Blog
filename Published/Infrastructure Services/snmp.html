@@ -1,4 +1,4 @@
-<h1>Simple Network Management Protocol (SNMP)</h1>
+<h1>Introduction</h1>
 <p>
 SNMP is an open standard protocol for collecting information about 
 managed devices and modifying configuration on the managed devices. SNMP is an application layer protocol that 
@@ -63,8 +63,7 @@ manager. The SNMP manager sends a confirmation using SNMP response PDU. If the
 Agent did not receive a response for an inform, the inform can be sent again.
 Informs may be sent many times hence traps are usually preferred.
 An inform is held in memory until a response is received or times out.
-Traps are usually preferred because they consume less resources than informs 
-which are held in memory until a response is received.
+Traps are usually preferred because they consume less resources in terms of memory.
 </p>
 <p>
 Polls are probes where the SNMP manager sends an SNMP request to the agent and 
@@ -145,7 +144,8 @@ R1(config)#<b>snmp-server view interfaces ifEntry included</b>
 <li><b>Configure SNMP Community:</b> configure the read-only or 
 read-write community string using the command 
 <code><b>snmp-server community &lt;string&gt;  &lt;ro | rw &gt; 
-[&lt;ipv6 nacl&gt; | &lt;acl&gt;]</b></code>. The ACL is an optional parameter but is 
+[&lt;ipv6 nacl&gt; | &lt;acl&gt;]</b></code>. The ACL parameter is an optional 
+access control list that is 
 recommended to be configured as it adds a layer of security to SNMPv2. 
 The community string has to match on both the manager and the agent.
 <p>
@@ -363,7 +363,7 @@ The order of configuration of SNMPv3:
 <p>
 SNMP Views can be configured to limit the number of MIB objects that an SNMP 
 manager has access to. SNMP views can be predefined or custom configured.
-Create the view record using the command <code><b>snmp-server view 
+To configure an SNMP view, use the command <code><b>snmp-server view 
 &lt;view-name&gt; &lt;oid-tree&gt; | &lt;object-name&gt; &lt;included | excluded&gt;</b></code>.<br> 
 <b>Caution:</b> If an MIB name is defined for a view, MIB names are 
 case-sensitive. Use the SNMP Object Navigator for the correct object names or OID values.
@@ -445,7 +445,7 @@ R2(config)#<b>snmp-server engineID remote 192.168.3.10 800000090300CA0305F30006<
 Creating an SNMP user user1
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
   <code>
-R2(config)#<b>snmp-server user user1 group1 v3 auth sha complexcomplex priv aes 256 priv_password access ACL_SNMP</b> 
+R2(config)#<b>snmp-server user user1 group1 10.1.1.1 v3 auth sha complexcomplex priv aes 256 priv_password access ACL_SNMP</b> 
 </code></div></p>
 </li>
 </ol>

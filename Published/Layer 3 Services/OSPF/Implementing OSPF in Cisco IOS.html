@@ -74,7 +74,7 @@ link state routing alogrithms to calculate the shortest path to a destination.
 </p>
 
 <p>
-OSPF uses IP protocol number 89 and provides its own transport layer protocol services.
+OSPF uses IP protocol number 89 and provides its own transport layer services.
 The current versions of OSPF are OSPFv2 that supports IPv4 and OSPFv3 that supports 
 IPv4 and IPv6. The two versions of OSPF are not compatible i.e., routers running OSPFv3 cannot form an 
 IPv4 adjacency with routers running OSPFv2. This entire article discusses OSPFv2.
@@ -1219,7 +1219,7 @@ preconditions.
   
   <h3 id="LSU">Link State Update (LSU) Packet</h3> 
   <p>
-  The link state update packet (OSPF packet Type 4) contains details on 
+  The link state update packet (OSPF packet Type 4) contains details of 
   one or more networks and is usually sent in response to an LSR. This packet 
   type is the envelop into which OSPF's link state Advertisements(LSAs) are enclosed.
   An LSU can contain one or many LSAs.
@@ -1813,8 +1813,8 @@ discovery is not supported.</li>
   partial mesh NBMA networks.</li>
   <li>The interface's IP address is advertised as /32 host route.</li>
   <li>Point-to-multipoint is not a default for any medium type.</li> 
-  <li>The hello interval is 30 seconds, dead-interval 120 seconds. DR and BDR 
-  election does not happen in this network type.</li>
+  <li>The hello interval is 30 seconds, dead-interval 120 seconds.</li>
+  <li>DR and BDR election does not happen in this network type.</li>
  </ul>
  
  <li><b> Point-to-multipoint Non-Broadcast: </b> 
@@ -2014,8 +2014,8 @@ OSPF interfaces:
   <li>Hello and dead-interval timer values.</li>
   <li>Non-stop forwarding (NSF) support. Additionally, link-local signaling 
   support is confirmed.</li>
-  <li>IP addresses of the DR and BDR on that segment for broadcast and nonbroadcast 
-  OSPF network types.</li>
+  <li>IP addresses and router IDs of the DR and BDR on that segment for 
+  broadcast and nonbroadcast OSPF network types.</li>
   <li>Number of adjacencies established through the interface.</li>
   <li>OSPF priority for the interface.</li>
   <li>The flood queue length.</li>
@@ -2058,11 +2058,12 @@ OSPF deems a router more preferrable for DR election if:
  The default priority is one (1). </li>
  <li> The router has the highest OSPF RID in that segment. The RID of a router is determined by:
     <ol type=i>
-	<li>if configured, the highest IP address configured on any "up" loopback interfaces.</li>
-	<li>the highest physical interface IP address</li>
-	<li> manual configuration of the RID using the OSPF process command: 
+    <li> manual configuration of the RID using the OSPF process command: 
       <code><b>router-id &lt;rid&gt;</b></code>
 	</li>
+	<li>if configured, the highest IP address configured on any "up" loopback interfaces.</li>
+	<li>the highest physical interface IP address</li>
+	
 	</ol>
  </li>
 </ol>
@@ -2113,7 +2114,7 @@ R1# <br />
 A DR is used in broadcast and non-broadcast networks and its primary role 
 consists of the following:
 <ul>
-  <li>it originates updates for the network segment.</li>
+  <li>It originates updates for the network segment.</li>
   <li>It facilitates synchronization</li>
 </ul>
 A DR controls information exchange.
@@ -2140,7 +2141,7 @@ The DR does not modify the next-hop value of this LSU.
 </p>
 <p>
 The BDR is used for redundancy; if the DR fails, the BDR becomes the DR and a 
-BDR is elected from the available DROther routers. The election of the BDR from 
+new BDR is elected from the available DROther routers. The election of a new BDR from 
 the DROthers follows the same pattern as the election of the DR. The BDR does 
 not flood any updates but receives all updates sent to the DR.
 </p>
@@ -2181,8 +2182,8 @@ Every OSPF device has a link state database (LSDB). OSPF devices inside the same
 have the same LSDB. 
 The LSDB stores LSAs with the link state information in the local area and 
 summary information about the link states in other areas and external networks.
- The content of LSDBs are LSAs. LSDBs are populated by Type 1, Type 2, Type 3, 
- Type 4, Type 5 and Type 7 LSAs. 
+ The content of LSDBs are LSAs. LSDBs are populated by LSAs of different types: 
+ Type 1, Type 2, Type 3, Type 4, Type 5 and Type 7 LSAs. 
  </p>
  <p>
  An OSPF router receiving an LSA, checks its integrity
@@ -2430,7 +2431,7 @@ OSPF network type and area type.
 </p>
 <p>
 LSA types 1,2 are intra-area LSAs while LSA 3, 4 are inter-area LSAs. LSA Type 5, 
-7 advertise external routes. In single area topologies, Type 1, 2 and 5 are utilised.
+7 advertise external routes. In single area topologies, Type 1, 2 and 5 are utilized.
 </p>
 
 <p>
@@ -3650,21 +3651,23 @@ example; when links fail, when failed links are restored, new routes added,
 existing routes withdrawn.
 </p>
 <p>
-It is important to note that a router becomes member of an area if any one of 
+It is important to note that a router becomes a member of an area if any one of 
 its interfaces is participating in the area.
 </p>
 
 <p>
-To determine the OSPF areas that a router is participating in:
+To determine the OSPF areas that a router is participating in issue the command
+<code><b>show ip ospf interface brief</b></code>:
 
 <div style="background-color:#f4f0ec; border-style:dotted;border-width:1px;border-color:#DCDCDC">
 <code>
-R1(config-if)#<b>do show ip ospf interface brief </b><br />
+R1#<b>show ip ospf interface brief </b><br />
 Interface&nbsp;&nbsp;    PID&nbsp;&nbsp;&nbsp;&nbsp;   <span style="background-color:#DCDCDC;">Area</span>&nbsp;&nbsp;&nbsp;&nbsp;            IP Address/Mask&nbsp;&nbsp;&nbsp;&nbsp;    Cost&nbsp;&nbsp;&nbsp;&nbsp;  State&nbsp;&nbsp;&nbsp;&nbsp; Nbrs F/C<br />
 Gi0/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;        1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;     0 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;              10.0.12.1/30 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;      1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;     DR &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   1/1<br />
 Fa3/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;        1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;     0 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;              10.0.16.1/30 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;      1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;     P2P&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   0/0<br />
 Gi1/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;        1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;     10&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;              10.10.13.1/30&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;      1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;     P2P&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   0/0<br />
-R1(config-if)#<b>do show ip ospf</b><br />
+R1#<br>
+R1#<b>show ip ospf</b><br />
  Routing Process "ospf 1" with ID 1.1.1.1<br />
  Start time: 00:00:32.764, Time elapsed: 01:57:36.228<br />
  Supports only single TOS(TOS0) routes<br />
@@ -3741,12 +3744,12 @@ single-area OSPF), into a two hierarchical topology (usually referred to as mult
 
 <h2 id="MULTI_AREA">Multi-area OSPF</h2>
 <p>
-Multi-area OSPF involves the the deployment of a two-tier hierarchical topology 
+Multi-area OSPF involves the deployment of a two-tier hierarchical topology 
 that consists of the backbone area (area 0) and non-backbone area(s).
 
-Multi-area OSPF topology is the better option to handle scalability. A 
-combination of the following factors may influence the decision to deploy a 
-multi-area OSPF topology:
+Multi-area OSPF topology is usually deployed to cater for network scalability 
+geographically as well was increasing numbers of routers, prefixes. A combination of the
+following factors may influence the decision to deploy a multi-area OSPF topology:
 <ul>
   <li>High processor utilization in routers in the OSPF area.</li>
   <li>High number of SPF executions.</li>
@@ -3835,8 +3838,8 @@ router resources.
   areas must connect to the backbone area which can act as a sort of transit area
   interconnecting two areas. 
   If a scenario occurs where a non-backbone area cannot connect directly to the 
-  backbone area, then a virtual link can be configured to ensure that the 
-  non-backbone area connects to the backbone area.
+  backbone area, then a virtual link must be configured to connect the 
+  non-backbone area to the backbone area.
  </p>
  
   <p>
@@ -3936,8 +3939,8 @@ The ABR does not automatically advertise a default route when a Type 5 LSA is
 blocked. The ABR of an NSSA area can be configured to advertise a default route 
 using the command:
 <code><b>area 1 nssa default-information-originate</b></code>.
-If the optional <code><b>default-information-originate</b></code> keyword is 
-appended, the ABR generates a Type 7 default route into the NSSA.
+If the optional <code><b>default-information-originate</b></code> keyword is triggering
+the ABR to generate a Type 7 default route into the NSSA.
 </p>
 
 <h5>Verification</h5>
@@ -4331,7 +4334,7 @@ into the routing table, a concept known as Equal Cost Multiple Paths (ECMP).
 The SPF algorithm runs many complex 
 calculations which may be recursive. These calculations are resource intensive
 consuming more processor time and memory. In OSPF areas that experience many 
-network changes such as flapping links, a significant amout of processor time is 
+network changes such as flapping links, a significant amount of processor time is 
 spent on SPF execution. This may affect other functions of the router.
 If the number of SPF calculations for an area is high, then it is a sign of an unstable network.
 Care should be taken to ensure a proper design of the OSPF domain and configuration 
@@ -4372,7 +4375,7 @@ The method used for flooding will depend on the following factors:
   <li>The state of a device's LSDB.</li>
   <li>Specific network types used on a device's network interfaces</li>
   </ul>
-  If new information is found within the contents of a database descripter packet,
+  If new information is found within the contents of a database descriptor packet,
   the local device sends an LSR requesting for the missing updates. The 
   determination of whether information should be updated if a copy already 
   exists in the LSDB is primarily based on the link state sequence number. The 
@@ -4507,7 +4510,7 @@ with extraordinary design considerations.
 <h3 id="VIRTUAL_LINKS">Virtual-Link Costs</h3>
 <p>
 Virtual-links inherit their cost from cost between the virtual-link endpoints.
-A virtual-link must have a cost below 65535 (maximum metric) to initialise. 
+A virtual-link must have a cost below 65535 (maximum metric) to initialize. 
 Link costs higher than 65535 could occur if reference bandwidth is higher and 
 virtual-link transits legacy links.
 </p>
@@ -6151,7 +6154,7 @@ The key differences between OSPFv3 and OSPFv2:
   <li><b>New LSA types: </b>LSA types 8 (link) and 9 (intra-area prefix) have been introduced while types 3 and 4 have been renamed 
   to inter-area prefix and inter-area router LSA respectively.</li>
   <li><b>Removal of addressing semantics: </b>addressing information has been removed from OSPFv3 packets and 
-  is now carried as LSA payloads in Link Sate Update packets. This makes 
+  is now carried as LSA payloads in Link State Update packets. This makes 
   OSPFv3 easily adaptable to new network protocols. The router-LSA and network-LSAs no longer contain network 
   addresses. They express topology information.</li>
   <li><b>Security: </b>OSPFv3 does not natively support authentication as does OSPFv2. This is because the authentication 
@@ -6602,7 +6605,7 @@ All the OSPFv3 network types use link-local addresses as source addresses;
   <thead style="background: #d3d3d3;">
   <tr style="border:solid; border-width:1px">
     <td style="border-bottom:solid; border-width:1px"><b>Type</b></td>
-    <td style="border-bottom:solid; border-width:1px"><b>Packet</b></td>
+    <td style="border-bottom:solid; border-width:1px; text-align: center"><b>Packet</b></td>
     <td style="border-bottom:solid; border-width:1px"><b>Source</b></td>
     <td style="border-bottom:solid; border-width:1px"><b>Destination</b></td>
     <td style="border-bottom:solid; border-width:1px"><b>Purpose</b></td>

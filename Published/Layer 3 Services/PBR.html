@@ -16,7 +16,7 @@ PBR is implemented using a route-map to identify which unicast packets are to be
 policy-routed and how to route the traffic. A unicast packet arriving on a 
 PBR-configured interface will be subject to PBR except when its destination IP 
 address is the same as the IP address of the router's interface. Because PBR uses 
-a route map, it provides solutions in cases where legal, contractual, or political 
+a route map, it provides solutions in cases where legal, regulatory, contractual, or political 
 constraints dictate that traffic is routed through specific paths.<br>
 <b>Note:</b> PBR is only applicable to unicast packets; it is not applicable to 
 multicast packets.
@@ -50,7 +50,8 @@ Some of the drawbacks of conditional routing include the following:
 <h2>PBR Fast Switching</h2>
 <p>
 In earlier IOS versions, PBR was implemented at the control-plane rather than the
-data-plane. This made it highly CPU-intensive PBR was not able to utilize CEF and RSVP.
+data-plane. This made it highly CPU-intensive and additionally, PBR was not able
+to utilize CEF and RSVP.
 It was therefore process-switched. In later IOS versions, PBR is fast-switched 
 and is operationally compatible with CEF, distributed CEF. 
 With process-switching, many platforms supported switching rates of 1000 to 10,000
@@ -213,7 +214,7 @@ R1(config-route-map)#<b>set ip next-hop 10.0.13.2</b>
   the RIB holds true except the default route. The routing table default route 
   is not considered.
   This can be considered as some sort of default route for matched traffic. The 
-  next hop has to be directly connected to the local router. The recursive 
+  next hop has to be directly connected to the local router. The <code><b>recursive</b></code>  
   keyword enables configuration of a next-hop that is not directly connected.
   </li>
   <li><code><b>set interface &lt;exit-interface&gt;</b></code>: The egress interface 
@@ -275,7 +276,7 @@ When PBR is configured, the PBR configured next hop takes precedence over the FI
 PBR can only be applied for IPv4 and IPv6 on the same interface using different 
 route maps; they cannot co-exist on the same route map on the same interface. 
 One route-map cannot have PBR configuration for IPv4 and IPv6 even 
-though they are on separate route map statements of the same route map.f
+though they are on separate route map statements of the same route map.
 </p>
 <p>
 <ul>
@@ -342,17 +343,23 @@ IP SLA probes need to be enabled as they are disabled by default.
 <h3>Create a Tracking Object</h3>
 <p>
 Tracking objects are used  to monitor probes.
+</p>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
 <code>
-#track 1 ip sla 1 reach
-#delay down 10 up 3
+#track 1 ip sla 1 reach<br>
+#delay down 10 up 3<br>
 #show track 
-</code>
+</code></div>
 </p>
 <p>
 To apply the track in a route-map set command:
+</p>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
 <code>
 #set ip next-hop verify-availability 10.1.13.2 13.1.14.2 1 track 1 
-</code>
+</code></div>
 </p>
 
 

@@ -57,7 +57,7 @@ Redistribution can be implemented in two ways:
  occurs when routes from routing protocol X are injected into routing protocol Y 
  and routes sourced from routing protocol Y are injected into routing protocol X 
  on the same routing device. 
- Mutual redistribution can be thought of as a form of route connversion.
+ Mutual redistribution can be thought of as a form of route conversion.
  Mutual redistribution can be implemented on a single routing device in the
  network (single-point two-way redistribution) or on two or more routing devices 
  (multipoint two-way redistribution).</p>
@@ -283,7 +283,7 @@ Redistribution is configured under the EIGRP router command:
 <p>
 where <code><b> &lt;source&gt; </b></code> is the source of the redistributed routes. 
 </p>
-
+<!--
 <p>
 In EIGRP named mode, redistribution is configured under topology base 
 configuration mode as shown below:
@@ -293,10 +293,11 @@ configuration mode as shown below:
 <code>
 R2(config)#<b>router eigrp EIGRP_NAMED</b><br>
 R2(config-router)#<b>address-family ipv4 unicast autonomous-system 1</b><br>
+R2(config-router)#<b>topology base</b><br>
 R2(config-router-af-topology)#<b>redistribute ospf 1</b><br>
 </code>
 </div>
-
+-->
 <p>
 In EIGRP classic mode, redistribution is configured under EIGRP router configuration 
 mode as shown below:

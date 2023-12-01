@@ -116,7 +116,7 @@ the specified time expires.
 </p>
 
 <p>
-Time synchronization is required between the source and target device to prove accurate 
+Time synchronization is required between the source and target device to provide accurate 
 measurements. NTP may be required to be configured on the source and target device 
 to ensure that the two devices have their time synchronized.
 </p>
@@ -191,7 +191,7 @@ ICMP-Echo request packet to a target device and receiving the ICMP-Echo reply.
 The response time calculated from the <code><b>icmp-echo</b></code> operation 
 provides a general picture of the response time. However, its results may not 
 necessarily be accurate because some systems may not prioritize the processing of 
-ICMP packets, resulting in apparent higher delay values. The use of the UDP-echo operation is a better 
+ICMP packets, resulting in apparent higher delay values. The use of the UDP-echo operation is a preferred  
 method to measure network connectivity and response time.
 </p>
 <p>
@@ -331,8 +331,8 @@ Operation time to live: Forever
 
 <h4><code>show ip sla configuration</code></h4>
 <p>
-A source address of 0.0.0.0 implies that the IP SLA probe will use whichever
-interface is closest to the destination.
+A source address of <code><b>0.0.0.0</b></code> implies that the IP SLA probe 
+will use whichever interface is closest to the destination.
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
@@ -882,7 +882,7 @@ R1#
 The UDP Jitter operation is used to measure the jitter experienced by traffic 
 between the source device and the target.
 UDP Jitter operation diagnoses network suitability for real-time traffic applications 
-such as VoIP, video over IP or real-time conferencing. These paramters can be 
+such as VoIP, video over IP or real-time conferencing. These parameters can be 
 monitored to assess whether they are within acceptable thresholds.
 </p>
 <p>

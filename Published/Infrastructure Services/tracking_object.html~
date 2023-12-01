@@ -10,16 +10,19 @@ down.
 <p>
 The Enhanced Object Tracking feature provides complete separation between the objects to be tracked and
 the action to be taken by a client when a tracked object changes. Thus, several clients such as HSRP, VRRP,
-or GLPB can register their interest with the tracking process, track the same object.
+or GLPB can register their interest with the tracking process; several clients 
+can register to track the state of the same object.
 Each client is notified when the tracking object changes state, and each can 
-take different action when the object changes.
-Each tracked object is identified by a unique number that is specified on the tracking CLI. Client processes
-use this number to track a specific object.
+take different action when the object state changes.
+Each tracked object is identified by a unique number that is specified in the 
+configuration of the tracking object. Client processes use this number to track 
+a specific object.
 </p>
 <p>
-The tracking process periodically polls the tracked objects and notes any change of value. The changes in the
+The tracking process periodically polls the tracked objects and notes any change 
+in value. The changes in the
 tracked object are communicated to interested client processes, either immediately or after a specified delay.
-The object values are reported as either up or down
+The object values are reported as being either up or down
 </p>
 
 <p>
@@ -81,7 +84,7 @@ reachability.
 <p>
 To configure a tracking object:
 <ol>
-<li>Create an IP SLA probe:
+<li><b>Create an IP SLA probe:</b>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
   <code>
@@ -96,8 +99,9 @@ Read more on details of the creation of <a href="https://emmanueltoko.blogspot.c
 IP SLA</a>. 
 </p>
 </li>
-  <li>Set up a tracking object based on that probe:
-  Reference the IP SLA that will be tracked by the tracking object using 
+  <li><b>Set up a tracking object based on that probe:</b> 
+  <ol type="a">
+   <li><b>Reference the IP SLA that will be tracked by the tracking object</b> using 
   the command <code><b>track &lt;obj-num&gt; ip sla &lt;sla-num&gt; [state | reachability]</b></code>.
   When configuring a tracking object, a boolean operation AND or OR can be specified 
   where the results of a series of tracking objects can be compared.
@@ -108,7 +112,7 @@ IP SLA</a>.
   </code></div></p>
   
   </li>
-  <li>Configure a delay on the object to regulate the flapping of the object using 
+  <li><b>Configure a delay on the object</b> to regulate the flapping of the object using 
   the command <code><b>delay [down &lt;seconds&gt; | up &lt;seconds&gt;]</b></code>.
   <p>
   <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
@@ -116,19 +120,23 @@ IP SLA</a>.
   R1(config-track)#<b>delay down 3 up 3</b>
   </code></div></p>
   </li>
-  <li>Associate the tracking object with a client process. In the following 
-  subsection, the tracking object is associated with a static route.</li>
+  </ol>
+  </li>
+  
+  <li><b>Associate the tracking object with a client process:</b>
+  IP SLA tracking can be leveraged to improve the efficiency and reliability of 
+static routing, dynamic routing using OSPF, BGP. </li>
 </ol>
 </p>
 
 <p>
-IP SLA tracking can be leveraged to improve the efficiency and reliability of 
-static routing, dynamic routing using OSPF, BGP.
+In the following 
+  subsection, the tracking object is associated with a static route.
 </p>
 
 <h3>Static Route Tracking</h3>
 <p>
-IP SLAs can be used in combination with static routes. IP SLA can be used to 
+IP SLAs can be used in combination with static routes where the IP SLA is used to 
 install or remove a static route from the Routing Information Base (RIB) only if 
 certain conditions are met.
 

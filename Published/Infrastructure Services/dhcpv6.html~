@@ -972,8 +972,13 @@ and uses the interface mode command <code><b>ipv6 dhcp relay destination &lt;ipv
 This command is configured on the interface facing the DHCPv6 clients and specifies 
 the DHCPv6 server address and egress interface to reach the server. The egress interface
 is only required when the next-hop address is an LLA. 
-
 </p>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+ <code>
+R3(config)#<b>int g0/0</b><br>
+R3(config-if)#<b>ipv6 dhcp relay destination FE80::C802:6FF:FE37:1C GigabitEthernet1/0</b>
+</code></div></p>
 <p>
 The relay address can be unicast or multicast. With a multicast address, multiple 
 DHCPv6 servers can respond to the request. If a link-local unicast address is configured, 
@@ -1022,12 +1027,22 @@ out attack messages providing security services for DHCPv6
 View the device's DHCPv6 unique identifier(DUID).
 </p>
 
+
 <h2><code>show ipv6 dhcp pool</code></h2>
 <p>
-Command verifies the name of the DHCPv6 pool and its parameters. The coomand also 
+Command verifies the name of the DHCPv6 pool and its parameters. The command also 
 identifies the number of active clients.
 </p>
-
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+ <code>
+DHCP#<b>show ipv6 dhcp pool</b><br>
+DHCPv6 pool: DHCPV6_2001:DB8:3::/64<br>
+&nbsp;&nbsp;Address allocation prefix: 2001:DB8:3::/64 valid 172800 preferred 86400 (1 in use, 0 conflicts)<br>
+&nbsp;&nbsp;DNS server: 2001:DB8:3::1<br>
+&nbsp;&nbsp;Domain name: emmanueltoko.blogspot.com<br>
+&nbsp;&nbsp;Active clients: 1
+</code></div></p>
 
 <h2><code>show ipv6 dhcp binding</code></h2>
 <p>
@@ -1035,8 +1050,34 @@ To display the IPv6 link-local address of the client and the global unicast addr
 assigned by the server. This information is maintained by a stateful DHCPv6 server.
 A stateless DHCPv6 server would not maintain this information.
 </p>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+ <code>
+DHCP#<b>show ipv6 dhcp binding</b><br>                                 
+Client: FE80::C804:6FF:FE72:8                               <br>
+&nbsp;&nbsp;DUID: 00030001CA0406720006                                <br>
+&nbsp;&nbsp;Username : unassigned                                     <br>
+&nbsp;&nbsp;IA NA: IA ID 0x00040001, T1 43200, T2 69120               <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Address: 2001:DB8:3:0:99D4:6B3E:472E:EACD               <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;preferred lifetime 86400, valid lifetime 172800 <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;expires at Aug 08 2023 03:40 PM (171398 seconds)<br>
+DHCP#  
+</code></div>
+</p>
+
 
 <h2><code>show ipv6 dhcp interface &lt;interface-ID&gt;</code></h2>
 <p>
 View settings such as state of rapid-commit.
 </p>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+ <code>
+DHCP#<b>show ipv6 dhcp interface</b><br>
+GigabitEthernet1/0 is in server mode  <br>
+&nbsp;&nbsp;Using pool: DHCPV6_2001:DB8:3::/64  <br>
+&nbsp;&nbsp;Preference value: 0                 <br>
+&nbsp;&nbsp;Hint from client: ignored           <br>
+&nbsp;&nbsp;Rapid-Commit: disabled              <br>
+DHCP#
+</code></div></p>

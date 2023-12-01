@@ -33,7 +33,7 @@ The original intent when introducing ACLs was packet filtering. ACLs have since
 been deployed to provide multiple network functions such as:
 <ul>
   <!--<li>Filtering traffic (egress or ingress): most commonly used application of ACLs</li> -->
-  <li>Quality of Server (QoS) operations such as queueing, traffic classification for 
+  <li>Quality of Service (QoS) operations such as queueing, traffic classification for 
   policing</li>
   <li>Policy-based routing (PBR)</li>
   <li>Route maps</li>
@@ -280,6 +280,7 @@ The ACL naming recommendations include the following:
 <h1>Types of ACLs</h1>
 <p>
 There are several types of ACLs:
+<ul>
   <li>Standard</li>
   <li>Extended ACLs</li>
   <li>Infrastructure</li>
@@ -289,6 +290,7 @@ There are several types of ACLs:
   <li>IP Named</li>
   <li>Reflexive</li>
   <li>Context-based</li>
+  </ul>
 </p>
 <p>
 The ACLs that are discussed in this post are: standard ACLs, extended ACLs, 
@@ -846,7 +848,8 @@ is when traffic is entering a router interface and egress is when traffic is
 exiting the router through an interface.
 To apply the ACL to an interface, you need to indicate the direction of traffic 
 flow that the device should implement the ACL.
-Pinging a destination that is blocked by an ACL results in ICMP unreachable output indicated by U.U.U.U
+Pinging a destination that is blocked by an ACL results in ICMP unreachable output 
+indicated by <code><b>U.U.U.U</b></code>.
 </p>
 
 
@@ -941,7 +944,7 @@ The non-time-based rule always overrides the duplicate time-based rule, as they 
 	    </li>
 	    <li><b>Periodic:</b> <code><b>periodic [Monday | Tuesday | Wednesday | 
 	    Thursday | Friday | daily | weekdays | weekend] &lt;hh:mm&gt; to &lt;hh:mm&gt;</b></code>. 
-	    If the periodic value configured is a day of the week, tt is possible to 
+	    If the periodic value configured is a day of the week, it is possible to 
 	    set the value to a series of days <code><b>periodic Monday Wednesday Friday
 	    &lt;hh:mm&gt; to &lt;hh:mm&gt;</b></code>.
 	    <p>
@@ -1722,7 +1725,8 @@ With log:
   <li>Interface ACL is applied to (0/0)</li>
   <li>Number of packets matched</li>
 </ul>
-
+</p>
+<p>
 With <code><b>log-input</b></code>, additional information is displayed particularly 
 the MAC address; this is the most recent MAC address.
 </p>
@@ -1791,7 +1795,7 @@ The host keyword can also be used with IPv6 ACLs.
 </p>
 <p>
 They include an implicit deny statement at the end. IPv6 will automatically add 
-the following statements to any access-list (dies not show up in configuration):
+the following statements to any access-list (does not show up in configuration):
 <ul>
   <li><code><b>permit icmp any any nd-na</b></code></li>
   <li><code><b>permit icmp any any nd-ns</b></code></li>
@@ -1814,7 +1818,7 @@ IPv6 ACLs do not support wildcard bits; instead prefix-length is used.
 <h2>Configuration</h2>
 <p>
 <ol>
-  <li><b>Define the ACL:</b> using the command <code><b>ipv6 access-list &lt;ACL-NAME</b></code>
+  <li><b>Define the ACL:</b> using the command <code><b>ipv6 access-list &lt;ACL-NAME&gt;</b></code>
   </li>
   <li><b>Configure the ACE:</b> using the command <code><b>[permit | deny] 
   &lt;protocol&gt; [&lt;source-address/prefix-length&gt; | any | host &lt;source-address] 
@@ -1856,11 +1860,14 @@ IPv6 ACLs do not support wildcard bits; instead prefix-length is used.
 
 <h3><code>show access-lists</code></h3>
 <p>
-R2#show access-lists
-IPv6 access list ACL6_DENY1::2
-    deny tcp any eq www host 1::2 sequence 10
-    permit icmp any any (57 matches) sequence 20
-    permit 89 any any (425 matches) sequence 30
-    permit tcp any eq www host 1::1 sequence 40
-    permit tcp host 3::3 host 1::1 eq www (23 matches) sequence 50
+  <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+ <code>
+R2#<b>show access-lists</b>                                            <br>
+IPv6 access list ACL6_DENY1::2                                         <br>
+&nbsp;&nbsp;&nbsp;&nbsp;deny tcp any eq www host 1::2 sequence 10                          <br>
+&nbsp;&nbsp;&nbsp;&nbsp;permit icmp any any (57 matches) sequence 20                       <br>
+&nbsp;&nbsp;&nbsp;&nbsp;permit 89 any any (425 matches) sequence 30                        <br>
+&nbsp;&nbsp;&nbsp;&nbsp;permit tcp any eq www host 1::1 sequence 40                        <br>
+&nbsp;&nbsp;&nbsp;&nbsp;permit tcp host 3::3 host 1::1 eq www (23 matches) sequence 50     <br>
+</code></div>    
 </p>
