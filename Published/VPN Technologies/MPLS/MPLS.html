@@ -16,14 +16,16 @@
 
 <h1 id="INTRODUCTION">Introduction</h1>
 <p>
-Multiprotocol label Switching  (MPLS) is a service provider packet forwarding technology for
-routing customer traffic between different customer sites such as between the 
-enterprise headquarters and branches or between the various enterprise branches. MPLS may also 
-be used by enterprises to separate traffic between different business units; 
+Multiprotocol Label Switching  (MPLS) is a service provider packet forwarding technology for
+routing customer traffic between different customer sites such as enterprise
+headquarters and branches. 
+MPLS may also be used by enterprises to separate traffic between different business units; 
 this is usually implemented through MPLS Layer 2 or Layer 3 VPNs.
+</p>
+<p>
 MPLS was developed to replace legacy remote-site-connectivity technologies  
 such as ATM circuits, frame relay circuits, dedicated serial lines. 
- MPLS supports many layer 3 protocols such as IP (multicasts,unicasts) and VPN.
+ MPLS supports many layer 3 protocols such as IP (multicasts,unicasts) and IPv6.
 </p>
 <p>
 Originally Cisco-proprietary, MPLS was referred to as tag switching. Cisco later 
@@ -35,7 +37,7 @@ MPLS provides support for the transportation of multiple payloads:
 <ul>
   <li><b>Layer 2 payloads:</b> Ethernet  (Ethernet over MPLS), Frame Relay, ATM, PPP, HDLC, etc.</li>
   <li><b>Layer 3 payloads:</b> IPv4, IPv6, etc.</li>
-  <li>Extensible to support future payloads.</li>
+  <li>MPLS is extensible to support future payloads.</li>
 </ul>
 </p>
 
@@ -44,15 +46,17 @@ By default, MPLS traffic will follow the same path as regular IP traffic. This i
 uses the routing table to create paths to switch the labels. 
 When MPLS is configured on a router, by default, all routes in the routing table 
 (RIB) i.e. static, connected, and learned routes will have a label
-assigned automatically . MPLS can also be configured to generate labels only for specific networks. These locally generated 
+assigned automatically. MPLS can also be configured to generate labels only for 
+specific networks. These locally generated 
 labels are exchanged in the MPLS domain by a label exchange protocol such as 
-LDP  (label distribution protocol). MPLS operates like an overlay that attaches labels to 
-known networks. MPLS uses these labels to switch packets throughout the 
-MPLS domain; a process referred to as label switching.
+LDP  (label distribution protocol). MPLS operates like an overlay over the layer 3
+protocol because it attaches labels to known networks. MPLS uses these labels to 
+forward packets throughout the MPLS domain; a process referred to as label switching.
 </p>
 <p>
-Label switching feature of MPLS switches traffic between interfaces based on 
-locally significant label values. This is similar to legacy virtual circuit 
+Label switching feature of MPLS forwards traffic based on the label forwarding 
+information base which contains labels assigned to networks as received by the 
+neighboring MPLS devices. This is similar to legacy virtual circuit 
 switching in Frame Relay with input/output DLCI or ATM with input/output VPI/VCI.
 </p>
 <p>
@@ -123,7 +127,7 @@ domain towards the customer network.
 The MPLS label stack is deleted at the egress LSR resulting in customer traffic 
 being subsequently routed using IP to the destination. 
 An MPLS-enabled router can act as both an ingress and egress LSR of traffic from 
-the the same customer. 
+the same customer. 
 </p>
 <p>
 <b>Intermediate LSRs</b> are in the 
@@ -149,7 +153,7 @@ MPLS domains consist of three types of devices:
 <ul>
   <li><b>Customer Edge (CE):</b> 
   <ul>
-    <li>Usually the last hop device in the customer's network and connects to 
+    <li>Usually the first and last hop device in the customer's network and connects to 
     the provider's network.</li>
     <li>MPLS is usually not configured on this device.</li>
     <li>It is configured for layer 2 or layer 3 connectivity services from MPLS
@@ -159,7 +163,7 @@ MPLS domains consist of three types of devices:
     </li>
   <li><b>Provider Edge (PE):</b>
     <ul>
-      <li>Last hop router in the provider's network connecting the CE to the 
+      <li>First and last hop router in the provider's network connecting the CE to the 
       P devices.</li>
       <li>PE performs IP routing lookups.</li>
       <li>If MPLS Layer 3 VPNs are implemented, PE devices share routes with 
@@ -199,7 +203,7 @@ An MPLS label is a 4-byte (32-bit) shim header inserted between the layer 2 and 
 headers of an IP packet. 
 </p>
 <p>
-  <div class="separator" style="clear: both;"><a href="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEh6jtErS4UrmZbG9yI0Umz4meh5jgFPzf5zyyFUBx3fFBX51VmpmMzikt5i4W7tZuiFmnZJ1flvX3ONq4-hmksnmQMCr7ohWDwdqgcOIW8hIqBlek0EM0aaObg0dDnhYFctyz7-7ho01Qk0jVgEjJyBabO9hJiNh3Pn9BcSFECHBMUUlD9yy1SD_oQ_Lwo/s822/IP_Packet_MPLS_Label.png" style="display: block; padding: 1em 0; text-align: center; "><img alt="" border="0" width="600" data-original-height="78" data-original-width="822" src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEh6jtErS4UrmZbG9yI0Umz4meh5jgFPzf5zyyFUBx3fFBX51VmpmMzikt5i4W7tZuiFmnZJ1flvX3ONq4-hmksnmQMCr7ohWDwdqgcOIW8hIqBlek0EM0aaObg0dDnhYFctyz7-7ho01Qk0jVgEjJyBabO9hJiNh3Pn9BcSFECHBMUUlD9yy1SD_oQ_Lwo/s600/IP_Packet_MPLS_Label.png"/></a></div>
+  <img alt="" border="0" width="600" data-original-height="78" data-original-width="822" src="Media/IP_Packet_MPLS_Label.png"/>
 
 </p>
 <p>
@@ -207,10 +211,11 @@ It is used to switch packets in the MPLS domain. It
 is defined by <a href="https://www.ietf.org/rfc/rfc3032.txt" target="_blank">RFC 3032</a>. 
 It contains the following fields:
 <p>
-  <div class="separator" style="clear: both;"><a href="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEix2SdOCA5DcsN1hm2rJYKNjJ9LhbG8mkgy-pvlMHn66861GuzHYyQgmJvCWV8_BTtQeIEJyR3pz_1H7k-aD8Xim7gCHFLucMuH1bPO05IwKF7chbsoJqAkK68qD_KpirtffhMaoIoZS-P27-UHoyAmqn9u7X92bI5bDGkNT7tFyp6jWiyGulNACcgd2PU/s822/MPLS%20Label.png" style="display: block; padding: 1em 0; text-align: center; "><img alt="" border="0" width="600" data-original-height="102" data-original-width="822" src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEix2SdOCA5DcsN1hm2rJYKNjJ9LhbG8mkgy-pvlMHn66861GuzHYyQgmJvCWV8_BTtQeIEJyR3pz_1H7k-aD8Xim7gCHFLucMuH1bPO05IwKF7chbsoJqAkK68qD_KpirtffhMaoIoZS-P27-UHoyAmqn9u7X92bI5bDGkNT7tFyp6jWiyGulNACcgd2PU/s600/MPLS%20Label.png"/></a></div>
+  <img alt="" border="0" width="600" data-original-height="102" data-original-width="822" src="Media/MPLS%20Label2.png"/>
 </p>
 <ul>
-<li><b>Label:</b> 20-bit field used for the label number or ID and its value is locally significant.</li>
+<li><b>Label:</b> 20-bit field used for the label number or ID and its value is 
+used by the LDP neighbors to forward traffic.</li>
 <li><b>Exp (Experimental bits):</b> 3 bit field used for QoS operations (Class of Service - CoS)</li>
 <li><b>S bit:</b> 1 bit to indicate if a label is the last (bottom) of a stack.
 This directly indicates that more than one label is present on the MPLS packet.
@@ -221,7 +226,7 @@ that has the S-bit set to 1. The S-bit field is also referred to as BoS
 (Bottom of Stack) field by some network equipment vendors. 
 
 <p>
-  <div class="separator" style="clear: both;"><a href="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjOhMDRHA8frXyHMnzoAPV-MSDzk_o4xCDKE-lSI1GnS6sYl2uoN8fSc1Hf-xhciLv37aujUaJKSoYT9TsaybqifZnFUjQQap8aw-WaCM0RKwjb5wUOyLYzILDINwguX26al7RMHo5F-YyhlS2pkX490ca5KJqE6Nvctsf73fDAm8m_pBPN-8ll3v4tySo/s1008/mpls_label_stack.png" style="display: block; padding: 1em 0; text-align: center; "><img alt="" border="0" width="600" data-original-height="113" data-original-width="1008" src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjOhMDRHA8frXyHMnzoAPV-MSDzk_o4xCDKE-lSI1GnS6sYl2uoN8fSc1Hf-xhciLv37aujUaJKSoYT9TsaybqifZnFUjQQap8aw-WaCM0RKwjb5wUOyLYzILDINwguX26al7RMHo5F-YyhlS2pkX490ca5KJqE6Nvctsf73fDAm8m_pBPN-8ll3v4tySo/s600/mpls_label_stack.png"/></a></div>
+  <img alt="" border="0" width="600" data-original-height="113" data-original-width="1008" src="Media/mpls_label_stack.png"/>
 
 </p>
 </li>
@@ -232,11 +237,6 @@ also contain the same value.</li>
 </p>
 
 <p>
-MPLS labels are bound to forwarding equivalency class  (FEC). The FEC is the 
-binding between the IPv4 prefix and the MPLS label. 
-A FEC can be mapped to multiple incoming labels to balance
-loads, but a label represents only a single FEC on an LSR.
-
 Routers in the MPLS domain use the LFIB to switch traffic instead of the routing table.
 </p>
 
@@ -307,6 +307,31 @@ unique to that particular LSR in the MPLS domain.
 This helps during troubleshooting to easily identify the LSR that a packet with 
 a specific label originated from.
 </p>
+<h2>Forwarding Equivalence Class</h2>
+<p>
+MPLS labels are bound to forwarding equivalency class (FEC). The FEC is the 
+binding between the IPv4 prefix and the MPLS label. 
+
+A FEC is a group of IP packets that a single LSR treats the same way i.e.;
+<ul>
+  <li>which are forwarded with the same treatment (queueing)</li>
+  <li>over the same path (next hop)</li>
+  <li>egress interface</li>
+  </ul>
+</p>  
+<p>  
+  A FEC might correspond to a 
+destination IP subnet but it also might correspond to any traffic class that the 
+Edge-LSR considers significant. For example, all traffic with a certain value 
+of IP precedence might constitute a FEC.
+</p>
+<p>
+In MPLS, FEC is determined only once, at the ingress LSR rather than at every 
+LSR in the LSP.
+A FEC can be mapped to multiple incoming labels to balance
+loads, but a label represents only a single FEC on an LSR.
+</p>
+
 
 <h2>How labels are Assigned</h2>
 <p>
@@ -384,6 +409,8 @@ Label Distribution Protocol  (LDP) is used to exchange labels with neighboring L
 These labels are generated for all the routes in the routing table i.e, 
 local/connected networks, IGP learned routes and static routes. It is defined by 
 <a href="https://www.ietf.org/rfc/rfc5036.txt" target="_blank">RFC 5036</a>.
+</p>
+<p>
 Like IGPs, LDP automatically discovers neighbors with a Hello protocol. Hello 
 messages are sent to the <b>all routers multicast IP address 224.0.0.2 using UDP
 port 646 and destination UDP port 646</b>. Hello messages include the "IPv4 transport address" 
@@ -409,7 +436,7 @@ label to IPv4 prefix mapping. Label distribution can be implicit or explicit;
 </p>
 <p>
 Label information is used to populate the label Information
-Base  (LIB) that MPLS uses to switch packets from source to destination in the 
+Base  (LIB) that MPLS uses to forward packets from source to destination in the 
 MPLS domain.
 LDP and TDP use TCP and UDP as their transport protocols. The LDP uses port number 
 <b>646 for both UDP and TCP</b> communication. For TDP, the port number is <b>711 for UDP and TCP</b>.
