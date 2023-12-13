@@ -7,7 +7,7 @@
    viewBox="0 0 400 52"
    version="1.1"
    id="svg5"
-   inkscape:version="1.2.2 (732a01da63, 2022-12-09)"
+   inkscape:version="1.3 (0e150ed6c4, 2023-07-21)"
    sodipodi:docname="mpls_label_stack.svg"
    inkscape:export-filename="mpls_label_stack.png"
    inkscape:export-xdpi="67.23"
@@ -28,20 +28,24 @@
      inkscape:document-units="mm"
      showgrid="false"
      showguides="true"
-     inkscape:zoom="1.5219183"
-     inkscape:cx="850.89981"
-     inkscape:cy="140.94055"
-     inkscape:window-width="958"
-     inkscape:window-height="1018"
-     inkscape:window-x="-7"
-     inkscape:window-y="0"
-     inkscape:window-maximized="0"
-     inkscape:current-layer="layer5">
+     inkscape:zoom="1.1608594"
+     inkscape:cx="755.90551"
+     inkscape:cy="141.70536"
+     inkscape:window-width="1920"
+     inkscape:window-height="1027"
+     inkscape:window-x="870"
+     inkscape:window-y="1072"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer4">
     <inkscape:grid
        type="xygrid"
        id="grid236"
        originx="0"
-       originy="0" />
+       originy="0"
+       spacingy="1"
+       spacingx="1"
+       units="mm"
+       visible="false" />
     <sodipodi:guide
        position="99.147399,31.528271"
        orientation="0,-1"
@@ -91,6 +95,16 @@
        position="87.098137,44.002966"
        orientation="0,-1"
        id="guide17426"
+       inkscape:locked="false" />
+    <sodipodi:guide
+       position="144.96696,75.056902"
+       orientation="1,0"
+       id="guide1"
+       inkscape:locked="false" />
+    <sodipodi:guide
+       position="199.82648,87.777953"
+       orientation="1,0"
+       id="guide2"
        inkscape:locked="false" />
   </sodipodi:namedview>
   <defs
@@ -167,19 +181,30 @@
        x="250.16878"
        y="10.824542" />
     <rect
-       style="fill:#b3f898;fill-opacity:1;fill-rule:evenodd;stroke-width:0.42864;font-variation-settings:normal;opacity:1;vector-effect:none;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;-inkscape-stroke:none;stop-color:#000000;stop-opacity:1"
+       style="font-variation-settings:normal;opacity:1;vector-effect:none;fill:#b3f898;fill-opacity:1;fill-rule:evenodd;stroke-width:0.35359;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;-inkscape-stroke:none;stop-color:#000000;stop-opacity:1"
        id="rect7470"
-       width="79.625473"
+       width="54.183372"
        height="41.54557"
        x="90.564621"
        y="10.381329" />
     <rect
-       style="font-variation-settings:normal;vector-effect:none;fill:#b3f898;fill-opacity:1;fill-rule:evenodd;stroke-width:0.42864;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;-inkscape-stroke:none;stop-color:#000000"
+       style="font-variation-settings:normal;vector-effect:none;fill:#b3f898;fill-opacity:1;fill-rule:evenodd;stroke-width:0.342164;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;-inkscape-stroke:none;stop-color:#000000"
        id="rect7470-2"
-       width="79.625473"
+       width="50.738091"
        height="41.54557"
-       x="170.46881"
+       x="199.3562"
        y="10.381329" />
+    <rect
+       style="font-variation-settings:normal;opacity:1;vector-effect:none;fill:#b3f898;fill-opacity:1;fill-rule:evenodd;stroke-width:0.35359;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;-inkscape-stroke:none;stop-color:#000000;stop-opacity:1"
+       id="rect2"
+       width="54.183372"
+       height="41.54557"
+       x="145.06885"
+       y="10.381329" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:0.320441px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="M 144.96696,9.4917256 V 53.030106"
+       id="path2" />
   </g>
   <g
      inkscape:groupmode="layer"
@@ -211,13 +236,13 @@
     <text
        xml:space="preserve"
        style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:7.05556px;line-height:1.25;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583"
-       x="115.73368"
+       x="112.0295"
        y="40.413845"
        id="text13817"><tspan
          sodipodi:role="line"
          id="tspan13815"
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:7.05556px;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;stroke-width:0.264583"
-         x="115.73368"
+         x="112.0295"
          y="40.413845">Label</tspan></text>
     <text
        xml:space="preserve"
@@ -232,15 +257,22 @@
          y="19.014706">Label Stack</tspan></text>
     <text
        xml:space="preserve"
-       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:7.05556px;line-height:1.25;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583"
-       x="205.69208"
-       y="40.413845"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:7.05556px;line-height:1.25;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:center;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583"
+       x="224.04942"
+       y="40.185925"
        id="text13817-3"><tspan
          sodipodi:role="line"
          id="tspan13815-1"
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:7.05556px;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;stroke-width:0.264583"
-         x="205.69208"
-         y="40.413845">Label</tspan></text>
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:7.05556px;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:center;text-anchor:middle;stroke-width:0.264583"
+         x="224.04942"
+         y="40.185925">Label</tspan><tspan
+         sodipodi:role="line"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:7.05556px;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:center;text-anchor:middle;stroke-width:0.264583"
+         x="224.04942"
+         y="49.005375"
+         id="tspan3">(<tspan
+   style="font-size:4.23333px;text-align:center;text-anchor:middle"
+   id="tspan4">Bottom of Stack</tspan>)</tspan></text>
     <text
        xml:space="preserve"
        style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:7.05556px;line-height:1.25;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583"
@@ -254,7 +286,7 @@
          y="40.139091">Payload</tspan></text>
     <path
        style="fill:none;stroke:#000000;stroke-width:0.264583px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-       d="M 170.1709,21.039918 V 50.246479"
+       d="M 199.19079,21.039918 V 50.246479"
        id="path17222" />
     <circle
        id="path17302"
@@ -272,6 +304,17 @@
        style="fill:none;stroke:#000000;stroke-width:0.263266px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-start:url(#marker19588)"
        d="m 91.23206,16.179779 c 0.681228,0 58.41538,-0.351402 58.41538,-0.351402"
        id="path17422" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:7.05556px;line-height:1.25;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583"
+       x="162.3004"
+       y="40.413845"
+       id="text2"><tspan
+         sodipodi:role="line"
+         id="tspan2"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:7.05556px;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;stroke-width:0.264583"
+         x="162.3004"
+         y="40.413845">Label</tspan></text>
   </g>
   <g
      inkscape:groupmode="layer"
