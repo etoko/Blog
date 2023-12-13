@@ -750,7 +750,7 @@ peerings. Route-refresh message types were not included in the original BGP RFC.
 However, they are now supported by major network equipment vendors.
 ROUTE-REFRESH messages have a message type value of 5 in the BGP header. 
 ROUTE-REFRESH is usually set when BGP session and/or policy parameters have been 
-changed and these new changes are to be implemented on the session and prefixes 
+changed and these new changes are to be implemented on the session and  
 prefixes exchanged. ROUTE-REFRESH message are sent after a soft-reset command 
 has been issued. A hard reset does not trigger the transmission of ROUTE-REFRESH 
 messages. A ROUTE REFRESH BGP packet contains the following fields:
@@ -1052,7 +1052,7 @@ eBGP has the following features:
    <li><b>External peers are directly connected (by default):</b> eBGP places a 
    Time-to-live (TTL) of one (1) to avoid the use of any other routing path.
    However, if any one of the directly connected interfaces fail, the eBGP session 
-   may get torn down. This can be modified using the BGP commands 
+   may get torn down. This can be resolved using the BGP commands 
    <code><b>neighbor &lt;ip-address&gt;  
    ebgp-multihop &lt;1 - 255&gt;</b></code> or  
    <code><b>neighbor  &lt;ip-address&gt; ttl-security hops &lt;1 - 255&gt;</b></code>.
@@ -1262,7 +1262,7 @@ NLRI can be originated in multiple ways:
       from IGPs.</li> 
       <li>When advertising a prefix, the prefix to be advertised 
       must match the prefix in the routing table.</li>
-      <li>Without the <code><b>mask</b></code> keyword, the BGP uses a classful
+      <li>Without the <code><b>mask</b></code> keyword, BGP uses a classful
       mask instead. If subnets or supernets are to be advertised, then the 
       <code><b>mask</b></code> keyword may be required.</li>
       <li>BGP sets the weight path attribute to 32768 for these prefixes.</li>
@@ -3367,6 +3367,8 @@ by the local router in the best path selection process.
 <p>
 By default, locally originated prefixes have a weight value of 32768. 
 For prefixes received from other BGP peers, the weight is assigned a value of zero (0).
+</p>
+<p>
 Use the route-map command <code><b>set weight &lt;0-65535&gt;</b></code> to 
 modify the weight path attribute. 
 If modifying the weight path attribute, take note of the following; 
@@ -3645,8 +3647,8 @@ Preference is given in best path selection using the following criteria:
   aggregate-address</b></code> (summarization).</li>
   <li>Routes received by BGP peers</li>
 </ol>
-<b>Note:</b> prefixes injected into the BGP table using the network command and 
-through redistribution are preferred to summary prefixes using the aggregate-address 
+<b>Note:</b> prefixes injected into the BGP table using the <code><b>network</b></code> command and 
+through redistribution are preferred to summary prefixes using the <code><b>aggregate-address</b></code> 
 command.
 </p>
 <h4>4. Accumulated Interior Gateway Protocol (AIGP)</h4>
@@ -6574,11 +6576,11 @@ The following command can be used to filter locally originated prefixes
 <h1 id="FILTERING">Route Filtering</h1>
 <p>
 BGP update filtering occurs on a per peer basis. 
-Cisco IOS provides the following  methods of filtering updates: 
+Cisco IOS provides the following methods of filtering updates: 
 <ol type="a">
-  <li>Distribute-lists</li> 
-  <li>Prefix-list</li>
-  <li>Filter-lists</li>
+  <li>Distribute-lists: uses ACLs</li> 
+  <li>Prefix-list: uses IP prefix-lists</li>
+  <li>Filter-lists: uses AS Path ACLs</li>
   <li>Route-maps</li>
 </ol>
 </p>
@@ -8698,16 +8700,22 @@ Implement a soft reset for the changes to be applied to the Loc-RIB.
 <p>
 VRFs provide a virtualization context or segmentation of the RIB. It separates the global routing table from another VRF.
 BGP supports VRFs. Every address family maintains a separate database and configurations in BGP. This allows for a routing policy 
-in one address family to be different from a routing policy in a different address family,
-This logic arries over to an address family per VRF per 
-protocol. BGP is used as the routing protocol to exhange 
-multiple VRG routes with ampulous layer 3 VPN provder edge routers with other routers. Using VRF-lite 
-follows the same syntax. it just does not require the configuration of the VPN-v4 address family or sessions to be established w
-with other provider=edge routers. Enabling VRF support on BGP is accomplished by the following steps:
+in one address family to be different from a routing policy in a different address family.
+This results in the support for an address family per VRF per 
+protocol. BGP is used as the routing protocol to exchange 
+multiple VRF routes with various layer 3 VPN provider edge routers with other routers. 
 </p>
 <p>
-<b>Step 1:</b> Define the BGP route distinguisher for the VRF under the VRF definition with the command:
-<code><b>rd &lt;route_distinguisher&gt;</b></code>. The RD is a path attribute used in ampulous layer 3 VPN that ensures 
+Using VRF-lite 
+follows the same syntax; it just does not require the configuration of the VPN-v4 
+address family or sessions to be established with other provider edge routers. 
+Enabling VRF support on BGP is accomplished by the following steps:
+</p>
+<p>
+<b>Step 1:</b> Define the BGP route distinguisher for the VRF under the VRF 
+definition with the command:
+<code><b>rd &lt;route_distinguisher&gt;</b></code>. The RD is a path attribute 
+used in layer 3 VPN that ensures 
 uniqueness of a prefix. A VPN prefix is an RD+Prefix. There is only one ED associated to a prefix.
 </p>
 <p>

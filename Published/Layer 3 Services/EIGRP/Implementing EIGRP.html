@@ -6,7 +6,7 @@
   <li><a href="#RID">Router IDs</a>
   <li><a href="#EXCHANGE">How Information is Exchanged with EIGRP</a>
     <ol type="a">
-	  <li><a href="#NEIGHBOR_ESTABLISHMENT">Neighbor Establishment</a></li>
+	  <li><a href="#NEIGHBOR_ESTABLISHMENT">Neighbor Formation</a></li>
 	  <li><a href="#NEIGHBOR_TABLE">Neighbor Table</a></li>
 	  <li><a href="#INTER-ROUTER_COMMUNICATION">Inter-Router Communication</a></li>
 	  <li><a href="#EIGRP_PACKETS">Packet Types</a></li>
@@ -1067,12 +1067,33 @@ R1# &nbsp;&nbsp;                                                                
 
 
 <h1 id="EXCHANGE">Information Exchange</h1>
-<h2 id="NEIGHBOR_ESTABLISHMENT">Neighbor Establishment</h2>
+<p>
+
+</p>
+<h2 id="NEIGHBOR_ESTABLISHMENT">Neighbor Formation</h2>
  <p>
 EIGRP requires a neighbor relationship to form between EIGRP devices before prefix exchange 
 takes place. 
-EIGRP uses neighborships to form a trusted bond between two similarly configured devices. When a router receives an 
-EIGRP hello packet, it attempts to become the neighbor of the sender of the Hello packet.
+EIGRP uses neighborships to form a trusted bond between two similarly configured devices. 
+</p
+<p>
+Router X must receive an initial Hello packet from Router Y before it can accept 
+other EIGRP packet types. When a router X receives an EIGRP hello packet from 
+another router Y, it attempts to become the neighbor of the router Y. When router 
+X receives the first Hello packet from router Y, it places Y in a "pending state".
+X transmits a unicast "NULL" Update which has the initialization bit set and no 
+routing data.
+</p>
+<p>
+With Y in the pending state, X will not send it any EIGRP messages and any other 
+EIGRP messages received from Y will not be processed except ACK message type. If 
+no ACK message is received, the timer on X will run out and the neighbor formation 
+process will start again.
+</p>
+<p>
+When the ACK message is received, X nives Y from the pending state to "Up" state.
+In the "up" state, X and Y exchange their topology table. This validates the 
+bi-directional exchange of messages completing the "three-way handshake".
 </p>
 <p>
  Before becoming neighbors, devices running EIGRP have to meet certain criteria. 
@@ -1161,13 +1182,16 @@ the highest uptime value.
 <td style="border-bottom:solid; border-width:1px"><b>SRTT (ms): </b></td>
 <td style="border-bottom:solid; border-width:1px">
 The computed smooth round-trip time (SRTT) for packets that are transmitted to and received from a neighbor.
+In effect, this reports how long it takes for this particular neighbor to respond 
+to reliable packets.
 </td>
 </tr>
 <tr>
 <td style="border-bottom:solid; border-width:1px"><b>RTO</b></td>
 <td style="border-bottom:solid; border-width:1px">
 The computed retransmission timeout for a neighbor. The value for this table object is computed as an aggregate average 
-of the time required for packet delivery.
+of the time required for packet delivery. It indicates how long the EIGRP will 
+wait before retransmition if not ACK message is received.
 </td>
 </tr>
 <tr>
@@ -1357,6 +1381,9 @@ R7#son: new if on tid 0                                                         
 </div></p>
  
 <h2 id="INTER-ROUTER_COMMUNICATION">Inter-router Communication</h2>
+<p>
+
+</p>
 
 <h3>EIGRP Packets</h3>
  
