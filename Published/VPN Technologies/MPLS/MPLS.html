@@ -643,7 +643,7 @@ Label address mapping messages are sent using the following parameters:
 </ul>
 </p>
 <p>
-The following is a Wireshark packet capure of an address message:
+The following is a Wireshark packet capture of an address message:
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
@@ -1450,7 +1450,7 @@ From a client Cisco IOS device, to verify the MPLS operation, run the
 command to a destination on the other end of an MPLS network.
 
 During label switching, local labels are not used to make switching decisions. They are used by
-downstream LSR.
+upstream LSRs.
 </p>
 
 <h2 id="CONFIGURATION">Configuration</h2>
@@ -1481,9 +1481,9 @@ The <code><b>distributed</b></code> keyword is optional.
 </p>
 <h3>Step 2: Configure the LDP ID</h3>
 <p>
-By default, LDP selects the highest IP address of the any loopback interface 
+By default, LDP selects the highest IP address of any loopback interface 
 as the LDP ID. However, the LDP ID can be explicitly configured using the global 
-configuration command: <code><b>mpls ldp router-id &lt;interface&gt; force</b></code>.
+configuration command: <code><b>mpls ldp router-id &lt;interface&gt; force</b></code>;
 <code><b>interface</b></code> is the interface whose IP address is to be used 
 as LDP ID.
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
@@ -1549,8 +1549,7 @@ R1(config-if)#<b>mpls label protocol tdp</b>
 </code></div>
 </p>
 <p>
-One of the main differences between LDP and TDP is  
-LDP supports authentication while TDP does not support authentication.
+It is important to note that LDP supports authentication while TDP does not support authentication.
 </p>
 
 
@@ -1672,7 +1671,7 @@ Another alternative is to configure the autoconfiguration at the interface:
 </p>
 
 <p>
-Note that setting the label range on an LSR that has an active TCP session with another LSR will
+<B>NOTE:</B> setting the label range on an LSR that has an active TCP session with another LSR will
 not take effect immediately. To enforce the new label range; disable MPLS on the 
 interface using the command <code><b>no mpls ip</b></code>, 
 then enable MPLS on the interface. However, if MPLS was enabled through the routing

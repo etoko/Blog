@@ -15,8 +15,9 @@ MPLS Layer 3 VPNs (L3VPNs) are used by service providers (SPs) to provide layer 
 connectivity between an enterprise and its different remote offices/locations 
 through the service provider's network. MPLS L3VPNs are defined by 
 <a href="https://www.ietf.org/rfc/rfc4364.txt" target="_blank">RFC 4364</a>. 
-
-SPs are able to provide different customers layer 3 connectivity to their remote 
+</p>
+<p>
+Service providers are able to provide different customers with layer 3 connectivity to their remote 
 locations using the same underlaying infrastructure. This is possible regardless of 
 whether the different customer sites use the same overlapping 
 <a href="https://www.ietf.org/rfc/rfc1918.txt" target="_blank">RFC 1918</a> IP 
@@ -57,7 +58,7 @@ In the service provider core of an MPLS L3VPN, the P routers run MPLS over an
  the provider core network do not have the customer  prefixes in their routing tables.
  All P routers (intermediate and edge LSRs) run an IGP and are configured for MPLS. LDP 
  is usually configured as the label exchange protocol. Other labeling methods 
- are supported such as BGP, RSVP-TE, etc.
+ are supported such as MP-BGP, RSVP-TE, etc.
  </p>
  
  <h3>PE Routers</h3>
@@ -88,10 +89,10 @@ It is locally significant and does not need to match on the remote PE.
 </p>
 <p>
 The RD is very critical to the successful operation of MPLS L3VPNs particularly 
-when clients are using RFC 1918 prefixes. 
+when clients are using RFC 1918 prefixes in their enterprise networks. 
 </p>
 
-<h3>VPNv4</h3>
+<h3>VPNv4 Addresses</h3>
 <p>
 The RD is used to create <b>VPNv4 addresses</b>. This is a <b>96-bit</b> value that consists 
 of the RD (64-bit) and the IP address/network address (32-bit). It is usually in 
@@ -120,7 +121,7 @@ On an MPLS packet, the transport label is the top most label. It is typically
 derived from LDP. It is sometimes referred to as the IGP label. 
 The LDP label(transport label) is used for label switching from PE to PE through the MPLS domain 
 as intermediate LSRs run only MPLS and not BGP. The transport label basically 
-tells SP MPLS core LSRs which PE traffic is destined to i.e., which 
+tells the SP MPLS core LSRs which PE traffic is destined to i.e., which 
 PE device is the exit point out of the L3VPN to the CE. The VPN Label is derived from VPNv4 advertisements of PE and 
  is used by the PE router to determine which CE traffic is destined to.
  </p>
@@ -160,7 +161,7 @@ prefixes enter and exit the VRF table.
 The RT allows for granular control over what sites have what routes. 
 </p>
 <p>
-As an alternative to the use of RD, the route-maps "import map" and "export map" 
+As an alternative to the use of RT, the route-maps "import map" and "export map" 
 allow control over import and export on a per prefix basis.
 </p>
 
@@ -221,7 +222,9 @@ Virtual Routing and Forwarding (VRFs) are used to create separate routing tables
 for each customer on a router. These routing tables are separated from the 
 global routing table (RIB). The RT and RD are then configured under each VRF.
 
-There are two ways to create a VRF; 
+There are two ways to create a VRF: using the command 
+<code><b>ip vrf &lt;vrf-name&gt;</b></code> or  
+<code><b>vrf definition &lt;vrf_name&gt;</b></code>.
 <ol>
   <li><code><b>ip vrf &lt;vrf-name&gt;</b></code> (older method):
    creates VRFs for IPv4 address family only.
@@ -245,7 +248,8 @@ Two VRFs CUST_X_HQ and CUST_Z_2 have been created.
 </p>
   
   </li> 
-  <li> <code><b>vrf definition &lt;vrf_name&gt;</b></code>.
+  <li> <code><b>vrf definition &lt;vrf_name&gt;</b></code>: VRFs can be created
+   for the IPv4 or IPv6 address families.
   <p>
   <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
       	<code>
