@@ -42,7 +42,7 @@ steps should be followed;
 <ul>
   <li>Step 1: Configuration of mGRE tunnels.</li>
   <li>Step 2: Configuration of Next Hop Resolution Protocol (NHRP).</li>
-  <li>Step 3: Securing the DMVPN Tunnel with IPSec. IPsec is covered <a href="https://emmanueltoko.blogspot.com/2021/02/securingdmvpn-tunnels-with-ipsec-ikev1.html" target="_blank">here</a>.</li>
+  <li>Step 3: Securing the DMVPN Tunnel with IPSec(covered <a href="https://emmanueltoko.blogspot.com/2021/02/securingdmvpn-tunnels-with-ipsec-ikev1.html" target="_blank">here</a>).</li>
 </ul>
 </p>
 <p>
@@ -660,7 +660,7 @@ source NBMA address, source protocol address, destination protocol address and N
 <p>
 All spokes statically define the hub in their configuration.
 
-The NHS creates a mapping to NBMA to tunnel IP address for all NHCs that register 
+The NHS creates a mapping of NBMA to tunnel IP address for all NHCs that register 
 with it. This mapping is known as the NHRP table. This table is shared by the 
 NHS to NHC so that when a spoke wishes to communicate with a remote NHC, when it 
 sends a resolution request to the NHS, the NHS shares the NHRP mapping with the NHC.

@@ -116,7 +116,7 @@ All routers in the MPLS-domain are referred to as <b>Label Switched Routers  (LS
 <b>Ingress edge LSRs</b> are at the entry point of the MPLS domain where enterprise traffic enters 
 the MPLS domain through the <b>provider edge  (PE) LSR</b>. The ingress LSR receives 
 IP packets from the CE (customer-edge device) then adds MPLS labels to the 
-packets based on the destination. The ingress LSR then forwards the packets to 
+packets based on the destination. The ingress LSR then switches the packet to 
 the intermediate LSR in the data path using a label. The <b>egress edge LSR</b>
 is the LSR in the service provider network at the opposite end of the LSP in the 
 MPLS domain, from the ingress LSR, connecting to the CE at remote site of the customer; it is the 
@@ -133,8 +133,7 @@ the same customer.
 <b>Intermediate LSRs</b> are in the 
 middle of the MPLS domain. They are alternatively referred to as <b>P (provider) 
 routers</b>. Intermediate LSRs interconnect the edge LSRs and 
-forward network traffic primarily using labels. These LSRs swap or pop the labels 
-depending on their location in the LSP.
+forward network traffic primarily using labels.
 </p>
 <p>
 A <b>Label Switched Path  (LSP)</b> is the complete unidirectional end-to-end path that the labeled packet
@@ -205,15 +204,17 @@ An MPLS label is a 4-byte (32-bit) shim header inserted between the layer 2 and 
 headers of an IP packet. 
 </p>
 <p>
-  <img alt="" border="0" width="600" data-original-height="78" data-original-width="822" src="Media/IP_Packet_MPLS_Label.png"/>
-
+  <!--<img alt="" border="0" width="600" data-original-height="78" data-original-width="822" src="Media/IP_Packet_MPLS_Label.png"/> -->
+  <div class="separator" style="clear: both;"><a href="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgbXbDX04Jc5CUhfn3MPe4yK58Hj3sEhZfWL3dZmOtwEgrQE_ql-fclTbcvC18WJS5gKXfVR3kkGWPGaGQaPDthgLJ2UE1q90_VOtSVEWY3FvFVaFURo5DeQAYH-uaNYph6YXxDCoCCaChD6prE7kyUc95stXprF9pQlRDA5GjaOZjKVw4mMp3yUoBBgKY/s1600/IP_Packet_MPLS_Label.png" style="display: block; padding: 1em 0; text-align: center; "><img alt="" border="0" data-original-height="138" data-original-width="873" src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgbXbDX04Jc5CUhfn3MPe4yK58Hj3sEhZfWL3dZmOtwEgrQE_ql-fclTbcvC18WJS5gKXfVR3kkGWPGaGQaPDthgLJ2UE1q90_VOtSVEWY3FvFVaFURo5DeQAYH-uaNYph6YXxDCoCCaChD6prE7kyUc95stXprF9pQlRDA5GjaOZjKVw4mMp3yUoBBgKY/s1600/IP_Packet_MPLS_Label.png"/></a></div>
 </p>
 <p>
 It is used to switch packets in the MPLS domain. It 
 is defined by <a href="https://www.ietf.org/rfc/rfc3032.txt" target="_blank">RFC 3032</a>. 
 It contains the following fields:
 <p>
-  <img alt="" border="0" width="600" data-original-height="102" data-original-width="822" src="Media/MPLS%20Label2.png"/>
+  <!--<img alt="" border="0" width="600" data-original-height="102" data-original-width="822" src="Media/MPLS%20Label2.png"/> -->
+  
+  <div class="separator" style="clear: both;"><a href="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjeX0XM8JEgI2VdbfXOU3l_x-2vn_ylqpc279s_-DcuG4VH_kQ1hK8-sufLzKCXBNZPhZkfRifwUkVuMvgp_AvJaiNG3KOxfULtvcYD3R5nDH7YvMRixH4NoriOAzCeGxrLodHhzwhU_2b00WX5141wA8HHZKuD6v2CCbysBdQD4qvKMMYUlzBloMUz-dc/s1600/MPLS%20Label2.png" style="display: block; padding: 1em 0; text-align: center; "><img alt="" border="0" data-original-height="138" data-original-width="873" src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjeX0XM8JEgI2VdbfXOU3l_x-2vn_ylqpc279s_-DcuG4VH_kQ1hK8-sufLzKCXBNZPhZkfRifwUkVuMvgp_AvJaiNG3KOxfULtvcYD3R5nDH7YvMRixH4NoriOAzCeGxrLodHhzwhU_2b00WX5141wA8HHZKuD6v2CCbysBdQD4qvKMMYUlzBloMUz-dc/s1600/MPLS%20Label2.png"/></a></div>
 </p>
 <ul>
 <li><b>Label:</b> 20-bit field used for the label number or ID and its value is 
@@ -228,9 +229,8 @@ that has the S-bit set to 1. The S-bit field is also referred to as BoS
 (Bottom of Stack) field by some network equipment vendors. 
 
 <p>
-  <img alt="" border="0" width="600" data-original-height="113" data-original-width="1008" src="Media/mpls_label_stack.png"/>
-
-</p>
+  <!--<img alt="" border="0" width="600" data-original-height="113" data-original-width="1008" src="Media/mpls_label_stack.png"/> -->
+<div class="separator" style="clear: both;"><a href="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhGIYmnNUSRbTeKZwPvYzxVX7qzbDfpKektL-FuAzgvWMUhUTk6ETwGIjzvtRk2y-2OzqY7fDFJ6UbI8xTR4G8fI7URm7yBN9QWOqxA-S77KZVicFOATXol3dn_WgSwFNOfaiIazk1QAJXdSBoa7qxZz9zWlshK-2fRYyCnffYbNFXRBs45s5H3JrknUWM/s1059/mpls_label_stack.png" style="display: block; padding: 1em 0; text-align: center; "><img alt="" border="0" width="600" data-original-height="138" data-original-width="1059" src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhGIYmnNUSRbTeKZwPvYzxVX7qzbDfpKektL-FuAzgvWMUhUTk6ETwGIjzvtRk2y-2OzqY7fDFJ6UbI8xTR4G8fI7URm7yBN9QWOqxA-S77KZVicFOATXol3dn_WgSwFNOfaiIazk1QAJXdSBoa7qxZz9zWlshK-2fRYyCnffYbNFXRBs45s5H3JrknUWM/s600/mpls_label_stack.png"/></a></div>
 </li>
 <li><b>Time To Live (TTL):</b> 8-bits field indicating the time to live (TTL). 
 This field implements the same function as the TTL field in IP packets. It may 
@@ -309,10 +309,11 @@ unique to that particular LSR in the MPLS domain.
 This helps during troubleshooting to easily identify the LSR that a packet with 
 a specific label originated from.
 </p>
+
 <h2>Forwarding Equivalence Class</h2>
 <p>
 MPLS labels are bound to forwarding equivalency class (FEC). 
-A FEC is a group of IP packets that a have similar characteristics and therefore 
+A FEC is a group of IP packets that have similar characteristics and therefore 
 are treated the same way i.e.;
 <ul>
   <li>QoS (queueing)</li>
@@ -446,9 +447,8 @@ It is technically possible to have both TDP and LDP operating in different secti
 domain and label switching will still take place.
 </p>
 <p>
-It is important to note that the MPLS control plane initially uses UDP to exchange 
-information before the formation of an
-LDP session between the neighbors, and subsequently TCP is used at the data plane
+It is important to note that the MPLS control plane initially uses UDP to detect neighbors and exchange 
+information before the formation of an LDP session between the neighbors. TCP is then used to start the formation of the LDP session was well as maintenance of the LDP session. Subsequently TCP is used at the data plane
 after the LDP session has been formed. 
 </p>
 <p>
@@ -1879,7 +1879,8 @@ R1(config)#<b>mpls ldp neighbor 30.255.2.2 password simplesimple</b>
 </p>
 
 <p>
-The output confirms that authentication has been configured:
+The output of the command <code><b>show mpls ldp neighbor detail</b></code> 
+confirms that authentication has been configured:
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
@@ -1908,6 +1909,9 @@ R1#<b>show mpls ldp neighbor detail</b>                                        <
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[Typed Wildcard (0x050B)]&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                    <br>
 R1#      	
       	</code></div>
+</p>
+<p>
+
 </p>
 <p>
 The peer LSR (R2) does not have authentication configured:
@@ -2638,9 +2642,37 @@ R1#
 <h2>Authentication</h2>
 <p>
 The configuration of a password can be verified using the command 
-<code><b>show mpls ldp neighbor detail</b></code>. From the output of this 
-command, the stale state indicates that the configuration of the password has 
-not been enforced. Applying the configuration using the 
+<code><b>show mpls ldp neighbor detail</b></code>. 
+</p>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+      	<code>
+R1#<b>show mpls ldp neighbor 2.2.2.2 det</b><br>                                   
+&nbsp;&nbsp;&nbsp;&nbsp;Peer LDP Ident: 2.2.2.2:0; Local LDP Ident 1.1.1.1:0                       <br>    
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;TCP connection: 2.2.2.2.44756 - 1.1.1.1.646                            <br>    
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Password: not required, neighbor, stale                                <br>    
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;State: Oper; Msgs sent/rcvd: 162/122; Downstream; Last TIB rev sent 45 <br>    
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Up time: 01:55:40; UID: 1; Peer Id 0;                                  <br>    
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;LDP discovery sources:                                                 <br>    
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;GigabitEthernet0/0; Src IP addr: 10.255.12.2                         <br>    
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;holdtime: 15000 ms, hello interval: 5000 ms                        <br>    
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Addresses bound to peer LDP Ident:                                     <br>    
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.255.12.2     10.255.24.1     10.255.112.1    2.2.2.2              <br>    
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Peer holdtime: 180000 ms; KA interval: 60000 ms; Peer state: estab     <br>    
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Capabilities Sent:                                                     <br>    
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[Dynamic Announcement (0x0506)]                                      <br>    
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[Typed Wildcard (0x050B)]                                            <br>    
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Capabilities Received:                                                 <br>    
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[Dynamic Announcement (0x0506)]                                      <br>    
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[Typed Wildcard (0x050B)]                                            <br>    
+</code></div>
+</p>
+<p>
+From the output of this 
+command, the <code><b>stale</b></code> state indicates that the configuration of the password has 
+not been enforced. The <code><b>neighbor</b></code> statement indicates that a 
+password has been configured for this neighbor. If no password is configured, the 
+keyword <code><b>none</b></code> is displayed instead. Applying the configuration using the 
 command <code><b>R7#clear mpls ldp neighbor &lt;ip-address | * &gt;</b></code> 
 results in the output showing the  status of <code><b>in-use</b></code>.
 </p>
