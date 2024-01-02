@@ -896,14 +896,14 @@ of neighborship or route information. Conversion is automated as of IOS version 
 <p>
 The router ID (RID) is a 32-bit number that uniquely identifies an EIGRP router 
 in an autonomous system. It also serves as a loop-prevention mechanism. 
-The RID can be set dynamically (which is the default) or configured manually.
-When the EIGRP process initializes, the EIGRP router ID is determined using the following order of criteria:
+The RID is set automatically (default) or can be configured manually.
+When the EIGRP process initializes, the EIGRP router ID is set using the following order of criteria:
 <ol>
 <li>The highest IPv4 address of any "up" loopback interface.</li> 
 <li>The highest IPv4 address of any "up" physical interfaces.</li>
 </ol>
 Even after initialization, the EIGRP RID can be modified through manual configuration.
-It is recommended to configure static RIDs so that the RID is predicable.
+It is recommended to configure static RIDs so that the RID is predictable.
 If the RID is manually configured after the device forms a neighbor relationship 
 with another EIGRP device, the neighbor relationship is reset with the device sending updates to neighbors and requesting for new updates without dropping the neighbor relationship.
 If the RID is manually configured before the device forms a neighbor relationship with another EIGRP device, the RID is 
@@ -1091,7 +1091,7 @@ no ACK message is received, the timer on X will run out and the neighbor formati
 process will start again.
 </p>
 <p>
-When the ACK message is received, X nives Y from the pending state to "Up" state.
+When the ACK message is received from, X changes its tracking state of Y from pending state to "Up" state.
 In the "up" state, X and Y exchange their topology table. This validates the 
 bi-directional exchange of messages completing the "three-way handshake".
 </p>
@@ -1174,7 +1174,7 @@ declared down and removed from the neighbor table.</td>
 <tr>
 <td style="border-bottom:solid; border-width:1px"><b>Uptime</b></td>
 <td style="border-bottom:solid; border-width:1px">
-The duration of the neighborship has been in an up state (in hh:mm:ss). The neighbor with a handle of zero(0) usually has 
+The duration that the neighborship has been in an up state (in hh:mm:ss). The neighbor with a handle of zero(0) usually has 
 the highest uptime value.
 </td>
 </tr>
@@ -1261,7 +1261,10 @@ EIGRP version information as reported by the neighbor.
 <td style="border-bottom:solid; border-width:1px"><b>Retries:</b></td>
 <td style="border-bottom:solid; border-width:1px">Total number of times that an unacknowledged packet is sent to a neighbor. </td>
 </tr>
-
+<tr>
+  <td style="border-bottom:solid; border-width:1px"><b>Prefixes:</b></td>
+  <td  style="border-bottom:solid; border-width:1px">Total number of networks exchanged with this neighbor</td>
+</tr>
 </table>
 </p>
 
@@ -1315,7 +1318,8 @@ H&nbsp;&nbsp;&nbsp;Address&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
  </code>
  </div></p>
  <p>
- The following log message will be displayed on the remote router whose neighborship is being terminated: 
+ The following log message will be displayed on the remote router whose neighborship is being terminated due to 
+ configuration of the static EIGRP peering: 
  </p> 
  <p><div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
 <code>
@@ -1391,15 +1395,15 @@ R7#son: new if on tid 0                                                         
 EIGRP uses five different packet types to communicate i.e. Hello, Update, Request, Reply, Query.  
 EIGRP sends packets using IP protocol 88. EIGRP uses multicast packets where possible to reduce bandwidth consumed on a link
 (one packet to reach multiple devices); it uses unicast packets when necessary. 
-Communication between routers is done with multicast using the group address 
-<code><b>224.0.0.10</b></code> and the MAC address <code><b>01:00:5e:00:00:0a</b></code> when possible. 
+Communication between routers is done with multicast using the IPv4 multicast address 
+<code><b>224.0.0.10</b></code> and the MAC address <code><b>01:00:5e:00:00:0a</b></code>. 
 </p>              
 
 <p>
 EIGRP uses Reliable Transport Protocol (RTP) to ensure that packets are delivered in order and to ensure that 
 routers receive specific packets. The reliable transport protocol is responsible for guaranteed, ordered delivery
 of EIGRP packets to all neighbors. It supports intermixed transmission of multicast and unicast packets.
-Some EIGRP packets must be sent reliably and others need not be. 
+Some EIGRP packets must be sent reliably. 
 </p>
 
 <p>
@@ -1465,8 +1469,9 @@ of varying speed links.
  </p>
  <p>
  <b>Sequence Number: </b> To ensure the reliable transmission of certain packet types with EIGRP, 
- a sequence number is set on certain packet types, an acknowledgement 
- number to acknowledge that packets have been received correctly. When a packet requires acknowledgement, the sequence 
+ a sequence number is set on certain packet types. Packets with a sequence number 
+ greater than zero require acknowledgement. The sequence number of the packet is 
+ contained in the acknowledgement message to acknowledge that packets have been received correctly. When a packet requires acknowledgement, the sequence 
  number is set to a non-zero value. If the value is zero, then the packet does not require acknowledgement. The acknowledgement 
  number is used along with a non-zero sequence number in a unicast packet exchange. When required, it is set to the same 
  value as the acknowledged packet's sequence number wthin an acknoweledgement Hello packet and sent back to the initial 
@@ -1493,8 +1498,8 @@ of varying speed links.
  <h4>1. Hello Packet</h4>
  <p>
  Hello packets are used primarily for neighbor discovery and maintenance of the 
- neighbor relationship where they act as keepalive messages. The hello-interval controls the 
- number of times that the hello packets are sent from an interface. By default, the hello interval is 5 seconds.
+ neighbor relationship where they act as keepalive messages. The hello-interval 
+ sets the time for hello packets to be transmitted by an interface. By default, the hello interval is 5 seconds.
  The Hello packet body contains sender's K-values, hold time and TLV (Type, Length Value) of the EIGRP version and TLV
  version used. Hello packets are often sent to multicast 224.0.0.10 on IPv4 
  networks and FF02::A on IPv6 networks.
@@ -1543,10 +1548,10 @@ of varying speed links.
  Hello packets don't require acknowledgement hence considered unreliable; 
  they have a sequence number of zero (0). 
  They are used for acknowledgment of reliable packet types such as Update packets.
- When used in this capacity, the packet is empty but with an acknowledgement number set to sequence 
+ When used in this capacity, the packet body is empty but with an acknowledgement number set to sequence 
  number of the received packets and with the unicast destination address of the sender. Additionally, acknowledgment packets 
  are sent in unicast so they do not use the destination multicast IP address of 
- 224.0.0.10 and MAC address 01:00:05:00:00:0a.
+ 224.0.0.10 and MAC address 01:00:5e:00:00:0a.
     
  </p>
  <p>
@@ -1585,7 +1590,8 @@ of varying speed links.
  authentication.
  </p>
  <ul>
- <li><b>Parameter TLV: </b>includes local device's K-values and hold timer value. These are used to determine compatibilitiy 
+ <li><b>Parameter TLV: </b>includes local device's K-values and hold timer value. 
+ These are used to determine compatibility 
  for neighbor establishment.
      <ul>
        <li><b>Peer Termination:</b> A peer termination is transmitted using a Hello packet with 
@@ -1655,9 +1661,8 @@ of varying speed links.
  IPv6 prefixes that were originally advertised using EIGRP (internal) were given the TLV value of 0x0402 and 
  redistributed prefixes (external) 0x0403. Cisco used these TLV values in older software versions prior to TLV v1.5. Older 
  TLVs have been deprecated in favor of multi-protocol TLVs not specific to the protocol type. When using these protocol 
- independent TLVs 0x0602 is used for IPv4 and IPv6 internal routes and 0x0603 for external.
+ independent TLVs, 0x0602 is used for IPv4 and IPv6 internal routes and 0x0603 for external.
  </p>
- 
  
  <h4>2. Update Packet</h4>
  <p>
@@ -1675,7 +1680,7 @@ allowing each router to independently identify the shortest path.
  are considered reliable hence have a non-zero sequence number.   
  </p>
  <p>
- Update packets can also serve the purpose of acknowledging a previously received Update packet. In such as scenario, 
+ Update packets can also serve the purpose of acknowledging a previously received Update packet. In such a scenario, 
  acknowledge field of the EIGRP header of the Update packet will contain the sequence 
  of the Update packet being acknowledged.
  </p>
@@ -1788,7 +1793,7 @@ allowing each router to independently identify the shortest path.
  <h4>3. Query Packet</h4>
  <p>
  EIGRP Query packets are used when a route goes active because a successor is lost and no feasible successor exists. These packets are sent to 
- all other neighbors that were not the former successor. This query performs two functions: 
+ all other neighbors that are not successor to the lost route. This query performs two functions: 
  <ul>
  <li>To request for an alternate path to the requested destination.</li>
  <li>To poison the routes that were formerly available through the path that is now down.
@@ -2026,7 +2031,10 @@ in the Query packet that use the local router as a next hop.
  </ul>
  Sometimes replies are lost or delayed. 
  This results in stuck-in-active (SIA) conditions. SIA is caused by failure to receive a reply from all queried devices within 
- a defined query time interval which by default is 90 seconds. This can result in a neighborship being reset. Two additional 
+ a defined query time interval which by default is 90 seconds. This can result in a neighborship being reset. 
+ </p>
+ <p>
+ Two additional 
  message types have been added: SIA-query and SIA-reply. SIA-query is sent at half query time if a reply is not seen. Its
  primary purpose is to verify the status of the query. SIA-reply is sent if that neighbor is still waiting for a reply to 
  its query from its neighbor with an 'active' bit set. If that neighbor is completed with its processing of the query, it 
@@ -2713,25 +2721,25 @@ Routing Protocol is "eigrp 1"                                                <br
  the formulae
  </p>
  <div>
- <code>
+ <code><b>
  32-bit metric = 64-bit metric &times; (1 &div; RIB-scale value)
+ </b>
  </code>
  </div></p>
  <p>
- The RIB-scale value is 128 as shown in the output of the command <code>show ip protocols</code>. 
+ The RIB-scale value is 128 as shown in the output of the command 
+ <code><b>show ip protocols</b></code>. 
  </p>
  <p>
  Therefore the 32-bit metric calculated as:
  </p>
  <div>
- <code>
+ <code><b>
  32-bit metric = 1392640 &times; (1 &div; 128)
- </code>
+ </b></code>
  </div></p>
  <p>
- <div><code>
- 32-bit metric = 10880
- </code></div></p>
+ <div><code><b> 32-bit metric = 10880</b> </code></div></p>
  </p>
  
  <p>
@@ -2785,16 +2793,15 @@ The reply process continues upstream for the queries until the first router&#39;
 <p>
 <p>
 Paths without a feasible successor can be viewed using the command: 
-<code><b>show ip eigrp topology zero-successors</b></code>. Usually, these are 
-routes competing with a route that has a better administrative distance such as 
-directly connected routes.
+<code><b>show ip eigrp topology zero-successors</b></code>.
 </p>
 </p>
 
 <h3>Paths with a feasible successor</h3>
 <p>
 <ul>
-<li>Loss of successor does not make a route Active. The device receiving the query sends a Reply with the appropriate 
+<li>Loss of successor does not make a route go into the Active state. 
+The device receiving the query sends a Reply with the appropriate 
 EIGRP attributes.</li>
 <li>Feasible successor is instantly promoted to successor.</li>
 <li>Result is sub-second convergence. </li>
@@ -2998,7 +3005,7 @@ The following can be learned from the output of the command <code><b>show ip pro
   <li><b>Filters: </b> 
     <ul>
      <li>filtering is being applied on inbound routes with a route map named RM_DENY_19216800 applied to 
-  all interfaces</li>
+  all interfaces (using <code><b>af-interface default</b></code> command).</li>
   <li>an offset-list is modifying the metric of all routes that permitted in access control list ACL_10200340 
   and is applied to all inbound routes entering interface GigabitEthernet0/0.
   </li>
@@ -3015,8 +3022,8 @@ The following can be learned from the output of the command <code><b>show ip pro
   <li><b>Total Redist Count</b> the device is not implementing redistribution hence count is zero (0).</li>
   <li><b>Automatic summarization</b> is currently disabled (default).</li>
   <li><b>Maximum hop count</b> supported is 100.</li>
-  <li><b>Routing for Networks:</b> local device is advertising all networks within 
-  the following addresses: 10.8.0.0/16, 10.100.1.16/28, 10.100.0.0/23</li>
+  <li><b>Routing for Networks:</b> local device is advertising the following 
+  networks: 10.8.0.0/16, 10.100.1.16/28, 10.100.0.0/23</li>
   <li><b>Routing Information Sources</b> device has formed neighborships with five (5) devices.
 </ul>
 </p>
@@ -3321,7 +3328,8 @@ R8#
 </code>
 </div></p>
 <p>
-Sometimes, Hello packets can get in the way of troubleshooting using debug eigrp packets. To filter out Hello packets 
+Sometimes, Hello packets can get in the way of troubleshooting using the command 
+<code><b>debug eigrp packets</b></code>. To filter out Hello packets 
 from the debug output, append the <code><b>terse</b></code> keyword.
 </p>
 <p><div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
@@ -4936,6 +4944,7 @@ Because it is redistributed, the propagated default route will be advertised as 
 <p><div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
 <code>
 R4(config)#<b>ip route 0.0.0.0 0.0.0.0 10.200.45.2                      </b> <br />
+R4(config)#<b>router eigrp 1</b><br>
 R4(config-router)#<b>redistribute static metric 1000000 1 255 1 1500    </b> <br />
 R4(config-router)#<b>do show ip protocols                               </b> <br />
 *** IP Routing is NSF aware ***                                          <br />
@@ -4989,7 +4998,7 @@ such as:
 <h3 id="EIGRP_K-VALUES">Custom K-values</h3>
 <p>
 If the design of the network requires that delay and load be included in metric 
-calculation in addition to bandwidth and delay in metric calculations, modification of the K-values may be 
+calculation in addition to bandwidth and delay, modification of the K-values may be 
 required. K-values for the path metric calculation are set with the command 
 <code><b>metric weights &lt;tos&gt; &lt;K1&gt; &lt;K2&gt; &lt;K3&gt; &lt;K4&gt; &lt;K5&gt; [&lt;K6&gt;]</b></code> under the EIGRP process. 
 The TOS value always has a value of 0, and the K6 value is used for wide metric 
@@ -5006,7 +5015,7 @@ The K-values are displayed with the <code><b>show ip protocols</b></code> comman
 <p>
 Default EIGRP composite metric is based on bandwidth and delay. Bandwidth is the lowest bandwidth along the path on a 
 per prefix basis. Delay is cumulative on a hop-by-hop basis. It is recommended to influence path selection by 
-modifying the interface delay. The interface delay is mostly used by EIGRP for 
+modifying the interface delay. The interface delay is largely used by EIGRP for 
 metric calculation unlike other variables such as bandwidth that 
 may be used by other processes running on the router such as OSPF in their route 
 metric calculation. 
@@ -5062,9 +5071,11 @@ EIGRP-IPv4 Topology Entry for AS(1)/ID(3.3.3.3) for 10.8.10.0/24               <
 </code>
 </div></p>
 <p>
-The interface GigabitEthernet1/0 has a default delay of 10 microseconds. The delay is increased from 10 microseconds to 
-10000 microseconds. Note that the delay value entered is in tens of microseconds. This increases the metric of the path 
-though interface GigabitEthernet1/0 and EIGRP then selects the path through interface FastEthernet3/0 as its metric is 
+The interface GigabitEthernet1/0 has a default delay of 10 microseconds. The 
+delay is increased from 10 microseconds to 
+10000 microseconds. Note that the delay value entered is in tens of microseconds.
+This increases the metric of the path 
+through interface GigabitEthernet1/0 and EIGRP then selects the path through interface FastEthernet3/0 as its metric is 
 now considered the best.
 </p>
 <p><div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
@@ -5284,7 +5295,8 @@ Dividing the feasible successor metric by the successor route metric provides th
 multiplier is a whole number, and any remainders should always round up.
 </p>
 <p>
-In classic-mode EIGRP, unequal cost load balancing is configured using the variance command under the EIGRP router
+In classic-mode EIGRP, unequal cost load balancing is configured using the 
+<code><b>variance</b></code> command under the EIGRP router
 process.
 </p>
 
@@ -5458,12 +5470,13 @@ R8#                                      <br />
  <h3>Maximum Paths</h3>
  <p>
  The number of paths to a destination network that can be installed in the 
- routing table can be controlled 
- using the <code><b>maximum-paths &lt;1-16&gt;</b></code> command. On Cisco devices, the default number of maximum paths is four (4). 
- Maximum paths applies to be equal cost and unequal cost load-balancing.
+ routing table can be controlled using the <code><b>maximum-paths &lt;1-16&gt;</b></code> command. 
+ On Cisco devices, the default number of maximum paths is four (4). 
+ Maximum paths applies to equal cost and unequal cost load-balancing.
  </p>
  <p>
- In named-mode, maximum paths is configured under the topology base section of the appropriate address family. In the following
+ In named-mode, maximum paths is configured under the topology base section of 
+ the appropriate address family. In the following
  configuration, the default maximum paths is decreased to two (2).
  </p>
  
@@ -5673,7 +5686,7 @@ associated with different routes. This is the default setting.
 Similarly, if the <code><b>traffic-share</b></code> command with the <code><b>
 min</b></code> keyword is configured, the traffic is sent only across the 
 minimum-cost path, even when there are multiple paths in the routing table. This is identical to the 
-forwarding behavior without use of the variance command. The <code><b>min</b></code> keyword has the additional option 
+forwarding behavior without use of the <code><b>variance</b></code> command. The <code><b>min</b></code> keyword has the additional option 
 <code><b>across-interfaces</b></code>.
 However, if you use the <code><b>traffic-share min</b></code> command and the 
 <code><b>variance</b></code> command, even though traffic is sent over the 

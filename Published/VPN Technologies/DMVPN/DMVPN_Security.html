@@ -70,13 +70,13 @@ Traditional IPSec provides two modes of packet protection; tunnel and transport:
     <li><b>Tunnel mode:</b> the entire original packet is encrypted and a new set
     of IPSec headers is added. For encrypted DMVPN packets that use ESP tunnel 
     mode, the original packets have the GRE flags added to them, and then the 
-    new GRE IP header is added for routing the packets on the transport (underlay)
+    new GRE IP header is added for routing the packets in the transport (underlay)
     network. That portion of the packets is encrypted, a signature for the encrypted 
     payload is added. Then a new IPSec IP header is added for routing the packets 
-    on the transport (underlay) network. The GRE IP header adds an extra 20 bytes 
+    in the transport (underlay) network. The GRE IP header adds an extra 20 bytes 
     of overhead, the GRE flags add an extra 4 bytes of overhead, the IPsec IP 
     header adds an extra 20 bytes of overhead, and depending on the encryption 
-    mechanism, a varying amount of additional bytes are added for the encrypted signature.
+    mechanism, a varying number of additional bytes are added for the encrypted signature.
     <!--
     <p>
     Tunnel mode can use AH or ESP as the protection suite.
@@ -95,14 +95,14 @@ Traditional IPSec provides two modes of packet protection; tunnel and transport:
     
     <li><b>Transport mode:</b> In this mode, only the packet payload is encrypted.
     The GRE header is maintained. 
-    In this mode, the packet is routed based on the original IP headers. For 
+    The packet is routed based on the original IP headers. For 
     encrypted DMVPN packets that use ESP transport mode, the original packets have
     the generic routing encapsulation (GRE) flags added to them, and then that 
     portion of the packets is encrypted. A signature for the encrypted payload 
     is added, and then the GRE IP header is added for routing the packets on the 
     transport (underlay) network. The GRE IP header adds an extra 20 bytes of 
     overhead, the GRE flags add an extra 4 bytes of overhead, and depending on 
-    the encryption mechanism, a varying amount of additional bytes are added for
+    the encryption mechanism, a varying number of additional bytes are added for
     the encrypted signature. 
     
     </li>
@@ -847,7 +847,7 @@ key involves configuration of the following:
 
 <h2>Step 1: Configure the IKEv2 Keyring</h2>
 <p>
-The IKEv2 keyring is a repository of the pre-shared keys. In a keyring, it is 
+The IKEv2 keyring is a repository for configured pre-shared keys. In a keyring, it is 
 possible to define which keys apply to which hosts. Identification of the password 
 is based on the IP address of the remote router. The IKEv2 keyring is created 
 with the following steps:
@@ -935,7 +935,7 @@ The peer IP address is defined with the command <code><b>match identity remote a
     <li> 
     <b>(Optional) Configure the local router’s identity:</b>
     the local router’s identity can be set based on an IP address with the command 
-<code><b>identity local address &lt;ip-address&gt;&gt;</b></code>. A loopback address is recommended as it is 
+<code><b>identity local address &lt;ip-address&gt;</b></code>. A loopback address is recommended as it is 
 always ‘up’. Note that the IP address configured here should match the IP address
 used during the certificate registration. This step is really not needed with 
 preshared key authentication but is very important in the deployment of public
@@ -1628,7 +1628,7 @@ limits the number of sessions being established or that are allowed to establish
 <ul>
     <li><b>Max-sa:</b> limits the total count of SAs that a router can establish 
     under normal conditions. The value should be set to double the number of ongoing 
-    sessions in order to achieve renegotiation.</li>
+    sessions in order to cater for renegotiation.</li>
     <li><b>Max-in-negotiation-sa:</b> limits the number of SAs being negotiated 
     at any one time.</li>
 </ul>
@@ -1670,7 +1670,7 @@ and when the lower priority packets arrive, they are discarded.
 Increasing the anti-replay window size does not impact throughput or security.
 An additional 128 bytes per incoming IPSec SA are needed to store the sequence 
 number on the decryptor. The window size is increased globally with the command 
-crypto ipsec security-association replay window-size size. Cisco recommends using 
+<code><b>crypto ipsec security-association replay window-size &lt;size&gt;</b></code>. Cisco recommends using 
 the largest window size possible for the hardware. Usually it is 1024.
 </p>
 
@@ -1695,18 +1695,18 @@ router starts to transmit additional R-U-THERE messages every retry interval for
 maximum of five retries. If no response is received, that peer is declared dead.
 </p>
 <p>
- DPD is supported by IKEv1
-and IKEv2:
+ DPD is supported by IKEv1 and IKEv2:
 <ul>
   <li><b>IKEv2:</b> DPD is configured with the global configuration command 
   <code><b>crypto ikev2 dpd &lt;interval-time&gt; &lt;retry-time&gt; [on-demand | periodic]</b></code>. 
   DPD is also configured using the IKEV2 profile mode command <code><b>dpd  &lt;interval-time&gt; &lt;retry-time&gt; [on-demand | periodic]</b></code>.
-  It is recommended that the interval time be set to twice that of the routing protocol hold time.
+  It is recommended that the interval time be set to twice that of the routing protocol hold time.</li>
 <p>
 <p>
 As it consumes CPU, it is recommended that DPD be configured on the spokes and 
 not on the hubs because a hub may have to maintain state of hundreds of branch routers.
 </p>
+</ul>
 
 <h2>Network Address Translation (NAT) Keepalives</h2>
 <p>
