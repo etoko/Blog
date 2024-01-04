@@ -5731,7 +5731,8 @@ Filtering is accomplished with the command:
 gateway prefix-list-name} {in | out} [interface-id]</b></code>
 </p>
 <p>
-EIGRP classic configuration places the command under the EIGRP process, while named-mode configuration places the command 
+EIGRP classic configuration places the command under the EIGRP process, while 
+named-mode configuration places the command 
 under topology base configuration mode. 
 Prefixes that match against <code><b>deny</b></code> statements are filtered, and prefixes that match 
 against a <code><b>permit</b></code> statement are passed.
@@ -6458,7 +6459,8 @@ Routing Protocol is "eigrp 1"                                           <br>
 <h3>Modifying the AD of Summary Routes</h3>
 <p>
 The AD of summary routes can be modified using the command <code><b>summary-metric</b></code>
-. This command can both modify the metrics of a summary route as well as AD : <code><b>distance</b></code> modifier.
+. This command can both modify the metrics of a summary route as well as AD using 
+the <code><b>distance</b></code> modifier.
 <code><b>summary-metric &lt;summary-address/subnetmask&gt; distance &lt;AD&gt;</b></code>.
 </p>
 
@@ -6562,8 +6564,9 @@ When defining the password, note that white space counts as a character.
 R7(config-keychain-key)#<b>key-string CISCO321                                  </b>                            <br />
 </code></div></p>
 <p>
-<b>Step 4: (Optional)</b> Configure the validity period of the key(s). It is important to note the accuracy of the 
-clock in mind when configuring the period when the key is valid.
+<b>Step 4: (Optional)</b> Configure the validity period of the key(s). It is 
+important to ensure the accuracy of the clock; this can be done through configuration 
+of NTP.
 </p>
 <p><div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
 <code>

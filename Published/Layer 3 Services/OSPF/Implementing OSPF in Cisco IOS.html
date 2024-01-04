@@ -246,7 +246,7 @@ few packets and the neighbor may be unable to process these large packets.
   similar route in its routing table. 
   </p>
   </li>
-  <li><b>Matching hello and dead-interval timers:</b> Unlink EIGRP, with OSPF, the 
+  <li><b>Matching hello and dead-interval timers:</b> Unlike EIGRP, with OSPF, the 
   Hello timer and dead-interval timer values must match. A Hello packet is 
   initially used for establishment of a neighbor relationship. After establishment 
   of the neighbor relationship, the Hello packet acts as a kind of keepalive to 
@@ -1122,7 +1122,7 @@ preconditions.
       subsequently.</li>
       <li><b>MS (Master - Slave):</b> indicates which of the devices becomes the 
       master of the neighbor formation process and controls the exchange of database information.
-      When the MS bit is set to 1, a device becomes the master.</li>
+      When the MS bit is set to 1, it indicates that the device is the master.</li>
       </ul>
       <li><b>Sequence:</b> Used by devices to ensure the correct ordering of 
       information between them. The determined master controls the sequence that 
@@ -1741,6 +1741,10 @@ Neighbor ID&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Pri&nbsp;&nbsp;&nbsp;State&nbsp;&nbsp;&
 
 
 <h1 id="NETWORK_TYPES">OSPF Media Dependencies and Network Types</h1>
+<p>
+
+</p>
+
 <h2>OSPF Network Types</h2>
 OSPF defines different network types to handle packet exchange with neighbors 
 connected through different types of network media and their different 
@@ -1877,7 +1881,7 @@ commands:
 <h3><code>show ip ospf interface brief</code></h3>
 <p>
 The <code><b>brief</b></code> keyword formats the output to display a list of 
-the interfaces that on which OSPF is enabled. 
+the interfaces on which OSPF is enabled. 
 </p>
 
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#DCDCDC">
@@ -2006,7 +2010,7 @@ OSPF interfaces:
   <li>OSPF network type </li>
   <li>RID of the local OSPF device</li>
   <li>Cost on the interface</li>
-  <li>How the OSPF was enabled on the interface i.e., through the interface mode 
+  <li>How OSPF was enabled on the interface i.e., through the interface mode 
   command <code><b>ip ospf &lt;process-id&gt; area &lt;area-id&gt;</b></code> or 
   using the OSPF router mode command <code><b>network &lt;network-address wilcard&gt; area &lt;area-id&gt; 
   </b></code>.
@@ -2250,7 +2254,7 @@ The ultimate goal of any OSPF network design is to make the LSDB as stable as po
 
 <p>
 The output of the command <code><b>show ip ospf database</b></code> displays a 
-summary of the LSDB. To view the the details of any LSDB entry, one has to 
+summary of the LSDB. To view the details of any LSDB entry, one has to 
 open up the LSAs that are stored in the LSDB. LSDB entries are sorted  
 according to the areas that the OSPF device is operating in; from the lowest area
 ID to the highest.
@@ -3156,7 +3160,7 @@ Fields included with an external LSA:
       <li><b>Type 2:</b> advertises a route with a static cost. This cost does 
       not change within the OSPF network. This metric type is the default Type 5 
       LSA with most vendors. It often works fine with a single connection 
-      point. If there are multiple connection points, the Type 1 external metric 
+      to the OSPF domain. If there are multiple connection points, the Type 1 external metric 
       type is preferred.</li>
     </ol>
   </li>
@@ -3268,7 +3272,7 @@ By default, external routes are redistributed as Type 2 external routes (with
 code "O E2") with a metric of 20.
 A Type 5 LSA includes a forwarding address field that directs where traffic 
 should be routed towards to reach the advertised link. Usually, this is the ASBR 
-but it could be set to another router in some designs. A route tag is included in this LSA.
+but it could be set to another router in some network designs. A route tag is included in this LSA.
 
 A forwarding address of 0.0.0.0 implies that traffic to the external routes should be forwarded to the ASBR that is 
 the advertising router for the external routes. If the forwarding address is not 0.0.0.0, 
@@ -3762,7 +3766,7 @@ following factors may influence the decision to deploy a multi-area OSPF topolog
 </ul>
 </p>
 
-<h3 id="SCALABILITY">Factors Influencing OSPF Scalability</h3>
+<h3 id="SCALABILITY">OSPF Design Decisions</h3>
 
 Scaling is determined by the utilization of three router resources: memory, CPU, 
 and interface bandwidth. The workload that 
@@ -3939,7 +3943,7 @@ The ABR does not automatically advertise a default route when a Type 5 LSA is
 blocked. The ABR of an NSSA area can be configured to advertise a default route 
 using the command:
 <code><b>area 1 nssa default-information-originate</b></code>.
-If the optional <code><b>default-information-originate</b></code> keyword is triggering
+The optional <code><b>default-information-originate</b></code> keyword triggers 
 the ABR to generate a Type 7 default route into the NSSA.
 </p>
 
@@ -3982,7 +3986,7 @@ area with the same command <code><b>area 1 nssa no-summary</b></code>.
 <h3 id="VIRTUAL_LINKS">OSPF Virtual Links</h3>
 <p>
 Discontiguous areas arise when a non-backbone area is not directly connected to 
-the backone. Another scenario where discontiguous areas exist is where the 
+the backbone. Another scenario where discontiguous areas exist is where the 
 backbone area is split-up into two or more sections with each section separated by a non-backbone area.
 
 Discontiguous areas cause the ABR of the discontiguous area not to be reachable 
@@ -4285,7 +4289,7 @@ Area 3 with this new cummulative cost.
 
 <p>
 In a multi-area OSPF topology where a non-backbone area is connected to the 
-backbone area using two or more ABRs, if a Type 3 LSA is flooded into the 
+backbone area through two or more ABRs, if a Type 3 LSA is flooded into the 
 non-backbone area of ABR R1, ABR R2 which is connected to the same non-backbone 
 area will receive this Type 3 LSA from its interface(s) in the non-backbone area.
 R2 will install these Type 3 LSAs into its LSDB but will not transfer the route 
