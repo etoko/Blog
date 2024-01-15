@@ -62,7 +62,7 @@ neighbors.
 <p>
 OSPF is classified as an Interior Gateway Protocol routing within a single 
 autonomous system. As a link state routing protocol, a router running OSPF 
-compiles a database of all the links in the network, the OSPF routers on those 
+compiles a database of all the links in the domain, the OSPF routers on those 
 links and the cost of the links. This database is the same on all routers in an OSPF area.
 Each router independently determines their best path to the destinations in this 
 database. 
@@ -101,8 +101,8 @@ of the routers in the OSPF domain.
 
 <p>
 For a router to learn and exchange routes with other OSPF routers in 
-the OSPF domain, the OSPF transitions through 
-various stages to present accurate routing information to the global/VRF routing
+the OSPF domain, the OSPF process transitions through 
+various stages before presenting accurate routing information to the global/VRF routing
 information base (RIB) or routing table. These stages include:
 
 <ul>
@@ -4620,7 +4620,7 @@ R1(config-if)#<b>ip ospf dead-interval 20 </b> </code>
 An interface can be configured to send hello packets in sub-second intervals using the 
 interface command <code><b>ip ospf dead-interval minimal hello-multiplier 
 &lt;3-20&gt;</b></code>.
-The <code><b>multiplier</b></code> is the number of hello packets sent per second;
+The <code><b>multiplier</b></code> value is the number of hello packets sent per second;
 </p>
 
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#DCDCDC">
@@ -4666,6 +4666,9 @@ failure detection mechanism by other IP routing protocols that support it such a
 BGP. BFD operates at the line-card level with little involvement of the processor. 
 This implies that BFD operates primarily at the data plane and not at the control 
 plane. 
+</p>
+<p>
+BFD operates at layer 1 and layer 2 of the OSI model.
 </p>
 <p>
 For BFD to be used for failure detection in OSPF domains, OSPF must first be configured with 
@@ -5181,7 +5184,7 @@ OSPF filtering can be implemented at the following locations:
  <ul>
    <li><b>Internal</b> i.e., between the LSDB and the routing table.</li>
    <li><b>Inter-area filtering:</b> inter-area filtering is implemented at the Area 
-   border router. Inter-area filtering can be implemented by changing the area 
+   border router. Inter-area filtering can also be implemented by changing the area 
    type to one of the stub types.</li>
    <li><b>External filtering:</b> this can be implemented at the ASBR. Changing the 
    area type can also apply filtering.</li>
@@ -5292,7 +5295,7 @@ master/slave election; processes which increase the duration of the neighbor
 adjacency formation and 
 also increase the size of the LSDB. In such cases, a broadcast network type can 
 be replaced with a point-to-point link to reduce the LSDB size and reduce the 
-neighbor formation process.
+number of stages in the neighbor formation process.
 </p>
 
 
