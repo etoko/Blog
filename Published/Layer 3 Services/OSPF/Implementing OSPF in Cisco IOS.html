@@ -190,8 +190,6 @@ The following are the adjacency preconditions:
 <p>
 <b>Troubleshooting tip:</b> if a neighbor adjacency formation stops at the <b>EXSTART</b>
 phase, then it is probable that the IP MTUs are mismatched. 
-</p>
-<p>
 OSPF can be configured to ignore this precondition using the interface mode 
   command:
  <code><b>ip ospf mtu-ignore</b></code>.
@@ -203,7 +201,7 @@ OSPF can be configured to ignore this precondition using the interface mode
 </code>
 </div></p>
 <p>
-However, ignoring MTU checks is not recommeded in production networks. This is 
+However, ignoring MTU checks is not recommended in production networks. This is 
 because if two OSPF neighbors have different MTU values and, say, the one with 
 the larger MTU value has a large LSDB, then it could send the entire LSDB in a 
 few packets and the neighbor may be unable to process these large packets.
@@ -266,7 +264,7 @@ few packets and the neighbor may be unable to process these large packets.
   area is identified by the area ID value. Area ID for the segment must match.</li>
   <li><b>Matching area type:</b> Area type flags must match i.e. whether normal, 
   stubby or Not-So-Stubby Area(NSSA).</li>
-  <li><b>Version:</b> The OSPF versions OSPv2 and OSPFv3 are not compatible. As 
+  <li><b>Version:</b> The OSPF versions OSPFv2 and OSPFv3 are not compatible. As 
   a result, the OSPF versions in use in the network must be the same.</li>
 </ol>
 
@@ -274,19 +272,19 @@ few packets and the neighbor may be unable to process these large packets.
 
 <h2 id="ADVERTISING_NETWORKS">Advertising Networks</h2>
 <p>
-For OSPF to advertise connected networks, it has to be enabled on the directly 
+For OSPF to advertise local networks, it has to be enabled on the directly 
 connected interfaces with configured IP addresses. The area that the 
-network will be resident in has to be added to the configuration. 
+network will be resident has to be explicitly defined. 
 A network can only reside in one area. This can be done in two ways: using the 
-OSPF <code><b>network</b></code> command or using the <code><b>ip ospf &lt;process-id&gt;</b></code> 
-interface command.
+OSPF <code><b>network</b></code> command or using the interface command 
+<code><b>ip ospf &lt;process-id&gt; area &lt;area-id&gt;</b></code>.
 </p>
 <h3><code>network</code> command</h3>
 <p>
 The OSPF router mode command 
 <code><b>network &lt;network-address&gt; &lt;wild-card&gt; area &lt;area-id&gt;</b></code>
 is used to specify networks to be advertised and the areas that the networks 
-reside in. When configured, any interfaces 
+reside. When configured, any interfaces 
 whose IP address is a subnet of the network configured will have OSPF enabled 
 and its network advertised. The area ID can be any value from 0 to 65,535.
 </p>
@@ -468,8 +466,8 @@ The header contains the following fields:
  <ul>
  <li><b>Version:</b> values in this field are 2 (two) for OSPv2 
  or 3 for OSPFv3. From the packet capture, the OSPF version is 2.</li>
- <li><b>Message Type:</b> type of OSPF packet. The following are the possible  
- values for the message type field:
+ <li><b>Message Type:</b> type of OSPF packet that is in the packet body. The 
+ following are the possible values for the message type field:
  <ol>
      <li> Hello packet.</li>
      <li> Database description (DBD)</li>
@@ -2186,14 +2184,14 @@ Every OSPF device has a link state database (LSDB). OSPF devices inside the same
 have the same LSDB. 
 The LSDB stores LSAs with the link state information in the local area and 
 summary information about the link states in other areas and external networks.
- The content of LSDBs are LSAs. LSDBs are populated by LSAs of different types: 
+ LSDBs are populated by LSAs of different types: 
  Type 1, Type 2, Type 3, Type 4, Type 5 and Type 7 LSAs. 
  </p>
  <p>
  An OSPF router receiving an LSA, checks its integrity
  before placing it into the LSDB. This process continues 
- domain wide until the LSDB of all routers in the same area are the same (synchronized).
- This process is referred to as flooding.
+ domain wide until the LSDB of all routers in the same area are the same i.e.,
+ are synchronized or converged.
  </p>
  <p>
  To view a summary of the LSDB, use the command <code><b>show ip ospf database</b></code>.
@@ -2280,13 +2278,13 @@ For OSPF devices in multiple areas:
 <h3>Querying the LSDB</h3>
 <p>
 The LSDB contains alot of information that can be used to gain insights into 
-the OSPF domain. Most of the commands querying the LSDB involve viewing stored 
+the OSPF domain. Most of the commands used for querying the LSDB involve viewing stored 
 LSA information. A few other commands provide an overview of the state of the 
 LSDB.
 </p>
 
 <p>
-To view the summary of the LSDB:
+To view the summary of the LSD, use the command 
 <code><b>show ip ospf database database-summary</b></code>
 </p>
 
@@ -2352,7 +2350,7 @@ R1#
 <p>
 When viewing the details of the LSAs in the LSDB, the phrase "Routing Bit Set" on 
 an LSA indicates that the route information learned from that LSA has been 
-imported into the routing table from the LSDB. This can be observed in the 
+installed in the routing table from the LSDB. This can be observed in the 
 following output where both paths are installed into the routing table:
 </p>
 
@@ -2439,7 +2437,8 @@ LSA types 1,2 are intra-area LSAs while LSA 3, 4 are inter-area LSAs. LSA Type 5
 </p>
 
 <p>
-Regardless of the type of LSA used, some fields are common to all LSAs:
+Regardless of the type of LSA used, some fields are common to all LSAs such as 
+the following:
 <ul>
   <li>LSA age</li>
  <!-- <li>Miscellaneous (Misc) options: used to indicate the type of capabilities  
@@ -2485,10 +2484,10 @@ the one with the newest information is used.
 
 <h2 id="TYPE1_LSA">Type 1 Router LSA</h2>
 <p>
-A Type 1 LSA contains lists of all OSPF-enabled interfaces on a router and their 
+A Type 1 LSA contains networks of all OSPF-enabled interfaces on a router and their 
 associated cost. It is originated by all OSPF devices in the network. It is used 
-to describe the networks that a device is attached to and the device's network 
-placement. 
+to describe the networks that a device is attached to and the device's placement 
+in the network. 
 
 Links advertised in a Type 1 LSA include stub links, point-to-point links, transit links.
 
@@ -2736,11 +2735,8 @@ addresses being the IP addresses of the virtual-link end points.
 <p>
 The Link ID value identifies the object that the link connects to, which could be: the router ID, 
 IP address of the interface of the DR, network address.
-</p>
-
-<p>
-Type 1 LSAs can be viewed by running the command: 
-<code><b>show ip ospf database router</b></code>
+Type 1 LSAs can be viewed by running the command 
+<code><b>show ip ospf database router</b></code>. 
 </p>
 
 <p>
@@ -2868,8 +2864,8 @@ Type 1 LSAs (link Type 2) advertise transit networks without subnet mask informa
 LSAs include subnet mask information for transit links. The DR advertises its 
 IP address, subnet mask and attached routers including itself.
 If a DR is not elected, a Type 2 LSA is not present. To view Type 2 LSAs: 
-issue the privileged command: 
-<code><b>show ip ospf database network</b></code>
+issue the privileged command  
+<code><b>show ip ospf database network</b></code>.
 </p>
 
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#DCDCDC">
@@ -3660,7 +3656,7 @@ its interfaces is participating in the area.
 </p>
 
 <p>
-To determine the OSPF areas that a router is participating in issue the command
+To determine the OSPF areas that a router is participating in, issue the command
 <code><b>show ip ospf interface brief</b></code>:
 
 <div style="background-color:#f4f0ec; border-style:dotted;border-width:1px;border-color:#DCDCDC">
@@ -3840,7 +3836,7 @@ router resources.
   Non-backbone areas are OSPF areas that connect to the backbone area. There are 
   two types of non-backbone areas: normal areas and stub areas. All non-backbone 
   areas must connect to the backbone area which can act as a sort of transit area
-  interconnecting two areas. 
+  interconnecting two non-backbone areas. 
   If a scenario occurs where a non-backbone area cannot connect directly to the 
   backbone area, then a virtual link must be configured to connect the 
   non-backbone area to the backbone area.
@@ -3853,8 +3849,8 @@ areas and the types of LSAs used. The types of stub areas include: stubby
 area, not-so-stubby-area (NSSA), totally stubby area and totally NSSA.
 
 To configure a stub area, every router in the stub area needs to be configured as a stub. 
-Stub areas are identified by the area flag in the hello packet.
-Stubby areas and not-so-stubby-areas are based on the OSPF  
+Stub areas are identified by the stub area flag in the hello packet.
+Stubby areas and not-so-stubby-areas are based on   
 <a href="https://www.ietf.org/rfc/rfc2328.txt">RFC 2328</a>  while totally 
 stubby and totally NSSA are non-standard (vendor specific) area types.
 </p>
@@ -3872,7 +3868,7 @@ size of the LSDB.
 
 <p>
 Stub areas are often used when there is a single exit point from an area into 
-the backbone. If multiple exit points exist, sub-optimal routing may result if 
+the backbone. If multiple exit points exist, suboptimal routing may result if 
 an area is configured as a stub area.
 </p>
 
@@ -3885,13 +3881,12 @@ an area is configured as a stub area.
 </ol>
 
 Configuration of a stubby area is accomplished using the OSPF mode command 
-<code><b>area 1 stub</b></code>. As the stub area flag must match on all routers
+<code><b>area &lt;area-id&gt; stub</b></code>. As the stub area flag must match on all routers
 in the area; all routers in the stub area should have the above command configured.
 </p>
 <p>
-When troubleshooting stub area mismatches, use the command <code><b>debug ip 
-ospf hello</b></code>. The debug command <code><b>debug ip ospf adjacencies</b></code>
-also works.
+When troubleshooting stubby area mismatches, use the debugging commands <code><b>debug ip 
+ospf hello</b></code> and <code><b>debug ip ospf adjacencies</b></code>.
 </p>
 
 <h4 id="TOTALLY_STUBBY_AREA">Totally Stubby Area</h4>
@@ -3904,13 +3899,13 @@ ASBRs are not allowed in stub or totally stubby areas.
 </p>
 <p>
 To configure a totally stubby area, on the ABR, enter the following configuration;
-<code><b>area 1 stub no-summary</b></code>. The other routers in the totally 
+<code><b>area &lt;area-id&gt; stub no-summary</b></code>. The other routers in the totally 
 stubby area can be configured with the stub area 
-command <code><b>#area 1 stub</b></code> and the adjacency will still be formed.
+command <code><b>area &lt;area-id&gt; stub</b></code> and the adjacency will still be formed.
 However, to ensure consistency in configuration, it may be preferrable to enter 
 the same totally stubby area configuration command on all the routers in the 
-totally stubby area as for the ABR.
-</p>
+totally stubby area.
+</p>                       
 <p>
 Totally stubby areas are suitable for areas with a single exit point to the 
 backbone i.e., one ABR. Multiple ABRs for a totally stubby area runs the risk 
@@ -3919,9 +3914,9 @@ of introducing suboptimal external and inter-area route paths.
 
 <h4 id="NSSA">Not-So-Stubby Area (NSSA)</h4>
 <p>
-NSSAs provide a way to get around the ASBR restriction of stubby areas and totally 
+NSSAs provide a way to get around the restriction of redistribution in stubby areas and totally 
 stubby areas. Like stubby areas, NSSA areas apply stub area rules such as 
-prohibiting Type 5 LSA from entering at the ABR. However, NSSAs allow for local 
+prohibiting Type 5 LSA from entering the area at the ABR. However, NSSAs allow for local 
 redistribution. The ASBR advertises external networks with Type 7 LSAs (NSSA 
 LSA). Type 7 LSAs carry information common to Type 5 LSAs. The format of a Type 
 7 LSA is almost identical to a Type 5 LSA. The only exceptions are:
@@ -3942,7 +3937,7 @@ LSA). Type 7 LSAs carry information common to Type 5 LSAs. The format of a Type
 The ABR does not automatically advertise a default route when a Type 5 LSA is 
 blocked. The ABR of an NSSA area can be configured to advertise a default route 
 using the command:
-<code><b>area 1 nssa default-information-originate</b></code>.
+<code><b>area &lt;area-id&gt; nssa default-information-originate</b></code>.
 The optional <code><b>default-information-originate</b></code> keyword triggers 
 the ABR to generate a Type 7 default route into the NSSA.
 </p>
@@ -3968,7 +3963,7 @@ NSSAs are often seen with service providers.
 
 <h4>Totally Not-So-Stubby Area (Totally NSSA)</h4>
 <p>
-NSSAs prohibit Type 4 and Type 5 LSAs. Totally NSSAs prohibit Type 3,4,5 LSAs but 
+NSSAs prohibit Type 4 and Type 5 LSAs. Totally NSSAs prohibit LSA type 3, 4, and, 5 but 
 allow for local redistribution. When the ABR in a totally NSSA receives a Type 3 or 5 LSA, it 
 generates a default route automatically on Cisco devices. Not all implementations 
 of OSPF generate this default route automatically. This default route is 
@@ -3976,11 +3971,11 @@ a Type 3 LSA route. The Type 7 LSA arriving at the ABR of a totally NSSA is
 translated into a Type 5 LSA.</p>
 <p>
 To configure a totally NSSA, on the ABR, enter the following command: 
-<code><b>area 1 nssa no-summary</b></code>. Other routers in the totally NSSA 
-area can be configured with the command <code><b>area 1 nssa</b></code> and 
+<code><b>area &lt;area-id&gt; nssa no-summary</b></code>. Other routers in the totally NSSA 
+area can be configured with the command <code><b>area &lt;area-id&gt; nssa</b></code> and 
 adjacency will be formed. However, to maintain consistency in the configuration,
 some prefer to configure the same command across all routers in the totally NSSA 
-area with the same command <code><b>area 1 nssa no-summary</b></code>.
+area with the same command <code><b>area &lt;area-id&gt; nssa no-summary</b></code>.
 </p>
 
 <h3 id="VIRTUAL_LINKS">OSPF Virtual Links</h3>
@@ -4041,18 +4036,22 @@ router terminating the virtual link becomes an ABR. The area in which the
 virtual-link endpoints are established is known as the transit area.  Each router 
 identifies the remote router by its RID. The virtual-link 
 can be one hop or multiple hops away from the remote virtual-link endpoint.
-
+</p>
+<p>
 The virtual link is built using Type 1 LSAs with link-Type 4.
-
+</p>
+<p>
 A virtual-link inherits costs from SPT cost between end-points. The cost must be below 65535
 otherwise the virtual link will enter a down state.
+</p>
+<p>
 A virtual-link runs as a demand circuit so errors in configuration could be hidden until flooding 
 occurs. As a demand circuit, when making configurations to the virtual link such 
 as authentication, the virtual link will have to be cleared first before the 
 configurations take effect.
 </p>
 <p>
-Configuration: (on both virtual-link endpoints)
+The following configurations illustrate how to configure virtual-link endpoints:
 </p>
 
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#DCDCDC">
@@ -4147,7 +4146,7 @@ virtual link interface:
 	  
 <h2 id="ROUTER_TYPES">OSPF Router Types </h2>
 <ul>
-  <li><b>Internal Routers: </b> all links of the router are in one non-backbone 
+  <li><b>Internal Routers: </b> all links of the router exist in one non-backbone 
   area.</li>
   <li><b>Backbone Router: </b>these are routers that have at least one interface in 
   area 0 (backbone). It can be an internal router as well as an ABR</li>
@@ -4385,9 +4384,9 @@ The method used for flooding will depend on the following factors:
   exists in the LSDB is primarily based on the link state sequence number. The 
   sequence number of an LSA is updated when new information is received through 
   an LSU.
-  It is this sequence number that is used for comparison by OSPF devices where multiple 
-  copies of the same LSA exist. If a device finds a copy that is more up-to-date 
-  than the one in its LSDB, then the local OSPF device includes it in the LSR 
+  It is this sequence number that is used for comparison by OSPF where multiple 
+  copies of the same LSA exist. If OSPF finds an LSA that is up-to-date 
+  compared to the same LSA in its LSDB, then the local OSPF device includes it in the LSR 
   sent to the originator of the LSA.
 </p>
 <p>
@@ -4418,7 +4417,7 @@ Flooding method depends on the network type:
 </p>
 <h3>Metrics</h3>
 <p>
-The decision on the path to the next hop for traffic is based on the path metric. 
+The decision on the path to the destination for traffic is based on the path metric. 
 Metric is the cumulative OSPF cost along the path. 
 The OSPF metric is called cost. The cost is calculated based on the bandwidth of 
 the exit interface. The cost is calculated as follows;  
@@ -4426,17 +4425,18 @@ the exit interface. The cost is calculated as follows;
 <code><b>cost = reference bandwidth &divide; interface bandwidth</b></code>
 <p>
 The default OSPF reference bandwidth is 100mbps. With this default reference 
-bandwidth, OSPF is unable to differentiate 
-between FastEthernet(100mbps), GigabitEthernet(1000mbps), Ten GigabitEthernet(10000mbps) or high speeds. 
-All interfaces from FastEthernet or faster will have an OSPF cost of one (1). It is
+bandwidth, OSPF is unable to differentiate the cost of Fast Ethernet (100mbps), 
+Gigabit Ethernet (1000mbps), Ten Gigabit Ethernet (10000mbps) interfaces. 
+All interfaces from Fast Ethernet or higher will have an OSPF cost of one (1). It is
 imperative to modify the default reference bandwidth in network environments with interfaces 
-having gigabitethernet or higher capacity interfaces so that OSPF can make more accurate path selection decisions. 
-
+having Gigabit Ethernet or higher capacity interfaces so that OSPF can make more accurate path selection decisions. 
+</p>
+<p>
 This default reference bandwidth can be modified with the OSPF router mode command:
 <code><b>auto-cost reference-bandwidth &lt;1-4294967&gt;</b></code>.
 The bandwidth value is in megabits per second. It is recommended that the reference 
 bandwidth be an order of magnitude higher than the largest bandwidth link in the 
-OSPF domain. If the network has Ten GigabitEthernet links, 
+OSPF domain. If the network has Ten Gigabit Ethernet links, 
 then set the reference bandwidth to 100Gps.
 </p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#DCDCDC">
@@ -4467,7 +4467,7 @@ R8(config-router)#<b>do show ip ospf</b>                                      <b
 </div></p>
 <p>
 The reference bandwidth should be set to the same value for all routers in the OSPF domain, 
-otherwise the risk of introducing sub-optimal routing to the OSPF domain may be high.
+otherwise the risk of introducing suboptimal routing to the OSPF domain may be high.
 Type 1 LSAs include the cost of each link which is in the range 1 - 65535.
 </p>
 
@@ -4535,17 +4535,46 @@ OSPF to improve performance while minimizing the load on the routers.
 There are a variety of configurations that can improve the performance of OSPF. 
 These can be categorized into the following:
 <ul>
- <li><b>Accelerating OSPF convergence</b> by modifying default dead-interval and hello 
- interval timers and the use of BFD.</li>
- <li><b>Controlling OSPF LSA generation and propagation</b> through LSA throttling, 
- LSA flood pacing, LSA group pacing and LSA retransmission pacing.</li>
- <li><b>Altering Shortest Path First behaviour</b> through SPF throttling and enabling 
- incremental SPF (iSPF).</li>
- <li><b>Reducing the size of the LSDB</b> through prefix summarization, creation of 
- OSPF areas, filtering</li>
- <li><b>Reducing the effects of restarts on OSPF</b> through grace LSAs and NSF.</li>
- <li><b>OSPF traffic engineering</b> by altering the administrative distance, 
- interface bandwidth and link cost, default route propagation.</li>
+ <li><b>Accelerating OSPF convergence</b> through:
+   <ul>
+     <li>Modifying default dead-interval and hello interval timers</li>
+     <li>BFD</li>
+     </ul>
+     </li>
+ <li><b>Controlling LSA generation and propagation</b> through:
+   <ul>
+     <li>LSA throttling</li> 
+     <li>LSA flood pacing</li>
+     <li>LSA group pacing</li>
+     <li>LSA retransmission pacing </li>
+     </ul>
+     </li>
+ <li><b>Altering Shortest Path First behaviour</b> through:
+   <ul>
+     <li>SPF throttling</li>
+     <li>Enabling incremental SPF (iSPF)</li>
+     </ul>
+     </li>
+ <li><b>Reducing the size of the LSDB</b> through: 
+   <ul>
+     <li>Prefix summarization</li>
+     <li>Creation of OSPF areas</li>
+     <li>Filtering</li>
+     </ul>
+  </li>
+ <li><b>Reducing the effects of restarts on OSPF</b> through: 
+   <ul>
+   	<li>Grace LSAs</li>
+   	<li>NSF</li>
+   	</ul>
+   	</li>
+ <li><b>Traffic engineering</b> through:
+   <ul>
+   	<li>Altering the administrative distance</li>
+   	<li>Interface bandwidth and link cost</li>
+   	<li>Default route propagation</li>
+  </ul>
+  </li>
 </ul>
 </p>
 
@@ -4578,7 +4607,7 @@ The process of network convergence can be categorized into a set of
 </p>
 
 <p>
-OSPF convergence time can be decreased through:
+OSPF failure detection time can be decreased through:
 <ol type="i">
   <li>Modification of default hello and dead interval timer values</li>
   <li>Use of Bi-Directional Forward Detection (BFD)</li>
@@ -4588,12 +4617,13 @@ OSPF convergence time can be decreased through:
 
 <h3 id="TIMERS">Hello and Dead Interval Timers</h3>
 <p>
-OSPF default timer values are not often the best method to rely on for failure 
-detection.  The hello and dead-interval timers
-can be modified to lower values to increase the speed of failure detection by OSPF.
-
 In today's converged high-bandwidth networks, the 40 second dead 
 interval timer to detect a failed neighbor are considered unacceptable. 
+Default OSPF timer values are not often the best method to rely on for failure 
+detection.  The hello and dead-interval timers
+can be modified to lower values to increase the speed of failure detection.
+
+
 
 </p>
 <p>
@@ -4692,7 +4722,7 @@ BFD supports two operating modes: asynchronous and demand modes.
 <p>
 Echo function can be used in either BFD demand mode or asynchronous mode. If the 
 BFD echo function is enabled, devices are configured to send echo packets towards 
-a control system with the expectation of having them loopback to the remote system. 
+a remote system with the expectation of having them loopback. 
 This verifies the path to the remote system as well as the forwarding path of the 
 remote system. BFD sessions can be configured independently in both directions. 
 </p>
@@ -4715,10 +4745,14 @@ failure detection using BFD in OSPF.
      higher-layer protocols of the failure.</li>
   </ul>
   </li>
-  <li><b>Step 2 - OSPF BFD Configuration:</b> In the OSPF process, register BFD 
+  <li><b>Step 2 - OSPF BFD Configuration:</b> 
+  <ul>
+    <li><b>All OSPF-enabled interfaces:</b> In the OSPF process, register BFD 
   as the failure detection mechanism using the command <code><b>bfd all-interfaces</b></code>
-  to configure BFD on all OSPF enabled interfaces. To configure BFD on individual 
-  interfaces, use the interface configuration command <code><b>ip ospf bfd</b></code>.
+  to configure BFD on all OSPF enabled interfaces.</li>
+  <li><b>Specific interfaces:</b> To configure BFD on individual 
+  interfaces, use the interface configuration command <code><b>ip ospf bfd</b></code>.</li>
+  </ul></li>
 </ul>
 </p>
 <h4>Verification</h4>
@@ -4727,7 +4761,7 @@ BFD operation and statistics can be verified using the commands: <code><b>show b
 </p>
 
 
-<h2 id="CTRL_LSA_GENERATION">Controlling OSPF LSA Generation and Propagation</h2>
+<h2 id="CTRL_LSA_GENERATION">Controlling LSA Generation and Propagation</h2>
 <p>
 LSA generation and propagation in OSPF are controlled by the following features:
 <ul>
@@ -4770,8 +4804,8 @@ hold-interval and LSA max-interval:
 
 <p>
 An initial LSA is sent immediately a network change is detected. The generation of the 
-second LSA is determined by the LSA start-interval. If an event occurs and the OSPF 
-device needs to send an additional update packet, it waits until the OSPF start 
+second LSA is determined by the LSA start-interval. If an event occurs and OSPF 
+needs to send an additional update packet, it waits until the OSPF start 
 interval expires. At this point, the OSPF hold interval begins. If an event occurs 
 during this hold interval, the device waits to send that update packet till that 
 hold interval expires. If this happens, the next LSA hold interval is doubled. 
@@ -5100,7 +5134,7 @@ the summary route is permitted across the ABR. When performing area summarizatio
   protection from processing remote network changes as they occur in other 
   areas. Link flaps in aggregate prefixes do not trigger SPF calculations in other areas.
   Area summarization can be configured using the command 
-  <code><b>area 0 range &lt;summary-address&gt; &lt;netmask&gt;</b></code> 
+  <code><b>area &lt;area-id&gt; range &lt;summary-address&gt; &lt;netmask&gt;</b></code> 
  </p>
  <p><div style="background-color: #f4f0ec; border-color:#DCDCDC; border-style: solid; border-width:1px">
 <code>
@@ -5126,7 +5160,7 @@ keyword <code><b>cost &lt;metric&gt;</b></code> to the area summarization comman
   being redistributed into the OSPF domain. It is a good idea to limit the number 
   of individual routes being redistributed. This summary can be configured at the 
   ASBR. If the IP addressing of the external routes is not contiguous, external 
-  summarization may introduce sub-optimal routing problems.
+  summarization may introduce suboptimal routing problems.
   External summarization summarizes Type 5 into Type 5 and Type 7 into Type 7 LSAs 
 by ASBR.
 </p>
@@ -5255,7 +5289,7 @@ are suppressed including secondary addresses.
 Prefix suppression is very handy especially on large networks to reduce the size
 of the LSDB with a large number of transit links whose addresses are not often 
 used. The suppression of these addresses domain-wide can considerably reduce the 
-size of the LSDB. Such prefix suppression, though does complicate troubleshooting
+size of the LSDB. Such prefix suppression, though, does complicate troubleshooting
 because these intermediate links cannot be accessed.
 </p>
 
@@ -5264,8 +5298,8 @@ because these intermediate links cannot be accessed.
 Local OSPF route filtering involves preventing a router from installing a network 
 from the LSDB into the RIB. This involves two steps: 
 <ol>
-	<li>identification of the route (using an ACL, prefix-list, route-map)</li>
-	<li>applying the filtering using a distribute-list command</li>
+	<li>Identification of the route (using an ACL, prefix-list, route-map)</li>
+	<li>Applying the filtering using a distribute-list command</li>
 </ol>
 </p>
 
@@ -5489,10 +5523,9 @@ R8(config-if)#                                                                 <
 </div></p>
 </p>
  </li>
- <li><b>Process auto-cost: </b>Modification of the default reference bandwidth implicitly changes the OSPF cost for 
- certain paths. </li>
- <li><b>Process neighbor cost: </b>In NBMA networks, neighbors are statically configured using the OSPF router mode command 
- <code><b>neighbor &lt;x.x.x.x&gt;</b></code>. A static cost can be assigned for the link to this neighbor.</li>
+ <li><b>Process <code>auto-cost</code>: </b>Modification of the default reference bandwidth implicitly changes the OSPF cost. </li>
+ <li><b>Process <code><b>neighbor cost</b></code>: </b>In NBMA networks, neighbors are statically configured using the OSPF router mode command 
+ <code><b>neighbor &lt;x.x.x.x&gt; cost &lt;cost&gt;</b></code>. A static cost can be assigned for the link to this neighbor.</li>
 </ul>
 
 
@@ -5707,7 +5740,7 @@ In NSSA areas, the default route is not generated by default. To generate the
 default route, use the command <code><b>area 10 nssa 
 default-information-originate</b></code>. This command does not require a default 
 route to exist. Also, this command is entered after the command <code><b>area 10 
-nssa</b></code>. In a totally NSSA, deafult route is installed by default as a 
+nssa</b></code>. In a totally NSSA, default route is installed by default as a 
 Type 3 LSA.
 </p>
 
@@ -5808,7 +5841,7 @@ password for Type 1 authentication and hash for Type 2 authentication.
 OSPF supports three types of authentication:
 <ul>
  <li><b>Type 0 null</b>: offers no authentication at all</li>
- <li><b>Type 1</b>: Simple password option uses cleartext password</li>
+ <li><b>Type 1</b>: Simple password with clear text password</li>
  <li><b>Type 2</b>: Cryptographic MD5 or SHA; RFC 5709 introduced SHA authentication 
  which uses SHA-1, SHA-256, SHA-384 and SHA-512.</li>
 </ul>
@@ -6116,7 +6149,7 @@ in the packet header.
 </p>
 <!-- 
 <h1 id="TSHOOT">Troubleshooting</h1>
-Common reasons for sub-optimal traffic flow;
+Common reasons for suboptimal traffic flow;
 <ul>
  <li>Auto-cost reference bandwidth is not configured the same throughout the OSPF domain.</li>
  <li>Summarization is not consistently applied on ABRs for inter-area summarization.</li>
@@ -6179,7 +6212,7 @@ OSPFv3 flooding scope is now explicitly coded in the LSA's LS type field:
   router LSAs, network LSAs, inter-area prefix LSAs, inter-area router LSAs, and
   intra-area prefix LSAs. </li>
   <li><b>Autonomous System scope: </b>flooding throughout the entire OSPF routing domain. 
-  OSPFv3 type 5 LSAs have AS scoping.  A router that originates AS-scoped LSAs is
+  OSPFv3 type 5 LSAs have AS flood-scoping.  A router that originates AS-scoped LSAs is
       considered an AS Boundary Router (ASBR) and will set its E-bit in router-LSAs for regular areas.
 </ol>
 </p>
@@ -6286,7 +6319,7 @@ R7(config)#<b>router ospfv3 1 </b>
 
 <li><b>Define the router ID: </b> the router ID (RID) is used to uniquely identify a router in 
 the OSPFv3 domain. If more than one router is using the same RID, some prefixes may be dropped by a 
-router with the belief that the dropped prefixes were locally originated. This will result in sub-optimal 
+router with the belief that the dropped prefixes were locally originated. This will result in suboptimal 
 routing at best. Note that the RID of 0.0.0.0 is reserved and should not be used.
 <p><div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#DCDCDC">
 <code>
@@ -6305,7 +6338,7 @@ R7(config-if)#<b>ospfv3 1 ipv6 area 7    </b>     <br />
 </li>
 </ol>
 
-<p>It is good practice to confirm the OSPFv3 configuration by using some verification commands:</p>
+<p>It is good practice to verify the OSPFv3 configuration:</p>
 <p><div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#DCDCDC">
 <code>
 R7#<b>show ospfv3 interface gigabitethernet 0/0 </b>                                <br /> 
@@ -6405,7 +6438,7 @@ Gi0/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1&nbsp;&nbsp;&nbsp;&nbsp;&n
 </code>
 </div></p>
 
-<h2>OSPF Neighbor Adjacency</h2>
+<h2>OSPFv3 Neighbor Adjacency</h2>
 <p>
 Neighboring OSPFv3-enabled routers need to become adjacent 
 before they can share their known prefixes. The adjacency stage depends on the OSPF network type of the neighbors. 
@@ -6792,7 +6825,7 @@ With OSPFv3, prefix information is propagated through LSAs 8 and 9 to reference 
 If a stub network is added or removed, full SPF is not required. 
 </p>
 
-<ul>
+<ol>
   <li><b>Type 1 Router LSA (0x2001): </b> 
   <p>
   Every router generates router LSAs that describe the state and cost of 
@@ -7691,7 +7724,7 @@ R8#                                                              <br />
 </code>
 </div></p>
 </li>
-</ul>
+</ol>
 
 <h3>OSPFv3 Link-local Forwarding</h3>
 <p>
