@@ -77,13 +77,13 @@ link state routing alogrithms to calculate the shortest path to a destination.
 OSPF uses IP protocol number 89 and provides its own transport layer services.
 The current versions of OSPF are OSPFv2 that supports IPv4 and OSPFv3 that supports 
 IPv4 and IPv6. The two versions of OSPF are not compatible i.e., routers running OSPFv3 cannot form an 
-IPv4 adjacency with routers running OSPFv2. This entire article discusses OSPFv2.
+IPv4 adjacency with routers running OSPFv2.
 </p>
 
 <P>
 In Cisco IOS, to configure OSPF, issue the global config mode command 
-<code><b>router ospf &lt;process-id&gt;</b></code> where 
-process-id is a value between 1 - 65535:
+<code><b>router ospf &lt;process-id&gt;</b></code> where <code><b>process-id</b></code>
+is a value between 1 - 65535:
 </p>
 
 <p>
@@ -297,9 +297,9 @@ and its network advertised. The area ID can be any value from 0 to 65,535.
   </code>
 </div></p>
 <p>
-It is possible to add all interfaces using a single <code><b>network</b></code> 
-command. The following snippet adds all interfaces with a configured IP address 
-to area 0; any subsequent interfaces that will be configured with IP addresses will 
+It is possible to advertise the network of all interfaces using a single <code><b>network</b></code> 
+command. The following snippet advertises the network of all interfaces with a 
+configured IP address as residents of area 0; any subsequent interfaces that will be configured with IP addresses will 
 have OSPF enabled and their configured networks advertised.
 </p>
 <div style="background-color:#f4f0ec; border-style:dotted;border-width:1px;border-color:#DCDCDC">
@@ -390,7 +390,7 @@ link state database information. Together, these packets ensure that the
 information in the neighbor table and the LSDB is accurate and regularly updated.
 </p>
 <p>
-OSPF routers exchange prefix information using unicast, multicast packets or both
+OSPF routers exchange prefix information using unicast packets, multicast packets or both
 depending on the OSPF network type. If multicast packets are used, the OSPF 
 multicast destination addresses used are:
 
@@ -582,7 +582,7 @@ preconditions.
       <li><b> LLS Data block (L):</b> support for non-stop forwarding (NSF) and 
       presence of NSF body containing features enabled.</li>
       <li><b> NSSA (N) bit:</b> If the N-bit is set to 1, then the router is in 
-      a not-so-stubby area(NSSA).</li>
+      a not-so-stubby area (NSSA).</li>
       <li><b> Multicast bit (MC):</b> </li>
       <li><b> External Routing bit (E):</b> If set to 1, then the router interface 
       is a normal area. If the E-bit is set to 0, then the router is in a stub 
@@ -1109,7 +1109,7 @@ preconditions.
   <ul>
     <li><b>Interface MTU:</b> indicates the largest-sized IP datagram that is 
     allowed on a link. It is one of the fields that must match between potential 
-    neighbors.</li>
+    neighbors as part of the adjacency formation criteria.</li>
     <li><b>Options:</b> Relays the same information as in the hello packet options
     field specifically, device capability information.</li>
     <li><b>DB Description: I,M, and MS bits:</b> Used to communicate the flow of information 
