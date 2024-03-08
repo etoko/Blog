@@ -1110,10 +1110,10 @@ preconditions.
     <li><b>Interface MTU:</b> indicates the largest-sized IP datagram that is 
     allowed on a link. It is one of the fields that must match between potential 
     neighbors as part of the adjacency formation criteria.</li>
-    <li><b>Options:</b> Relays the same information as in the hello packet options
-    field specifically, device capability information.</li>
-    <li><b>DB Description: I,M, and MS bits:</b> Used to communicate the flow of information 
-    between neighbors: 
+    <li><b>Options:</b> Relays the same information as the hello packet options
+    field specifically; device capability information.</li>
+    <li><b>DB Description: I,M, and MS bits:</b> Used to communicate information 
+    on the the flow of DBD messages between neighbors: 
     <ul type="i">
       <li><b>I (Init bit):</b> indicates that this is the first bit in a series.</li>
       <li><b>M (More):</b> indicates that additional DBD packets will be sent 
@@ -1432,18 +1432,18 @@ Its format is similar to the DBD packet.
 <h2 id="ADJACENCY_STATES">OSPF Adjacency States</h2>
 
 <p>
-When OSPF devices are forming neighbor relationships with each other, the state 
-of this OSPF neighbor adjacency transitions through up to nine states 
-depending on the OSPF network type; these include DOWN, ATTEMPT, WAIT, INIT, 
+When OSPF devices are forming neighbor relationships with each other, the adjacency 
+state transitions through up to nine phases depending on the OSPF network type; 
+these include DOWN, ATTEMPT, WAIT, INIT, 
 2-WAY, EXSTART, EXCHANGE, LOADING, FULL. In some OSPF network types, the number of stages may be less:
 
 <ol>
   <li><b>DOWN:</b> Initial state of any neighborship. It indicates that no 
-  OSPF packets have been sent to or received from any neighbor. 
+  OSPF packets have been sent or received from any neighbor. 
   Additionally, the OSPF-enabled interface of the local router may be shutdown. </li>
   <li><b>ATTEMPT:</b> A unicast hello packet has been sent to a neighbor but no hello 
   packet has been received back. This state applies to an OSPF neighborship that 
-  is manually configured using the OSPF process command <code><b>neighbor 10.2.3.4</b> </code> 
+  is manually configured using the OSPF process command <code><b>neighbor &lt;ip_address&gt;</b> </code> 
   in NBMA environments.</li>
   <li>
 
@@ -1475,8 +1475,8 @@ the duration of the dead-interval in this state.
   </ul>
   <li><b>EXSTART:</b> This state is reached by devices that have determined that 
   they need to reach the FULL state of adjacency such as the devices on point-to-point 
-  links. On broadcast links, the DR and BDR are the only devices whose OSPF process 
-  reach this stage and continue to the FULL stage with each other as well as with 
+  links. On broadcast links, the DR and BDR are the only devices whose adjacency
+   reach this stage and continue to the FULL stage with each other as well as with 
   DROthers. 
   <ul>
     <li>Devices begin the process to exchange complete link state information.</li>
@@ -1844,7 +1844,7 @@ Others do not support Type 2 LSA packets.
 <p>
 The OSPF network type of an interface can be changed from its default using the 
 interface mode command: <code><b>ip ospf  network &lt;network-type&gt;</code>.  
-<code>network-type</b></code> can be any of the these values: broadcast, 
+<code>network-type</b></code> can be any of these values: broadcast, 
 non-broadcast, point-to-point, point-to-multipoint.
 <br />
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#DCDCDC">
@@ -2033,9 +2033,7 @@ If multiple routers in multi-access networks are to form adjacencies with every
 other router in the network, the total number of 
 adjacencies established is determined by the formula:
 
-<code>
-Total = n * (n - 1)/2.
-</code>
+<code><b>Total Adjacencies = n * (n - 1)/2</b></code>
 
 All these routers will be sending hello and update packets to each and every one of them.
 In order to reduce the number of adjacencies (and OSPF packets) on a segment in a multi-access network, 
@@ -2173,7 +2171,7 @@ LSAs contain a sequence number as a form of version control to overcome problems
 <p>
 The originating router floods an LSA after every 1800 seconds (30 minutes).
 OSPF continually monitors the LSDB; LSAs with LSAge of 3600 seconds (1hr) are 
-deemed invalid and purged from the LSDB. OSPF uses this as a method of route withdrawal.
+deemed invalid and purged from the LSDB. OSPF, also, uses this as a method of route withdrawal.
 </p>
 
 
@@ -2190,8 +2188,8 @@ summary information about the link states in other areas and external networks.
  <p>
  An OSPF router receiving an LSA, checks its integrity
  before placing it into the LSDB. This process continues 
- domain wide until the LSDB of all routers in the same area are the same i.e.,
- are synchronized or converged.
+ domain-wide until the LSDB of all routers in the same area are the same i.e.,
+ are synchronized.
  </p>
  <p>
  To view a summary of the LSDB, use the command <code><b>show ip ospf database</b></code>.
@@ -2261,14 +2259,14 @@ ID to the highest.
 If a router has interfaces in more than one area, it will maintain separate LSDBs
 for each area. All routers in an area must have identical LSDBs. To create a 
 loop-free domain, OSPF requires a synchronised LSDB and a loop-free calculation;
-this calculation is implemented by Dijkstra's algorithm.
+this calculation is implemented by SPF using Dijkstra's algorithm.
 </p>
 <p>
 For OSPF devices in multiple areas:
 <ul>
   <li>Per-area database contains:
   <ul>
-    <li>internal and inter-area routes</li>
+    <li>intra and inter-area routes</li>
     <li>NSSA external routes</li>
   </ul>
   </li>
@@ -2277,14 +2275,14 @@ For OSPF devices in multiple areas:
 </p>
 <h3>Querying the LSDB</h3>
 <p>
-The LSDB contains alot of information that can be used to gain insights into 
+The LSDB contains a lot of information that can be used to gain insights into 
 the OSPF domain. Most of the commands used for querying the LSDB involve viewing stored 
 LSA information. A few other commands provide an overview of the state of the 
 LSDB.
 </p>
 
 <p>
-To view the summary of the LSD, use the command 
+To view the summary of the LSDB, use the command 
 <code><b>show ip ospf database database-summary</b></code>
 </p>
 
@@ -2746,7 +2744,7 @@ has in a network:
     <li><b><a id="E_BIT">E Bit</a>:</b> used to indicate whether a device is a boundary router with
     another routing domain usually using redistribution.</li>
     <li><b>B Bit:</b> used to indicate whether a device is an area border router.</li>
-    <li><b>V Bit:</b> usd to indicate whether a device is an end-point for a virtual-link. 
+    <li><b>V Bit:</b> used to indicate whether a device is an end-point for a virtual-link. 
     A virtual-link implies an area border router.</li>
   </ol>
 </p>
@@ -2860,7 +2858,7 @@ Type 2 LSA does not propage prefix information.
 </p>
 <p>
 It is used to reduce redundant information in database and flooding scalability issues. 
-Type 1 LSAs (link Type 2) advertise transit networks without subnet mask information. Type 2 
+Type 1 LSAs Link Type 2 advertise transit networks without subnet mask information. Type 2 
 LSAs include subnet mask information for transit links. The DR advertises its 
 IP address, subnet mask and attached routers including itself.
 If a DR is not elected, a Type 2 LSA is not present. To view Type 2 LSAs: 
@@ -2957,7 +2955,7 @@ prefixes, the ABR will create five Type 3 LSAs with one for each prefix.
 <p>
 When a network change occurs in an area, SPF is not run for ABR advertised type 
 3 LSA routes. This is because the ABR has already run SPF for those routes 
-(in their origin area) from itself to the originating routers when they were received 
+(in their area of origin) from itself to the originating routers when they were received 
 as Type 1 LSAs. Additionally, the local routers have already run SPF for the route
 from themselves to the ABR. LSA Type 3 are used to advertise summaries of link 
 state information to other areas. 
@@ -2992,7 +2990,8 @@ A Type 3 LSA is advertised into the neighboring area by the ABR. If a second ABR
 is to advertise the Type 3 LSA into 
 a third area (after receiving it through the backbone), only the advertising 
 router field is updated by the second ABR.
-
+</p>
+<p<>
 To view Type 3 LSAs, issue the following command: 
 <code><b>show ip ospf database summary</b></code>.
 </p>
@@ -3161,8 +3160,8 @@ Fields included with an external LSA:
     </ol>
   </li>
   <li><b>Forwarding address:</b> indicates where traffic is forwarded to reach 
-  the advertised destination. Often set to 0.0.0.0 indicating a destination of LSA 
-  source i.e., the originator of the LSA should be forwarded the traffic.</li>
+  the advertised destination. Often set to 0.0.0.0 indicating that traffic to the 
+  external network should be forwarded to the advertising router.</li>
 </ul>
 </p>
  <p>
@@ -3656,8 +3655,8 @@ its interfaces is participating in the area.
 </p>
 
 <p>
-To determine the OSPF areas that a router is participating in, issue the command
-<code><b>show ip ospf interface brief</b></code>:
+To determine the OSPF areas that a router is participating in, issue the commands
+<code><b>show ip ospf interface brief</b></code> and <code><b>show ip ospf</b></code>:
 
 <div style="background-color:#f4f0ec; border-style:dotted;border-width:1px;border-color:#DCDCDC">
 <code>
@@ -3835,8 +3834,8 @@ router resources.
   <p>
   Non-backbone areas are OSPF areas that connect to the backbone area. There are 
   two types of non-backbone areas: normal areas and stub areas. All non-backbone 
-  areas must connect to the backbone area which can act as a sort of transit area
-  interconnecting two non-backbone areas. 
+  areas must connect to the backbone area which can act as a sort of transit hub 
+  area interconnecting non-backbone areas. 
   If a scenario occurs where a non-backbone area cannot connect directly to the 
   backbone area, then a virtual link must be configured to connect the 
   non-backbone area to the backbone area.
@@ -3858,9 +3857,11 @@ stubby and totally NSSA are non-standard (vendor specific) area types.
 <h4 id="STUBBY_AREA">Stubby Area</h4>
 <p>
 Stubby areas prohibit Type 5 LSAs and thereby preventing Type 4 LSAs from being propagated. 
-When a Type 5 LSA reaches the ABR, it generates a Type 3 default route for the 
-stub area. All external routes (originated from outside the stub area) are replaced 
+When a Type 5 LSA reaches the ABR of a stubby area, it generates a Type 3 default route for the 
+stubby area. All external routes (originated from outside the stubby area) are replaced 
 with a single entry, a default route.
+</p>
+<p>
 Configuration of stubby areas reduces the processing and memory load on low-end 
 or heavily-loaded routers as the number of SPF executions reduces as well as the 
 size of the LSDB.
@@ -3898,7 +3899,8 @@ Totally stubby areas do not allow redistribution inside of them implying that
 ASBRs are not allowed in stub or totally stubby areas.
 </p>
 <p>
-To configure a totally stubby area, on the ABR, enter the following configuration;
+To configure a totally stubby area, on the ABR of the totally stubby area, enter 
+the following configuration;
 <code><b>area &lt;area-id&gt; stub no-summary</b></code>. The other routers in the totally 
 stubby area can be configured with the stub area 
 command <code><b>area &lt;area-id&gt; stub</b></code> and the adjacency will still be formed.
@@ -3933,7 +3935,11 @@ LSA). Type 7 LSAs carry information common to Type 5 LSAs. The format of a Type
  within the NSSA.
  </li>
 </ul>
-
+</p>
+<p>
+To configure an area as NSSA the command is <code><b>area &lt;area-id&gt; nssa</b></code>. 
+</p>
+<p>
 The ABR does not automatically advertise a default route when a Type 5 LSA is 
 blocked. The ABR of an NSSA area can be configured to advertise a default route 
 using the command:
@@ -3987,7 +3993,7 @@ backbone area is split-up into two or more sections with each section separated 
 Discontiguous areas cause the ABR of the discontiguous area not to be reachable 
 via SPT. An ABR can only advertise routes between areas when one of the areas it
 is connected to is the backbone(area 0).
- Some preconditions of virtual-link include the following:</h3>
+ Some preconditions of virtual-links include the following:</h3>
 <ul>
   <li>End-points must be reachable via a normal area (not a stub area). 
   OSPF stubby areas cannot be a transit area for a virtual-link.</li> 
@@ -4023,7 +4029,7 @@ A virtual link is characterized by the following features:
   <li>Only OSPF overhead traffic transits the virtual link; this includes OSPF 
   packets such as Hello, DBD, LSR, LSU and LSAck. OSPF adjacencies can therefore 
   be formed through the virtual link.</li>
-  <li>The virtual terminal end-points (routers where the virtual terminal is 
+  <li>The virtual-link terminal end-points (routers where the virtual terminal is 
   configured): 
     <ul>
       <li>Virtual terminal endpoints become ABRs.</li>
@@ -4034,8 +4040,8 @@ A virtual link is characterized by the following features:
 The tunnel (of a virtual-link) belongs to the backbone area and therefore the 
 router terminating the virtual link becomes an ABR. The area in which the 
 virtual-link endpoints are established is known as the transit area.  Each router 
-identifies the remote router by its RID. The virtual-link 
-can be one hop or multiple hops away from the remote virtual-link endpoint.
+identifies the remote router by its RID. The virtual-link can span one hop or 
+multiple hops from the remote virtual-link endpoint.
 </p>
 <p>
 The virtual link is built using Type 1 LSAs with link-Type 4.
@@ -4161,6 +4167,11 @@ virtual link interface:
 </ul>
 <p>
 The router type can be verified by using the following commands:
+<ul>
+  <li><code><b>show ip protocols</b></code></li>
+  <li><code><b>show ip ospf</b></code></li>
+  <li><code><b>show ip ospf border-routers</b></code></li>
+</ul>
 </p>
 <div style="background-color:#f4f0ec; border-style:dotted;border-width:1px;border-color:#DCDCDC">
 <code>
@@ -4187,7 +4198,7 @@ Other commands such <code><b>#show ip ospf </b></code> can display the router's 
 <p>
 To view all ABRs and ASBRs in the OSPF domain, 
 run the command <code><b>show ip ospf border-routers</b></code> with the optional
-keyword <code><b>detail</b></code> can be appended for additional information.
+keyword <code><b>detail</b></code> appended for additional information.
 </p>
 
 <div style="background-color:#f4f0ec; border-style:dotted;border-width:1px;border-color:#DCDCDC">
@@ -4322,7 +4333,8 @@ include: intra-area routes, inter-area routes and external routes.
 
 <h1 id="SPF">Shortest Path First (SPF) Operation</h1>
 <p>
-Dijkstra's algorithm (SPF) uses the link state database as input to generate 
+Shortest path first (SPF) uses Dijkstra's algorithm; it takes the link state 
+database as input to generate 
 the loop-free shortest path tree (SPT) which is the shortest path to any destination 
 in the network. During a change in the network topology, 
 the SPT is rebuilt and the SPF algorithm runs again to calculate new shortest 
@@ -4356,12 +4368,14 @@ availability of neighbors. LSUs are used to update neighbors of network changes.
 <p>
 When a new LSA is received, it is checked against the LSDB for changes such as:
 <ul>
- <li>Sequence number: to track new LSAs.</li>
- <li>Age: used to keep information updated and withdraw old information. Periodic
+ <li><b>Sequence number:</b> used to differentiate same LSAs containing same network 
+ information. The sequence number is usally used to differentiate LSAs containing 
+ new topology information from the LSAs containing previous topology information.</li>
+ <li><b>Age:</b> used to keep information updated and withdraw old information. Periodic
  flooding occurs every 30 minutes (1800 secs). LSAs whose LSA age 
  is equal to the MaxAge value of 3600 seconds are purged from the LSDB as they 
  are considered invalid.</li>
- <li>Checksum: used to verify that transmission and memory corruption have not 
+ <li><b>Checksum:</b> used to verify that transmission and memory corruption have not 
  affected the integrity of the packet.
 </ul>
 </li>
