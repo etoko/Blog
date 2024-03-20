@@ -42,8 +42,8 @@
 <p>
 <h1 id="INTRODUCTION">Introduction</h1>
 Enhanced Interior Gateway Routing Protocol (EIGRP) is a Cisco-proprietary enhanced distance vector routing protocol.  
-EIGRP uses an algorithm known as diffusing update algorithm (DUAL) to identify the lowest metric network paths and provides for 
-fast convergence using precalculated loop-free backup paths. EIGRP uses protocol-dependent modules (PDMs) to support 
+EIGRP uses an algorithm known as diffusing update algorithm (DUAL) to identify the lowest metric network paths.
+EIGRP ensures fast convergence using precalculated loop-free backup paths. EIGRP uses protocol-dependent modules (PDMs) to support 
 network protocols such as IPv4 and IPv6. EIGRP is written so that the PDM is responsible for the functions that handle 
 the route selection criteria for each network layer protocol. 
 
@@ -66,7 +66,7 @@ EIGRP has features unique from other distance vector protocols:
 Updates are only sent when there is a topology change i.e. a new network is added or 
 an existing network is withdrawn due to link or device failure, change of path metric etc. 
 These updates are only sent to routers that require them.</li>
-<li>Uses a composite metric that, by default, consists of cumulative delay and lowest path bandwidth. EIGRP can be 
+<li>EIGRP uses a composite metric that, by default, consists of cumulative delay and lowest path bandwidth. EIGRP can be 
 configured to include additional parameters such as link load and reliability. </li>
 <li>EIGRP is the only routing protocol to-date to support unequal cost load balancing</li>
 </ul>
@@ -196,7 +196,7 @@ To configure EIGRP using classic-mode:
 <li>
 <b>Initialize the EIGRP routing process</b> with the global configuration command 
 <code><b>router eigrp &lt;AS&gt;</b> </code> where AS is the autonomous system number and is in the range 1 - 65535.
-The autonomous system number must match for two neighboring devices to become EIGRP peers.
+The autonomous system number must match for neighboring devices to become EIGRP peers.
 
 
 <p><div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
@@ -296,8 +296,8 @@ R1(config)#                                                  <br />
 
 <h3>EIGRP Classic Metric Calculation</h3>
 <p>
-The EIGRP formula is based on the IGRP metric formula. However, calculated metric is then multiplied by 256 to 
-change it from 24-bit to 32-bit.
+The EIGRP metric calculation formula is based on the IGRP metric formula. However, 
+calculated metric is then multiplied by 256 to change it from 24-bit to 32-bit.
 EIGRP uses multiple parameters to calculate the metric for a path hence the term composite metric. 
 Metric calculation uses bandwidth and delay by default but can be configured to include interface load and reliability too.
 EIGRP selects paths with the lowest composite metric based on the following parameters:
@@ -643,14 +643,14 @@ This default can be modified using the command:
 address-family submode.
 </p>
 
-<div><code>
+<div><code><b>
 RIB metric = Feasible Distance &times; (1 &div; 128)
-</code></div></p>
+</b></code></div></p>
 
 <p>
 Modifying the rib-scale has a direct impact on the metrics of routes. When the 
 <code><b>metric rib-scale</b></code> command is issued, all 
-EIGRP routes in the RIB are cleared and replaced with with recalculated metrics.
+EIGRP routes in the RIB are cleared and replaced with recalculated metrics.
 </p>
 <p>
 <b>NOTE:</b> Classic EIGRP does not include a provision for modifying the RIB scale as it is not required because classic-mode 
@@ -1168,7 +1168,7 @@ Interface of the local device through which the neighbor can be reached. </td>
 <tr>
 <td style="border-bottom:solid; border-width:1px"> <b>Hold (sec):</b> </td>
 <td style="border-bottom:solid; border-width:1px"> 
-Hold timer value in seconds for the adjacency with the neighor. This value is usually between 10 - 15. If this value decrements to zero, the neighbor is 
+Hold timer value in seconds for the adjacency with the neighbor. This value is usually between 10 - 15. If this value decrements to zero, the neighbor is 
 declared down and removed from the neighbor table.</td>
 </tr>
 <tr>
@@ -1425,8 +1425,8 @@ of varying speed links.
  The EIGRP packet header can be found in each of the five EIGRP packet types. It contains the following fields:
  <p><b>Header version:</b> usually 2.</p>
  <p>
- <b>OpCode: </b> The type of message in the packet. Eleven(11) types are supported; seven(7) are actively used on modern 
- equipment: The OpCode for EIGRP's five packet types are: 
+ <b>OpCode: </b> The type of message in the packet. Eleven(11) types are supported; 
+ seven(7) are actively used: The OpCode for EIGRP's five packet types are: 
  Update(1), Requests(2), Query(3), Reply(4), Hello(5), SIA Query(10), SIA Reply (11).
  </p>
  <p>
@@ -1660,8 +1660,8 @@ of varying speed links.
  <p>
  IPv6 prefixes that were originally advertised using EIGRP (internal) were given the TLV value of 0x0402 and 
  redistributed prefixes (external) 0x0403. Cisco used these TLV values in older software versions prior to TLV v1.5. Older 
- TLVs have been deprecated in favor of multi-protocol TLVs not specific to the protocol type. When using these protocol 
- independent TLVs, 0x0602 is used for IPv4 and IPv6 internal routes and 0x0603 for external.
+ TLVs have been deprecated in favor of multi-protocol TLVs not specific to the protocol type. 
+ When using these protocol-independent TLVs, 0x0602 is used for IPv4 and IPv6 internal routes and 0x0603 for external.
  </p>
  
  <h4>2. Update Packet</h4>
@@ -1796,7 +1796,7 @@ allowing each router to independently identify the shortest path.
  all other neighbors that are not successor to the lost route. This query performs two functions: 
  <ul>
  <li>To request for an alternate path to the requested destination.</li>
- <li>To poison the routes that were formerly available through the path that is now down.
+ <li>To poison the routes whose next hop is the path that is now down.
  </ul>
  </p>
  <p>
@@ -2012,7 +2012,7 @@ in the Query packet that use the local router as a next hop.
 </p>
  <h4>4. Reply Packet</h4>
  <p>
- The EIGRP Reply packet is always sent as a response to query regardless of whether a neighbor has a route to the 
+ The EIGRP Reply packet is always sent as a response to a query regardless of whether a neighbor has a route to the 
  destination or not. The reply packet acts as an acknowledgement for a query packet and contains the query packet's 
  sequence number in its acknowledge field. If a neighbor does not have a route to the query destination, the reply is sent with an infinite delay 
  metric.
@@ -2252,8 +2252,13 @@ in the Query packet that use the local router as a next hop.
  
  <h2 id="LOOP_PREVENTION">EIGRP Loop Prevention</h2>
  <p>
- As a distance-vector routing protocol, EIGRP uses split horizon, poison reverse,
- and maximum hop count as a counter-measure for formation of loops in a network.
+ As a distance-vector routing protocol, EIGRP uses the following techniques as 
+ counter-measures for formation of loops in a network.: 
+ <ol>
+   <li>Split horizon</li>
+   <li>Poison reverse</li>
+   <li>Maximum hop count</li>
+ </ol>  
  </p>
  
  <h3>Split Horizon</h3>
@@ -2751,8 +2756,8 @@ Routing Protocol is "eigrp 1"                                                <br
 <h2 id="EIGRP_CONVERGENCE">Reconvergence and Failure Detection</h2>
 <p>
 When EIGRP detects that it has lost its successor for a network, a reconvergence process starts to identify 
-an alternate path to the network. The reconvergence process differs for paths with or 
-without a FS.
+an alternate path to the network. The reconvergence process differs for paths 
+with a feasible successor from paths without a feasible successor.
 
 
  <h3>Paths without a feasible successor</h3>
@@ -4203,7 +4208,7 @@ automatically suppresses subnet advertisements.
 It is still possible to advertise constituent subnets even after configuring 
 summarization using a leak-map. Manual summarization can be implemented; in 
 classic-mode under interface configuration mode
-using the command <code><b>ip summary-address eigrp </b></code>. In named-mode manual summarization is configured under the 
+using the command <code><b>ip summary-address eigrp</b></code>. In named-mode manual summarization is configured under the 
 af-interface mode: <code><b>summary-address</b></code>.
 </p>
 <p>
@@ -4266,7 +4271,7 @@ Configuration of summary routes should be done on the outgoing interface.
  <h4>Classic Mode</h4>
  <p>
  In classic-mode, EIGRP summary is configured using the interface mode command 
- <code><b>ip summary-address eigrp &lt;as&gt; &lt;network&gt; &lt;subnet-mask&gt; [leak-map &lt;route-map-name&gt;] </b></code>.
+ <code><b>ip summary-address eigrp &lt;as&gt; &lt;network&gt; &lt;subnet-mask&gt; [leak-map &lt;route-map-name&gt;]</b></code>.
  The leak-map option allows the advertisement of the component routes of the 
 summary route identified in the route map.
 </p>
@@ -4987,7 +4992,7 @@ according to the network design. Traffic engineering may include configurations
 such as:
 <ul>
   <li>Metric modification using offset lists</li>
-  <li>Modification of metric parameters such as bandwidth, delay etc</li> 
+  <li>Modification of variables that affect metric calculation such as bandwidth, delay etc</li> 
   <li>Changing K-values</li>
   <li>Modification of load balancing</li>
   <li>Route summarization</li>
@@ -5178,7 +5183,7 @@ R3(config-if)#                                                                 <
  Installing multiple paths into the RIB with the same metric for the same prefix is called equal-cost multipathing 
  (ECMP) routing. 
  </p>
- <h4>Unequal Cost Load Balancing: variance</h4>
+ <h4>Unequal Cost Load Balancing: <code style="font-size:110%;">variance</code></h4>
  <p>
  EIGRP is the only IGP today that supports unequal cost load-balancing. 
  The <code><b>variance &lt;multiplier&gt;</b></code> command of EIGRP controls it's ability to support 
@@ -5470,7 +5475,7 @@ R8#                                      <br />
  <h3>Maximum Paths</h3>
  <p>
  The number of paths to a destination network that can be installed in the 
- routing table can be controlled using the <code><b>maximum-paths &lt;1-16&gt;</b></code> command. 
+ routing table can be controlled by the <code><b>maximum-paths &lt;1-16&gt;</b></code> command. 
  On Cisco devices, the default number of maximum paths is four (4). 
  Maximum paths applies to equal cost and unequal cost load-balancing.
  </p>
@@ -5697,7 +5702,7 @@ convergence times.
 <h2 id="ROUTE_FILTERING">Route Filtering Using ACLs, Prefix-lists and Route-Maps</h2>
 
 <p>
-EIGRP supports filtering of routes as they are received into or advertised out an interface.
+EIGRP supports filtering of routes as they are received or advertised out an interface.
 Filtering of routes can be accomplished using:
 <ul>
  <li>Access control lists (ACLs)</li>

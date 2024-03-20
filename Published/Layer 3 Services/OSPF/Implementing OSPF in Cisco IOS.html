@@ -121,6 +121,76 @@ OSPF generates a shortest path first tree (SPT) in which the local
 
 </p>
 
+
+<h1>OSPF and Other Routing Information Sources</h1>
+ <p>
+ The routing table (RIB) receives routing information from various sources. If a routing device is being informed about a route from 
+ various sources such as EIGRP, OSPF, IS-IS, BGP etc it uses the concept of administrative distance to rank the routing 
+ information from each source. 
+ The admininstrative distance (AD) can be considered as the level of trustworthiness of routing information from a given 
+ source. 
+ The lower the AD, the more trustworthy the routing information and the more likely that that routing 
+ information will be installed in the RIB in preference over other sources with higher AD. An AD of 255 represents an untrustworthy route. 
+ </p>
+ <p>
+ OSPF has an administrative distance of 110 for intra-area, inter-area OSPF 
+ originated routes and 110 for routes that have been redistributed into OSPF from 
+ other sources such as BGP, EIGRP (external routes). 
+ The following table shows the ADs of some common routing  protocols.
+ </p>
+ <p>
+ <div>
+ <table cellspacing="0" width="60%">
+ <thead style="background:#d3d3d3;">
+ <tr>
+ <td width="50%" style="border-bottom:solid; border-top:solid; border-width:2px;"
+ ><b>Routing Source</b></td>
+ <td  style="border-bottom:solid; border-top:solid; border-width:2px"><b>Administrative Distance</b></td>
+ </tr>
+ </thead>
+ <tbody>
+ <tr>
+ <td  style="border-bottom:solid; border-width:1px">Connected</td>
+ <td  style="border-bottom:solid; border-width:1px">0</td>
+ </tr>
+ <tr>
+ <td  style="border-bottom:solid; border-width:1px">Static</td>
+ <td  style="border-bottom:solid; border-width:1px">1</td>
+ </tr>
+ <tr>
+ <td  style="border-bottom:solid; border-width:1px">eBGP</td>
+ <td  style="border-bottom:solid; border-width:1px">20</td>
+ </tr>
+ <tr>
+ <td  style="border-bottom:solid; border-width:1px">EIGRP</td>
+ <td  style="border-bottom:solid; border-width:1px">90</td>
+ </tr>
+ <tr>
+ <td  style="border-bottom:solid; border-width:1px">OSPF</td>
+ <td  style="border-bottom:solid; border-width:1px">110</td>
+ </tr>
+ <tr>
+ <td  style="border-bottom:solid; border-width:1px">IS-IS</td>
+ <td  style="border-bottom:solid; border-width:1px">115</td>
+ </tr>
+ <tr>
+ <td  style="border-bottom:solid; border-width:1px">RIP</td>
+ <td  style="border-bottom:solid; border-width:1px">120</td>
+ </tr>
+ <tr>
+ <td  style="border-bottom:solid; border-width:1px">EIGRP-External</td>
+ <td  style="border-bottom:solid; border-width:1px">170</td>
+ </tr>
+ <tr>
+ <td  style="border-bottom:solid; border-width:1px">iBGP</td>
+ <td  style="border-bottom:solid; border-width:1px">200</td>
+ </tr>
+ </tbody>
+ </table>
+ </div></p>
+</p>
+
+
 <h1 id="NEIGHBOR_ADJACENCY">OSPF Neighbor Adjacency</h1>
 
  <h2 id="ADJACENCY_PRECONDITIONS">Adjacency Preconditions</h2>
@@ -5566,11 +5636,6 @@ R8(config-if)#                                                                 <
 
 <h3>Administrative Distance</h3>
 <p>
-There may be scenarios where more than one routing source is informing a router about the path to 
-a given network. Routers use the administrative distance as a measure of the trustworthiness of a 
-routing source. Administrative distance is a value ranging from 1 to 255 with 255 being an untrustworthy source.
-The lower the AD, the more trustworthy the routing source.
-
 The default administrative distance of OSPF is 110. When implementing traffic engineering, some scenarios may 
 require the modification of the default AD of OSPF so that paths through 
 OSPF are preferred to paths from other routing protocols or paths from other 
