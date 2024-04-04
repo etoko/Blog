@@ -119,6 +119,10 @@ Once neighborships are formed, unicasts are used to synchronize the topology.
  <td  style="border-bottom:solid; border-width:1px">1</td>
  </tr>
  <tr>
+ <td  style="border-bottom:solid; border-width:1px">EIGRP Summary</td>
+ <td  style="border-bottom:solid; border-width:1px">5</td>
+ </tr>
+ <tr>
  <td  style="border-bottom:solid; border-width:1px">eBGP</td>
  <td  style="border-bottom:solid; border-width:1px">20</td>
  </tr>
@@ -167,7 +171,8 @@ In classic-mode, EIGRP configuration is split into two sections:
  commands that affect the EIGRP topology table.</li>
  <li><b>Interface mode:</b> interface-specific commands that are configured individually 
  at the interface include authentication, hello interval, split-horizon and
- summary-route advertisements.</li>
+ summary-route advertisements. These usually affect information sharing and neighbor 
+ formation between connected neighbors.</li>
 </ul>
 </p>
 
@@ -6628,13 +6633,18 @@ may be lost resulting in route loss for some prefixes.
 Classic mode EIGRP supports only MD5 authentication. To enable MD5 authentication, follow these steps:
 </p>
 <p>
-When using classic configuration, authentication must be enabled on the interface under the interface configuration 
-submode.
-</p>
+<ol>
+<li>Specify the key chain under the interface configuration 
+submode:
+
 <p><div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
 <code>
 R1(config)#<b>interface gigabitethernet 0/0                            </b>                                             <br />
-R1(config-if)#<b>ip authentication key-chain eigrp 1 EIGRP_KEYCHAIN    </b>                                             <br />
+R1(config-if)#<b>ip authentication key-chain eigrp 1 EIGRP_KEYCHAIN    </b>                                             
+</code></div></p></li>
+<li>Enable MD5 authentication for EIGRP under the interface:
+<p><div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+<code>
 R1(config-if)#<b>ip authentication mode eigrp 1 md5                    </b>                                             <br />
 R1(config-if)#<b>do show ip eigrp interface detail g0/0                </b>                                             <br />
 EIGRP-IPv4 Interfaces for AS(1)                                                                                  <br />
@@ -6662,6 +6672,9 @@ Key-chain EIGRP_KEYCHAIN:                                                       
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;send lifetime (always valid) - (always valid) [valid now]        <br />
 R1(config-if)#                                                                                                   <br />
 </div></p></code>
+</li>
+</ol>
+</p>
 
 <h2>Named EIGRP Peer Authentication</h2>
 <p>
