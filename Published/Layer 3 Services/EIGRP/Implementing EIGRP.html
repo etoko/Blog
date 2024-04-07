@@ -5013,12 +5013,24 @@ required. K-values for the path metric calculation are set with the command
 <code><b>metric weights &lt;tos&gt; &lt;K1&gt; &lt;K2&gt; &lt;K3&gt; &lt;K4&gt; &lt;K5&gt; [&lt;K6&gt;]</b></code> under the EIGRP process. 
 The TOS value always has a value of 0, and the K6 value is used for wide metric 
 calculation.
-K-values are either 1 or 0 where 1 activates the K-value and 0 deactivates it.
-To ensure consistent metric calculation in an EIGRP autonomous system, the K-values 
+K-values are in the range 0 - 255. To ensure consistent metric calculation in an EIGRP autonomous system, the K-values 
 must match between EIGRP neighbors. 
 The K-values are included in an EIGRP hello packet. 
 
 The K-values are displayed with the <code><b>show ip protocols</b></code> command.
+</p>
+
+<p>
+It is important to note that changing the value of K6 from default of zero(0) 
+results in a K-value mismatch for a peer relationship between a classically-configured 
+and named-EIGRP configured device. This will result in the peer relationship 
+dropping.
+</p>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+<code>
+*Apr  7 10:23:51.411: %DUAL-5-NBRCHANGE: EIGRP-IPv4 1: Neighbor 10.100.13.1 (GigabitEthernet1/0) is down: K-value mismatch
+</code></div>
 </p>
 
 <h3 id="MODIFYING_METRICS">Modifying Metric Values</h3>
