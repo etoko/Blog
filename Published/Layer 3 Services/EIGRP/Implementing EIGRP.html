@@ -399,7 +399,7 @@ neighborship over a particular interface and interface specific settings such as
 	<li>bandwidth percentage</li>
 	<li>summary route</li>
 </ul>
-EIGRP interfaces can be configured in two places: 
+EIGRP interface specific configuration can be done in two places: 
 <ol type="a">
 <li><b>Specific interface</b>: commands configured for a specific interface  
 using the EIGRP address-family command <code><b>af-interface &lt;interface-name&gt; </b></code>.
@@ -641,12 +641,12 @@ Wide metrics are backwards compatible with classic EIGRP.
 </p>
 <h3>Wide Metric and RIB Scaling</h3>
 <p>
-IOS Routing Information Base (RIB) only supports 32-bit metrics. After EIGRP DUAL, 
+Routing Information Base (RIB) only supports 32-bit metrics. After EIGRP DUAL, 
 the 64-bit EIGRP wide metric is scaled down to fit in the 32-bit RIB metric size 
 using the RIB-scale value in the formula <code><b>32-bit metric = 64-bit metric &times; (1 &divide; rib-scale)</b></code>. 
-Using the default metric RIB-scale value of 128, the 64-bit metric is 
-scaled to 32-bit using the calculation <code><b>32-bit metric = 64-bit metric &times; (1 &divide; 128)</b></code>.
-This default can be modified using the command: 
+</p>
+<p>
+This default RIB-scale value can be modified using the command: 
 <code><b>metric rib-scale &lt;1 - 255&gt;</b></code> in EIGRP named-mode 
 address-family sub-mode.
 </p>
@@ -818,7 +818,8 @@ Routing Protocol is "eigrp 1"                                                   
  
 </code></div></p>
 <p>
-After modifying the rib-scale, all the routes in the RIB learned via EIGRP are cleared and recalculated and re-installed 
+After modifying the rib-scale, all the routes in the RIB learned via EIGRP are 
+cleared from the routing table and recalculated in the topology table and re-installed 
 into the RIB with new metric values. 
 The effect of the modified metric rib-scale can be seen from the recalculation of the metric from 114952 to 76634. 
 Modification of the RIB-scale value does not affect the 64-bit wide-metric values 
@@ -905,7 +906,7 @@ of neighborship or route information. Conversion is automated as of IOS version 
 The router ID (RID) is a 32-bit number that uniquely identifies an EIGRP router 
 in an autonomous system. It also serves as a loop-prevention mechanism. 
 The RID is set automatically (default) or can be configured manually.
-When the EIGRP process initializes, the EIGRP router ID is set using the following order of criteria:
+When the EIGRP process initializes, the EIGRP router ID is set in the following order of criteria:
 <ol>
 <li>The highest IPv4 address of any "up" loopback interface.</li> 
 <li>The highest IPv4 address of any "up" physical interfaces.</li>
@@ -913,15 +914,18 @@ When the EIGRP process initializes, the EIGRP router ID is set using the followi
 Even after initialization, the EIGRP RID can be modified through manual configuration.
 It is recommended to configure static RIDs so that the RID is predictable.
 If the RID is manually configured after the device forms a neighbor relationship 
-with another EIGRP device, the neighbor relationship is reset with the device sending updates to neighbors and requesting for new updates without dropping the neighbor relationship.
-If the RID is manually configured before the device forms a neighbor relationship with another EIGRP device, the RID is 
+with another EIGRP device, the neighbor relationship is reset with the device 
+sending updates to neighbors and requesting for new updates without dropping the neighbor relationship.
+If the RID is manually configured before the device forms a neighbor relationship
+with another EIGRP device, the RID is 
 changed and no further action takes place as no neighborship exists to be reset.
 </p>
 
 
 <p>
  Router IDs are used during the origination and redistribution of routes. 
- EIGRP devices only accept routes with different originator router IDs. Remote routes with duplicate RIDs are discarded by 
+ EIGRP devices only accept routes with different originator router IDs. Remote 
+ routes with duplicate RIDs are discarded by 
  the local router because EIGRP will assume that the route was locally originated. This discarding behaviour is 
  performed on both internal and external routes.
  </p>
