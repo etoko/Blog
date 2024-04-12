@@ -18,6 +18,7 @@
   <li><a href="#EIGRP_OPTIMIZATION">EIGRP Optimization
     <ol type="a">
       <li><a href="#TIMERS">Hello and Hold Timers</a></li>
+      <li><a href="#BFD">Bi-Directional Forwarding</a></li>
       <li><a href="#PASSIVE_INTERFACE">Passive Interfaces</a></li>
       <li><a href="#SUMMARIZATION">Route Summarization</a></li>
       <li><a href="#EIGRP_STUB">EIGRP Stub</a></li>
@@ -43,7 +44,7 @@
 <h1 id="INTRODUCTION">Introduction</h1>
 Enhanced Interior Gateway Routing Protocol (EIGRP) is a Cisco-proprietary enhanced distance vector routing protocol.  
 EIGRP uses an algorithm known as diffusing update algorithm (DUAL) to identify the lowest metric network paths.
-EIGRP ensures fast convergence using precalculated loop-free backup paths. EIGRP uses protocol-dependent modules (PDMs) to support 
+EIGRP ensures fast convergence using pre-calculated loop-free backup paths. EIGRP uses protocol-dependent modules (PDMs) to support 
 network protocols such as IPv4 and IPv6. EIGRP is written so that the PDM is responsible for the functions that handle 
 the route selection criteria for each network layer protocol. 
 
@@ -61,7 +62,7 @@ of the network compared to link-state routers which learn route information from
 EIGRP has features unique from other distance vector protocols:
 <ul>
 <li>It utilizes neighbors for sharing information and continuously monitors neighbor state</li>
-<li>Rapid convergence of EIGRP networks is enabled by using precalculated loop-free backup paths</li>
+<li>Rapid convergence of EIGRP networks is enabled by using pre-calculated loop-free backup paths</li>
 <li>EIGRP sends incremental and bounded updates; it does not send periodic updates. 
 Updates are only sent when there is a topology change i.e. a new network is added or 
 an existing network is withdrawn due to link or device failure, change of path metric etc. 
@@ -95,7 +96,7 @@ Once neighborships are formed, unicasts are used to synchronize the topology.
  information will be installed in the RIB in preference over other sources with higher AD. An AD of 255 represents an untrustworthy route. 
  </p>
  <p>
- EIGRP has an administrative distance of 90 for  internal EIGRP originated routes and 170 for routes that are
+ EIGRP has an administrative distance of 90 for  internal EIGRP-originated routes and 170 for routes that are
  redistributed into EIGRP from other sources such as OSPF (external routes). 
  The following table shows the ADs of some common routing  protocols.
  </p>
@@ -315,7 +316,9 @@ can also be retrieved from the configured interface bandwidth using command
 <p>
 <b>Delay:</b> cumulative delay along the path in tens of microseconds.
 </p>
+</ul>
 <p>If the K-values are modified to include load and reliability in metric calculation:</p>
+<ul>
 <p>
 <b>Load:</b> highest load along path.
 </p>
@@ -347,7 +350,7 @@ The default K-values can be modified with the EIGRP command:
 <p><div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
 <code><b>metric weights 0 1 0 1 0 0</b></code></div></p>
 <p>
-TOS is always zero(0) and the values K1 to K5 can be one(1) or zero(0). The K-values can be viewed using the command 
+TOS is always zero(0) and the values K1 to K5 are in the range 1 - 255. The K-values can be viewed using the command 
 <code><b>show ip protocols</b></code>. 
 The K-values must match between two neighboring devices for adjacency to occur.
 </p>
@@ -373,8 +376,8 @@ provides a hierarchical configuration in three subsections: address-family,
 interface and topology.
 <ol>
 <li>
-<b>Address Family:</b> This submode contains settings that are relevant to the 
-global EIGRP autonomous system operations such as:
+<b>Address Family:</b> This sub-mode contains settings that are relevant to the 
+autonomous system-wide operations such as:
 	<ul>
 	 	<li>local networks to advertise</li>
 	 	<li>K-values</li>
@@ -384,7 +387,7 @@ global EIGRP autonomous system operations such as:
 	</ul>
 </li>
 <li>
-<b>Interface: </b> This submode contains settings that are specific to the 
+<b>Interface: </b> This sub-mode contains settings that are specific to the 
 neighborship over a particular interface and interface specific settings such as:
 <ul>
 	<li>hello interval</li>
@@ -411,7 +414,7 @@ If there are conflicting configurations between the default interface and a spec
 the specific interface configuration takes priority over the default configuration.
 </li>
 <li>
-<b>Topology: </b>This submode contains configurations that affect the EIGRP topology database and how routes are presented to the 
+<b>Topology: </b>This sub-mode contains configurations that affect the EIGRP topology database and how routes are presented to the 
 router&#39;s RIB. Configurations that can be done under the topology base section include: 
 <ul>
   <li>route redistribution</li>
@@ -452,7 +455,7 @@ R6(config-if)#                                                                  
 </div></p>
 
 <p>
-<b>Step 1:</b> Enable the EIGRP process with the config mode command <code><b>router eigrp &lt;WORD&gt;</b></code>
+<b>Step 1:</b> Enable the EIGRP process with the config mode command <code><b>router eigrp &lt;instance-name&gt;</b></code>
 </p>
 <p><div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
 <code>
@@ -645,7 +648,7 @@ Using the default metric RIB-scale value of 128, the 64-bit metric is
 scaled to 32-bit using the calculation <code><b>32-bit metric = 64-bit metric &times; (1 &divide; 128)</b></code>.
 This default can be modified using the command: 
 <code><b>metric rib-scale &lt;1 - 255&gt;</b></code> in EIGRP named-mode 
-address-family submode.
+address-family sub-mode.
 </p>
 
 <div><code><b>
@@ -4035,6 +4038,74 @@ For faster detection of neighbor failures or link-failures, a more optimum
 solution would be to leave the EIGRP timer values at their defaults and configure Bi-Directional Forwarding (BFD).
 </p>
 
+<h2 id="BFD">BFD</h2>
+<p>
+In EIGRP named mode, BFD is configured under the af-interface mode:
+</p>
+
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+<code>
+R6(config)#<b>router eigrp EIGRP_NAMED</b><br>
+R6(config-router)#<b>address-family ipv4 autonomous-system 1</b><br>
+R6(config-router-af)#<b>af-interface gigabitethernet0/0</b><br>
+R6(config-router-af-interface)#<b>bfd</b><br>
+R6(config-router-af-interface)#
+</code></div>
+</p>
+
+
+<p>
+If BFD is configured under <code><b>af-interface default</b></code>, all interfaces with EIGRP peers will be registered to 
+receive BFD notifications. However, remember that BFD has to first be configured on the interface otherwise the 
+following error message will be generated:
+</p>
+
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+<code>
+R6(config)#<b>router eigrp EIGRP_NAMED</b><br>
+R6(config-router)#<b>address-family ipv4 autonomous-system 1</b><br>
+R6(config-router-af)#<b>af-interface gigabitethernet0/0</b><br>
+R6(config-router-af-interface)#<b>bfd</b><br>
+%EIGRP: BFD interval is not configured on interface GigabitEthernet0/0 required for BFD operation.<br>
+R6(config-router-af-interface)#
+</code></div>
+</p>
+
+<p>
+In EIGRP classic mode, EIGRP can be configured to receive BFD notifications on link failure 
+on a single interface as below:
+</p>
+
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+<code>
+R6(config)#<b>router eigrp 2</b><br>
+R6(config-router)#<b>bfd interface gigabitethernet 0/0</b>
+</code></div>
+</p>
+
+
+<p>
+In EIGRP classic mode, EIGRP can be configured to receive BFD notifications on all EIGRP-enabled interfaces as below:
+</p>
+
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+<code>
+R6(config)#<b>router eigrp 2</b><br>
+R6(config-router)#<b>bfd all-interfaces</b>
+</code></div>
+</p>
+
+
+<p>
+<b>NOTE:</b> Configuration of EIGRP to receive notifications from all EIGRP enabled interfaces 
+as demonstrated above does not issue a log message if BFD has not been enabled on the 
+interface using the interface-mode BFD configuration commands.
+</p>
+
 <h2 id="PASSIVE_INTERFACE">Passive Interfaces</h2>
 <p>
 Passive interfaces in EIGRP allow the network configured on an interface to be advertised 
@@ -4469,6 +4540,17 @@ R3(config-if)#
 Leak-maps allow selective advertisement of selected component subnets of a 
 summary route. They can be used for longest match traffic engineering.
 Leak-maps are applied through a route-map.
+</p>
+<p>
+The following is the default behaviour if an incomplete configuration is entered:
+<ul>
+  <li>If the referenced route-map is not existent, then the leak-map has no effect.</li>
+  <li>If the route-map references a non-existent access-list, the summary address
+  and all its component routes are advertised.</li>
+  <li>If the route-map referenced by the leak-map does not reference an access-list,
+  the summary address and all its component routes are advertised.</li>
+  </ul>
+
 </p>
 
 <h3>Verification of Summarization</h3>
@@ -6647,7 +6729,7 @@ Classic mode EIGRP supports only MD5 authentication. To enable MD5 authenticatio
 <p>
 <ol>
 <li>Specify the key chain under the interface configuration 
-submode:
+sub-mode:
 
 <p><div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
 <code>
@@ -6700,7 +6782,7 @@ SHA digest is more secure than MD5 due to the key chain length.
 
 <p>
 The named-mode configuration places the configurations under the EIGRP interface 
-submode configuration using either <code><b>af-interface default</b></code> 
+sub-mode configuration using either <code><b>af-interface default</b></code> 
 command or interface specific command <code><b>af-interface &lt;interface-id&gt;</b></code>.
 </p>
 
@@ -6849,8 +6931,8 @@ Additional commands that help in troubleshooting include:
 The interface parameter command <code><b>ip bandwidth-percent eigrp &lt;as-number percentage&gt;</b></code>
 changes the EIGRP available bandwidth for a link on EIGRP classic configuration. 
 
-The available bandwidth for EIGRP is modified under the af-interface default submode or the af-interface interface-id
-submode with the command bandwidth-percent percentage in a named-mode configuration.
+The available bandwidth for EIGRP is modified under the af-interface default sub-mode or the af-interface interface-id
+sub-mode with the command bandwidth-percent percentage in a named-mode configuration.
 </p>
 <p>
 In the following example, the bandwidth restriction for EIGRP is 20%.
