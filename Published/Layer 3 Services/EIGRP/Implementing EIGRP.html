@@ -6237,7 +6237,8 @@ or a combination of direction and prefix.
 An offset list is configured with the command 
 <code><b>offset-list &lt;offset-value&gt; [acl-number | acl-name] [in | out] [interface-id]</b></code>. 
 Specifying an interface restricts the conditional match for the offset list to the interface 
-that the route is received or advertised out of. 
+that the route is received or advertised out of. If the interface argument is 
+not specified, the offset-list is applied to all interfaces.
 EIGRP classic configuration places the command under the EIGRP process, while named-mode configuration 
 places the command under the topology base. 
 </p>
