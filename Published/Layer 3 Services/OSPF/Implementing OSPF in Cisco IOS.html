@@ -2956,7 +2956,7 @@ shared network segment is of broadcast and non-broadcast type. The flooding
 scope for a Type 2 LSA is the local area.
 The Type 2 LSA lists the routers that are adjacent to the DR. When a DR is not used, this 
 type of information is listed in a Type 1 LSA. It is important to note that 
-Type 2 LSA does not propage prefix information.
+Type 2 LSA does not propagate prefix information.
 </p>
 <p>
 It is used to reduce redundant information in database and flooding scalability issues. 
@@ -3372,7 +3372,7 @@ R8#
 
 <p>
 By default, external routes are redistributed as Type 2 external routes (with 
-code "O E2") with a metric of 20.
+code "O E2" in the routing table) with a metric of 20.
 A Type 5 LSA includes a forwarding address field that directs where traffic 
 should be routed towards to reach the advertised link. Usually, this is the ASBR 
 but it could be set to another router in some network designs. A route tag is included in this LSA.
@@ -4366,9 +4366,9 @@ R1#
 
 <h3>Area Border Routers (ABRs)</h3>
 <p>
-An area border router connects a backbone area to one or more non-backbone areas.
+An area border router connects the backbone area to one or more non-backbone areas.
 This definition is extremely important; a router that connects two non-backbone
-areas and is not connected to a backone area will have separate LSDBs for each 
+areas and is not connected to the backone area will have separate LSDBs for each 
 area but will not allow traffic from one non-backbone area to cross to the other 
 non-backbone area.
 </p>
@@ -4427,8 +4427,8 @@ include: intra-area routes, inter-area routes and external routes.
 <ul>
   <li><b>Intra-area:</b> these are routes that are sourced within an area. 
   In OSPF, the LSDB of single-area networks contain only intra-area routes.</li>
-  <li><b>Inter-area:</b> route sourced from OSPF area X that appears in another 
-  OSPF area Y.</li>
+  <li><b>Inter-area:</b> route sourced from one area X that appears in another 
+  area Y.</li>
   <li><b>External routes:</b> routes redistributed into OSPF from another 
   routing protocol or static routes. These are advertised 
   as Type 5 LSAs and appear as external Type 1 and external Type 2 routes.
@@ -4556,7 +4556,7 @@ This default reference bandwidth can be modified with the OSPF router mode comma
 The bandwidth value is in megabits per second. It is recommended that the reference 
 bandwidth be an order of magnitude higher than the largest bandwidth link in the 
 OSPF domain. If the network has Ten Gigabit Ethernet links, 
-then set the reference bandwidth to 100Gps.
+then set the reference bandwidth to 100Gbps.
 </p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#DCDCDC">
 <code>
@@ -4849,8 +4849,8 @@ remote system. BFD sessions can be configured independently in both directions.
 <p>
 Configuration of BFD takes two steps: enabling BFD on the interface and registering 
 failure detection using BFD in OSPF.
-<ul>
-  <li><b>Step 1- BFD Configuration:</b>
+<ol>
+  <li><b>BFD Configuration:</b>
   BFD is configured on the interface through which the OSPF adjacency is formed 
   using the interface command <code><b>bfd interval &lt;50-999&gt; min_rx 
   &lt;50-999&gt; multiplier &lt;3-50&gt;</b></code>:
@@ -4864,14 +4864,14 @@ failure detection using BFD in OSPF.
      higher-layer protocols of the failure.</li>
   </ul>
   </li>
-  <li><b>Step 2 - OSPF BFD Configuration:</b> 
+  <li><b>OSPF BFD Configuration:</b> 
   <ul>
     <li><b>All OSPF-enabled interfaces:</b> In the OSPF process, register BFD 
   as the failure detection mechanism using the command <code><b>bfd all-interfaces</b></code>
   to configure BFD on all OSPF enabled interfaces.</li>
   <li><b>Specific interfaces:</b> To configure BFD on individual 
   interfaces, use the interface configuration command <code><b>ip ospf bfd</b></code>.</li>
-  </ul></li>
+  </ol></li>
 </ul>
 </p>
 <h4>Verification</h4>
@@ -5423,7 +5423,7 @@ Local OSPF route filtering involves preventing a router from installing a networ
 from the LSDB into the RIB. This involves two steps: 
 <ol>
 	<li>Identification of the route (using an ACL, prefix-list, route-map)</li>
-	<li>Applying the filtering using a distribute-list command</li>
+	<li>Applying the filtering using the <code><b>distribute-list</b></code> command</li>
 </ol>
 </p>
 
@@ -5548,7 +5548,7 @@ occurs.
  with a max age. The neighbors re-run SPF affecting normal traffic. With graceful restart: 
  <ul>
    <li>The restarting device communicates with its neighbors and lets them know 
-   that a restart is iminent. </li>
+   that a restart is imminent. </li>
    <li>If the neighbors support this, they lock the neighborship between them 
    and the restarting device and maintain the appearance of a full adjacency.</li>
    <li>The neighbors continue to send traffic to the device as normal even though 
@@ -5886,11 +5886,7 @@ public Internet. In the design of an OSPF network, OSPF devices should not be
 allowed to communicate directly with devices in the public Internet. Because of this, a 
 layer of security is created that protects the OSPF domain from the Internet.
 Therefore for an attack on OSPF, some kind of internal access may be required. 
-Multiple ways exist to achieve internal access:
-<ul>
-  <li>Gaining wired or wireless network access.</li>
-  <li>Exploitation of an insecure internal system.</li>
-</ul>
+</p>
 
 <p>
 OSPF attacks involve listening to OSPF traffic to understand network traffic patterns and  
@@ -5907,8 +5903,13 @@ The threats to unauthorized access to OSPF could result in the introduction of
 false link state information that could affect performance and network traffic 
 in a number of different ways:
 <ul>
-  <li><b>Traffic re-routing</b> to overwhelm sections of the OSPF domain with link 
-  congestion. Traffic could be re-routed to a longer path to add additional delay.</li>
+  <li><b>Traffic re-routing:</b> 
+    <ul>
+      <li>To overwhelm sections of the OSPF domain with link 
+  congestion.</li>
+      <li> Traffic could be re-routed to a longer path to add additional delay.</li>
+   </ul>   
+   </li>
   <li><b>Traffic to nowhere</b> to cause traffic to never reach its destination.</li>
   <li><b>Introduce constant recalculations</b> to reduce performance of the 
   routing devices themselves through constant changing of link state information
@@ -6038,7 +6039,7 @@ OSPF supports three types of authentication:
  
  <h3>Type 2 Authentication</h3>
  <p>
- Type 2 authentication uses MD5 for SHA for hashing the password. The hashed password is then 
+ Type 2 authentication uses MD5 or SHA for hashing the password. The hashed password is then 
  included in the OSPF header.
  <ul>
    <li><b>Area configuration:</b> to enable Type 2 authentication for an OSPF area, 
