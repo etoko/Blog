@@ -65,11 +65,11 @@ The adjacencies between BGP peers is known as BGP sessions or peering.
 BGP does not use hello packets to discover neighbors and due to this,  
 BGP routers can not discover each other dynamically. Neighbor relationships need to be configured manually.
 BGP is able to form neighbor relationships across many hops; what is commonly referred to as 
-a multihop relationship.
+a multihop relationship. This is possible because BGP uses TCP as the transport 
+protocol. 
 </p>
 <p>
-This is possible because BGP uses TCP as the transport 
-protocol. BGP updates are incremental and triggered.
+BGP updates are incremental and triggered.
 </p>
 <p>
 BGP makes extensive use of TCP in its operations using TCP port 179 and depends 
@@ -77,9 +77,9 @@ on TCP reliability mechanisms for transmission of messages.
 
  TCP is responsible for:
 <ol>
-<li>handling of fragmentation</li> 
-<li>sequencing of packets</li>
-<li>ensuring packets are reliably transmitted</li>
+<li>Handling of fragmentation</li> 
+<li>Sequencing of packets</li>
+<li>Ensuring packets are reliably transmitted</li>
 </ol>
 TCP allows for multi-hop BGP sessions. This directly implies that BGP requires the 
 implementation of an interior gateway protocol (IGP) such as OSPF and IS-IS 
@@ -286,7 +286,7 @@ In BGP configuration, there are three ways of representing 32-bit autonomous sys
   is represented as 1.33. 
   <p>
   Conversion between decimal and asdot+ notation can be 
-  done from the <a href="https://networkers-online.com/tools/bgp-asn-4byte-converter/"></a>.
+  done from the site <a href="https://networkers-online.com/tools/bgp-asn-4byte-converter/">networks-online.com</a>.
   </p>
   </li>
   <li><b>asdot</b> consists of both asdot+ and as-plain notations; any autonomous 
@@ -1052,11 +1052,12 @@ eBGP has the following features:
    <li><b>External peers are directly connected (by default):</b> eBGP places a 
    Time-to-live (TTL) of one (1) to avoid the use of any other routing path.
    However, if any one of the directly connected interfaces fail, the eBGP session 
-   may get torn down. This can be resolved using the BGP commands 
-   <code><b>neighbor &lt;ip-address&gt;  
-   ebgp-multihop &lt;1 - 255&gt;</b></code> or  
-   <code><b>neighbor  &lt;ip-address&gt; ttl-security hops &lt;1 - 255&gt;</b></code>.
-   
+   may get torn down. This can be resolved using any one these BGP commands:
+   <ol>
+     <li><code><b>neighbor &lt;ip-address&gt;  
+   ebgp-multihop &lt;1 - 255&gt;</b></code></li>  
+     <li><code><b>neighbor  &lt;ip-address&gt; ttl-security hops &lt;1 - 255&gt;</b></code>.</li>
+   </ol>
    The TTL-security feature can be configured to enforce the requirement for the 
    neighbors to be directly adjacent. TTL-security needs to be configured on both 
    BGP peers. TTL-Security is covered in depth in the section 

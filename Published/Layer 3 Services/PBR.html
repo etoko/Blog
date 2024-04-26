@@ -2,7 +2,7 @@
 <p>
 By default, routers make forwarding decisions based on the destination IP address 
 of the packet. This is known as destination-based routing where the 
-routing table is checked to determine next-hop IP address and the exit interface 
+routing table is checked to determine the next-hop IP address and the exit interface 
 through which packets are forwarded towards the destination. 
 In majority of network designs, destination-based routing meets designed network
 traffic flow. However, in some cases, some network traffic may require special 
@@ -26,8 +26,7 @@ multicast packets.
 PBR makes forwarding decisions independent of the routing table. These forwarding 
 decisions may be based upon any one or combination of the following:
 <ul>
- <li>IP address i.e. destination IP address, source IP address or combination of 
- the two.</li>
+ <li>IP address i.e. destination IP address, source IP address or both.</li>
  <li>Protocol type i.e. IP protocols such as ICMP, TCP, UDP or TCP and UDP 
  applications such as HTTP, FTP, SSH etc.</li>
  <li>Packet size: a range can be configured and packets whose sizes fall within 
@@ -55,7 +54,10 @@ to utilize CEF and RSVP.
 It was therefore process-switched. In later IOS versions, PBR is fast-switched 
 and is operationally compatible with CEF, distributed CEF. 
 With process-switching, many platforms supported switching rates of 1000 to 10,000
-packets per second. This may not be fast enough for some applications. Fast-switched 
+packets per second. This may not be fast enough for some applications. 
+</p>
+<p>
+Fast-switched 
 policy routing supports all route-map <code><b>match</b></code> commands and most 
  <code><b>set</b></code> commands except for the following:
 <ul>
@@ -72,7 +74,7 @@ fast-switched policy routing, use the interface configuration command
 Possible applications of PBR include:
 <ul>
   <li>Routing based on interactive rather than batch traffic.</li>
-  <li>Routing of selected traffic based on dedicated links.</li>
+  <li>Routing of selected traffic through dedicated links.</li>
   <li>Protocol-sensitive routing.</li>
   <li>Source-sensitive routing.</li>
 </ul>
@@ -127,6 +129,7 @@ When configuring an ACL or prefix-list to identify traffic to be policy routed:
 In the following configuration, ICMP traffic and UDP traffic from host 192.168.1.2 
 to host 172.31.0.1 has been identified for policy routing using an extended ACL. 
 </p>
+<p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
 <code>                                                                   
 R1(config)#<b>ip access-list extended ACL_172.31.0.0/24</b>                    <br>
@@ -139,7 +142,7 @@ Extended IP access list ACL_172.31.0.0/24                               <br>
 R1(config-ext-nacl)#
 
 </code></div>
-
+</p>
 
 
 
@@ -164,7 +167,7 @@ What you can match on usually will depend on specifically how you are
     an ACL or prefix list can be used to match traffic by IP address.
     <ul>
       <li>To match traffic using an ACL, use the command: <code><b>match 
-  ip address &lt;acl_name or number&gt; </b></code>. Match all or match any based 
+  ip address &lt;acl_name or number&gt;</b></code>. Match all or match any based 
   on how the match statements are written in the clause. <code><b> match ip address 
   10, 20 - 30, MY_ACL,</b></code> match any.
   
@@ -202,10 +205,12 @@ usually the <code><b>next-hop</b></code> keyword:
   <li><code><b>set next-hop &lt;ip_address&gt;</b></code>: the next hop is 
   unconditionally used; the configured next-hop will be used to forward traffic 
   and the routing table will not be consulted.
+  <p>
   <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
 <code>
 R1(config-route-map)#<b>set ip next-hop 10.0.13.2</b>
 </code></div>
+</p>
   </li>
   <li><code><b>set default next-hop &lt;ip_address&gt;</b></code>: IP routing 
   table is first consulted for the next hop before the configured next hop is 
@@ -286,11 +291,13 @@ though they are on separate route map statements of the same route map.
 The route-map is applied with the interface configuration command: 
 <code><b>ip policy route-map &lt;route-map-name&gt;</b></code>
 </p>
+<p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
 <code>
 R1(config)#<b>interface f4/1</b><br>
 R1(config-if)#<b>ip policy route-map RM_PBR_172.31.0.1</b>
 </code></div>
+</p>
 </li>
 <li>
 <p>
@@ -298,6 +305,7 @@ R1(config-if)#<b>ip policy route-map RM_PBR_172.31.0.1</b>
 applied using the global configuration command: <code><b>ip local policy route-map  
 &lt;route-map-name&gt;</b></code>.
 </p>
+<p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
 <code>
 R1(config)#<b>ip access-list extended ACL_172.31.0.0/24</b>                    <br>
@@ -305,6 +313,7 @@ R1(config-ext-nacl)#<b>30 permit udp host 192.168.1.1 host 172.31.0.1</b><br>
 R1(config-ext-nacl)#<b>exit</b><br>
 R1(config)#<b>ip local policy route-map RM_PBR_172.31.0.1</b>
 </code></div>
+</p>
 </li>
 </ul>
 </p>
@@ -325,6 +334,7 @@ in combination with PBR.
 <p>
 Create the probe using the command 
 </p>
+<p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
 <code>
 <b>#ip sla 1                                         <br>
@@ -337,6 +347,7 @@ Create the probe using the command
 #show ip sla statistics                              <br>
 </b>
 </code></div>
+</p>
 <p>
 IP SLA probes need to be enabled as they are disabled by default.
 </p>
@@ -422,6 +433,7 @@ user3@box:~$
         Linux and IOS use UDP packets for traceroutes so these have to be configured 
         in the extended ACL.
      </p>
+     <p>
      <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
         <code>
         user3@box:~$ <b>traceroute 172.31.0.1</b>                  <br>
@@ -431,12 +443,14 @@ traceroute to 172.31.0.1 (172.31.0.1), 30 hops max, 38 byte packets<br>
  3&nbsp;&nbsp;10.0.34.2 (10.0.34.2)&nbsp;&nbsp;47.604 ms&nbsp;&nbsp;48.801 ms&nbsp;&nbsp;52.973 ms         <br>
 user3@box:~$
       </code></div>
+      </p>
       
     <h2><code>show route-map</code></h2>
       <p>
       Displays the number of policy matches in terms of number of packets and 
       number of bytes.
      </p>
+     <p>
      <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
        <code>
          R1#<b>show route-map</b>                <br>
@@ -448,12 +462,13 @@ route-map RM_PBR_172.31.0.1, permit, sequence 10 <br>
 &nbsp;&nbsp;Policy routing matches: 70 packets, 5046 bytes <br>
 R1#
        </code></div>
-       
+       </p>
        
     <h2><code>show ip policy</code></h2>
     <p>
      To view which route-map is applied to which interface.
     </p>
+    <p>
       <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
 <code>
 R1#<b>show ip policy</b><br> 
@@ -462,6 +477,8 @@ local&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;RM_PBR_172.31.0
 Fa4/1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;RM_PBR_172.31.0.1 <br>
 R1#
 </code></div>
+</p>
+
 <p>
 The interface name "local" indicates that the route-map applies to PBR for locally-
 generated traffic. Any other interface name listed implies that PBR is configured 
@@ -474,6 +491,7 @@ for incoming traffic
         After enabling debugging using debug ip policy, a traceroute command is
         run on the local router and a downstream device to the host 172.31.0.1.
         </p>
+        <p>
       <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
 <code>  
         R1#<b>debug ip policy </b>                                                                                     <br>
@@ -486,57 +504,58 @@ VRF info: (vrf in name/id, vrf out name/id)                                     
 &nbsp;&nbsp;1 10.0.12.2 24 msec 16 msec 4 msec                                                                                  <br>
 &nbsp;&nbsp;2 10.0.24.2 12 msec 12 msec 48 msec                                                                                 <br>
 R1#                                                                                                                   <br>
-*Mar  5 02:51:08.579: IP: s=10.0.12.1 (local), d=172.31.0.1, len 28, policy rejected -- normal forwarding             <br>
-*Mar  5 02:51:08.607: IP: s=10.0.12.1 (local), d=172.31.0.1, len 28, policy rejected -- normal forwarding             <br>
-*Mar  5 02:51:08.627: IP: s=10.0.12.1 (local), d=172.31.0.1, len 28, policy rejected -- normal forwarding             <br>
-*Mar  5 02:51:08.635: IP: s=10.0.12.1 (local), d=172.31.0.1, len 28, policy rejected -- normal forwarding             <br>
-*Mar  5 02:51:08.655: IP: s=10.0.12.1 (local), d=172.31.0.1, len 28, policy rejected -- normal forwarding             <br>
-*Mar  5 02:51:08.671: IP: s=10.0.12.1 (local), d=172.31.0.1, len 28, policy rejected -- normal forwarding             <br>
-R1#                                                                                                                   <br>
-*Mar  5 02:51:30.747: IP: s=192.168.1.2 (FastEthernet4/1), d=172.31.0.1, len 38, policy match                         <br>
-*Mar  5 02:51:30.751: IP: route map RM_PBR_172.31.0.1, item 10, permit                                                <br>
-*Mar  5 02:51:30.751: IP: s=192.168.1.2 (FastEthernet4/1), d=172.31.0.1 (POS5/0), len 38, policy routed               <br>
-*Mar  5 02:51:30.755: IP: FastEthernet4/1 to POS5/0 10.0.13.2                                                         <br>
-*Mar  5 02:51:30.759: IP: s=192.168.1.1 (local), d=192.168.1.2, len 56, policy rejected -- normal forwarding          <br>
-*Mar  5 02:51:30.775: IP: s=192.168.1.2 (FastEthernet4/1), d=172.31.0.1, len 38, policy match                         <br>
-*Mar  5 02:51:30.779: IP: route map RM_PBR_172.31.0.1, item 10, permit                                                <br>
-*Mar  5 02:51:30.779: IP: s=192.168.1.2 (FastEthernet4/1), d=172.31.0.1 (POS5/0), len 38, policy routed               <br>
-*Mar  5 02:51:30.783: IP: FastEthernet4/1 to POS5/0 10.0.13.2                                                         <br>
-*Mar  5 02:51:30.787: IP: s=192.168.1.1 (local), d=192.168.1.2, len 56, policy rejected -- normal forwarding          <br>
-*Mar  5 02:51:30.807: IP: s=192.168.1.2 (FastEthernet4/1), d=172.31.0.1, len 38, policy match                         <br>
-*Mar  5 02:5                                                                                                          <br>
+*Mar&nbsp;&nbsp;5 02:51:08.579: IP: s=10.0.12.1 (local), d=172.31.0.1, len 28, policy rejected -- normal forwarding             <br>
+*Mar&nbsp;&nbsp;5 02:51:08.607: IP: s=10.0.12.1 (local), d=172.31.0.1, len 28, policy rejected -- normal forwarding             <br>
+*Mar&nbsp;&nbsp;5 02:51:08.627: IP: s=10.0.12.1 (local), d=172.31.0.1, len 28, policy rejected -- normal forwarding             <br>
+*Mar&nbsp;&nbsp;5 02:51:08.635: IP: s=10.0.12.1 (local), d=172.31.0.1, len 28, policy rejected -- normal forwarding             <br>
+*Mar&nbsp;&nbsp;5 02:51:08.655: IP: s=10.0.12.1 (local), d=172.31.0.1, len 28, policy rejected -- normal forwarding             <br>
+*Mar&nbsp;&nbsp;5 02:51:08.671: IP: s=10.0.12.1 (local), d=172.31.0.1, len 28, policy rejected -- normal forwarding             <br>
+R1#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                                                                             <br>
+*Mar&nbsp;&nbsp;5 02:51:30.747: IP: s=192.168.1.2 (FastEthernet4/1), d=172.31.0.1, len 38, policy match                         <br>
+*Mar&nbsp;&nbsp;5 02:51:30.751: IP: route map RM_PBR_172.31.0.1, item 10, permit                                                <br>
+*Mar&nbsp;&nbsp;5 02:51:30.751: IP: s=192.168.1.2 (FastEthernet4/1), d=172.31.0.1 (POS5/0), len 38, policy routed               <br>
+*Mar&nbsp;&nbsp;5 02:51:30.755: IP: FastEthernet4/1 to POS5/0 10.0.13.2                                                         <br>
+*Mar&nbsp;&nbsp;5 02:51:30.759: IP: s=192.168.1.1 (local), d=192.168.1.2, len 56, policy rejected -- normal forwarding          <br>
+*Mar&nbsp;&nbsp;5 02:51:30.775: IP: s=192.168.1.2 (FastEthernet4/1), d=172.31.0.1, len 38, policy match                         <br>
+*Mar&nbsp;&nbsp;5 02:51:30.779: IP: route map RM_PBR_172.31.0.1, item 10, permit                                                <br>
+*Mar&nbsp;&nbsp;5 02:51:30.779: IP: s=192.168.1.2 (FastEthernet4/1), d=172.31.0.1 (POS5/0), len 38, policy routed               <br>
+*Mar&nbsp;&nbsp;5 02:51:30.783: IP: FastEthernet4/1 to POS5/0 10.0.13.2                                                         <br>
+*Mar&nbsp;&nbsp;5 02:51:30.787: IP: s=192.168.1.1 (local), d=192.168.1.2, len 56, policy rejected -- normal forwarding          <br>
+*Mar&nbsp;&nbsp;5 02:51:30.807: IP: s=192.168.1.2 (FastEthernet4/1), d=172.31.0.1, len 38, policy match                         <br>
+*Mar&nbsp;&nbsp;5 02:5                                                                                                          <br>
 R1#1:30.807: IP: route map RM_PBR_172.31.0.1, item 10, permit                                                         <br>
-*Mar  5 02:51:30.807: IP: s=192.168.1.2 (FastEthernet4/1), d=172.31.0.1 (POS5/0), len 38, policy routed               <br>
-*Mar  5 02:51:30.807: IP: FastEthernet4/1 to POS5/0 10.0.13.2                                                         <br>
-*Mar  5 02:51:30.807: IP: s=192.168.1.1 (local), d=192.168.1.2, len 56, policy rejected -- normal forwarding          <br>
-*Mar  5 02:51:30.819: IP: s=192.168.1.2 (FastEthernet4/1), d=172.31.0.1, len 38, FIB policy match                     <br>
-*Mar  5 02:51:30.819: IP: s=192.168.1.2 (FastEthernet4/1), d=172.31.0.1, len 38, PBR Counted                          <br>
-*Mar  5 02:51:30.823: IP: s=192.168.1.2 (FastEthernet4/1), d=172.31.0.1, g=10.0.13.2, len 38, FIB policy routed       <br>
-*Mar  5 02:51:30.863: IP: s=192.168.1.2 (FastEthernet4/1), d=172.31.0.1, len 38, FIB policy match                     <br>
-*Mar  5 02:51:30.863: IP: s=192.168.1.2 (FastEthernet4/1), d=172.31.0.1, len 38, PBR Counted                          <br>
-*Mar  5 02:51:30.863: IP: s=192.168.1.2 (FastEthernet4/1), d=172.31.0.1, g=10.0.13.2, len 38, FIB policy routed       <br>
-*Mar  5 02:51:30.899: IP: s=192.168.1.2 (FastEthe                                                                     <br>
+*Mar&nbsp;&nbsp;5 02:51:30.807: IP: s=192.168.1.2 (FastEthernet4/1), d=172.31.0.1 (POS5/0), len 38, policy routed               <br>
+*Mar&nbsp;&nbsp;5 02:51:30.807: IP: FastEthernet4/1 to POS5/0 10.0.13.2                                                         <br>
+*Mar&nbsp;&nbsp;5 02:51:30.807: IP: s=192.168.1.1 (local), d=192.168.1.2, len 56, policy rejected -- normal forwarding          <br>
+*Mar&nbsp;&nbsp;5 02:51:30.819: IP: s=192.168.1.2 (FastEthernet4/1), d=172.31.0.1, len 38, FIB policy match                     <br>
+*Mar&nbsp;&nbsp;5 02:51:30.819: IP: s=192.168.1.2 (FastEthernet4/1), d=172.31.0.1, len 38, PBR Counted                          <br>
+*Mar&nbsp;&nbsp;5 02:51:30.823: IP: s=192.168.1.2 (FastEthernet4/1), d=172.31.0.1, g=10.0.13.2, len 38, FIB policy routed       <br>
+*Mar&nbsp;&nbsp;5 02:51:30.863: IP: s=192.168.1.2 (FastEthernet4/1), d=172.31.0.1, len 38, FIB policy match                     <br>
+*Mar&nbsp;&nbsp;5 02:51:30.863: IP: s=192.168.1.2 (FastEthernet4/1), d=172.31.0.1, len 38, PBR Counted                          <br>
+*Mar&nbsp;&nbsp;5 02:51:30.863: IP: s=192.168.1.2 (FastEthernet4/1), d=172.31.0.1, g=10.0.13.2, len 38, FIB policy routed       <br>
+*Mar&nbsp;&nbsp;5 02:51:30.899: IP: s=192.168.1.2 (FastEthe                                                                     <br>
 R1#rnet4/1), d=172.31.0.1, len 38, FIB policy match                                                                   <br>
-*Mar  5 02:51:30.899: IP: s=192.168.1.2 (FastEthernet4/1), d=172.31.0.1, len 38, PBR Counted                          <br>
-*Mar  5 02:51:30.903: IP: s=192.168.1.2 (FastEthernet4/1), d=172.31.0.1, g=10.0.13.2, len 38, FIB policy routed       <br>
-*Mar  5 02:51:30.959: IP: s=192.168.1.2 (FastEthernet4/1), d=172.31.0.1, len 38, FIB policy match                     <br>
-*Mar  5 02:51:30.959: IP: s=192.168.1.2 (FastEthernet4/1), d=172.31.0.1, len 38, PBR Counted                          <br>
-*Mar  5 02:51:30.959: IP: s=192.168.1.2 (FastEthernet4/1), d=172.31.0.1, g=10.0.13.2, len 38, FIB policy routed       <br>
-*Mar  5 02:51:31.007: IP: s=192.168.1.2 (FastEthernet4/1), d=172.31.0.1, len 38, FIB policy match                     <br>
-*Mar  5 02:51:31.011: IP: s=192.168.1.2 (FastEthernet4/1), d=172.31.0.1, len 38, PBR Counted                          <br>
-*Mar  5 02:51:31.011: IP: s=192.168.1.2 (FastEthernet4/1), d=172.31.0.1, g=10.0.13.2, len 38, FIB policy routed       <br>
-*Mar  5 02:51:31.063: IP: s=192.168.1.2 (FastEthernet4/1), d=172.31.0.1, len 38, FIB policy match                     <br>
-*Mar  5 02:51:31.063: IP: s=192                                                                                       <br>
+*Mar&nbsp;&nbsp;5 02:51:30.899: IP: s=192.168.1.2 (FastEthernet4/1), d=172.31.0.1, len 38, PBR Counted                          <br>
+*Mar&nbsp;&nbsp;5 02:51:30.903: IP: s=192.168.1.2 (FastEthernet4/1), d=172.31.0.1, g=10.0.13.2, len 38, FIB policy routed       <br>
+*Mar&nbsp;&nbsp;5 02:51:30.959: IP: s=192.168.1.2 (FastEthernet4/1), d=172.31.0.1, len 38, FIB policy match                     <br>
+*Mar&nbsp;&nbsp;5 02:51:30.959: IP: s=192.168.1.2 (FastEthernet4/1), d=172.31.0.1, len 38, PBR Counted                          <br>
+*Mar&nbsp;&nbsp;5 02:51:30.959: IP: s=192.168.1.2 (FastEthernet4/1), d=172.31.0.1, g=10.0.13.2, len 38, FIB policy routed       <br>
+*Mar&nbsp;&nbsp;5 02:51:31.007: IP: s=192.168.1.2 (FastEthernet4/1), d=172.31.0.1, len 38, FIB policy match                     <br>
+*Mar&nbsp;&nbsp;5 02:51:31.011: IP: s=192.168.1.2 (FastEthernet4/1), d=172.31.0.1, len 38, PBR Counted                          <br>
+*Mar&nbsp;&nbsp;5 02:51:31.011: IP: s=192.168.1.2 (FastEthernet4/1), d=172.31.0.1, g=10.0.13.2, len 38, FIB policy routed       <br>
+*Mar&nbsp;&nbsp;5 02:51:31.063: IP: s=192.168.1.2 (FastEthernet4/1), d=172.31.0.1, len 38, FIB policy match                     <br>
+*Mar&nbsp;&nbsp;5 02:51:31.063: IP: s=192                                                                                       <br>
 R1#.168.1.2 (FastEthernet4/1), d=172.31.0.1, len 38, PBR Counted                                                      <br>
 *Mar  5 02:51:31.067: IP: s=192.168.1.2 (FastEthernet4/1), d=172.31.0.1, g=10.0.13.2, len 38, FIB policy routed       <br>
 </code></div>
-
+</p>
 
     <h2> <code>show cef interface &lt;interface-name&gt;</code></h2>
    
       <p>
         CEF interface settings for PBR.
         </p>
+        <p>
         <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
 <code>
         R1#<b>show cef interface fa4/1</b>                   <br>
@@ -564,13 +583,14 @@ FastEthernet4/1 is up (if_number 9)                          <br>
 &nbsp;&nbsp;IP MTU 1500                                                <br>
 R1#                                                          <br>
 </code></div>
-
+</p>
 
     <h2>
       <code>show ip interface &lt;interface-name&gt;</code></h2>
       <p>
         Displays route-map configured for PBR.
         </p>
+        <p>
         <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
 <code>
         R1#<b>show ip interface fa4/1</b>                           <br>         
@@ -614,6 +634,7 @@ FastEthernet4/1 is up, line protocol is up                          <br>
 &nbsp;&nbsp;IPv4 WCCP Redirect exclude is disabled                            <br>
 R1# 
 </code></div>
+</p>
 
  <h2><code>debug ip routing</code></h2>
  <p>
