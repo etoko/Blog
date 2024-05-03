@@ -19,86 +19,33 @@ ends the processing of the route map. This default behaviour can be modified by 
 <code><b>continue</b></code>. Route-maps have an implicit deny statement at the end.
 </p>
 
-<h1>Route map Applications</h1>
-<p>
- The flexibility of route maps means that they can be utilized in many routing 
- scenarios such as the following: 
-</p>
-<p>
-<ul>
-<li><b>Route filtering</b> such as between areas in OSPF, in any arbitrary location 
-in EIGRP and BGP.</li>
-<li><b>Route filtering during Redistribution:</b> Route maps offer the benefit of manipulating 
-route metrics through the set commands. The route maps applied using the redistribute command.</li>
-<li><b>Policy-based routing (PBR):</b> Route maps can be used to match source and destination 
-addresses, protocol types, and end-user applications. When a match occurs, a set command can be
-used to determine the interface or next-hop address which the packet should be sent.
-The route-map is applied to an interface using the command: <code><b> policy route-map</b></code> 
-interface configuration command.
-</li>
-<li><b>Traffic Engineering in BGP:</b> in addition to filtering, route-maps 
-provide traffic engineering opportunities such as manipulation of BGP path 
-attributes such as the next hop, AS PATH, local preference, weight etc. on a 
-neighbor-by-neighbor basis. The route-map is applied using the BGP <code><b>neighbor</b></code>
-router configuration command.</li>
-</ul>
-</p>
-<h1>Components of a Route Map</h1>
-<p>
-The four components of a route map include the following:
-  <ol>
-    <li><b>Sequence number:</b> The default sequence
-    number is 10. When configuring additional statements in a route map, the 
-    sequence number of a new route map statement does not automatically increment. 
-    The sequence number determines the order of processing of the route map.
-     
-<p>
-Like an access-list, an implicit deny any appears at the end of a route-map. The 
-consequences of this deny depend on how the route-map is being used.
-</p>
-    </li>
-    <li><b>Match criteria:</b> what characteristics of the traffic should be checked. 
-        If match statement is not configured, the default action is to match all addresses.</li>
-    <li><b>Processing Action:</b> what do we do with matched traffic?
-    Processing actions consist of permit or deny.
-    The meaning of permit and deny depend on the purpose of the route map.
-If a route-map references an ACL or prefix-list, the ACL and prefix-list permit 
-statement means match this prefix. The deny statement means do not match the 
-prefix.
 
-Route-maps have an implicit deny all statement at the end.
-Route-maps support modifying prefix attributes. This is heavily utilized in BGP.
-    
-    </li>
-    <li><b>Action:</b> Modifying characteristics of packets or traffic flow 
-    patterns. This is done using the <code><b>set</b></code> command.</li>
-  </ol>
-</p>
 
-<p>
-Processing of route-maps starts with the lowest sequence number and proceeds 
-sequentially, until a match statement thereafter, processing then stops. However, if a 
-route-map statement has the <code><b>continue</b></code> keyword, processing continues in spite 
-of the match statement. The <code><b>continue</b></code> keyword is used in 
-route-map statements when logical "AND" processing is needed.
-</p>
-
-<h1>Configuration of Route Maps</h1>
+<h1>Configuration</h1>
 
 <ol>
   <li>
-  <b>Define the route-map:</b> a route map is defined by specifying the route map name, processing action and 
+  <b>Define the route map:</b> a route map is defined by specifying the route map name, processing action and 
 sequence number. The command used is <code><b>route-map &lt;route-map-name&gt; 
 [permit | deny] &lt;sequence-number&gt;</b></code> where:
 <ul>
-  <li><code><b>permit | deny</b></code> (Optional): specifies the action to be taken if the 
+  <li><code><b>permit | deny</b></code> (Optional): what do we do with matched traffic?
+    Processing actions consist of permit or deny. Define the action to be taken if the 
   route map match conditions are met. The meaning of permit or deny is dependent 
   on how the route-map is used. The default action of a route-map command is permit 
   with a sequence number of 10 (if not included in the configuration). 
+  If a route-map references an ACL or prefix-list, the ACL and prefix-list permit 
+statement means match this prefix. The deny statement means do not match the 
+prefix.
+  <p>
+Like an access-list, an implicit deny any appears at the end of a route-map. The 
+consequences of this deny depend on how the route-map is being used.
+</p>
   </li>
   <li><code><b>sequence-number</b></code> (Optional): number that indicates the 
   position that a new route-map statement will have in the list of route-map
   statements already configured with the same name much like the ACL with sequence numbers. 
+  The sequence number determines the order of processing of the route map.
   The first route map statement has a sequence number of 10 by default. Route-maps do not 
 automatically increment the sequence number like ACLs. If no sequence number is 
 entered, subsequent statements  overwrite the first statement.
@@ -114,12 +61,15 @@ number of 10.
 <li><b>Define the matching conditions</b> using the <code><b>match</b></code> 
 command and the optional <b><code>action</code></b> to be taken when each 
 condition is matched using the <code><b>set</b></code> command.
+What characteristics of the traffic should be checked. If match statement is not 
+configured, the default action is to match all addresses.
 </li>
-
+<li><b>Action:</b> Modifying characteristics of packets or traffic flow 
+    patterns. This is done using the <code><b>set</b></code> command.</li>
 <li> Apply the route map.
 </li>
 </ol>
-<h1>Route Map Rules</h1>
+<h2>Route Map Rules</h2>
 <p>
 route-map sequence numbers d not automatically increment. When the sequence-number parameter 
 f the route-map is not used, the following ccrs:
@@ -182,7 +132,7 @@ processing the route-map for that route, even when there are more entres n the r
 </li>
 </ul>
 </p>
-<h1>Matching Conditions</h1>
+<h2>Matching Conditions</h2>
 <p>
 When configuring a route-map, the first action should be a match statement.
 Route-maps use the following features to match routes:
@@ -466,7 +416,7 @@ When matching using an ACL or prefix list, take note of the following:
 </p>
 
 
-<h2>Route Map Set Actions</h2>
+<h2>Set Actions</h2>
 <b>Specify the action to be carried out on matched routes (Optional):</b>
 This is implemented using the <code><b>set</b></code> command. Supported features 
 include the following:
@@ -792,6 +742,38 @@ disables the implicit deny all command at the end of the route map.
 
 
 <h1>Application of the route-map</h1>
+<h1>Applications</h1>
+<p>
+ The flexibility of route maps means that they can be utilized in many routing 
+ scenarios such as the following: 
+</p>
+<p>
+<ul>
+<li><b>Route filtering</b> such as between areas in OSPF, in any arbitrary location 
+in EIGRP and BGP.</li>
+<li><b>Route filtering during Redistribution:</b> Route maps offer the benefit of manipulating 
+route metrics through the set commands. The route maps applied using the redistribute command.</li>
+<li><b>Policy-based routing (PBR):</b> Route maps can be used to match source and destination 
+addresses, protocol types, and end-user applications. When a match occurs, a set command can be
+used to determine the interface or next-hop address which the packet should be sent.
+The route-map is applied to an interface using the command: <code><b> policy route-map</b></code> 
+interface configuration command.
+</li>
+<li><b>Traffic Engineering in BGP:</b> in addition to filtering, route-maps 
+provide traffic engineering opportunities such as manipulation of BGP path 
+attributes such as the next hop, AS PATH, local preference, weight etc. on a 
+neighbor-by-neighbor basis. The route-map is applied using the BGP <code><b>neighbor</b></code>
+router configuration command.</li>
+</ul>
+</p>
+
+<p>
+Processing of route-maps starts with the lowest sequence number and proceeds 
+sequentially, until a match statement thereafter, processing then stops. However, if a 
+route-map statement has the <code><b>continue</b></code> keyword, processing continues in spite 
+of the match statement. The <code><b>continue</b></code> keyword is used in 
+route-map statements when logical "AND" processing is needed.
+</p>
 <p>
 To utilise the route map, t has t be applied t an interface (policy based routing) or a routing 
 protocol.
