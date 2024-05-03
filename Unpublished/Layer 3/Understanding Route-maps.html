@@ -1,12 +1,16 @@
 <h1>Route Maps</h1>
 <p>
-Route maps are complex access lists that allow some conditions to be tested against the packet 
-or route using match commands. If the conditions match, actions can be taken to 
-modify attributes of the packet or route. These actions are specified by the route-map's set commands.
+Route maps are a network tool that can be used to carry out pattern matching 
+against network traffic and actions taken to traffic that matches certain patterns 
+or traffic that does not match the configured patterns. 
 
+If the conditions match, actions can be taken to modify attributes of the packet.
+These actions are specified by the route-map's set commands.
+</p>
+<p>
 A collection of route map statements that have the same route map name is considered one route map.
 Within a route map, each route-map statement is numbered and therefore can be edited individually.
-The statements in a route-map correspond to the lines of an access list.
+The statements in a route-map are similar to the statements in an access control list.
 </p>
 <p>
 Route map actions can be either permit or deny. Route map statements are processed sequencially from 
@@ -14,10 +18,7 @@ top to bottom with a first-match processing just like an access list; the first 
 ends the processing of the route map. This default behaviour can be modified by using the keyword 
 <code><b>continue</b></code>. Route-maps have an implicit deny statement at the end.
 </p>
-<p>
-Access-lists and prefix lists can only match on IP addresses or routes. To match against other 
-attributes sch as external or internal routes, BGP attributes route-maps can be used. 
-</p>
+
 <h1>Route map Applications</h1>
 <p>
  The flexibility of route maps means that they can be utilized in many routing 
@@ -25,18 +26,20 @@ attributes sch as external or internal routes, BGP attributes route-maps can be 
 </p>
 <p>
 <ul>
-<li><b>Route filtering</b></li>
+<li><b>Route filtering</b> such as between areas in OSPF, in any arbitrary location 
+in EIGRP and BGP.</li>
 <li><b>Route filtering during Redistribution:</b> Route maps offer the benefit of manipulating 
 route metrics through the set commands. The route maps applied using the redistribute command.</li>
-<li><b>Policy-based routing (BR):</b> Route maps can be used to match source and destination 
+<li><b>Policy-based routing (PBR):</b> Route maps can be used to match source and destination 
 addresses, protocol types, and end-user applications. When a match occurs, a set command can be
 used to determine the interface or next-hop address which the packet should be sent.
 The route-map is applied to an interface using the command: <code><b> policy route-map</b></code> 
 interface configuration command.
 </li>
-<li><b>BGP:</b> in addition to filtering, route-maps provide sophisticated manipulation of BGP path 
+<li><b>Traffic Engineering in BGP:</b> in addition to filtering, route-maps 
+provide traffic engineering opportunities such as manipulation of BGP path 
 attributes such as the next hop, AS PATH, local preference, weight etc. on a 
-neighbor-by-neighbor basis. The route-map is applied using the BGP <code><b>neghbor</b></code>
+neighbor-by-neighbor basis. The route-map is applied using the BGP <code><b>neighbor</b></code>
 router configuration command.</li>
 </ul>
 </p>
@@ -44,45 +47,41 @@ router configuration command.</li>
 <p>
 The four components of a route map include the following:
   <ol>
-    <li><b>Sequence number:</b> much like an ACL with sequence numbers. The default sequence
-    number is 10. The sequence number of a route-map does not automatically increment. 
-    Sequence number determines the order of processing.
+    <li><b>Sequence number:</b> The default sequence
+    number is 10. When configuring additional statements in a route map, the 
+    sequence number of a new route map statement does not automatically increment. 
+    The sequence number determines the order of processing of the route map.
      
 <p>
 Like an access-list, an implicit deny any appears at the end of a route-map. The 
 consequences of this deny depend on how the route-map is being used.
 </p>
     </li>
-    <li><b>Processing action:</b> again like an ACL with permit and deny statements</li>
     <li><b>Match criteria:</b> what characteristics of the traffic should be checked. 
-    If match statement is not configured, the default action is to match all addresses.</li>
-    <li><b>Action:</b> what do we do with matched traffic?
-    Actions consist of permit or deny. 
+        If match statement is not configured, the default action is to match all addresses.</li>
+    <li><b>Processing Action:</b> what do we do with matched traffic?
+    Processing actions consist of permit or deny.
+    The meaning of permit and deny depend on the purpose of the route map.
 If a route-map references an ACL or prefix-list, the ACL and prefix-list permit 
 statement means match this prefix. The deny statement means do not match the 
 prefix.
 
-Route-maps have an implicity deny all statement at the end.
+Route-maps have an implicit deny all statement at the end.
 Route-maps support modifying prefix attributes. This is heavily utilized in BGP.
     
     </li>
+    <li><b>Action:</b> Modifying characteristics of packets or traffic flow 
+    patterns. This is done using the <code><b>set</b></code> command.</li>
   </ol>
 </p>
 
 <p>
 Processing of route-maps starts with the lowest sequence number and proceeds 
-sequentially, until a match statement; processing then stops. However, if a 
-route-map statement has the "continue" keyword, processing continues in spite 
+sequentially, until a match statement thereafter, processing then stops. However, if a 
+route-map statement has the <code><b>continue</b></code> keyword, processing continues in spite 
 of the match statement. The <code><b>continue</b></code> keyword is used in 
 route-map statements when logical "AND" processing is needed.
 </p>
-<p>
-When configuring filtering using prefix lists, only one prefix list can be used 
-for filtering per direction(ingress or egress). However, when filtering using 
-route maps, a route map can be configured with many statements each using different 
-prefix lists.
-</p>
-
 
 <h1>Configuration of Route Maps</h1>
 
@@ -99,7 +98,7 @@ sequence number. The command used is <code><b>route-map &lt;route-map-name&gt;
   </li>
   <li><code><b>sequence-number</b></code> (Optional): number that indicates the 
   position that a new route-map statement will have in the list of route-map
-  statements already configured with the same name. 
+  statements already configured with the same name much like the ACL with sequence numbers. 
   The first route map statement has a sequence number of 10 by default. Route-maps do not 
 automatically increment the sequence number like ACLs. If no sequence number is 
 entered, subsequent statements  overwrite the first statement.
@@ -839,7 +838,10 @@ Where route maps are applied depends on what they will be used for:
 
 <h2>Filtering</h2>
 <p>
-
+When configuring filtering using prefix lists, only one prefix list can be used 
+for filtering per direction(ingress or egress). However, when filtering using 
+route maps, a route map can be configured with many statements each using different 
+prefix lists.
 </p>
 <h2>Redistribution</h2>
 <p>
