@@ -2,22 +2,29 @@
 <p>
 Route maps are a network tool used to carry out pattern matching 
 against network traffic and take specified actions to traffic that matches specified 
-criteria or traffic that does not match. 
+criteria or traffic that does not match. The action taken is permit or deny and the 
+context depends on how the route map is used which may include:
+<ul>
+  <li>Traffic engineering for BGP</li>
+  <li>Filtering</li>
+  <li>Policy based routing (PBR)</li>
+  <li>Filtering during redistribution</li>
+</ul>
 
 If the conditions match, actions can be taken to modify attributes of the packet.
-These actions are specified by the route-map's set commands.
+These actions are specified by the route map's set commands.
 </p>
 <p>
 A collection of route map statements that have the same route map name is considered one route map.
-Within a route map, each route-map statement is numbered and therefore can be edited individually.
-The statements in a route-map are similar to the statements in an access control list.
+Within a route map, each route map statement is numbered and therefore can be edited individually.
+The statements in a route map are similar to the statements in an access control list.
 </p>
 <p>
 Route map actions can be either permit or deny. Route map statements are processed sequentially from 
 top to bottom with a first-match processing; just like an access list. 
 The first statement that is matched in the route map 
 ends the processing of the route map. This default behaviour can be modified by using the keyword 
-<code><b>continue</b></code>. Route-maps have an implicit deny statement at the end.
+<code><b>continue</b></code>. Route maps have an implicit deny statement at the end.
 </p>
 
 
@@ -27,27 +34,27 @@ ends the processing of the route map. This default behaviour can be modified by 
 <ol>
   <li>
   <b>Define the route map:</b> a route map is defined by specifying the route map name, processing action and 
-sequence number. The command used is <code><b>route-map &lt;route-map-name&gt; 
+sequence number. The command used is <code><b>route-map &lt;route map-name&gt; 
 [permit | deny] &lt;sequence-number&gt;</b></code> where:
 <ul>
   <li><code><b>permit | deny</b></code> (Optional):  Define the action to be taken if the 
   route map match conditions are met i.e., what do we do with matched traffic?
     Processing actions consist of permit or deny. The meaning of permit or deny is dependent 
-  on how the route-map is used. The default action of a route-map command is permit. 
-  If a route-map references an ACL or prefix-list, the ACL and prefix-list permit 
-statement means match this prefix. The deny statement means do not match the 
+  on how the route map is used. The default action of a route map command is permit. 
+  If a route map references an ACL or prefix-list in its <code><b>match</b></code> command, the ACL and prefix-list permit 
+statement means match this prefix; the deny statement means do not match the 
 prefix.
   <p>
-Like an access-list, an implicit deny any appears at the end of a route-map. The 
-consequences of this deny depend on how the route-map is being used.
+Like an access control list, an implicit deny any appears at the end of a route 
+map. The consequences of this deny depend on how the route map is being used.
 </p>
   </li>
   <li><code><b>sequence-number</b></code> (Optional): number that indicates the 
-  position that a new route-map statement will have in the list of route-map
+  position that a new route map statement will have in the list of route map
   statements already configured with the same name. This is much like the sequence 
   numbers of an access control list(ACL). 
   The sequence number determines the order of processing of the route map.
-  The first route map statement has a sequence number of 10 by default. Route-maps do not 
+  The first route map statement has a sequence number of 10 by default. Route maps do not 
 automatically increment the sequence number like ACLs. If no sequence number is 
 entered, subsequent statements  overwrite the first statement.
   </li>
@@ -79,11 +86,12 @@ route map:
     <ul>  
   <li>Route map sequence numbers do not increment automatically.</li>
  <li>
- If no other entry is already defined with the supplied route-map name, an entry 
+ If no other entry is already defined with the supplied route map name, an entry 
 is created with the sequence number 10. </li>
 <li>If only one entry is already defined with the configured route map name, that entry is the 
-default entry for the route-map command, and the sequence number of the entry is unchanged.</li>
-<li>If more than one entry is already defined with the configured route map name, an error message 
+default entry for the route map command, and the sequence number of the entry is unchanged.</li>
+<li>If more than one entry is already defined with the configured route map name, 
+and the new statement does not contain a sequence number, an error message 
 is displayed, indicating that the sequence number is required.</li>
 
 </ul>
@@ -91,27 +99,50 @@ is displayed, indicating that the sequence number is required.</li>
 <li>
 The <code><b>match</b></code> statement is used to define the characteristics that 
 traffic should match against.</li>
-<li>The <code><b>set</b></code> condition command is used to define the actions 
-to be followed if there is a match and the action to be taken is permit.
+<li>The <code><b>set</b></code> condition command is used to define the desired
+modifications that should be taken to the packets if there is a match and the action to be taken is permit.
 </li>
 <li>
-A route-map statement without any match statements will be considered matched.
+A route map statement without any match statements will be considered matched.
 </li>
+<li>If deleting a route map using the command <code><b>no route map &lt;route map-name&gt;</b></code> 
+ without specifying the sequence number, the whole route map is deleted.</li>
+<li>Like an access-list, an implicit <code><b>deny any</b></code> statement appears at the end of a 
+route map. The implications of this depends on how the where the 
+route map is utilized.</li>
+<li>More than one condition can be configured under the same <code><b>match</b></code> statement, 
+then it acts as a logical OR function. 
+When matching prefixes, it is possible to chain ACLs or prefixes using the <code>
+<b>match ip address &lt;acl-1&gt; &lt;acl-2&gt; &lt;acl-2&gt;</b></code> command.
+This represents an OR function where matching is done successfully if any of the 
+ACLs is matched.
 
-<li>If deleting a route-map using the command <code><b>no route-map &lt;route-map-name&gt;</b></code> 
- without specifying the sequence number, the whole route-map is deleted.</li>
-<li>Like an access-list, an implicit deny any statement appears at the end of a 
-route-map. The conseqeunces of this "deny any" depends on how the where the 
-route map is applied.</li>
-<li>If more than one condition is configured under the same match statement, 
-then it acts as a logical OR function.</li>
-<li>If more than one match statement aears nder the same sequence number, then t acts 
-as an AND logic statement.</li>
-<li>If more than one route map statement is configured, then route map acts as an
-If-Else-If statement block.</li>
-<li>
-To match all packets, the route-map clase mts the match command.
+An example is:
+  <p>
+  <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+<code>
+<b>match X Y Z</b>
+</code></div>
+  </p>
+  Where X, Y, Z are different conditions
 </li>
+<li>If more than one match statement is configured under the same sequence number, 
+then it acts as an AND logic statement.
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+<code>
+<b>match X</b><br>
+<b>match Y</b><br>
+<b>match Z</b>
+</code></div>
+  </p>
+
+</li>
+<li>If a route map has more than one statement configured, the route map acts as an
+If-Else statement block similar to that in many programming languages.</li>
+<!--<li>
+To match all packets, the route map clase mts the match command.
+</li> -->
 <li>If a sequence number is not included in the configuration of the first statement,
 the default sequence number or first sequence number is set to 10. 
 Successive route map statements without sequence numbers overwrite the existing
@@ -124,31 +155,37 @@ When processing statements, the first match ends the processing of the route map
 </p>
 <h2>Matching Conditions</h2>
 <p>
-When configuring a route-map, the first action should be a match statement.
-Route-maps use the following features to match routes:
+When configuring a route map, the <code><b>match</b></code> command is used to 
+identify network traffic that matches defined characteristics.
+Route maps use the following features to identify traffic:
 <ul>
-  <li>Access control lists</li>
-  <li>Prefix-lists</li>
-  <li>Route-type</li>
+  <li>Access control lists: 
+    <ul>
+      <li>Source or/and destination IP address</li>
+      <li>Source and/or destination ports</li>
+    </ul> 
+    </li>
+  <li>Prefix-lists: source or destination IP address</li>
+  <li>Route-type: internal or redistributed</li>
   <li>Metric</li>
-  <li>Metric type</li>
+  <li>Metric type: for OSPF Type 1 or Type 2</li>
   <li>Next hop</li>
-  <li>BGP attributes</li>
+  <li>BGP attributes: 
+     <ul>
+       <li>Weight</li>
+       <li>Next Hop</li>
+       <li>Local Preference</li>
+       <li>AS PATH</li>
+     </ul>
+  </li>
 </ul>
 </p>
 <p>
-Route maps use ACLs or prefix-lists match the prefixes. The route-map tells what to do with the 
-matched routes using permit or deny. A permit action in the ACL or 
-prefix list means match the prefix and a deny action means do not match the prefix.
-All ACLs types are supported i.e., named or numbered standard and extended ACLs. 
+A permit action in the ACL or prefix list means match the prefix and a deny action means do not match the prefix.
+All ACL types are supported i.e., named or numbered standard and extended ACLs. 
 It is important to note that when matching prefixes, IPv4 and IPv6 prefixes cannot 
 be matched in the same route map. Different separate route maps are required to 
 match each protocol separately.
-</p>
-<p>
-Route maps provide more flexibility when matching various characteristics of the traffic. Route maps 
-map against IP addresses by referencing access-lists or prefix-lists. Additionally, the provide the 
-ability to match against route-type, metric, metric-type, next-hop, BGP attributes etc.
 </p>
 
 <p>
@@ -173,8 +210,8 @@ Matching is done using the following commands:
       Matches based on a referenced named or numbered access control list.
       
       Matches any routes that have a network number that is permitted by a standard or 
-extended access list or prefix list. Multiple access-lists or prefix lists can be specified 
-matching any one results in a match.
+extended access list. Multiple access-lists can be specified matching any one 
+results in a match (logical OR statement).
       </td>
     </tr>
     <tr>
@@ -182,7 +219,8 @@ matching any one results in a match.
       <code><b>match ip address prefix-list &lt;prefix-list-name&gt;</b></code>
       </td>
       <td style="border-bottom: 1px solid;">
-      Matches based on a referenced prefix list.
+      Matches based on a referenced prefix list. Matches any prefixes permitted 
+      in the prefix list.
       </td>
     </tr>
     <tr>
@@ -190,7 +228,7 @@ matching any one results in a match.
       <code><b>match as-path &lt;ASN-acl-number&gt;</b></code>
       </td>
       <td style="border-bottom: 1px solid;">
-      Matches prefixes based on a regular expression query to isolate the Autonomous 
+      Matches prefixes based on a regular expression query to identify the Autonomous 
       System Number (ASN) in the BGP path attribute AS path. The AS path ACLs are 
       numbered 1 - 500. This command allows for multiple match variables.
       </td>
@@ -200,21 +238,15 @@ matching any one results in a match.
       <code><b>match length &lt;min&gt; &lt;max&gt;</b></code>
       </td>
       <td style="border-bottom: 1px solid;">
-      matches based on a packet's Layer 3 length
+      Matches based on a packet's Layer 3 length
       </td>
     </tr>
-	<tr>
-	  <td style="border-bottom: 1px solid;">
-	  <code><b>match route-type [external | internal | level-1 | level-2 | local]</b></code>
-	  </td>
-	  <td style="border-bottom: 1px solid;">Matches packets of the specified type.</td>
-	</tr>
     <tr>
       <td style="border-bottom: 1px solid;">
       <code><b>match interface &lt;interface-id&gt;</b></code>
       </td>
       <td style="border-bottom: 1px solid;">
-      matches any routes that have the next hop out of one of the interfaces specified.
+      Matches any routes that have the specified egress interface.
       </td>
     </tr>
     <tr>
@@ -222,7 +254,7 @@ matching any one results in a match.
       <code><b>match ip next-hop &lt;acl-1 acl-2 acl3&gt;
       </td>
       <td style="border-bottom: 1px solid;">
-      matches any routes that have a next-hop router address permitted by one of the access-lists 
+      Matches any routes that have a next-hop router address permitted by one of the access-lists 
   specified
       </td>
     </tr>
@@ -231,7 +263,7 @@ matching any one results in a match.
         <code><b>match ip route-source &lt;acl-1 acl-2 acl-3&gt;</b></code>
       </td>
       <td style="border-bottom: 1px solid;">
-       matches routes that have been advertised by routers and acccess servers that 
+       Matches routes that have been advertised by routers and acccess servers that 
   have an address permitted by one of the access lists specified.
       </td>
     </tr>
@@ -241,7 +273,7 @@ matching any one results in a match.
       [+-deviation]</b></code>
       </td>
       <td style="border-bottom: 1px solid;">
-      matches routes have the metric specified, a range, or within acceptable 
+      Matches routes have the metric specified, a range, or within acceptable 
       deviation.
       </td>
     </tr>
@@ -251,7 +283,7 @@ matching any one results in a match.
   </b></code>
       </td>
       <td style="border-bottom: 1px solid;">
-       matches routes of the specified type.
+       Matches routes that are external (redistributed) or internal routes.
       </td>
     </tr>
     <tr>
@@ -259,7 +291,7 @@ matching any one results in a match.
       <code><b>match community &lt;list-name | list-num&gt;</b></code>
       </td>
       <td style="border-bottom: 1px solid;">
-      matches a BGP community
+      Matches a BGP community
       </td>
     </tr>
     <tr>
@@ -267,7 +299,7 @@ matching any one results in a match.
       <code><b>match tag &lt;0-4294967295&gt;</b></code>
       </td>
       <td style="border-bottom: 1px solid;">
-       matches based on the tag of a route that was set by another router. This 
+       Matches based on the tag of a route that was set by another router. This 
        command allows for multiple match variables.
       </td>
     </tr>
@@ -284,25 +316,20 @@ matching any one results in a match.
 </table>
 </p>
 <p>
-A route-map without the match statement is equivalent to match any.
+A route map without the <code><b>match</b></code> statement is equivalent to match any.
 </p>
 
 
 <p>
-When processing a route-map, the processing starts at the top with the lowest 
-sequence number and progress sequentially. The first successful match ends 
-the execution of the prefix-list except if the continue statement is used.
+When processing a route map, the processing starts at the top with the statement 
+that has the lowest 
+sequence number and progresses sequentially. The first successful match ends 
+the execution of the prefix-list except if the <code><b>continue</b></code> statement is used.
 A deny statement in the ACL/Prefix list that is referenced by a permit statement 
 in the route map results in no match and execution of the route map moves to 
 the next route map sequence number.
 </p>
 
-<p>
-When matching prefixes, it is possible to chain ACLs or prefixes using the <code>
-<b>match ip address &lt;acl-1&gt; &lt;acl-2&gt; &lt;acl-2&gt;</b></code> command.
-This represents an OR function where matching is done successfully if any of the 
-ACLs is matched.
-</p>
 
 <p>
 A deny statement in an ACL, prefix list or AS-Path ACL excludes the route 
@@ -314,7 +341,7 @@ When matching using an ACL or prefix list, take note of the following:
 <thead style="background: #d3d3d3;">
 <tr>
       <td style="border-top: 1px solid; border-bottom: 1px solid">ACL/Prefix-list Action</td>
-      <td style="border-top: 1px solid; border-bottom: 1px solid">Route-map Action</td>
+      <td style="border-top: 1px solid; border-bottom: 1px solid">Route map Action</td>
       <td style="border-top: 1px solid; border-bottom: 1px solid">Result</td>
     </tr>
 </thead>
@@ -350,7 +377,7 @@ When matching using an ACL or prefix list, take note of the following:
 
 
 <h2>Set Actions</h2>
-<b>Specify the action to be carried out on matched routes (Optional):</b>
+Specify the attributes of matched traffic that should be modified.
 This is implemented using the <code><b>set</b></code> command. Supported features 
 include the following:
 
@@ -368,7 +395,7 @@ include the following:
       <code><b>set metric [+value | -value | &lt;value&gt;]</b></code>
       </td>
       <td style="border-bottom: 1px solid;">
-       sets the metric value for a route or modifies the existing metric. Allowable 
+       Sets the metric value for a route or modifies the existing metric. Allowable 
        values are in the range 0 - 4294967295.
       </td>
     </tr>
@@ -377,7 +404,7 @@ include the following:
       <code><b>set metric-type [type-1 | type-2 | internal | external]</b></code>
       </td>
       <td style="border-bottom: 1px solid;">
-      sets the metric type for the destination routing protocol.
+      Sets the metric type for the destination routing protocol.
       </td>
     </tr>
     <tr>
@@ -396,7 +423,7 @@ include the following:
       <code><b>set interface &lt;interface-id&gt;</b></code>
       </td>
       <td style="border-bottom: 1px solid;">
-      sets the exit interface for packets that pass a match clause of a route map for policy routing.
+      Sets the exit interface for packets that pass a match clause of a route map for policy routing.
       </td>
     </tr>
     <tr>
@@ -404,8 +431,8 @@ include the following:
       <code><b>set ip default next-hop &lt;ip-address&gt;</b></code>
       </td>
       <td style="border-bottom: 1px solid;">
-      sets the next hop for packets that pass a match clause of a route map for policy routing
-  and for which the Cisco IOS software has no explicit route to the destination.
+      Sets the next hop for packets that pass a match clause of a route map for policy routing
+  and for which the RIB has no explicit route to the destination.
       </td>
     </tr>
     <tr>
@@ -414,7 +441,7 @@ include the following:
       </td>
       <td style="border-bottom: 1px solid;">
       Forces 
-  the router to check the CDP database to determine if an entry is available 
+  the router to check the CEF database to determine if an entry is available 
   for the next hop that is specified by the <code><b>set ip default next-hop</b></code> 
   command. This command is used to prevent traffic from being "blackholed" if the 
   configured next hop becomes unavailable.
@@ -426,7 +453,7 @@ include the following:
       peer-address | self&gt;</b></code>
       </td>
       <td style="border-bottom: 1px solid;">
-       sets the next hop for packets that pass a match clause 
+       Sets the next hop for packets that pass a match clause 
   of a route map for policy routing. BGP dynamic manipulation uses the peer-address 
   or self keywords.
       </td>
@@ -436,7 +463,7 @@ include the following:
       <code><b>set ip next-hop verify-availability</b></code>
       </td>
       <td style="border-bottom: 1px solid;">
-      Forces the router to check the CDP database or use object tracking to 
+      Forces the router to check the CEF database or use object tracking to 
       determine if the next hop that is specified for policy-based routing 
       is available.
       </td>
@@ -533,28 +560,28 @@ include the following:
 
 <h1><code>continue</code> command</h1>
 <p>
-Processing of route-maps starts with the lowest sequence number and proceeds 
+Processing of route maps starts with the lowest sequence number and proceeds 
 sequentially, until a match statement thereafter, processing then stops. However, if a 
-route-map statement has the <code><b>continue</b></code> keyword, processing continues in spite 
+route map statement has the <code><b>continue</b></code> keyword, processing continues in spite 
 of the match statement. The <code><b>continue</b></code> keyword is used in 
-route-map statements when logical "AND" processing is needed.
+route map statements when logical "AND" processing is needed.
 the continue command causes the 
-processing to continue processing the next match statements in the route-map.
+processing to continue processing the next match statements in the route map.
 </p>
 
 <h1>Example Configuration</h1>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
 <code>
-route-map DEMO permt 10<br>
+route map DEMO permt 10<br>
 match X Y Z<br>
 match A <br>
 set B<br>
 set C<br>
-route-map DEMO permit 20<br>
+route map DEMO permit 20<br>
 match Q<br>
 set R<br>
-route-map DEMO permit 30
+route map DEMO permit 30
 </code>
 </div>
 </p>
@@ -570,7 +597,7 @@ The route map DMEO is interpreted as follows:
 </p>
 
 <p>
-A route map without a match or set command such as <code><b>route-map DEMO permit 40</b></code>, 
+A route map without a match or set command such as <code><b>route map DEMO permit 30</b></code>, 
 matches all prefixes and permits all other prefixes. If this is the last sequence in a route map, it 
 disables the implicit deny all command at the end of the route map.
 </p>
@@ -579,29 +606,40 @@ disables the implicit deny all command at the end of the route map.
 
 <h1>Applications</h1>
 <p>
-Where route maps are applied depends on what they will be used for:
-</p>
-<p>
- The flexibility of route maps means that they can be utilized in many routing 
+Where route maps are applied depends on what they will be used for. The 
+flexibility of route maps means that they can be utilized in many routing 
  scenarios such as the following: 
 </p>
 <p>
 <ul>
-<li><b>Route filtering</b> such as between areas in OSPF, in any arbitrary location 
-in EIGRP and BGP.</li>
-<li><b>Route filtering during Redistribution:</b> Route maps offer the benefit of manipulating 
-route metrics through the set commands. The route maps applied using the redistribute command.</li>
+<li><b>Route filtering:</b> 
+  <ul>
+    <li><b>OSPF:</b> between areas or at end of autonomous system</li> 
+    <li><b>EIGRP and BGP:</b> in any arbitrary location</li>
+ </ul>
+</li>
+
+<li><b>Traffic Engineering:</b> 
+  <ul>
+  
 <li><b>Policy-based routing (PBR):</b> Route maps can be used to match source and destination 
 addresses, protocol types, and end-user applications. When a match occurs, a set command can be
 used to determine the interface or next-hop address which the packet should be sent.
-The route-map is applied to an interface using the command: <code><b> policy route-map</b></code> 
+The route map is applied to an interface using the command: <code><b> policy route map</b></code> 
 interface configuration command.
 </li>
-<li><b>Traffic Engineering in BGP:</b> in addition to filtering, route-maps 
+    <li><b>BGP:</b> in addition to filtering, route maps 
 provide traffic engineering opportunities such as manipulation of BGP path 
 attributes such as the next hop, AS PATH, local preference, weight etc. on a 
-neighbor-by-neighbor basis. The route-map is applied using the BGP <code><b>neighbor</b></code>
+neighbor-by-neighbor basis. The route map is applied using the BGP <code><b>neighbor</b></code>
 router configuration command.</li>
+  <li><b>Redistribution:</b> Redistribution simply refers to taking the best 
+  routes from one routing protocol and inserting them into another routing
+  protocol. Route maps offer the benefit of manipulating 
+route attributes during redistribution. The route maps applied using the 
+<code><b>redistribute</b></code> command.</li>
+  </ul>
+</li>
 </ul>
 </p>
 
@@ -616,72 +654,71 @@ prefix lists.
 When using a route map for filtering, the "permit" or "deny" within the ACL or 
 prefix-list does not mean that route will be filtered or not. The permit and deny 
 keywords are used to indicate that the prefix should be matched or not matched 
-respectively. A permit statement in an ACL/prefix-list 
-means take action in the route-map. A deny means move to the next route map statement.
+respectively. A permit statement in an ACL/prefix-list means take action in the 
+route map. A deny means move to the next ACL statement.
 
 
-Different ACLs or prefix-lists can be called by the same route-map.
+Different ACLs or prefix-lists can be called by the same route map.
 </p>
 <p>
+Filtering for the different routing protocols is covered in detail:
+<ul>
+  <li><b>OSPF:</b></li>
+  <li><b>BGP:</b></li>
+  <li><b>EIGRP:</b></li>
+</ul>
+</p>
+<!--
+<p>
 Given the following access-lists:
-<code>
+<p>
+<code><b>
 access-list 50 permit 172.16.0.0 0.0.255.255<br>
 access-list 60 permit 192.168.0.0 0.0.255.255<br>
 access-list 60 deny 192.168.10.0 0.0.0.255<br>
 access-list 60 permit any<br>
 <br>
-route-map TEST deny 10 <br>
+route map TEST deny 10 <br>
    match  address 50 <br>
-route-map TEST permit 20 <br>
+route map TEST permit 20 <br>
    match  address 60 <br>
-</code>
+</b></code>
 </p>
 <p>
-The route-map sequence number 10 means the route-map is permitted to deny traffc from 172.16.0.0
+The route map sequence number 10 means the route map will deny traffic from 172.16.0.0
 0.0.255.255
 </p>
-<h2>Redistribution</h2>
 <p>
-<img alt="" src="images/RM_Redistribution.png">
+Filtering of prefixes when during advertisement using a routing protocol 
+      uses the command <code><b>distribute-list route map &lt;route map-name&gt;</b></code>
 </p>
-<p>
-Uses the command <code><b>redistribute route-map &lt;route-map-name&gt;</b></code>.
+-->
 
-      <li><b>Prefix Advertisement:</b> 
-      Filtering of prefixes when during advertisement using a routing protocol 
-      uses the command <code><b>distribute-list route-map &lt;route-map-name&gt;</b></code>
-      </li>
-  </ul>
-  </b>
-<h2>Attribute Manipulation</h2> 
-<p>
-use the command <code><b>neighbor &lt;ip-address&gt; route-map &lt;route-map-name&gt;</b></code>
-</p>
-<h2>Path Control</h2>
+<h2>Traffic Engineering</h2>
+<h3>Path Control</h3>
 
 <p>
-To utilise the route map, it has to be applied to an interface.
-When applying a route-map, it should be applied in the ingress interface. 
-Applying a route-map to the egress interface has no effect. To associate the 
-route-map, use the command: <code><b> policy route-map &lt;route-map-name&gt;</b></code>
-</p>
+To utilise the route map for policy based routing (PBR), it has to be applied to an ingress 
+interface. Applying a route map to the egress interface has no effect on PBR. 
+To use a route map for PBR, use the commands:
+<ul>
+  <li><b>Transit traffic:</b> interface mode command <code><b>ip policy route map &lt;route map-name&gt;</b></code></li> 
+  <li><b>Locally generated traffic:</b> privilege-mode command 
+  <code><b>ip local policy route-map &lt;route map-name&gt;</b></code></li> 
+</ul>
 <p>
-To utilise the route map, it has to be applied to an interface (policy based routing) 
-or a routing protocol.
-</p>
-<p>
-When applying a route-map, it should be applied n the inbound interface. 
-Applying a route-map in the outgoing interface has no effect. T0 associate the 
-route-map, use the command: <code><b>ip policy route-map &lt;route-map-name&gt;</b></code>.
-</p>
-<p>
-use the <code><b>ip policy route-map &lt;route-map-name&gt;</b></code> command under the interface</li>.
-
-Details of how route maps are used for path control are explained here: 
+For a detailed explanation of how route maps are used for path control, see 
 <a target="_blank" href="https://emmanueltoko.blogspot.com/2023/06/path-control-using-policy-based-routing.html">HERE</a>
 </p>
 
-<h3>Redistribution Caveats</h3>
+
+
+<h3>Redistribution</h3>
+<p>
+A more detailed explanation of redistribution can be found <a href="#">HERE</a></p> 
+</p>
+</p>
+<h4>Redistribution Caveats</h4>
 <p>
 Redistribution of routing information adds to the complexity of a network and 
 increases the potential for routing confusion, so you should use it only when 
@@ -694,14 +731,24 @@ The key issues that arise when you are using redistribution are as follows:
  <li>Inconsistent convergence time</li> 
 </ul>
 </p>
+      
+<h3>BGP</h3> 
+<p>
+Traffic engineering in BGP consists of mainly attribute modification using a 
+route map. The configured route map is then applied on a peer by peer basis 
+using the command <code><b>neighbor &lt;ip-address&gt; route map &lt;route map-name&gt;</b></code>
+</p>
+<p>
+Details on path control in BGP can be found <a href="#">HERE</a>.
+</p>
 
 <h1>Verification</h1>
 <p>
 
 </p>
 
-<h2><code>show route-map &lt;route-map-name&gt;</code></h2>
+<h2><code>show route map &lt;route map-name&gt;</code></h2>
 <p>
 Verify what was configured. This displays all route maps configured. The specific
-route map name can be added <code>show route-map &lt;-route-map-name&gt;</code>
+route map name can be added <code>show route map &lt;-route map-name&gt;</code>
 </p>
