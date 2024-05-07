@@ -153,7 +153,7 @@ for VRF names.</li>
 </ul>
 </p>
 <p>
-In VRF-lite, there is no need to specify the import and export route target (RT).
+In VRF-lite, there is no need to specify the import and export route target (RT)
 and route distinguisher (RD). RD was designed specifically for BGP.
 </p>
 
@@ -253,7 +253,7 @@ R2(config)#<b>router eigrp 1 vrf FINANCE</b><br>
     R2(config-router)#<b>capability vrf-lite</b>
   </code></div></p>
 <p>
-The command <code><b>R2(config-router)#capability vrf-lite</b></code> causes OSPF 
+The OSPF command <code><b>capability vrf-lite</b></code> causes OSPF 
 to not perform PE specific checks.
 </p>
 
@@ -265,7 +265,7 @@ VRFs in BGP, the route distinguisher needs to be configured to uniquely identify
 
 Configuration of the route target is done using the VRF configuration mode command 
 <code><b>rd &lt;ASN:nn&gt;</b></code> or 
-<code><b>rd &lt;ip-address:nn&gt;</b></code>
+<code><b>rd &lt;ip-address:nn&gt;</b></code>.
 The RD is used to keep the routes from various clients unique regardless of whether 
 the IP addresses used are overlapping; how we distinguish one route in one VRF 
 from a route in another VRF particularly when the IP addresses are overlapping 

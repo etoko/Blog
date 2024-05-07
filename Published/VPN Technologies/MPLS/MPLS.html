@@ -451,9 +451,10 @@ information before the formation of an
 LDP session between the neighbors, and subsequently TCP is used at the data plane
 after the LDP session has been formed. 
 </p>
+<h3>Penultimate Hop Popping(PHP)</h3>
 <p>
 An intermediate LSR in the MPLS domain that is connected to an egress LSR is known as a 
-<b>penultimate hop</b>. The egress LSR gives directly connected networks a label 
+<b>penultimate hop</b>. The egress LSR assigns directly connected networks a label 
 with label ID 3. This implicit null label is sent to the penultimate hop LSR.
 When a penultimate hop receives a packet with a label ID of 3  (implicit-null) 
 from the egress LSR, it is a signal from the egress LSR that the penultimate hop
@@ -1783,7 +1784,7 @@ LDP sessions can be configured for LDP peers that are not directly connected but
 have IP connectivity. This can be accomplished in a number of ways:
 <ol>
   <li>Static LDP neighbors on both routers: both LSRs are configured to 
-  to point to each other's LDP ID using the command <code><b>mpls ldp neighbor &lt;peer-ldp-id&gt; targeted
+  point to each other's LDP ID using the command <code><b>mpls ldp neighbor &lt;peer-ldp-id&gt; targeted
 </b></code>.</li>
   <li> Static LDP neighbor on one LSR using the command <code><b>mpls ldp neighbor &lt;peer-ldp-id&gt; targeted
 </b></code> and accept targeted hellos on the other using the command 
