@@ -49,7 +49,7 @@ steps should be followed;
 DMVPN has three modes of operation; Phase 1, Phase 2, and Phase 3. Each phase 
 incrementally adds features that improve the operation of DMVPN.
 DMVPN reduces the need for n &times; <sup>(n-1)</sup> &#8260; <sub>2</sub>  
-static tunnel configurations. This happens through the use of one mGRE interface 
+static tunnel configurations. This is made possible through the use of one mGRE interface 
 for all connections.
 </p>
 <p>
@@ -86,7 +86,7 @@ DMVPN supports spoke routers behind dynamic NAT and hub routers behind static NA
 </p>
 </li> 
 <li>
-<p>DMVPN facilitates zero-touch configuration on the hub for addition new spokes i.e., no 
+<p>DMVPN facilitates zero-touch configuration on the hub for addition of new spokes i.e., no 
 configuration on the hub when adding a new spoke.</p></li>
 <li><p>DMVPN features automatic IPsec triggering for building IPsec protected 
 VPN tunnels. However, it remains usable with or without IPsec encryption.</p></li>
@@ -106,9 +106,8 @@ layer 3 adjacencies. So routing protocol updates come only from the hub.</li>
 
 <h3>Connectivity</h3>
 <p>
-As previously indicated, DMVPN toplogies start initially with a hub to spoke 
-topology. This dynamically changes to full mesh with hub to spoke and spoke-to-spoke 
-topologies depending on traffic patterns.
+As previously indicated, DMVPN topologies start initially with a hub to spoke 
+topology. This dynamically changes to full mesh topologies depending on traffic patterns.
 </p>
 <h4>Hub to Spokes</h4>
 <p>
@@ -117,8 +116,7 @@ The two main components of a hub and spoke connection are:
   <li>DMVPN hub/NHRP server (NHS).</li>
   <li>DMVPN spokes / NHCs:
     <ul>
-      <li>Spokes register with the hub/server.</li>
-      <li>Spokes manually specify the hub's address.</li>
+      <li>Spokes manually specify the hub's address and register with the hub/server.</li>
       <li>The Registration message from the spokes is sent via NHRP Registration 
       Request message type.</li>
       <li>The hub dynamically learns the spoke's VPN address and NBMA address.</li>
@@ -140,8 +138,8 @@ the hub initially but subsequent traffic is spoke-to-spoke.
 <p>
 mGRE creates Virtual Private Network (VPN) tunnels between routers across a 
 network such as the Internet. A hub
-router is the central connection point of what is a star topology. DMVPN provides
-for the capability to create topologies that contain more than one hub. For purposes
+router is the central connection point of what is a star topology. DMVPN has
+the capability to create topologies that contain more than one hub. For purposes
 of understanding DMVPN, we will implement a single-hub DMVPN topology.
 </p>
 <p>
@@ -377,7 +375,7 @@ HUB(config-if)#<b>ip tcp adjust-mss 1360</b>
 <h3>Spoke configuration (DMVPN Phase 1)</h3>
 <p>
 Configuration of the Spoke in DMVPN phase 1 is similar to the configuration of 
-the hub. The only exception is that with the spoke GRE is configured instead of 
+the hub. The only exception is that with the spoke, GRE is configured instead of 
 mGRE. In the configuration of the hub, replace steps 3 and 4.
 </p>
 
@@ -412,10 +410,10 @@ SPOKE7(config-if)#<b>ip address 172.30.1.7 255.255.255.0</b>
 NHRP is used for mapping tunnel (overlay) addresses to transport (underlay) addresses. It 
 is defined in <a target="_blank" href="https://www.ietf.org/rfc/rfc2332.txt">RFC 2332</a>. 
 NHRP operates using the client-server model with a hub 
-as the server and the spokes as the client. The clients are also referred to as 
+as the server and the spokes as the client. The clients are referred to as 
 Next Hop Clients (NHC) and the server as Next Hop Server (NHS).
 
-Spokes are statically configured with the IP address of the hub so they can register
+Spokes are configured with the IP address of the hub so they can register
 their tunnel and NBMA (transport) address with the hub. No manual registration of 
 clients is required on the hub i.e., zero-touch configuration. This reduces 
 administrative workload and improves scalability with addition of new spokes.
@@ -426,15 +424,19 @@ administrative workload and improves scalability with addition of new spokes.
 NHRP messages are encapsulated by GRE between devices.
 </p>
 <p>
-There are the various types of messages NHCs and NHSs exchange with each other;
-NHRP Registration(Request and Reply), NHRP Resolution(Request and Reply), NHRP 
-Redirect, NHRP Purge, NHRP Error.
+There are the various types of messages NHCs and NHSs exchange with each other:
+<ul>
+	<li>NHRP Registration(Request and Reply)</li>
+	<li>NHRP Resolution(Request and Reply)</li>
+	<li>NHRP Redirect</li>
+	<li>NHRP Purge</li>
+	<li>NHRP Error</li>
+</ul>
 </p>
 
 <h3>NHRP Registration</h3> 
 <p>
-NHRP Registration Request is sent from NHCs to NHS to know a destination spoke’s NBMA 
-information along with the amount of time the registration should be maintained.
+NHRP Registration Request is sent from NHCs to NHS to register its NHRP information.
 Spokes dynamically register the mapping of their NBMA and VPN IP address to the NHS. This is required 
 to build the spoke-to-spoke tunnels.
 NHRP Registration supports spokes with dynamic NBMA addresses or NAT.
@@ -597,17 +599,14 @@ Next Hop Resolution Protocol (NHRP Registration Request)         <br>
 
 <h3>NHRP Resolution Message</h3>
 <p>
-Resolution request messages are sent to locate and provide address resolution information 
- of the DMVPN egress router toward a destination. Resolution Reply provides the 
-      tunnel IP address and the NBMA of the remote spoke.
-      Spokes talking to each other; spoke queries the hub for NBMA-to-VPN mappings of 
-      other spokes which is required to build spoke-to-spoke tunnels.
+Resolution request messages are sent by NHC to NHS to request address resolution information 
+of a remote NHC. Resolution Reply provides the tunnel IP address and the NBMA of the remote spoke.
 </p>
 
 <h3>NHRP Redirect</h3>
 <p>
 NHRP redirect messages are sent by an intermediate router (hub) to notify the spoke  
-  originating traffic that a specific destination network can be reached by a more optimal 
+  originating traffic that a specific destination network can be reached through a more optimal 
   path (spoke to spoke) (Phase 3) rather than through the hub. This makes it possible 
   for DMVPN to support building dynamic spoke-to-spoke tunnels. <b>NHRP Redirect 
   suppression messages</b> can be sent by spoke to indicate that the redirected path is not feasible.
@@ -650,8 +649,13 @@ information;
 </p>
 
 <p>
-All listed NHRP packets contain a mandatory header section that must include; 
-source NBMA address, source protocol address, destination protocol address and NHRP message type.
+All listed NHRP packets contain a mandatory header section that must include:
+<ul>
+  <li>Source NBMA address</li>
+  <li>Source protocol address</li>
+  <li>Destination protocol address</li>
+  <li>NHRP message type</li>
+</ul>
 </p>
 
 
@@ -661,7 +665,7 @@ source NBMA address, source protocol address, destination protocol address and N
 All spokes statically define the hub in their configuration.
 
 The NHS creates a mapping of NBMA to tunnel IP address for all NHCs that register 
-with it. This mapping is known as the NHRP table. This table is shared by the 
+with it. This mapping is known as the NHRP table. Information in this table is shared by the 
 NHS to NHC so that when a spoke wishes to communicate with a remote NHC, when it 
 sends a resolution request to the NHS, the NHS shares the NHRP mapping with the NHC.
 </p>

@@ -115,14 +115,14 @@ VPNv4 NLRI main attributes include:
 <h3>MPLS Layer 3 VPN Label Stack</h3>
 <p>
 L3VPN needs at least 2 labels to forward traffic across an MPLS L3VPN. 
-The first label attached is the VPN label and the second is the transport/Label 
-Distribution Protocol (LDP) label. 
+The first label attached is the VPN label and the second is the transport label, 
+sometimes referred to as the Label Distribution Protocol (LDP) label. 
 On an MPLS packet, the transport label is the top most label. It is typically 
 derived from LDP. It is sometimes referred to as the IGP label. 
 The LDP label(transport label) is used for label switching from PE to PE through the MPLS domain 
 as intermediate LSRs run only MPLS and not BGP. The transport label basically 
 tells the SP MPLS core LSRs which PE traffic is destined to i.e., which 
-PE device is the exit point out of the L3VPN to the CE. The VPN Label is derived from VPNv4 advertisements of PE and 
+PE device is the exit point out of the MPLS network to the CE. The VPN Label is derived from VPNv4 advertisements of PE and 
  is used by the PE router to determine which CE traffic is destined to.
  </p>
  <p>
@@ -484,7 +484,8 @@ routes learned from the remote PE router are stored in the MP-BGP VPNv4 table.
 These can then be redistributed into the IGP running on the PE-CE link. Also, 
 routes learned from the connected customer site through the IGP can be 
 redistributed into MP-BGP to be forwarded to the remote customer site. This is 
-accomplished using the redistribution command in the appropriate address-family.
+accomplished using the <code><b>redistribution</b></code> command in the 
+appropriate address-family.
 </p>
 <p>
 On R2:
@@ -1041,7 +1042,8 @@ ID is matching, then the routes can be encoded as inter-area routes.
 The domain-ID can be configured to be the same on the local and remote PE by:
 <ul>
   <li>Configuring the same OSPF process ID on the local and remote PE.</li>
-  <li>A second option is to configure the same domain-id value on the local and remote PE.</li>
+  <li>A second option is to configure the same <b>domain-id</b> value on the
+  local and remote PE.</li>
 </ul>
 </p>
 <p>
