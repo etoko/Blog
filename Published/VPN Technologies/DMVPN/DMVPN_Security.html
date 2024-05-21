@@ -7,7 +7,7 @@ IP header is added for routing the packets through the transport (underlay) netw
 The GRE IP header adds an extra 20 bytes of overhead, and the GRE flags add an 
 extra 4 bytes of overhead. These packets use the protocol field of GRE (47).
 By default, GRE has no in-built security features to secure the data transiting 
-the tunnel. IPSec is used to provide encryption, data integrity, replay protection 
+the tunnel. IPSec is used to provide: encryption, data integrity, replay protection 
 features to GRE tunnels.
 </p>
 <p>
@@ -24,20 +24,21 @@ IPSec security architecture is composed of the following;
 <p>
 Security protocols can be used individually or in combination. They include;
 <ol type="a">
- <li><b>Authentication Header (AH):</b> AH provides data integrity, authentication, 
+ <li><b>Authentication Header (AH):</b> provides data integrity, authentication, 
  replay protection. AH uses IP protocol number 51.</li>
- <li><b>Encapsulating Security Payload (ESP):</b> ESP provides data confidentiality, integrity, 
+ <li><b>Encapsulating Security Payload (ESP):</b> provides data confidentiality, integrity, 
      authentication and replay protection. ESP uses IP protocol number 50.</li>
 </ol>
 
 <h1>Key Management</h1>
 <p>
-Internet Key Exchange (IKE) negotiates the IPSec security associations (SAs). 
-This process requires that the IPSec systems first authenticate themselves to each
+Key management requires that the communicating systems first authenticate themselves to each
 other and establish ISAKMP (IKE) shared keys. IPSec uses IKEv2 by default. IKEv2 
 introduced Extensible Authentication Protocol (EAP) with reduction of bandwidth 
 consumption, network address translation (NAT) and ability to detect whether a 
-tunnel is still alive.
+tunnel is still alive. Internet Key Exchange (IKE) thereafter negotiates the 
+IPSec security associations (SAs).
+
 </p>
 
 <h1>Security Associations</h1>
@@ -82,15 +83,7 @@ Traditional IPSec provides two modes of packet protection; tunnel and transport:
     Tunnel mode can use AH or ESP as the protection suite.
     </p>
     -->
-    <p>
-    It is important to note that the use of IPsec tunnel mode for DMVPN networks
-    does not add any perceived value and adds 20 bytes of overhead. It is 
-    recommended that transport mode should be used for encrypted DMVPN tunnels.
-    </p>
-    <p>
-    Additionally, the header added when tunnel is configured is redundant due to 
-    the already existing GRE header.
-    </p>
+    
     </li>
     
     <li><b>Transport mode:</b> In this mode, only the packet payload is encrypted.
@@ -104,11 +97,17 @@ Traditional IPSec provides two modes of packet protection; tunnel and transport:
     overhead, the GRE flags add an extra 4 bytes of overhead, and depending on 
     the encryption mechanism, a varying number of additional bytes are added for
     the encrypted signature. 
-    
     </li>
-    
 </ol>
-
+<p>
+    It is important to note that the use of IPsec tunnel mode for DMVPN networks
+    does not add any perceived value of protection over and above that offered 
+    by the transport mode. It also adds 20 bytes of overhead. It is 
+    recommended that transport mode should be used for encrypted DMVPN tunnels.
+    
+    Additionally, the header added when tunnel is configured is redundant due to 
+    the already existing GRE header.
+    </p>
 <h1>DMVPN Tunnel Protection using IPSec</h1>
 <p>
 Enabling IPsec protection on a DMVPN network requires that all devices enable IPsec 
@@ -131,7 +130,7 @@ the creation of the following:
  <li>IPSec transform set</li>
  <li>IPSec profile</li>
 </ol>
-</p>
+</p>     
 
 <p>
 The configuration of 
@@ -163,8 +162,8 @@ The encryption method is usually any of the synchronous encryption algorithms
 aes, 3des or des: 
 <code><b>encryption &lt;aes | 3des | des&gt; &lt;128-256&gt;</b></code>
 <ul>
-  <li>aes | 3des | des: are the synchronous encryption versions supported by the platform.</li>
-  <li>128 - 256: the supported encryption key sizes. More modern platforms 
+  <li><b>aes | 3des | des:</b> are the synchronous encryption versions supported by the platform.</li>
+  <li><b>128 - 256:</b> the supported encryption key sizes. More modern platforms 
   support a larger key size. </li>
 </ul>
 </p>
@@ -190,7 +189,7 @@ HUB(config-isakmp)#<b>authentication pre-share</b>
 
 <li><h4>Configure the Diffie-Helman group for integrity</h4></li>
 <p>
-Define the diffie-helman group using the command 
+Define the Diffie-Helman group using the command 
 <code><b>group &lt;1|14|15|16|19|2|20|21|24|5&gt;</b></code>. 
 The Diffie-Hellman groups include the following; 
 <ul>
@@ -260,14 +259,12 @@ encryption and hashing functions configured under the transform-set.
 </p>
 <p>
 <ol>
-<li><h4>Define the transform set and ESP or AH settings</h4>
+<li><h4>Define the transform set and security protocol(ESP or AH)</h4>
 
 <p>
 Define the ESP authentication and ESP encryption or AH authentication algorithms
-for encryption or authentication.
-</p>
-Here one SA is created for inbound traffic and one for outbound traffic to a 
-DMVPN peer using the global configuration command; 
+for encryption or authentication. One SA is created for inbound traffic and one 
+for outbound traffic to a DMVPN peer. This is done using the global configuration command; 
 <code><b>crypto ipsec transform-set &lt;transform-set-tag&gt; [&lt;esp-encryption-function&gt; 
 &lt;esp-authentication-function&gt; | &lt;ah-authentication&gt;]</b></code>.
 </p>
@@ -325,7 +322,7 @@ HUB(cfg-crypto-trans)#<b>mode transport</b>
 
 <h3>Step 4 Create an IPSec profile</h3>
 <p>
-The IPsec profiile is created and the references the IPsec transform set previously 
+The IPsec profile is created and the references the IPsec transform set previously 
 defined.
 </p>
 <p>
@@ -372,8 +369,8 @@ for a front-door VRF tunnel can be accomplished using the following sequence:
 <li>The key is configured using the command <code><b>crypto keyring &lt;keyring-name&gt; 
 vrf &lt;vrf-name&gt;</b></code> where:  
 <ul>
- <li>keyring-name: is the suggested name of the keyring.</li>
- <li>vrf-name: is the VRF under which the key will be used.</li>
+ <li><CODE><b>keyring-name:</b></CODE> is the suggested name of the keyring.</li>
+ <li><CODE><b>vrf-name:</b></CODE> is the VRF under which the key will be used.</li>
 </ul>
 
 <p>
@@ -401,7 +398,7 @@ SPOKE4(conf-keyring)#<b>pre-shared-key address 0.0.0.0 0.0.0.0 key simplesimple<
 <h3>Step 3: Configure the IKEv1 Profile</h3>
 <p>
 <ol>
-  <li>Create an IKEv1 profile: <code><b>create isakmp profile &lt;profile-name&gt;</b></code>.
+  <li>Create an IKEv1 profile: <code><b>crypto isakmp profile &lt;profile-name&gt;</b></code>.
   <p>
   <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
  <code>

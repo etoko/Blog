@@ -14,7 +14,7 @@ The RP handles traffic that is categorized into three planes:
 </p>
 <p>
 The control plane is a collection of processes that run at the process level on
-the route processor (RP). These processes collectively provide high-level control for 
+the route processor (RP). These processes collectively provide high-level control over  
 most IOS functions. All packets destined for the control plane pass through the central 
 switch engine before they are forwarded to the process level. The control-plane 
 and central switch engine are part of the RP.
@@ -68,11 +68,19 @@ based on importance, function or protocol type.
 </p>
 <p>
 ACLs are used to identify and classify traffic to be rate-limited.
-These classes include: BGP, IGP, critical applications, file management, 
-interactive management, monitoring, and default. A separate ACL should be configured 
-for each of these traffic categories. 
+These classes include: 
+<ul> 
+<li>BGP</li> 
+<li>IGP</li>
+<li>Critical applications</li> 
+<li>File management</li> 
+ <li>Interactive management</li> 
+ <li>Monitoring</li> 
+ <li>Default</li> 
+</ul>
+A separate ACL should be configured for each of these traffic categories. 
 Each ACL should permit all known protocols in its class. Traffic for the default 
-class should be configured to permit any type of traffic e.g 
+class should be configured to permit any other type of traffic e.g 
 <code><b>permit ip any any</b></code>.
 </p>
 <p>
@@ -98,7 +106,7 @@ The different traffic categories include:
   <code>
 R1(config)#<b>ip access-list extended ACL_COPP_BGP</b><br>
 R1(config-ext-nacl)#<b>remark BGP traffic</b><br>
-R1(config-ext-nacl)#<b>10 permit tcp any eq bgp any gt 1024</b><br>
+R1(config-ext-nacl)#<b>10 permit tcp any gt 1024 any eq bgp</b><br>
 R1(config-ext-nacl)#<b>20 permit tcp any gt 1024 any eq bgp established</b><br>
 </code></div>
 </P>

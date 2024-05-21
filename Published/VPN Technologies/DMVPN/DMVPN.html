@@ -50,7 +50,9 @@ DMVPN has three modes of operation; Phase 1, Phase 2, and Phase 3. Each phase
 incrementally adds features that improve the operation of DMVPN.
 DMVPN reduces the need for n &times; <sup>(n-1)</sup> &#8260; <sub>2</sub>  
 static tunnel configurations. This is made possible through the use of one mGRE interface 
-for all connections.
+for all connections. It is important to note that the DMVPN phases are not 
+compatible i.e. a spoke configured for phase 1 cannot access another spoke configured 
+with phase 2.
 </p>
 <p>
  DMVPN maintains tunnels based on traffic patterns. Spoke-to-spoke tunnel 
@@ -983,7 +985,7 @@ NBMA and tunnel addresses.
 Spokes are statically configured with the hub. The hub does not modify the next-hop 
 in routing updates. If a spoke X receives a routing update from the hub and this 
 update has an unchanged next-hop, the NHRP table is consulted for the next-hop NBMA address.
-If the next-hop NBMA address is not in the NHRP table, an NHRP request is sent to
+If the next-hop NBMA address is not in the NHRP table, an NHRP resolution request is sent to
 the hub requesting for the underlay-overlay IP address mapping of the next-hop. 
 The hub will forward with request to the spoke that is the next-hop. 
 </p>
@@ -1059,7 +1061,7 @@ With eBGP, third party next-hops can be used. IBGP does not modify the next-hop 
 <h3>Dynamic Peers</h3>
 <p>
 The mapping of tunnel to NBMA addresses is dynamic on the NHS. Each NHC can register 
-with the NHC without any prior preconfigurations on the NHS. This results in the 
+with the NHS without any prior preconfigurations on the NHS. This results in the 
 NHCs being dynamic peers. The number of spokes may grow exponentially. Dynamic 
 peering makes the registration of this increasing number of NHCs scalable.
 </p>
@@ -1097,9 +1099,9 @@ network, the following should be considered:
 
 </p>
 
-<h3>Spoke Configuration</h3>
 <p>
-In DMVPN Phase 3 configuration;
+In DMVPN Phase 3 configuration, the command <code><b>ip nhrp redirect</b></code>
+is added to the tunnel interface.
 </p>
 
 <p>NHS</p>
@@ -1112,7 +1114,7 @@ HUB(config-if)#<b>ip nhrp redirect</b></br>
 </div>
 </p>
 
-<p>NHC;</p>
+<p>On the NHC, the command added to the tunnel interface is <code><b>ip nhrp shortcut</b></code></p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
  <code>
@@ -1530,10 +1532,11 @@ Next Hop Resolution Protocol (NHRP Traffic Indication)                          
 
 <h4>Routing Protocols</h4>
 <p>
-In DMVPN phase 3, if EIGRP is configured as the routing protocol over the overlay 
+In DMVPN phase 3, if EIGRP is configured as the routing protocol of the overlay 
 network, EIGRP, by default, changes the next-hop to the router it is running on.
 In phase 3, the configuration of <code><b>next-hop-self</b></code> feature is 
-usually ignored as the redirect on the NHS and shortcut on NHC will take care of 
+usually ignored as the <code><b>redirect</b></code> on the NHS and <code><b>shortcut</b></code>
+on NHC will take care of 
 spoke to spoke communication; its presence or absence in NHS configuration has no 
 effect on the next-hop behaviour.
 </p>
@@ -1741,7 +1744,7 @@ are more specific, then the route learned through the overlay
 routing protocol will have the next-hop override flag(%) is set.
 </p>
 <p>
-NHRP manipulates the routing table as necessary. An installed route is indicated 
+NHRP presents routes to the routing table as necessary. An installed route is indicated 
 by the code <code><b>‘H’</b></code>. A next hop override is indicated by the
 code <code><b>‘%’</b></code>. To display 
 explicit NHRP shortcuts, <code><b>show ip route next-hop-override</b></code>. 
@@ -1860,8 +1863,7 @@ If using EIGRP for the internal networks, split horizon needs to be disabled
 on the tunnel interface.
 
 As EIGRP always maintain loop-free routes using the feasibility condition, 
-disabling split-horizon does not introduce loops. However, it might be 
-preferrable to disable it entirely.
+disabling split-horizon does not introduce loops in DMVPN. 
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
@@ -1882,9 +1884,9 @@ the underlay network in routing protocol over the overlay network.
 
 </p>
 
-<h2>Viewing DMVPN Tunnel States</h2>
+<h2>DMVPN Tunnel States</h2>
 <p>
-The tunnel interface experiences varying states based on the stage of tunnel 
+The tunnel interface transitions through various states based on the stage of tunnel 
 creation or if the tunnel experienced problems during establishment or operation. 
 Addition of encryption to the tunnel also affects the state of the DMVPN tunnels. 
 </p>
@@ -1904,7 +1906,7 @@ Tunnel states can be any of the following:
   <li><b>IPSec:</b> An IKE session is established but an IPSec SA has not yet been established.</li>
   <li><b>NHRP:</b> The DMVPN spoke router has not yet successfully registered.</li>
   <li><b>Up:</b> Spoke has registered with hub and received ACK (positive registration reply). 
-  An up interface state must be maintained for traffic to flow. 
+  An "up" interface state must be maintained for traffic to flow. 
 </ol>
 </p>
 <p>
@@ -1944,7 +1946,7 @@ Type:Spoke, Total NBMA Peers (v4/v6): 4&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp
 
 <p>
 Run from the hub displays the mapping between the tunnel address and NBMA address.
-This command displays local tunnel and NBMA ip addresses, tunnel health 
+This command displays local tunnel and NBMA IP addresses, tunnel health 
 monitoring and VRF contexts IPSec crypto info.
 </p>
 <p>
@@ -1991,8 +1993,9 @@ Pending DMVPN Sessions:                                                         
 
 <h3><code>show ip nhrp [brief | detail]</code></h3>
 <p>
-The displays the local NHRP cache. The <code><b>detail</b></code> keyword lists routers that submitted
-an NHRP request and its request ID. The NHRP cache displays NHRP mapping entries and NHRP message flags.
+The above command displays the local NHRP cache. The <code><b>detail</b></code> 
+keyword lists routers that submitted an NHRP request and its request ID. The NHRP 
+cache displays NHRP mapping entries and NHRP message flags.
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
@@ -2031,18 +2034,19 @@ The local NHRP cache contains:
 <ol>
   <li>Network entry for hosts (/32 or 128) or subnets (/24, /25, /16) and tunnel to NBMA address.</li>
   <li>Interface number, duration of tunnel existence. Included is the amount of time 
-to expiry of the tunnel for dynamic entries. Static entries do not expire.</li>
+to expiry of the tunnel for dynamic entries. By default, the dynamic entries expire after two hours.
+Static entries do not expire.</li>
 <li>NHRP mapping types;
 <ul>
   <li><b>Static:</b> an entry created statically, on tunnel interface.</li>
-  <li><b>Dynamic:</b> an entry created from a spoke that register.</li>
+  <li><b>Dynamic:</b> an entry created from a spoke that successfully registered.</li>
   <li><b>Incomplete:</b> a temporary entry placed locally while an NHRP resolution request is processing.</li>
   <li><b>Local:</b> a typical entry is of a local network that was advertised for an NHRP resolution reply.</li>
   <li><b>(no socket):</b> These mapping entries do not have an associated IPSec 
   socket and encryption isn’t triggered yet.</li>
-  <li><b>NBMA address:</b> transport IP address where the entry was received.</li>
 </ul>
 </li>
+<li><b>NBMA address:</b> transport IP address where the entry was received.</li>
 </ol>
 </p>
 <p>
@@ -2122,7 +2126,7 @@ and OSPF in the underlay network.
 </p>
 <p>
 The two routers that have a DMVPN tunnel formed will share their routes using 
-the EIGRP over the tunnel. EIGRP having an AD (90) lower than OSPF (110) will 
+EIGRP over the tunnel. EIGRP having an AD (90) lower than OSPF (110) will 
 have its underlay route selected as the preferred route over the OSPF route by 
 the remote router. This remote router will attempt to route underlay traffic 
 through the tunnel. This will obviously fail. As it keeps attempting to route 
@@ -2145,8 +2149,8 @@ recursive routing.</li>
 <h2 id="FVRF"> Front-Door Virtual Route Forwarding (FVRF)</h2>
 <p>
 A DMVPN tunnel source or destination can be made to be separate from the DMVPN 
-tunnel itself. The VRF associated with the transport network is known as front-foor
-VRF. Using a front-door VRF for every DMVPN tunnel prevents route recursion because
+tunnel itself. A VRF is configured and then associated with the transport network.
+Known as front-door VRF, using a front-door VRF for every DMVPN tunnel prevents route recursion because
 the transport and overlay networks remain in separate routing tables. The transport 
 network and interface can be associated with the transport VRF and the tunnel 
 network and interface associated with the tunnel VRF.
@@ -2261,7 +2265,7 @@ Type:Spoke, Total NBMA Peers (v4/v6): 1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp
 </p>
 <h3>Hold time</h3>
 <p>
-By default, an NHRP mapping stays in the NHRP cache for 7200 seconds (2 hours) 
+By default, a dynamic NHRP mapping stays in the NHRP cache for 7200 seconds (2 hours) 
 (holdtime). It can be modified to the recommended value of 600 seconds using the
 tunnel configuration command <code><b>ip nhrp holdtime &lt;1 – 65535&gt;</b></code>.
 </p>
