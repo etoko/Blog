@@ -423,11 +423,11 @@ TACACS+ for network access control. These have the following strengths
 
 <h2 id="RADIUS">RADIUS</h2>
 <p>
-RADIUS (Remote Authentication Dial-In User Service) is standards-based protocol 
+RADIUS (Remote Authentication Dial-In User Service) is a standards-based protocol 
 for implementing AAA (RFC 2865). It combines authentication and authorization into a 
 single resource. It offers robust accounting features. The default ports for RADIUS 
 servers are 1645 for authentication and 1646 for accounting. The new RFC sets the 
-RADIUS ports on UDP ports 1812 for authentication and 1813 for accounting. 
+RADIUS ports on UDP to 1812 for authentication and 1813 for accounting. 
 RADIUS uses both TCP and UDP as the transport protocol.
 With RADIUS, only the password is encrypted. 
 RADIUS combines authentication and authorization features. It offers robust 
