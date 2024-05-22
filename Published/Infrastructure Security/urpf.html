@@ -10,7 +10,7 @@ address is reachable using Layer 2 information in the Forwarding Information Bas
 the packet source IP address is not reachable, the packet is dropped.
 </p>
 <p>
-When forwarding traffic, by default, routers checks for the reachability of a destination 
+When forwarding traffic, by default, routers check for the reachability of a destination 
 IP address prior to forwarding IP packets. With uRPF, the router validates reachability 
 of the source IP address as well. uRPF can also be configured to verify whether the 
 interface through which the packets entering the router is what the router would
@@ -46,7 +46,7 @@ depending on whether an ACL is specified in the URF configuration.
 <p>
 With uRPF, all equal cost return paths are considered valid. uRPF works in cases 
 where multiple return paths exist provided that each path is equal to others in 
-terms of routing cost, i.e. number of hops, weight etc.and as long as the route 
+terms of routing cost, i.e. number of hops, cost etc. and as long as the route 
 is in the FIB. uRPF also functions where EIGRP variants are being used with unequal 
 cost routes back to the packet source IP address.
 </p>
@@ -72,11 +72,7 @@ available on some Cisco router models.
     interface are examined. This is commonly used in ISP networks for MPLS and BGP.</li>
 </ol>
 </p>
-<p>
-By default, uRPF drops packets whose source IP address/network is reachable only 
-via the default route. uRPF supports <code><b>allow-default</b></code> to accept 
-a default route as a valid route.
-</p>
+
 <p>
 If an ACL is referenced in the uRPF configuration, it is checked when uRPF fails. 
 If uRPF check fails and the packet is permitted by an ACL, it is transmitted. 
@@ -92,8 +88,11 @@ Where:
 <ul>
 <li><b>rx:</b> enables strict mode</li>
 <li><b>any:</b> enables loose mode</li>
-<li><b>allow-default:</b> allows the use of a default route. It can be used in 
-strict mode or loose mode.</li>
+<li><b>allow-default:</b> allows the use of a default route. 
+By default, uRPF drops packets whose source IP address/network is reachable only 
+via the default route. uRPF supports <code><b>allow-default</b></code> to accept 
+a default route as a valid route.
+It can be used in strict mode or loose mode.</li>
 <li><b>allow-self-ping:</b> allows self-pinging when checking reachability of IP 
 address. Cisco specifically discourages configuration of uRPF with allow-self-ping 
 as it introduces security loopholes that can be leveraged for Denial of Service (DoS) attacks.</li>
@@ -141,7 +140,7 @@ R1#                                                                             
 
 <h1>Verification</h1>
 <p>
-
+&nbsp;
 </p>
 
 <h2><code>show ip interface &lt;interface-id&gt;</code></h2>
@@ -334,15 +333,12 @@ GigabitEthernet0/0 is up, line protocol is up              <br>
 </code></div>   
 </p>
 
-
-
-
 <h1>Implementing Unicast RPF</h1>
 <p>
 uRPF implementation principles;
 <ol>
   <li>Packets must be received on an interface that has the best return path to 
-  the source (symmetric routing). There must be a router in the FIB matching the
+  the source (symmetric routing). There must be a route entry in the FIB matching the
   route to the receiving interface. ACLs permit uRPF to be used when packets are 
   known to be arriving by specific, less optimal asymmetric input paths.</li>
   <li>IP source addresses at the receiving interface must match the routing entry
