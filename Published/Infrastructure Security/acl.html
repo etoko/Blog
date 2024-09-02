@@ -39,7 +39,7 @@ been deployed to provide multiple network functions such as:
   <li>Route maps</li>
   <li>Network identification in routing protocols</li>
   <li>Route modification/filtering</li>
-  <li>Management plane restrictions such as Telnet, SSH, VPN</li>
+  <li>Management plane restrictions</li>
   <li>Object tracking</li>
 </ul>
 </p>
@@ -594,8 +594,8 @@ a new ACE without indicating the sequence number adds it to the bottom of the AC
 and generates the highest sequence number for the ACE.
 </p>
 <p>
-The command to configure an extended ACL is <code><b>
-ip access-list extended &lt;100 – 199 | 1300 - 1999 | acl-name&gt; &lt;permit or deny&gt; 
+The command to configure an extended ACL is: <code><b>
+ip access-list extended &lt;100 – 199 | 2000 - 2699 | acl-name&gt; &lt;permit or deny&gt; 
 &lt;protocol&gt; [host] &lt;source-network&gt; &lt;wildcard-bits&gt; [&lt;operator&gt; port-number] 
 &lt;destination-network&gt; &lt;wildcard-bits&gt; [&lt;operator&gt; port-number]
 </b></code>
