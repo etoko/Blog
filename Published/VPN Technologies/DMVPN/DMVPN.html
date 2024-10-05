@@ -42,7 +42,8 @@ steps should be followed;
 <ul>
   <li>Step 1: Configuration of mGRE tunnels.</li>
   <li>Step 2: Configuration of Next Hop Resolution Protocol (NHRP).</li>
-  <li>Step 3: Securing the DMVPN Tunnel with IPSec(covered <a href="https://emmanueltoko.blogspot.com/2021/02/securingdmvpn-tunnels-with-ipsec-ikev1.html" target="_blank">here</a>).</li>
+  <li>Step 3: Securing the DMVPN Tunnel with IPSec
+  (covered <a href="https://emmanueltoko.blogspot.com/2021/02/securingdmvpn-tunnels-with-ipsec-ikev1.html" target="_blank">HERE</a>).</li>
 </ul>
 </p>
 <p>
@@ -99,7 +100,7 @@ supports multipoint VPN connectivity. On the hub, DMVPN configuration is accompl
 with fewer configuration commands and one tunnel interface for all spokes.</p></li>
 <li><p>Dynamic tunnel destination simplifies support for dynamically addressed spokes.</p></li> 
 <li>Spoke-to-spoke data-plane traffic is through the hub (phase 1) or direct (phase 2 and 3). 
-However, control-plane and multicast traffic is only exchanged with the hub regardless of DMVPN phase in operation.
+However, control-plane and multicast traffic is only exchanged with the hub regardless of the DMVPN phase in operation.
 This results 
 in the spokes forming layer 3 adjacencies only with the hub. There are no spoke-to-spoke 
 layer 3 adjacencies. So routing protocol updates come only from the hub.</li>
@@ -115,8 +116,8 @@ topology. This dynamically changes to full mesh topologies depending on traffic 
 <p>
 The two main components of a hub and spoke connection are:
 <ol>
-  <li>DMVPN hub/NHRP server (NHS).</li>
-  <li>DMVPN spokes / NHCs:
+  <li>DMVPN hub/NHRP server (Next Hop Server).</li>
+  <li>DMVPN spokes / Next Hop Clients (NHCs):
     <ul>
       <li>Spokes manually specify the hub's address and register with the hub/server.</li>
       <li>The Registration message from the spokes is sent via NHRP Registration 
@@ -131,8 +132,8 @@ The two main components of a hub and spoke connection are:
 
 <h4>Spoke to Spoke</h4>
 <p>
-With the spoke-to-spoke tunnel formed, the hub is only used for control-plane 
-information exchange. The spoke-to-spoke tunnel data-plane may flow through 
+With the spoke-to-spoke tunnel formed, the hub is only used for the exchange of control-plane 
+information such as routing updates of the overlay routing protocol. The spoke-to-spoke tunnel data-plane may flow through 
 the hub initially but subsequent traffic is spoke-to-spoke.
 </p>
 
@@ -229,11 +230,11 @@ Internet Control Message Protocol                                               
 
 <h2 id="GRE_CONFIGURATION">Configuration of GRE Tunnels</h2>
 <p>
-Control-plane neighborships only happen between spoke and hub. Spokes are not 
+Control-plane neighborship relationships only happen between spoke and hub. Spokes are not 
 able to form dynamic routing protocol neighbor relationships with each other.
 
 All spoke to spoke communication transits the hub because the hub sets itself as the
-next-hop in control-plane traffic. All data plane traffic transits via the hub 
+next-hop in control-plane traffic. All initial data plane traffic transits via the hub 
 as a result.
 </p>
 <p>
@@ -359,7 +360,8 @@ HUB(config-if)#<b>ip mtu 1400</b>
 
 <h4>Step 8: Define the Maximum Segment Size (MSS)</h4>
 <p>
-This ensures that the router modifies the payload of a three-way handshake if 
+This ensures that the router notifies the transmitting host the maximum segment size so that 
+the host itself, rather than the router, fragments the payload to the appropriate size if 
 the MSS exceeds the configured value. With DMVPN, this value is typically 1360.
 
 During tunnel configuration, configure MTU to 1400, MSS to 1360 to ensure 
@@ -374,9 +376,12 @@ HUB(config-if)#<b>ip tcp adjust-mss 1360</b>
 </div>
 </p>
 
-<h3>Spoke configuration (DMVPN Phase 1)</h3>
+
+<h2>DMVPN Phase 1</h2>
+
+<h3>Spoke configuration</h3>
 <p>
-Configuration of the Spoke in DMVPN phase 1 is similar to the configuration of 
+Configuration of the spoke in DMVPN phase 1 is similar to the configuration of 
 the hub. The only exception is that with the spoke, GRE is configured instead of 
 mGRE. In the configuration of the hub, replace steps 3 and 4.
 </p>
@@ -424,8 +429,6 @@ administrative workload and improves scalability with addition of new spokes.
 <h2 id="MESSAGES">NHRP Message Types</h2>
 <p>
 NHRP messages are encapsulated by GRE between devices.
-</p>
-<p>
 There are the various types of messages NHCs and NHSs exchange with each other:
 <ul>
 	<li>NHRP Registration(Request and Reply)</li>
@@ -627,7 +630,7 @@ Purge messages are sent to remove a cached NHRP entry for example after the
 <h3>NHRP Error</h3>
 <p>
 
-  Used to notify the sender of an NHRP packet that an error 
+  Error messages are used to notify the sender of an NHRP packet that an error 
   has occurred.
 
 </p>
@@ -755,29 +758,33 @@ used instead.
 
 <h2 id="PHASE1">DMVPN Phase 1: Point to Point</h2>
 <p>
-DMVPN Phase 1 creates point to point tunnels between the hub and each of the 
+DMVPN Phase 1 has the following features:
+<ul>
+  <li>Creates point to point tunnels between the hub and each of the 
 spokes resulting in a more traditional hub and spoke topology. For each NHC to 
 communicate with any other NHC, all traffic must be sent through the hub.
-</p>
-<p>
-In DMVPN phase 1, all traffic is sent through the hub regardless of whether the 
+</li>
+<li>
+All traffic is sent through the hub regardless of whether the 
 spokes are in the same broadcast domain. The hub places itself as the next-hop in 
 all routing updates.
-</p>
-<p>
-In Phase 1, no NHRP requests are sent. Additionally, route summarization at the 
+</li>
+<li>
+<!--No NHRP requests are sent. Additionally,--> Route summarization at the 
 hub is possible in phase 1 and 3 but not in DMVPN phase 2.
-</p>
-<p>
-The default behaviour of EIGRP in DMVPN phase 1 a router makes itself as the 
-next-hop by default.
-</p>
-<p>
+</li>
+<li>
+In EIGRP, the hub becomes the next-hop by default for all traffic whether spoke to hub or 
+spoke to spoke.
+</li>
+<li>
 If using OSPF, DMPVN phase 1 is implemented if the network type is point-to-multipoint.
 This is because the hub automatically sets itself as the next-hop in routing 
 updates. If the interface is broadcast, then phase 2 or 3 is implemented because OSPF 
 does not modify the next-hop. It keeps it unchanged.
-</p>
+</li>
+</ul>
+
 <h3>Spoke Configuration</h3>
 <p>
 Continuing the earlier configuration of mGRE on the spoke;
@@ -1129,8 +1136,7 @@ physical interface and sends a redirect message to the source spoke router when
 it detects packets hairpinning out of the DMVPN cloud. <b>Hairpinning is when 
 traffic is received and sent out of an interface in the same DMVPN cloud (identified 
 by the NHRP network ID). Hairpinning of traffic triggers redirect messages.</b>
-</p>
-<p>
+
 When NHC X wants to communicate with NHC Y:
 <ul>
   <li>NHC X sends traffic to the NHS.</li>
@@ -1888,7 +1894,7 @@ the underlay network in routing protocol over the overlay network.
 <p>
 The tunnel interface transitions through various states based on the stage of tunnel 
 creation or if the tunnel experienced problems during establishment or operation. 
-Addition of encryption to the tunnel also affects the state of the DMVPN tunnels. 
+Enabling encryption on the tunnel also affects the state of the DMVPN tunnels. 
 </p>
 
 <h3><code>show dmvpn interface &lt;interface&gt; detail</b></code> </h3>
@@ -2032,7 +2038,7 @@ SPOKE8#
 <p>
 The local NHRP cache contains:
 <ol>
-  <li>Network entry for hosts (/32 or 128) or subnets (/24, /25, /16) and tunnel to NBMA address.</li>
+  <li>Network entry for hosts (/32 - IPv4 or 128 or IPv6) or subnets (/24, /25, /16) and tunnel to NBMA address.</li>
   <li>Interface number, duration of tunnel existence. Included is the amount of time 
 to expiry of the tunnel for dynamic entries. By default, the dynamic entries expire after two hours.
 Static entries do not expire.</li>
@@ -2109,7 +2115,7 @@ Overlay routes have the tunnel interface as the exit interface.
 <p>
 During registration, NHCs instruct NHS to keep their NBMA address unique. If a 
 loss of connectivity occurs between the NHC and NHS and a new NBMA address is 
-given to the NHC, say through DHCP, before the NHRP NHC cache timeout, the new 
+assigned to the NHC, say through DHCP, before the NHRP NHC cache timeout, the new 
 registration is blocked. This can be suppressed by using the command; 
 <code><b>ip nhrp registration no-unique</b></code> on the NHC tunnel interface. 
 Verify using the command <code><b>show ip nhrp 10.100.100.8</b></code>.
@@ -2117,7 +2123,7 @@ Verify using the command <code><b>show ip nhrp 10.100.100.8</b></code>.
 
 <h2>Recursive Routing Problems</h2>
 <p>
-Recursive routing happens when the transport/NBMA network is advertised into the same routing
+Recursive routing happens when the transport/NBMA network is advertised into the routing
 protocol that runs on the overlay network. One of the main preconditions for 
 recursive routing is the routing protocol in the overlay network having a lower 
 Administrative Distance (AD) than the routing protocol being used in the underlay
@@ -2140,13 +2146,12 @@ the tunnel. This process repeats continuously.
 <h3>Solution</h3>
 <p>
 <ul>
-<li>Removing the transport network from the overlay routing protocol resolves
-recursive routing.</li>
+<li>Do not advertise the transport network in the overlay routing protocol.</li>
 <li>Front-door VRF</li>
 </ul>
 </P>
 
-<h2 id="FVRF"> Front-Door Virtual Route Forwarding (FVRF)</h2>
+<h3 id="FVRF"> Front-Door Virtual Route Forwarding (FVRF)</h3>
 <p>
 A DMVPN tunnel source or destination can be made to be separate from the DMVPN 
 tunnel itself. A VRF is configured and then associated with the transport network.
@@ -2156,7 +2161,7 @@ network and interface can be associated with the transport VRF and the tunnel
 network and interface associated with the tunnel VRF.
 </p>
 
-<h3>Configuring FVRF</h3>
+<h4>Configuring FVRF</h4>
 <p>
 The VRF can be created using the older global configuration command 
 <code><b>ip vrf &lt;vrf_name&gt;</b></code> or the newer global configuration command  
@@ -2186,7 +2191,7 @@ has been activated.
 </li>
 <li>
   <p>
-  Associate the front-door FVRF to the interface; <code><b>vrf forwarding &lt;vrf_name&gt;</b></code>.
+  Associate the front-door FVRF with the interface; <code><b>vrf forwarding &lt;vrf_name&gt;</b></code>.
   </p>
   <p>
   <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
@@ -2199,7 +2204,7 @@ has been activated.
 </li>
 <li>
   <p>
-  Make the DMVPN VRF-aware: <code><b>tunnel vrf &lt;fvrf_name&gt;</b></code>.
+  Make DMVPN VRF-aware: <code><b>tunnel vrf &lt;fvrf_name&gt;</b></code>.
   </p>
   <p>
     <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">

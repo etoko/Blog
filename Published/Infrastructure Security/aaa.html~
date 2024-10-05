@@ -6,8 +6,8 @@ the user is allowed to access and which operations the user is allowed to perfor
 Accounting logs all user actions on the system.
 </p>
 <p>
-AAA is usually used for device access and network access. Device access provides 
-administrative access to network devices for administrative purposes.
+AAA is usually used for device access and network access. Device access may require   
+privileged access for administrative purposes.
 </p>
 <p>
 Application of AAA in network access can be used to segregate users between 
@@ -33,7 +33,8 @@ AAA consists of three components: supplicant, authenticator and authentication s
 <ol>
   <li><b>Supplicant:</b> device requesting access; this may be a laptop, printer,  
   smartphone. The supplicant is either requesting for network access or device 
-  access.</li>
+  access. Supplicant may also refer to the software on the laptop that is used to 
+  authenticate the end user.</li>
   <li><b>Authenticator:</b> this is the device being accessed; it is the device 
   that is enforcing authentication (NAD). With device access, this device can be 
   any network-connected device such as router, switch, wireless LAN controller. 
@@ -43,9 +44,11 @@ AAA consists of three components: supplicant, authenticator and authentication s
   <li><b>Authentication server:</b> validates the identity of the client and 
   notifies the authenticator if the client is authorized to access the network 
   or device. This authentication uses username/password combination or certificates (PKI) 
-  to authenticate users. RADIUS is an example of an authentication services. 
+  to authenticate users. RADIUS is an example of an authentication service. 
+  <p>
   Cisco systems offers Identity Services Engine (ISE) and Access Control System (ACS) 
   to provide AAA services for a network.
+  </p>
   </li>
 </ol>
 </p>
@@ -54,7 +57,7 @@ AAA consists of three components: supplicant, authenticator and authentication s
 <p>
 AAA can be used to authenticate users for device administration or network access:
 <ol>
-  <li><b>Device administration:</b> device access is possible through console, SSH, Telnet and  
+  <li><b>Device administration:</b> device access is done using console, SSH, Telnet and  
   HTTP(S). The network device then uses RADIUS or TACACS+ to authenticate the 
   user's network access with the authentication server.</li>
   <li><b>Network access:</b> users can be authenticated using 
@@ -65,16 +68,16 @@ AAA can be used to authenticate users for device administration or network acces
 
 <h1>Privileges</h1>
 <p>
-Privileges are the list of commands that a user is authorized to execute. Cisco 
-defines different privilege levels with level 0, 1 and 15 defined. Privilege 
-levels 2-14 are open for customization. The following table displays the different 
+Privileges are the list of commands that a user is authorized to execute. IOS 
+defines different privilege levels with level 0, 1 and 15 defined by default. 
+Privilege levels 2-14 are open for customization. The following table displays the different 
 levels of privileges in Cisco IOS:
 </p>
 <p>
 <table cellspacing="0" width="100%">
 <thead style="background:#d3d3d3; font-weight: bold;">
 <tr>
-  <td style="border-bottom:1px solid; border-top:1px solid;" width="15%">Privilege Level</td>
+  <td style="border-bottom:1px solid; border-top:1px solid;" width="20%">Privilege Level</td>
   <td style="border-bottom:1px solid; border-top:1px solid;" width="15%">Origin</td>
   <td style="border-bottom:1px solid; border-top:1px solid;">Accessibility</td>
 </tr>
@@ -263,7 +266,7 @@ The above command enables authentication using the local database on vty lines
 the primary remote access method with telnet as backup if SSH fails.
 </p>
 <p>
-<b>Note:</b> It is recommended disable remote access using telnet as it sends 
+<b>Note:</b> It is recommended that remote access using telnet be disabled as it sends 
 the authentication credentials and commands to the remote device in clear text.
 </p>
 

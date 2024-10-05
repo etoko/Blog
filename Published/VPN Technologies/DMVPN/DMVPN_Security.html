@@ -2,12 +2,15 @@
 
 <h1>Introduction and Overview</h1>
 <p>
-In unencrypted DMVPN packets, the original packets have GRE flags added to them, and then the new GRE
-IP header is added for routing the packets through the transport (underlay) network. 
+In unencrypted DMVPN packets, the original packets have GRE flags added to them,
+and the GRE IP header is added for routing the packets through the transport (underlay) network. 
 The GRE IP header adds an extra 20 bytes of overhead, and the GRE flags add an 
 extra 4 bytes of overhead. These packets use the protocol field of GRE (47).
+</p>
+<p>
 By default, GRE has no in-built security features to secure the data transiting 
-the tunnel. IPSec is used to provide: encryption, data integrity, replay protection 
+the tunnel. GRE depends on IPSec to secure the VPN tunnel. 
+IPSec is used to provide: encryption, data integrity, replay protection 
 features to GRE tunnels.
 </p>
 <p>
@@ -45,8 +48,6 @@ IPSec security associations (SAs).
 <p>
 A security association (SA) is a relationship between two or more entities that
 describes how the entities will use security services to communicate securely.
-</p>
-<p>
 Security Associations (SA) contain agreed upon security parameters. The two main 
 security associations that will be used by DMVPN to secure traffic are IKE SA and 
 IPSec SA:
@@ -133,18 +134,17 @@ the creation of the following:
 </p>     
 
 <p>
-The configuration of 
-DMVPN tunnel protection using DMVPN follows:
+The configuration of DMVPN tunnel protection using DMVPN follows:
 </p>
 
-<h3>Step 1: Create the IKEv1 policy:</h3>
+<h3>Step 1: Configure the IKEv1 policy:</h3>
 <p>
 This is used for phase 1 negotiations (control-plane) in IPsec to generate the key 
 information used in phase 2 for the actual data-plane.
 </p>
 <p>
 <ol>
-<li><h4>Define an IKE policy</h4></li>
+<li><b>Define an IKE policy:</b>
 The IKE policy is configured using the command 
  <code><b>crypto isakmp policy &lt;1-10000&gt;</b></code> where 1-10000 is the 
  priority of the protection suite.
@@ -155,9 +155,10 @@ The IKE policy is configured using the command
 HUB(config)#<b>crypto isakmp policy 100</b>
 </code></div>
 </p>
+</li>
   
-    <li><h4>Configure encryption method</h4></li>
-<p>
+    <li><b>Configure encryption method:</b>
+
 The encryption method is usually any of the synchronous encryption algorithms 
 aes, 3des or des: 
 <code><b>encryption &lt;aes | 3des | des&gt; &lt;128-256&gt;</b></code>
@@ -166,32 +167,29 @@ aes, 3des or des:
   <li><b>128 - 256:</b> the supported encryption key sizes. More modern platforms 
   support a larger key size. </li>
 </ul>
-</p>
+
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
  <code>
 HUB(config-isakmp)#<b>encryption aes 256</b>
 </code></div>
 </p>
-
-<li><h4>Configure the authentication method</h4></li>
-<p>
+</li>
+<li><b>Configure the authentication method:</b>
 The authentication method can be either preshared keys or RSA-signatures: 
 <code><b>authentication &lt;pre-share | rsa-encr | rsa-sig&gt;</b></code>.
 In this configuration, we opt to use preshared keys for authentication.
-</p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
  <code>
 HUB(config-isakmp)#<b>authentication pre-share</b>
 </code></div>
 </p>
-
-<li><h4>Configure the Diffie-Helman group for integrity</h4></li>
-<p>
+</li>
+<li><b>Configure the Diffie-Helman group for integrity:</b>
 Define the Diffie-Helman group using the command 
 <code><b>group &lt;1|14|15|16|19|2|20|21|24|5&gt;</b></code>. 
-The Diffie-Hellman groups include the following; 
+The Diffie-Hellman groups include the following: 
 <ul>
   <li>Group 1 (768 bits)</li>
   <li>Group 14 (2048 bits)</li>
@@ -214,21 +212,20 @@ HUB(config-isakmp)#<b>group 16</b>
 <p>
 If not specified, the default group is enabled.
 </p>
-
-<li><h4>Configure the hash function for data integrity</h4></li>
-<p>
+</li>
+<li><b>Configure the hash function for data integrity:</b>
 The hash algorithm provides a check for data integrity i.e, a check to ensure 
 that the data was not altered in transit. The main hashing functions in use are MD5 
 and the various versions of SHA i.e, SHA, SHA256, SHA384, SHA512. 
 The command is <code><b>hash &lt;md5 | sha | sha256 | sha384 | sha512&gt;</b></code>.
-</p>
+
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
  <code>
 HUB(config-isakmp)#<B>hash sha512</b>
 </code></div>
 </p>
-
+</li>
 </ol>
 <h3>Step 2: Configure the IKE key</h3>
 <p>
@@ -259,15 +256,13 @@ encryption and hashing functions configured under the transform-set.
 </p>
 <p>
 <ol>
-<li><h4>Define the transform set and security protocol(ESP or AH)</h4>
-
-<p>
+<li><b>Define the transform set and security protocol(ESP or AH):</b>
 Define the ESP authentication and ESP encryption or AH authentication algorithms
 for encryption or authentication. One SA is created for inbound traffic and one 
 for outbound traffic to a DMVPN peer. This is done using the global configuration command; 
 <code><b>crypto ipsec transform-set &lt;transform-set-tag&gt; [&lt;esp-encryption-function&gt; 
 &lt;esp-authentication-function&gt; | &lt;ah-authentication&gt;]</b></code>.
-</p>
+
 <p>
 The AH options available include the following:
 <ul>
@@ -306,10 +301,9 @@ HUB(config)#<b>crypto ipsec transform-set DMVPN_IPSEC_TSET esp-aes esp-sha512-hm
 </code></div>
 </p>
 </li>
-<li><h4>Define the tunnel mode</h4>
-<p>
+<li><b>Define the tunnel mode:</b>
 tunnel mode can be transport or tunnel
-</p>
+
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
  <code>
@@ -320,9 +314,9 @@ HUB(cfg-crypto-trans)#<b>mode transport</b>
 </ol>
 </p>
 
-<h3>Step 4 Create an IPSec profile</h3>
+<h3>Step 4: Create an IPSec profile</h3>
 <p>
-The IPsec profile is created and the references the IPsec transform set previously 
+The IPsec profile is created and references the IPsec transform set previously 
 defined.
 </p>
 <p>
@@ -435,7 +429,7 @@ SPOKE4(conf-isa-prof)#<b>match identity address 0.0.0.0 FVRF</b>
 </ol>
 </p>
 
-<h3>Step 4: Configure the IPsec Transform-set</h3>
+<h3>Step 4: Configure the IPSec Transform-set</h3>
 <p>
 The IPsec transform-set is configured as in step 3 above:
 </p>
@@ -447,7 +441,7 @@ The IPsec transform-set is configured as in step 3 above:
  </code></div>
 </p>
 
-<h3>Step 5: Configure the IPsec Profile</h3>
+<h3>Step 5: Configure the IPSec Profile</h3>
 <p>
 <ol>
   <li>Define the IPsec profile:<code><b>crypto ipsec profile &lt;profile-name&gt;</b></code>
@@ -458,7 +452,7 @@ SPOKE4(config)#<b>crypto ipsec profile DMVPN_IPSEC_PROFILE</b>
 </code></div>
 </p>
   </li>
-  <li>Reference the configured IPsec transform-set: 
+  <li>Reference the configured IPSec transform-set: 
   <code><b>set transform-set &lt;transform-set-name&gt;</b></code>
   <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
@@ -478,7 +472,7 @@ SPOKE4(ipsec-profile)#<b>set transform-set DMVPN_IPSEC_TSET</b>
 </ol>
 </p>
 
-<h3>Step 6: Reference the IPsec Profile under the tunnel</h3>
+<h3>Step 6: Reference the IPSec Profile under the tunnel</h3>
 <p>
 Tunnel protection using IPsec is configured under the tunnel interface:
 </p>
@@ -1620,6 +1614,8 @@ SPOKE1#
 
 <h3>Protection of IKEv2</h3>
 <p>
+<ul>
+	<li><b>Limit Security Associations:</b>
 The command <code><b>crypto ikev2 limit max-in-negotiation-sa limit | max-sa limit outgoing</b></code> 
 limits the number of sessions being established or that are allowed to establish.
 <ul>
@@ -1629,12 +1625,16 @@ limits the number of sessions being established or that are allowed to establish
     <li><b>Max-in-negotiation-sa:</b> limits the number of SAs being negotiated 
     at any one time.</li>
 </ul>
-<p>
+</li>
+<li><b>Half-Open Sessions:</b>
 To protect the IKE from half open sessions, a cookie can be used to validate that
 sessions are valid IKEv2 sessions and not a Denial of Service (DoS) attack. The 
 command <code><b>crypto ikev2 cookie-challege &lt;challenge-number&gt;</b></code> defines the threshold of 
 half-open SAs before issuing an IKEv2 challenge.
+</li>
+</ul>
 </p>
+
 <h3>Verification</h3>
 <p>                                                                
 <code><b>show crypto ikev2 stats</b></code>

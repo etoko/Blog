@@ -10,7 +10,7 @@ address is reachable using Layer 2 information in the Forwarding Information Bas
 the packet source IP address is not reachable, the packet is dropped.
 </p>
 <p>
-When forwarding traffic, by default, routers check for the reachability of a destination 
+When forwarding traffic, by default, router check for the reachability of a destination 
 IP address prior to forwarding IP packets. With uRPF, the router validates reachability 
 of the source IP address as well. uRPF can also be configured to verify whether the 
 interface through which the packets entering the router is what the router would
@@ -47,8 +47,8 @@ depending on whether an ACL is specified in the URF configuration.
 With uRPF, all equal cost return paths are considered valid. uRPF works in cases 
 where multiple return paths exist provided that each path is equal to others in 
 terms of routing cost, i.e. number of hops, cost etc. and as long as the route 
-is in the FIB. uRPF also functions where EIGRP variants are being used with unequal 
-cost routes back to the packet source IP address.
+is in the FIB. uRPF also functions where EIGRP is running with the unequal cost 
+routes back to the packet source IP address.
 </p>
 
 <h1>Unicast RPF Operation Modes</h1>

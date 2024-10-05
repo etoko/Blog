@@ -412,7 +412,7 @@ local/connected networks, IGP learned routes and static routes. It is defined by
 <a href="https://www.ietf.org/rfc/rfc5036.txt" target="_blank">RFC 5036</a>.
 </p>
 <p>
-Like IGPs, LDP automatically discovers neighbors with a Hello protocol. Hello 
+Like IGPs, LDP automatically discovers neighbors with Hello messages. Hello 
 messages are sent to the <b>all routers multicast IP address 224.0.0.2 using UDP
 port 646 and destination UDP port 646</b>. Hello messages include the "IPv4 transport address" 
 field. This field 
@@ -2129,9 +2129,17 @@ LDP session protection can be implemented in the following ways:
 </p>
 
 
-<h1 id="VERIFICATION">Verification</h1>
+<h1 id="VERIFICATION">VERIFICATION OF MPLS</h1>
 <p>
-
+MPLS can be verified by viewing: 
+<ol>
+  <li>The MPLS operational state</li>
+  <li>MPLS configured interfaces</li>
+  <li>FIB</li>
+  <li>LFIB</li>
+  <li>Traffic path</li>
+  <li>LIB</li>
+</ol>
 </p>
 
 <h2>LDP Operational State</h2>
@@ -2173,7 +2181,7 @@ following:
 
 <h2>MPLS Interfaces</h2>
 <p>
-The command to display interfaces on which LDP is configured is <code><b>show mpls interface</b></code>.
+The command to display interfaces on which LDP is configured is <code><b>show mpls interfaces</b></code>.
 </p>
 
 <p>
@@ -2451,7 +2459,7 @@ VRF info: (vrf in name/id, vrf out name/id)    <br>
 <p>
 The LIB operates at the MPLS control plane. If BGP is used for label exchange, 
 then the command is <code><b>show ip bgp labels</b></code>. The LIB stores all 
-labels.
+labels; it can be viewed using the command <code><b>show mpls ldp bindings</b></code>.
 </p>
 
 <p>
@@ -2719,7 +2727,7 @@ R2#
 </p>
 
 
-<h1 id="TROUBLESHOOTING">Troubleshooting</h1>
+<h1 id="TROUBLESHOOTING">TROUBLESHOOTING</h1>
 <p>
 
 </p>
@@ -2727,16 +2735,16 @@ R2#
 <h2>LDP Neighbors not forming</h2>
 <p>
 <ul>
-<li><code><b>show mpls ldp neighbor </b></code>
-    to identify neighbors.</li> 
-<li><code><b>show mpls interface</b></code>: to identify if MPLS is running</li>
-<li>traceroute</li>
-<li>Ensure that the LDP ID is reachable; of the local LSR or remote LSR.
-    To easily identify where MPLS is broken, from one PE use the command <code><b>
+<li>To to identify LDP neighbors using the command <code><b>show mpls ldp neighbor </b></code>.</li> 
+<li>Determine if MPLS is configured on expected interfaces using the command <code><b>show mpls interface</b></code></li>
+<li>Determine with label switching along the LSP is taking place using a traceroute</li>
+<li>Ensure that the LDP ID is reachable;
+    To identify where MPLS is broken, from one PE use the command <code><b>
     ping mpls ipv4 </b></code> to the remote PE device. Status code of B indicates that the packet was sent 
     using unlabeled packets. On affected LSR, use <code><b>show mpls interfaces</b></code>.
     </li>
-    </li>
+ <li>Determine if exchange of labels is taking place between peers using the command 
+ <code><b>show mpls ldp discovery</b></code></li>
 </ul>
 </p>
 <!--
