@@ -10,12 +10,13 @@ address is reachable using Layer 2 information in the Forwarding Information Bas
 the packet source IP address is not reachable, the packet is dropped.
 </p>
 <p>
-When forwarding traffic, by default, router check for the reachability of a destination 
+When forwarding traffic, by default, routers check for the reachability of a destination 
 IP address prior to forwarding IP packets. With uRPF, the router validates reachability 
 of the source IP address as well. uRPF can also be configured to verify whether the 
 interface through which the packets entering the router is what the router would
 normally use to send traffic back to IP addresses in that network.
-
+</p>
+<p>
 For uRPF to function, CEF must be enabled globally (using the global configuration 
 command <code><b>ip cef</b></code>).
 </p>
@@ -47,13 +48,13 @@ depending on whether an ACL is specified in the URF configuration.
 With uRPF, all equal cost return paths are considered valid. uRPF works in cases 
 where multiple return paths exist provided that each path is equal to others in 
 terms of routing cost, i.e. number of hops, cost etc. and as long as the route 
-is in the FIB. uRPF also functions where EIGRP is running with the unequal cost 
-routes back to the packet source IP address.
+is in the FIB. uRPF also functions where EIGRP is configured with unequal cost 
+routing.
 </p>
 
 <h1>Unicast RPF Operation Modes</h1>
 <p>
-uRPF operates in three modes; strict, loose and VRF modes. Some modes may not be 
+uRPF operates in three modes: strict, loose and VRF modes. Some modes may not be 
 available on some Cisco router models.
 <ol>
     <li><b>Strict mode:</b> uRPF checks to ensure that the source IP address 
@@ -139,9 +140,6 @@ R1#                                                                             
 </p>
 
 <h1>Verification</h1>
-<p>
-&nbsp;
-</p>
 
 <h2><code>show ip interface &lt;interface-id&gt;</code></h2>
 <p>
@@ -348,7 +346,7 @@ uRPF implementation principles;
 </ol>
     </p>
 
-<h1>Where to use uRPF</h1>
+<h2>Where to use uRPF</h2>
 <p>
 uRPF does not inspect IP packets encapsulated in tunnels such as GRE, L2TP, PPTP.
 Configure uRPF so that it processes network traffic only after tunneling and 
@@ -362,6 +360,120 @@ with malformed or spoofed source IP addresses from the Internet. If implemented
 in an ISP, it protects the ISP from spoofed packets from an enterprise.
 </p>
 
+
+ <h2>uRPF Types</h2> 
+ <p>There are two types of uRPF:</p> 
+ <ul> <li><strong>Ingress Filtering</strong>: Ingress filtering is applied to 
+ incoming packets at the edge of a network. It's used to prevent IP spoofing attacks 
+ from outside the network.</li> <li><strong>Egress Filtering</strong>: Egress 
+ filtering is applied to outgoing packets at the edge of a network. It's used to 
+ prevent IP spoofing attacks from within the network.</li> </ul> 
+ 
+ <h2>Benefits of uRPF</h2> 
+ <p>uRPF provides several benefits, including:</p> 
+ <ul> 
+ <li><strong>Prevention of IP Spoofing Attacks</strong>: uRPF prevents
+ IP spoofing attacks by verifying the source IP address of incoming packets.</li> 
+ <li><strong>Denial of Service (DoS) Attack Prevention</strong>: uRPF can prevent 
+ DoS attacks by dropping packets with spoofed source IP addresses.</li> 
+ <li><strong>Man-in-the-Middle (MitM) Attack Prevention</strong>: uRPF can prevent 
+ MitM attacks by dropping packets with spoofed source IP addresses.</li> 
+ </ul>
+ 
+ <h2>Limitations of uRPF</h2> 
+ <p>uRPF has several limitations, including:
+ <ul> 
+ <li><strong>Asymmetric Routing</strong>: uRPF can cause issues with asymmetric 
+ routing, where the return path of a packet is different from the forward path.</li> 
+ <li><strong>Load Balancing</strong>: uRPF can cause issues with load balancing,
+ where a load balancer is used to distribute traffic across multiple servers.</li> 
+ <li><strong>Network Complexity</strong>: uRPF can add complexity to network 
+ configuration and management.</li>
+ </ul> 
+ </p>
+ 
+ <h2>Recommended Locations to Configure Unicast Reverse Path Forwarding (uRPF)</h2>
+ <p>
+<table width="100%" cellspacing="0">
+	<thead style="font-weight: bold; background:#d3d3d3;">
+    <tr>
+        <th width="25%" style="border-bottom: 1px solid; border-top: 1px solid;">Location</th>
+        <th style="border-bottom: 1px solid; border-top: 1px solid;">Description</th>
+        <th style="border-bottom: 1px solid; border-top: 1px solid;">Reason for Configuration</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <td style="border-bottom: 1px solid;">Edge Routers</td>
+        <td style="border-bottom: 1px solid;">Routers connecting the internal network to external networks (e.g., the Internet).</td>
+        <td style="border-bottom: 1px solid;">Filters out spoofed packets from external sources before they enter the internal network, preventing attacks.</td>
+    </tr>
+    <tr>
+        <td style="border-bottom: 1px solid;">Distribution Layer Routers</td>
+        <td style="border-bottom: 1px solid;">Routers that aggregate traffic from access layer switches and route it to the core layer.</td>
+        <td style="border-bottom: 1px solid;">Ensures that traffic from different access points is validated before being forwarded to the core network.</td>
+    </tr>
+    <tr>
+        <td style="border-bottom: 1px solid;">Core Routers (Selective)</td>
+        <td style="border-bottom: 1px solid;">Routers responsible for high-speed data transfer between different parts of the network.</td>
+        <td style="border-bottom: 1px solid;">Validates traffic passing through the core, especially on routers connecting to multiple distribution layers or external networks.</td>
+    </tr>
+    <tr>
+        <td style="border-bottom: 1px solid;">Interconnected Networks</td>
+        <td style="border-bottom: 1px solid;">Routers connecting different segments of a network or different networks (e.g., branch offices).</td>
+        <td style="border-bottom: 1px solid;">Validates the source of packets from different segments or external networks, reducing the risk of spoofed traffic.</td>
+    </tr>
+    <tr>
+        <td style="border-bottom: 1px solid;">Access Layer Routers (Cautiously)</td>
+        <td style="border-bottom: 1px solid;">Routers connecting end devices (like computers and printers) to the network.</td>
+        <td style="border-bottom: 1px solid;">Can be configured in high-risk environments to validate all incoming traffic, though less common.</td>
+    </tr>
+    </tbody>
+</table>
+</p>
+
+<h2>Considerations for Configuration</h2>
+<p>
+<table width="100%" cellspacing="0">
+	<thead style="font-weight: bold; background:#d3d3d3;">
+    <tr>
+        <th width="25%" style="border-bottom: 1px solid; border-top: 1px solid;">Consideration</th>
+        <th style="border-bottom: 1px solid; border-top: 1px solid;">Details</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <td style="border-bottom: 1px solid;">Network Design</td>
+        <td style="border-bottom: 1px solid;">Consider overall network design and traffic patterns to avoid dropping legitimate traffic.</td>
+    </tr>
+    <tr>
+        <td style="border-bottom: 1px solid;">Routing Protocols</td>
+        <td style="border-bottom: 1px solid;">Ensure compatibility of routing protocols with uRPF; keep the routing table accurate and up-to-date.</td>
+    </tr>
+    <tr>
+        <td style="border-bottom: 1px solid;">Testing</td>
+        <td style="border-bottom: 1px solid;">Test configurations in a lab or staging environment before production deployment.</td>
+    </tr>
+    <tr>
+        <td style="border-bottom: 1px solid;">Monitoring and Logging</td>
+        <td style="border-bottom: 1px solid;">Implement monitoring and logging to track uRPF effectiveness and identify any legitimate traffic drops.</td>
+    </tr>
+    </tbody>
+</table>
+</p>
+ 
+ <h1>Best Practices for Implementing uRPF</h1> 
+ <p>To implement uRPF effectively, follow these best practices:</p> 
+ <ul> 
+ <li><strong>Configure uRPF on Edge Routers</strong>: Configure uRPF on edge 
+ routers to prevent IP spoofing attacks from outside the network.</li> 
+ <li><strong>Use Strict Mode</strong>: Use strict mode to provide maximum security, 
+ but be aware of potential issues with legitimate traffic.</li> 
+ <li><strong>Monitor and Analyze Traffic</strong>: Monitor and analyze traffic 
+ to identify potential issues with uRPF.</li> 
+ <li><strong>Configure Exceptions</strong>: Configure exceptions for specific IP
+ addresses or networks to bypass uRPF checks.</li> 
+ </ul> 
 
 <h1>Optimizing uRPF with ACLs</h1>
 <p>
