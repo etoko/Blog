@@ -24,7 +24,7 @@ user may be a network device.
 
 <p>
 Authorization defines what resources the user has access to. It can also be 
-defined as what the user actions the user is allowed to perform on a device.
+defined as what actions the user is permitted to perform on a device.
 </p>
 
 <h2>AAA Components</h2>
@@ -92,7 +92,7 @@ levels of privileges in Cisco IOS:
   <td style="border-bottom:1px solid;">1</td>
   <td style="border-bottom:1px solid;">Built-in</td>
   <td style="border-bottom:1px solid;">User mode, very limited access. It is the default exec user level and 
-  provides some show commands.</td>
+	  provides some <code><b>show</b></code> commands.</td>
  </tr> 
  <tr>
   <td style="border-bottom:1px solid;">15</td>
@@ -396,14 +396,35 @@ Configure authorization to be performed against the local router’s database
   </code></div>
 </p>
 </li>
-<li>Apply ‘local-author’ as an authorisation method for the vty lines
+<li>Apply <b>local-author</b> as an authorization method for the vty lines
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
   <code>
 R1(config)#<b>line vty 0 4</b><br>
-R1(config-line)#<b>authorisation exec local-author</b>
+R1(config-line)#<b>authorization exec local-author</b>
 </code></div>
 </p>
+</li>
+<li>
+	<b>Configure local authorization for specific intefaces</b> 
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+R1(config-if)#<b>aaa authorization exec &lt;interface-type&gt; &lt;interface-number&gt;</b>
+</code></div>
+</p>
+</li>
+<li>
+	Configure local authorization for specific commands:
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+R1(config)#<b>aaa authorization commands &lt;privilege-level&gt; &lt;command&gt; local</b>
+</code></div>
+Replace <code><b>privilege-level</b></code> and <code><b>command</b></code> with the appropriate privilege
+level and command permitted respectively. 
+</p>
+</li>
 </li>
 <li>Telnet to router and authenticate.</li>
 </ol>
@@ -428,10 +449,10 @@ TACACS+ for network access control.
 <p>
 RADIUS (Remote Authentication Dial-In User Service) is a standards-based protocol 
 for implementing AAA (<a href="https://www.rfc-editor.org/rfc/rfc2865.txt" target="blank">RFC 2865</a>). It combines authentication and authorization into a 
-single resource. It offers robust accounting features. The default ports for RADIUS 
-servers are 1645 for authentication and 1646 for accounting. The new RFC sets the 
+single resource. It offers robust accounting features. Previously (RFC 2138), the default ports for RADIUS 
+servers are 1645 for authentication and 1646 for accounting. <a target="blank" href="https://www.rfc-editor.org/rfc/rfc2138">RFC 2138</a> sets the 
 RADIUS ports on UDP to 1812 for authentication and 1813 for accounting. 
-RADIUS uses both TCP and UDP as the transport protocol.
+RADIUS uses both TCP and UDP as the transport protocol; however UDP is more commonly used.
 With RADIUS, only the password is encrypted. 
 RADIUS combines authentication and authorization features. It offers robust 
 accounting features.
@@ -445,14 +466,14 @@ is required is for the local device to have IP connectivity to the RADIUS server
 <p>
 When configuring authentication of user credentials against a RADIUS server, the 
 local device sends the authentication credentials entered by the user to the specificed 
-IP address of the RADIUS server connecting to the port number 1812 or 1645.
+IP address of the RADIUS server connecting to the port number 1812.
 </p>
 <p>
 When configuring RADIUS authentication, ensure that a backup authentication method 
 is configured to avoid being unable to access the device due to misconfiguration 
 of the RADIUS authentication. Usually, this backup authentication method is the 
 local database. When authenticating a user login session against a RADIUS server, 
-by default, IOS will attempt to connect to the RADIUS server up to five times to make an 
+IOS will attempt to connect to the RADIUS server up to five times by default, to make an 
 access request. If the connection attempt fails all these five times, then 
 the backup authentication method is used. 
 A RADIUS server will not respond to an access request if the requester is not 
@@ -480,8 +501,8 @@ R1(config)#<b>aaa new-model</b>
 </p>
 </li>
 <li>
-Define the source of authentication: Use local database as last resort;
-The default RADIUS authentication port is 1645 and accounting port 1646.
+Define the source of authentication: use local database as last resort;
+The default RADIUS authentication port is 1812 and accounting port 1813.
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
   <code>
@@ -858,16 +879,16 @@ for a console session).
 <p>
 <ol>
 <li>
-Configure authorisation by defining any RADIUS or TACACS+ servers. 
+Configure authorization by defining any RADIUS or TACACS+ servers. 
 Follow steps 1 -3 of RADIUS and/or TACACS+ configurations above.
 </li>
 <li>
-Define a method list of authorisation that will be tried in sequence using;
-<code><b>aaa authorisation &lt;commands | config-commands | configuration | exec 
+Define a method list of authorization that will be tried in sequence using;
+<code><b>aaa authorization &lt;commands | config-commands | configuration | exec 
 | network| reverse-access&gt; &lt;default | list-name&gt; method1, method2, method3 …. methodn
 </b></code>.
 <p>
-Specify the function or service needing authorisation with one of the following keywords;
+Specify the function or service needing authorization with one of the following keywords;
 <ul>
     <li><b>commands:</b> the server must return permission to use any command at any privilege level</li>
     <li><b>config-commands:</b> the server must return permission to use any configuration command.</li>
@@ -881,12 +902,12 @@ Specify the function or service needing authorisation with one of the following 
 </p>
 <p>
 You can identify the method with a descriptive name (list-name) or use the single 
-unnamed list (default). Each authorisation method will be listed in the order it will be tried;
+unnamed list (default). Each authorization method will be listed in the order it will be tried;
 <ul>
   <li><b>group &lt;group-name&gt;:</b> requests are sent to servers in a group.</li>
   <li><b>group &lt;radius|tacacs+:</b> requests are sent to all servers of this type.</li>
   <li><b>if-authenticated:</b> requests are granted if the user is already authenticated.</li>
-  <li><b>none:</b> no external authorisation is used; every user is authorised successfully.</li>
+  <li><b>none:</b> no external authorization is used; every user is authorised successfully.</li>
  </ul>  
 </p>
 <p>
@@ -895,17 +916,17 @@ RADIUS servers offer more of an all or nothing approach.
 </p>
 </li>
 <li>
-Apply an authorisation method list to a specific line;
+Apply an authorization method list to a specific line;
 <code><b>authorization &lt;commands level | exec | reverse-access&gt; &lt;default | list-name&gt;</b></code>.
 
 If this command is not entered, the default group is used for all lines.
 
-To configure a switch / router to use AAA authorisation for all lines using 
-configured TACACS+ group, with the local user database as backup authorisation.
+To configure a switch / router to use AAA authorization for all lines using 
+configured TACACS+ group, with the local user database as backup authorization.
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
   <code>
-R1(config)#<b>aaa authorisation exec aaa-exec group tacacs+ local</b>
+R1(config)#<b>aaa authorization exec aaa-exec group tacacs+ local</b>
 </code></div>
 </p>
 <p>
@@ -914,7 +935,7 @@ Another example:
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
   <code>
-R1(config)#<b>aaa authorisation exec VTY group radius local</b>
+R1(config)#<b>aaa authorization exec VTY group radius local</b>
 </code></div>
 </p>
 <p>
@@ -1013,6 +1034,70 @@ R1(config)#<b>aaa accounting commands 15 default start-stop group myauthserver</
 </code></div>
 </p>
 
+<h3>RADIUS Server Configuration</h3>
+<p>
+The RADIUS server will have to configured to authorize users based on their authentication 
+credentials. 
+Some popular RADIUS servers include FreeRADIUS, daloRADIUS. The following is an example configuration of daloRADIUS:
+</p>
+<p>
+<p>
+
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+<code><b>
+# Define the RADIUS server
+server {<br>
+&nbsp;&nbsp;# Set the server IP address and port<br>
+&nbsp;&nbsp;ipaddr = 192.168.1.100<br>
+&nbsp;&nbsp;port = 1812<br>
+<br>
+&nbsp;&nbsp;# Set the authentication protocol<br>
+&nbsp;&nbsp;auth_protocol = PAP<br>
+<br>
+&nbsp;&nbsp;# Set the authentication server<br>
+&nbsp;&nbsp;auth_server = mysql<br>
+<br>
+&nbsp;&nbsp;# Set the authorization server<br>
+&nbsp;&nbsp;authz_server = mysql<br>
+}<br>
+<br>
+# Define the MySQL database<br>
+mysql {<br>
+&nbsp;&nbsp;# Set the MySQL server IP address and port<br>
+&nbsp;&nbsp;ipaddr = 192.168.1.200<br>
+&nbsp;&nbsp;port = 3306<br>
+<br>
+&nbsp;&nbsp;# Set the MySQL database name<br>
+&nbsp;&nbsp;database = "radius"<br>
+<br>
+&nbsp;&nbsp;# Set the MySQL username<br>
+&nbsp;&nbsp;username = "radius"<br>
+<br>
+&nbsp;&nbsp;# Set the MySQL password<br>
+&nbsp;&nbsp;password = "password"<br>
+}<br>
+<br>
+# Define the user database<br>
+users {<br>
+&nbsp;&nbsp;# Define a user<br>
+&nbsp;&nbsp;user {<br>
+&nbsp;&nbsp;# Set the username<br>
+&nbsp;&nbsp;username = "cisco"<br>
+<br>
+&nbsp;&nbsp;# Set the password<br>
+&nbsp;&nbsp;password = "cisco123"<br>
+<br>
+&nbsp;&nbsp;# Set the service type<br>
+&nbsp;&nbsp;service_type = Exec-User<br>
+<br>
+&nbsp;&nbsp;# Set the Cisco AVPair<br>
+&nbsp;&nbsp;Cisco-AVPair = "shell:priv-lvl=15"<br>
+&nbsp;&nbsp;}<br>
+}<br>
+<br>
+
+		</b></code></div>
+</p>
 
 <h2>TACACS+</h2>
 <p>
@@ -1031,7 +1116,7 @@ administration and RADIUS for network access.
 <p>
 TACACS+ (Terminal Access Controller Access Control System) is Cisco-proprietary 
 and uses port 49 on TCP (but also UDP). It provides separate services for 
-authentication, authorisation and accounting. TACACS+ offers basic accounting features. 
+authentication, authorization and accounting. TACACS+ offers basic accounting features. 
 Unlike RADIUS where only the password is encrypted, with TACACS+, the entire packet is encrypted.
 </p>
 
