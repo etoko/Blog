@@ -136,7 +136,10 @@ R1(config)#<b>privilege configure level 2 interface</b><br>
 R1(config)#<b>privilege interface level 2 shutdown</b><br>
 R1(config)#<b>privilege interface level 2 no shutdown</b><br>
 R1(config)#<b>privilege exec level 2 show privilege</b><br>
-R1(config)#<b>username bob privilege 2 secret alice</b>
+R1(config)#<b>username bob privilege 2 secret alice</b><br>
+R1(config)#<b>privilege interface level 3 ip address</b><br>
+R1(config)#<b>privilege configure level 3 ip domain-name</b><br>
+R1(config)#<b>username user3 privilege 3 secret cisco3</b><br>
 </code></div>
 </p>
 <p>
@@ -372,7 +375,12 @@ R1#<b>ssh -l user7 192.168.1.1</b>
 <h3>Authorization using Local Database</h3>
 <p>
 If authorization is enabled for a line, and <code><b>enable secret</b></code> is 
-configured, the enable secret is superseded by the aaa authorization. To enable 
+configured, the enable secret is superseded by the aaa authorization. If authorization is 
+not enabled for an authenticated user, the privilege level for a remote user (SSH) is set to 15. 
+The user's configured privilege level is only enforced after enabling authorization.
+</p>
+<p>
+To enable 
 authorization,
 </p>
 <p>
@@ -445,6 +453,46 @@ authentication such as ISE, ACS, or any other platform that supports RADIUS or
 TACACS+ for network access control.
 </p>
 
+<h3>Verification</h3>
+<p>
+AAA operational state can be varied by the various sub-commands under the <code><b>show aaa</b></code> command.
+  <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+R1#<b>show aaa ?</b>                                                                                                                            <br>
+&nbsp;&nbsp;acct-stop-cache&nbsp;&nbsp; Show Acct Session IDs of poisoned sessions                                                       <br>
+&nbsp;&nbsp;attributes&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Show attributes supported by AAA subsystem                         <br>
+&nbsp;&nbsp;cache&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Show contents of AAA caches                    <br>
+&nbsp;&nbsp;clients&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Show AAA Client statistics                               <br>
+&nbsp;&nbsp;command&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Show AAA command infomation                              <br>
+&nbsp;&nbsp;dead-criteria&nbsp;&nbsp;&nbsp;&nbsp; Show what criteria will be applied to mark the specified                               <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;server dead      <br>
+&nbsp;&nbsp;local&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Show AAA local method options                  <br>
+&nbsp;&nbsp;memory&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Memory usage information                       <br>
+&nbsp;&nbsp;method-lists&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Show method lists defined in the AAA subsystem                               <br>
+&nbsp;&nbsp;servers&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Show All AAA Servers as seen by the AAA Server MIB       <br>
+&nbsp;&nbsp;service-profiles&nbsp;&nbsp;Show AAA service profiles downloaded and stored                                                  <br>
+&nbsp;&nbsp;sessions&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Show AAA Sessions as seen by AAA Session MIB             <br>
+&nbsp;&nbsp;user&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Show users active in the AAA subsyste<br>
+</code>
+</div>
+</p>
+  <p>
+  <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+	  R1#<b>show aaa sessions</b><br>
+	  Total sessions since last reload: 8<br>
+	  Session Id: 8<br>
+	  &nbsp;&nbsp;Unique Id: 23<br>
+	  &nbsp;&nbsp;User Name: etoko3<br>
+	  &nbsp;&nbsp;IP Address: 192.168.2.2<br>
+	  &nbsp;&nbsp;Idle Time: 0<br>
+	  &nbsp;&nbsp;CT Call Handle: 0<br>
+	  R1#
+  </code>
+  </div>
+  </p>
+
+
 <h2 id="RADIUS">RADIUS</h2>
 <p>
 RADIUS (Remote Authentication Dial-In User Service) is a standards-based protocol 
@@ -462,7 +510,7 @@ The RADIUS server may be located in the same subnet or remote network. All that
 is required is for the local device to have IP connectivity to the RADIUS server.
 </p>
 
-<h3>Authentication using RADIUS</h3>
+<h3>Authentication</h3>
 <p>
 When configuring authentication of user credentials against a RADIUS server, the 
 local device sends the authentication credentials entered by the user to the specificed 
