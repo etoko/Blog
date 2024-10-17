@@ -1055,7 +1055,49 @@ default route in the routing table. This route has a default administrative
 distance of 254 which is the worst acceptable administrative distance.
 </p>
 <p>
+It is important to note that when an interface acting as a DHCP client is shutdown, 
+a DHCPRELEASE message is sent out this interface to the DHCP server:
+</p>
 
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+Frame 203: 321 bytes on wire (2568 bits), 321 bytes captured (2568 bits) on interface -, id 0        <br>
+Ethernet II, Src: ca:05:15:60:00:54 (ca:05:15:60:00:54), Dst: ca:01:2b:b8:00:54 (ca:01:2b:b8:00:54)  <br>
+Internet Protocol Version 4, Src: 172.16.15.2, Dst: 172.16.15.1                                      <br>
+User Datagram Protocol, Src Port: 68, Dst Port: 67                                                   <br>
+Dynamic Host Configuration Protocol (Release)                                                        <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Message type: Boot Request (1)                                                                   <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Hardware type: Ethernet (0x01)                                                                   <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Hardware address length: 6                                                                       <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Hops: 0                                                                                          <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Transaction ID: 0x00001b7e                                                                       <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Seconds elapsed: 0                                                                               <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Bootp flags: 0x0000 (Unicast)                                                                    <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0... .... .... .... = Broadcast flag: Unicast                                                <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.000 0000 0000 0000 = Reserved flags: 0x0000                                                 <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Client IP address: 172.16.15.2                                                                   <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Your (client) IP address: 0.0.0.0                                                                <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Next server IP address: 0.0.0.0                                                                  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Relay agent IP address: 0.0.0.0                                                                  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Client MAC address: ca:05:15:60:00:54 (ca:05:15:60:00:54)                                        <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Client hardware address padding: 00000000000000000000                                            <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Server host name not given                                                                       <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Boot file name not given                                                                         <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Magic cookie: DHCP                                                                               <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Option: (53) DHCP Message Type (Release)                                                         <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Length: 1                                                                                    <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;DHCP: Release (7)                                                                            <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Option: (54) DHCP Server Identifier (172.16.15.1)                                                <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Length: 4                                                                                    <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;DHCP Server Identifier: 172.16.15.1                                                          <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Option: (61) Client identifier                                                                   <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Length: 27                                                                                   <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Type: 0                                                                                      <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Client Identifier: cisco-ca05.1560.0054-Gi3/0                                                <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Option: (255) End                                                                                <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Option End: 255
+</code></div>
 </p>
 
 <h2>Relay</h2>
