@@ -9,6 +9,12 @@ object variables of managed devices on IP networks and send notifications to
 Network Management Stations (NMS). Some devices that support SNMP include routers, 
 switches, servers, workstations, printers etc.
 </p>
+
+<p>
+SNMP uses UDP port 161 for general messages and responses and UDP port 162 for 
+SNMP traps.
+</p>
+
 <p>
 SNMP components include; SNMP manager (NMS), SNMP agent and SNMP MIB.
 <ul>
@@ -77,7 +83,7 @@ SNMP comes in three major versions: SNMPv1, v2c and v3. In SNMP v1, security is
 based on community strings. SNMPv1 is not recommended to be used in today's 
 networks and many network device vendors do not support it.
 In SNMP v2c, security is also based on community 
-strings. In SNMPv3, security is based on message authentication, encryption
+strings. In SNMP v3, security is based on message authentication, encryption
 algorithms.
 </p>
 
@@ -94,18 +100,18 @@ Security with SNMP can be refined by implementing the following:
 <p>
 
 
-<h2>SNMPv2c</h2>
+<h1>SNMP v2c</h1>
 <p>
-SNMPv2c is defined by <a href="https://www.ietf.org/rfc/rfc1441.txt" target="_blank">RFC 1441</a> 
+SNMP v2c is defined by <a href="https://www.ietf.org/rfc/rfc1441.txt" target="_blank">RFC 1441</a> 
 and RFC 1452 with improvements to SNMPv1 in areas 
 of performance, security and manager-to-device communications. It introduced 
-GetBulkRequest, an alternative to iterative GetNextRequests for retrieving large 
-amounts of management data in a single request. SNMPv2c sends the community strings in clear text.
+the GetBulk request, an alternative to iterative GetNext requests, for retrieving large 
+amounts of management data in a single request. SNMP v2c sends the community strings in clear text.
 </p>
 <p>
-SNMPv2c includes detailed error reporting; this minimizes the number of round trips. 
+SNMP v2c includes detailed error reporting; this minimizes the number of round trips. 
 It includes expanded error codes that distinguish different types of errors. 
-SNMPv2c uses community strings for security.
+SNMP v2c uses community strings for security.
 
 
 An agent can communicate with multiple managers using the appropriate version 
@@ -114,21 +120,21 @@ for each manager.
 </p>
 
 <p>
-Configuring views for SNMPv2c is optional. It limits which MIB objects an SNMP 
+Configuring views for SNMP v2c is optional. It limits which MIB objects an SNMP 
 manager can access.
 </p>
 
-<h3>Configuration of SNMPv2c</h3>
+<h2>Configuration of SNMP v2c</h2>
 <p>
 
-To configure SNMPv2 on a managed device, follow these steps:
+To configure SNMP v2c on a managed device, follow these steps:
 <ol>
 
 <!--
 <li><b>Create the view record:</b>
 SNMP Views can be configured to limit the number of MIB objects that an SNMP 
 manager has access to. SNMP views can be predefined or custom configured. The 
-command to configure the SNMPv2c view is  
+command to configure the SNMP v2c view is  
 <code><b>snmp-server view &lt;view-name&gt; &lt;oid-tree&gt; &lt;included | excluded&gt;
 </b></code>.
 In this configuration, the mib2 view includes all objects in the MIB-II subtree
@@ -157,7 +163,7 @@ R1(config)#<b>snmp-server community ciscolab ro</b>
 </li>
 
 
-  <li><b>Enable sending of traps;</b> SNMPv2c is able to send traps using the 
+  <li><b>Enable sending of traps:</b> SNMP v2c is able to send traps using the 
   command <code><b>snmp-server enable traps [&lt;mib-value&gt;]</b></code>. 
   To send all  available SNMP traps, exclude the mib-value <code><b>snmp-server enable traps</b></code>. 
 To define specific traps, add the type of traps to the above command: 
@@ -183,11 +189,11 @@ Link up/down notifications are controlled by <code><b>snmp trap link-status</b><
 notifications will be sent is configured using the command 
 <code><b>snmp-server host &lt;ip-address&gt; [traps | informs] version [1 | 2c 
 | 3 [auth | noauth | priv]] &lt;community-string&gt; udp-port &lt;port-number&gt; &lt;notification-type&gt;</b></code>. 
-By default,traps are sent. With this command, the following confurations are made:
+By default, traps are sent. With this command, the following configurations are made:
 <ul>
-  <li>the SNMP manager address</li>
-  <li>the type of notifications sent i.e., informs or traps.</li>
-  <li>the version of SNMP</li>
+  <li>SNMP manager address</li>
+  <li>Type of notifications sent i.e., informs or traps.</li>
+  <li>Version of SNMP</li>
 </ul>
 </li>
 <p>
@@ -196,9 +202,12 @@ By default,traps are sent. With this command, the following confurations are mad
 R1(config)#<b>snmp-server host 192.168.5.2 traps version 2c ciscolab</b>
 </code></div></p>
 <p>
-Without the <code><b>snmp-server host</b></code> command on a managed device, no notifications are sent. 
-Each succeeding <code><b>snmp-server host</b></code> command overwrites the previous command. Entering 
-the <code><b>snmp-server host</b></code> command without keywords enables all trap types for the host. 
+It is important to note the following:
+<ul>
+  <li>Without the <code><b>snmp-server host</b></code> command on a managed device, no notifications are sent.</li> 
+  <li>Each succeeding <code><b>snmp-server host</b></code> command overwrites the previous command.</li>
+  <li>Entering the <code><b>snmp-server host</b></code> command without keywords enables all trap types for the host.</li>
+</ul> 
 </p>
 </li>
 <li><b>System information:</b>
@@ -217,7 +226,7 @@ location and contact information of the device.
 </ol>
 </p>
 
-<h4>Security using Access Control Lists</h4>
+<h2>Security using Access Control Lists</h2>
 <p>
 An additional layer of security can be introduced by applying an Access Control List 
 (ACL).
@@ -250,9 +259,9 @@ R1(config)#<b>snmp-server community ciscolab rw ACL_SNMP_MANAGER</b>
 </p>
 
 
-<h3>Index Shuffling</h3>
+<h2>Index Shuffling</h2>
 <p>
-MIB indexes sometimes experience "index shuffling" where the indexes of router 
+MIB indices sometimes experience "index shuffling" where the indices of router 
 components change after reboots or firmware upgrades. Index shuffling can be stopped using the 
 command <code><b>snmp-server ifindex persist</b></code>. This command shows up 
 in the running configuration as <code><b>snmp ifmib ifindex persist</b></code>. 
@@ -260,7 +269,7 @@ This command ensures that the mapping between the ifDescr object values and the
 ifIndex object values (generated from the IF_MIB) will be retained across reboots.
 </p>
 
-<h3>Verification</h3>
+<h2>Verification</h2>
 <!----------------------
 <p>
 To verify the SNMP view created;
@@ -288,16 +297,16 @@ R1#<b>show snmp</b>                                        <br>
 
 </p>
 
-<h2>Troubleshooting SNMPv2</h2>
+<h2>Troubleshooting SNMP v2c</h2>
 <p>
-When troubleshooting SNMPv2, verify the following:
+When troubleshooting SNMP v2c, verify the following:
 <ul>
  <li>Traps are enabled by default (traps are unsolicited)</li>
- <li>Specify correct traps if all are not desired.</li>
- <li>Traps or informs is correctly configured.</li>
+ <li>Specify correct traps if all traps are not desired.</li>
+ <li>Ensure correct configuration of traps or informs.</li>
  <li>Verify that the correct community string is specified</li>
  <li>Verify that the correct NMS IP address is specified</li>
- <li>Verify that the required SNMP version is configured</li>
+ <li>Verify that the correct SNMP version is configured</li>
  <li>SNMP uses UDP port 161 for general messages and 162 for traps and informs. 
  Verify that an access control list is not blocking traffic to these ports.</li> 
  
@@ -305,16 +314,16 @@ When troubleshooting SNMPv2, verify the following:
 </p>
 
 
-<h2>SNMPv3</h2>
+<h1>SNMP v3</h1>
 <p>
-The main improvement of SNMPv3 over SNMPv2c is the added security through  
+The main improvement of SNMP v3 over SNMP v2c is the added security through  
 authentication and encryption.
 
 Poll messages for example GetRequest are sent still sent using UDP port 161 and traps (GetResponse)
 on UDP 162. 
 </p>
 <p>
-SNMPv3 defines three security levels:
+SNMP v3 defines three security levels:
 <ol>
  <li><b>NoAuthNoPriv:</b> no authentication, no privacy. Uses a username for 
  authentication and does not use encryption.</li>
@@ -324,13 +333,14 @@ SNMPv3 defines three security levels:
  privacy (DES, 3DES, AES).</li>
 </ol>
 
-When configuring SNMPv3, in order to utilize the security mechanisms that it 
+When configuring SNMP v3, in order to utilize the security mechanisms that it 
 supports, groups and users must be configured.
 </p>
 
-<h3>SNMPv3 Features</h3>
+<h2>SNMP v3 Features</h2>
+
 <p>
-SNMPv3 structures its configuration into three main sections:
+SNMP v3 structures its configuration into three main sections:
 <ol>
   <li><b>Views:</b> Restrict the OIDs visible to the NMS. It defines 
   what the manager is able to access/view on the device. This restriction can include 
@@ -342,9 +352,9 @@ SNMPv3 structures its configuration into three main sections:
 </ol>
 </p>
 
-<h3>Configuration</h3>
+<h2>Configuration</h2>
 <p>
-When configuring SNMPv3, three steps are followed;
+When configuring SNMP v3, three steps are followed:
 <ol>
 <li>Create an SNMP view to define the list of features or attributes on the managed 
 device that are to be monitored.</li>
@@ -355,13 +365,13 @@ encryption and authentication to be used.</li>
 </ol>
 </p>
 <p>
-The order of configuration of SNMPv3:
+The order of configuration of SNMP v3:
 </p>
 <p>
 <ol>
 <li><b>Configuration of SNMP Views:</b>
 <p>
-SNMP Views can be configured to limit the number of MIB objects that an SNMP 
+SNMP Views are configured to restrict the number of MIB objects that an SNMP 
 manager has access to. SNMP views can be predefined or custom configured.
 To configure an SNMP view, use the command <code><b>snmp-server view 
 &lt;view-name&gt; &lt;oid-tree&gt; | &lt;object-name&gt; &lt;included | excluded&gt;</b></code>.<br> 
@@ -453,10 +463,10 @@ R2(config)#<b>snmp-server user user1 group1 10.1.1.1 v3 auth sha complexcomplex 
 </li>
 </ol>
 
-<h4>Security</h4>
+<h2>Security</h2>
 <p>
-To use SNMP version 3 security mechanisms, groups and users with passwords must b
-e configured. No default values exist for authentication or privacy algorithms 
+To use SNMP version 3 security mechanisms, groups and users with passwords must be 
+configured. No default values exist for authentication or privacy algorithms 
 when you configure <code><b>snmp-server group</b></code>.
 
 <h4>Configuration of Access Control Lists</h4>
@@ -474,7 +484,7 @@ R2(config-std-nacl)#exit
 </code></div></p>
 
 
-<h3>Verification</h3>
+<h2>Verification</h2>
 <p>
 
 </p>
@@ -486,7 +496,7 @@ users, use the command <code><b>show snmp user</b></code>.
 </p>
 
 <p>
-To verify the SNMPv3 view created;
+To verify the SNMP v3 view created;
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
@@ -500,10 +510,10 @@ R2#<b>show snmp view</b>
 
 </p>
 
-<h4>SNMPv3 Groups</h4>
+<h4>SNMP v3 Groups</h4>
 
 <p>
-Verification of SNMPv3 groups
+Verification of SNMP v3 groups
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
@@ -520,7 +530,7 @@ R2(config)#<b>do show snmp engineID</b>                                    <br>
 
 </code></div></p>
 
-<h3>Troubleshooting SNMPv3</h3>
+<h2>Troubleshooting SNMP v3</h2>
 <p>
   <ul>
     <li>Correct security level specified?</li>
