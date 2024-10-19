@@ -17,7 +17,7 @@ devices. Additional purposes include regulatory compliance.
 </p>
 <p>
 Log messages include a timestamp that indicates the time when the log was generated. 
-It is important to note that the time must be accurate. This can be done by 
+It is important to note that the system clock should be accurate. This can be done by 
 configuring NTP to provide accurate datetime values. The time must be consistent 
 across all network devices; troubleshooting 
 can be difficult if you cannot correlate timestamps across devices.
@@ -150,7 +150,7 @@ through SSH or telnet.
 To enable logging to remote logins via SSH or telnet, use the command 
 <code><b>terminal monitor</b></code>. 
 The default logging severity is debugging. To change the logging severity level 
-to a remote login session, use the command <code><b>logging monitor &lt;level&gt;</b></code>.
+of a remote login session, use the command <code><b>logging monitor &lt;level&gt;</b></code>.
 </p>
 <p>
 Logging messages can be disabled from a vty login session using the command 
@@ -213,8 +213,8 @@ Best practices when using debugging include the following:
   <li>Consider output volume and time before enabling debug. If output is 
   voluminous, this may impact router performance.</li>
   <li>Excessive console logging can cause the network device to hang as its 
-  CPU prioritizes this output. Use vty <code><b>terminal monitor</b></code> or logging buffered 
-  instead.</li>
+  CPU prioritizes this output. Use vty <code><b>terminal monitor</b></code> or 
+  <code><b>logging buffered</b></code> instead.</li>
   <li>Disable debug commands after troubleshooting using <code><b>no debug all</b></code> 
   or <code><b>undebug all</b></code>.</li>
 </ul>
