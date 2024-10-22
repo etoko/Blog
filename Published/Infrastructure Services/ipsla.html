@@ -1,4 +1,11 @@
 <h1>Introduction and Overview</h1>
+
+<p>
+  <ol>
+     <li><a href="#SLA_Types">IP SLA Types</a></li>
+  </ol>
+</p>
+
 <p>
 IP SLAs are used to measure and verify network performance.  
 IP SLAs operate in real-time by generating simulated network traffic such as VoIP, ICMP (echo,
@@ -32,7 +39,7 @@ IP SLA consists of two distinct parts; a probe and schedule.
   </ol>
 </p>
 
-<h2>Types of SLA Traffic</h2>
+<h1 id="SLA_Types">Types of SLA Traffic</h1>
 <p>
  IP SLA operations measure the following network parameters:
 <ul>
@@ -93,13 +100,13 @@ Time of last change in whole IP SLAs: *15:05:44.253 UTC Sat Mar 13 2021   <br>
 R1#
 </code></div></p>
 <p>
-IP SLAs that are based on connectivity tests do not require a responder. However, 
+IP SLAs that are used for connectivity tests do not require a responder. However, 
 for IP SLA operations that do require a responder, this should be configured 
 first before scheduling the IP SLA operation.
 </p>
 
 
-<h2>IP SLA responder and SLA Control Protocol</h2>
+<h1>IP SLA responder and SLA Control Protocol</h1>
 <p>
 An IP SLA responder is an active device in the network specifically configured  
 to interprete and respond to specific probes. Cisco devices configured as responders 
@@ -107,9 +114,12 @@ use the IP SLA control protocol. The IP SLA control protocol allows the responde
 and sender to agree on various parameters such 
 as port number and respond to IP SLA request packets. This results in IP SLA operations 
 having greater accuracy in measurements not available to standard ICMP-based probes. 
-The IP SLA responder listens on UDP port 1967 for control protocol messages
+</p>
+
+<p>
+The IP SLA responder listens on UDP port 1967 for control messages
 sent by an IP SLA operation. Upon receipt of the control message, the responder 
-will enable the specified UDP or TCP port for the specified IP SLA operation. During this 
+will start listening on the configured UDP or TCP port for the specified IP SLA operation. During this 
 time, the responder accepts the requests and sends responses.
 The responder disables the port after it responds to the IP SLA request or when 
 the specified time expires.
@@ -123,7 +133,7 @@ to ensure that the two devices have their time synchronized.
 
 <p>
 Some IP SLA operations do not require the configuration of an IPSLA responder. These 
-include HTTP, DHCP where the application itself acts as a responder to requests.
+include HTTP, DHCP where the application itself acts as a responder to IP SLA requests.
 </p>
 <p>
 MD5 authentication of control messages can be configured to provide security to 
@@ -141,7 +151,7 @@ accurately represent the true network delays.
 Devices give ICMP packets lower priorities when processing incoming traffic; as such, 
 the use of ICMP packets for IP SLA operations may result in inaccurate measurements 
 due to the lower priority given to these packets. It is therefore recommended to 
-use UDP based IP SLA operations when trying to determine accurate network performance.
+use UDP-based IP SLA operations when trying to determine accurate network performance.
 </p>
 <p>
 IP SLA test packets use time stamping to more precisely calculate the processing delays.
@@ -160,7 +170,7 @@ TS3 to produce the time spent processing the test packet as represented by delta
 The source device calculates the round-trip time by subtracting TS1 from TS4.
 </p>
 
-<h2>Implementing IP SLA</h2>
+<h1>Implementing IP SLA</h1>
 
 <p>
 To implement IP SLA network performance measurement, the following steps
@@ -182,16 +192,15 @@ required for some IP SLA operations.</li>
 </ol>
 </p>
     
-<h3>ICMP Echo Operation</h3>
+<h2 id="ICMP_ECHO">ICMP Echo Operation</h2>
 <p>
-ICMP echo operations are useful for testing network connectivity and end-to-end 
-response time. 
+ICMP echo operations are useful for testing network connectivity and round-trip time (RTT). 
 The response time is determined by measuring the time taken between sending an
 ICMP-Echo request packet to a target device and receiving the ICMP-Echo reply.
 The response time calculated from the <code><b>icmp-echo</b></code> operation 
 provides a general picture of the response time. However, its results may not 
 necessarily be accurate because some systems may not prioritize the processing of 
-ICMP packets, resulting in apparent higher delay values. The use of the UDP-echo operation is a preferred  
+ICMP packets, resulting in comparatively higher delay values. The use of the UDP-echo operation is a preferred  
 method to measure network connectivity and response time.
 </p>
 <p>
@@ -374,7 +383,7 @@ History Statistics:                                     <br>
 
 <h2>ICMP Path Echo Operations</h2>
 <p>
-An ICMP path echo operation measures the end-to-end and hop-by-hop response time
+An ICMP path echo operation measures the round-trip time (RTT) and hop-by-hop response time
 between a Cisco device and other devices along the path to a destination device. 
 ICMP Path Echo is useful for determining the network path, and for
 troubleshooting network connectivity issues along the path between a device and the destination 
@@ -474,6 +483,10 @@ R1#                                                       <br>
 </p>
 
 <h2>ICMP Path Jitter Operations</h2>
+<p>IP SLA Path Jitter is a feature in Cisco routers that allows you to measure the jitter 
+(variability in packet delay) between the router and a target device, while also tracing the 
+path that the packets take. 
+</p>
 <p>
 IP SLA ICMP Path Jitter provides hop-by-hop jitter, packet loss and delay 
 measurement statistics in network. ICMP path jitter can be used to supplement 
@@ -513,7 +526,30 @@ R1(config-ip-sla-path-jitter)#<b>frequency 10</b><br>
 R1(config)#<b>ip sla schedule 300 start-time now life forever</b>
 </code></div>
 </p>
+<p>
+The path-echo command can be configured within the path-jitter command to specify the IP addresses 
+of the hops that the packets should take.
+</p>
+  <p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
 
+	ip sla 1  <br>
+	  path-jitter 192.168.1.100 <br>
+	  timeout 1000 <br>
+	  frequency 30 <br>
+	  path-echo 10.1.1.1 10.1.2.1 10.1.3.1 record <br>
+	  num-packets 10 <br>
+	packet-size 100 <br>
+	  ip sla schedule 1 life forever start-time now <br>
+
+  </code>
+</div>
+  </p>
+  <p>
+The record keyword will record the path jitter results, including the jitter and packet loss 
+for each hop, and you can view the results using the <code><b>show ip sla path-jitter</b></code> command.
+  </p>
 <p>
 The optional <code><b>targetOnly</b></code> keyword to the <code><b>path-jitter
 </b></code> command is used to bypass the hop-by-hop measurements; echo probes 
@@ -623,8 +659,8 @@ R1#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                 
 
 <h2>UDP Echo Operation</h2>
 <p>
-UDP echo operation is used to monitor the end-to-end response time between a Cisco 
-device and devices using IPv4 or IPv6. It is also used to test end-to-end connectivity. 
+UDP echo operation is used to measure the RTT between a Cisco 
+device and devices using UDP packets and IPv4 or IPv6. It is also used to test end-to-end connectivity. 
 The destination device is any device that supports RFC 862 Echo operation.
 </p>
 <p>
@@ -879,6 +915,8 @@ R1#
 
 <h2>UDP Jitter</h2>
 <p>
+IP SLA UDP Jitter is a feature that allows you to measure the jitter 
+(variability in packet delay) of UDP packets between the router and a target device. 
 The UDP Jitter operation is used to measure the jitter experienced by traffic 
 between the source device and the target.
 UDP Jitter operation diagnoses network suitability for real-time traffic applications 
