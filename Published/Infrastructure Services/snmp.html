@@ -285,11 +285,74 @@ R1#<b>show snmp view</b>                                                        
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
   <code>
-R1#<b>show snmp</b>                                        <br>                                                                                 
+R4#<b>show snmp</b>                                         <br>       
+Chassis: 4279256517                                         <br>
+Contact: etoko@gmail.com                                    <br>
+Location: Building2Room2SW01                                <br>
+0 SNMP packets input                                        <br>
+&nbsp;&nbsp;&nbsp;&nbsp;0 Bad SNMP version errors                               <br>
+&nbsp;&nbsp;&nbsp;&nbsp;0 Unknown community name                                <br>
+&nbsp;&nbsp;&nbsp;&nbsp;0 Illegal operation for community name supplied         <br>
+&nbsp;&nbsp;&nbsp;&nbsp;0 Encoding errors                                       <br>
+&nbsp;&nbsp;&nbsp;&nbsp;0 Number of requested variables                         <br>
+&nbsp;&nbsp;&nbsp;&nbsp;0 Number of altered variables                           <br>
+&nbsp;&nbsp;&nbsp;&nbsp;0 Get-request PDUs                                      <br>
+&nbsp;&nbsp;&nbsp;&nbsp;0 Get-next PDUs                                         <br>
+&nbsp;&nbsp;&nbsp;&nbsp;0 Set-request PDUs                                      <br>
+&nbsp;&nbsp;&nbsp;&nbsp;0 Input queue packet drops (Maximum queue size 1000)    <br>
+0 SNMP packets output                                       <br>
+&nbsp;&nbsp;&nbsp;&nbsp;0 Too big errors (Maximum packet size 1500)             <br>
+&nbsp;&nbsp;&nbsp;&nbsp;0 No such name errors                                   <br>
+&nbsp;&nbsp;&nbsp;&nbsp;0 Bad values errors                                     <br>
+&nbsp;&nbsp;&nbsp;&nbsp;0 General errors                                        <br>
+&nbsp;&nbsp;&nbsp;&nbsp;0 Response PDUs                                         <br>
+&nbsp;&nbsp;&nbsp;&nbsp;0 Trap PDUs                                             <br>
+SNMP Dispatcher:                                            <br>
+&nbsp;&nbsp; queue 0/75 (current/max), 0 dropped                      <br>
+SNMP Engine:                                                <br>
+&nbsp;&nbsp; queue 0/1000 (current/max), 0 dropped                    <br>
+&nbsp;&nbsp;&nbsp;&nbsp;                                                        <br>
+SNMP logging: enabled                                       <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Logging to 10.0.12.1.162, 0/10, 0 sent, 0 dropped.      <br>
+R4#        
 </code></div>
 </p>
+
 <h3><code>show snmp host</code></h3>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+R4#<b>show snmp host</b><br>                                                   
+Notification host: 10.0.12.1&nbsp;&nbsp;&nbsp;&nbsp;udp-port: 162&nbsp;&nbsp; type: trap  <br>        
+user: cisco123&nbsp;&nbsp;security model: v2c&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;     <br>        
+                                                            <br>        
+R4#                                                         <br>        
+</code></div>
+</p>
+
 <h3><code>show snmp community</code></h3>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+R4#<b>show snmp community</b>                                       <br>
+                                                             <br>
+Community name: ILMI                                         <br>
+Community Index: cisco0                                      <br>
+Community SecurityName: ILMI                                 <br>
+storage-type: read-only  active                              <br>
+                                                             <br>
+                                                             <br>
+Community name: cisco123                                     <br>
+Community Index: cisco2                                      <br>
+Community SecurityName: cisco123                             <br>
+storage-type: nonvolatile        active access-list: 1300    <br>
+                                                             <br>
+                                                             <br>
+R4#
+</code></div>
+</p>
+
+
 <h3><code>show snmp chassis</code></h3>
 <h3><code>show snmp contact</code></h3>
 <h3><code>show snmp location</code></h3>
@@ -496,12 +559,87 @@ users, use the command <code><b>show snmp user</b></code>.
 </p>
 
 <p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+R2#<b>show snmp user</b>                 <br>
+                                         <br>
+User name: user1                         <br>
+Engine ID: 800000090300CA0206BC0006      <br>
+storage-type: nonvolatile        active  <br>
+Authentication Protocol: SHA             <br>
+Privacy Protocol: AES256                 <br>
+Group-name: SNMP_GROUP1                  <br>
+                                         <br>
+R2#
+</code></div></p>
+
+<p>
 To verify the SNMP v3 view created;
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
   <code>
-R2#<b>show snmp view</b>
+R2#<b>show snmp view</b>                                            <br>
+R2#show snmp view                                                   <br>
+*ilmi system - included permanent active                            <br>
+*ilmi atmForumUni - included permanent active                       <br>
+cac_view pimMIB - included read-only active                         <br>
+cac_view msdpMIB - included read-only active                        <br>
+cac_view interfaces - included read-only active                     <br>
+cac_view ip - included read-only active                             <br>
+cac_view ospf - included read-only active                           <br>
+cac_view bgp - included read-only active                            <br>
+cac_view dot1dBridge - included read-only active                    <br>
+cac_view ifMIB - included read-only active                          <br>
+cac_view nhrpMIB - included read-only active                        <br>
+cac_view ipMRouteStdMIB - included read-only active                 <br>
+cac_view igmpStdMIB - included read-only active                     <br>
+cac_view ospfv3MIB - included read-only active                      <br>
+cac_view ipForward - included read-only active                      <br>
+cac_view ipTrafficStats - included read-only active                 <br>
+cac_view ospfTrap - included read-only active                       <br>
+cac_view sysUpTime.0 - included read-only active                    <br>
+cac_view mplsLsrStdMIB - included read-only active                  <br>
+cac_view mplsLdpStdMIB - included read-only active                  <br>
+cac_view ciscoPingMIB - included read-only active                   <br>
+cac_view ciscoIpSecFlowMonitorMIB - included read-only active       <br>
+cac_view ciscoIpSecPolMapMIB - included read-only active            <br>
+cac_view ciscoPimMIB - included read-only active                    <br>
+cac_view ciscoBgp4MIB - included read-only active                   <br>
+cac_view ciscoIfExtensionMIB - included read-only active            <br>
+cac_view ciscoEigrpMIB - included read-only active                  <br>
+cac_view ciscoCefMIB - included read-only active                    <br>
+cac_view ciscoNhrpExtMIB - included read-only active                <br>
+cac_view ciscoGdoiMIB - included read-only active                   <br>
+cac_view ciscoIpMRouteMIB - included read-only active               <br>
+cac_view ciscoIPsecMIB - included read-only active                  <br>
+cac_view mplsLdpMIB - included read-only active                     <br>
+cac_view ciscoDlcSwitchMIB - included read-only active              <br>
+cac_view ciscoExperiment.101 - included read-only active            <br>
+cac_view ciscoIetfIsisMIB - included read-only active               <br>
+cac_view ciscoIetfBfdMIB - included read-only active                <br>
+cac_view ifIndex - included read-only active                        <br>
+cac_view ifDescr - included read-only active                        <br>
+cac_view ifType - included read-only active                         <br>
+cac_view ifAdminStatus - included read-only active                  <br>
+cac_view ifOperStatus - included read-only active                   <br>
+cac_view snmpTraps.3 - included read-only active                    <br>
+cac_view snmpTraps.4 - included read-only active                    <br>
+cac_view snmpTrapOID.0 - included read-only active                  <br>
+cac_view internet.6.3.1.1.4.3.0 - included read-only active         <br>
+cac_view lifEntry.20 - included read-only active                    <br>
+cac_view cciDescriptionEntry.1 - included read-only active          <br>
+v1default iso - included permanent active                           <br>
+v1default internet.6.3.15 - excluded permanent active               <br>
+v1default internet.6.3.16 - excluded permanent active               <br>
+v1default internet.6.3.18 - excluded permanent active               <br>
+v1default ciscoMgmt.394 - excluded permanent active                 <br>
+v1default ciscoMgmt.395 - excluded permanent active                 <br>
+v1default ciscoMgmt.399 - excluded permanent active                 <br>
+v1default ciscoMgmt.400 - excluded permanent active                 <br>
+SNMP_MIB_VIEW mplsLsrMIB.1.8 - included nonvolatile active          <br>
+SNMP_MIB_VIEW lifEntry.1 - included nonvolatile active              <br>
+SNMP_MIB_VIEW lifEntry.45 - included nonvolatile active
 </code></div>
 </p>
 
@@ -518,16 +656,34 @@ Verification of SNMP v3 groups
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
   <code>
-R2(config)#<b>do show snmp group</b>                                            <br>
-
+R2(config)#<b>do show snmp group</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                              <br>
+groupname: ILMI&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; security model:v1              <br>
+contextname: &lt;no context specified&gt;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; storage-type: permanent        <br>
+readview : *ilmi&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;writeview: *ilmi               <br>
+notifyview: &lt;no notifyview specified&gt;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                              <br>
+row status: active&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                         <br>
+ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                        <br>
+groupname: ILMI&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; security model:v2c             <br>
+contextname: &lt;no context specified&gt;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; storage-type: permanent        <br>
+readview : *ilmi&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;writeview: *ilmi               <br>
+notifyview: &lt;no notifyview specified&gt;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                              <br>
+row status: active&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                         <br>
+ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                        <br>
+groupname: SNMP_GROUP1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;security model:v3 priv         <br>
+contextname: &lt;no context specified&gt;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; storage-type: nonvolatile      <br>
+readview : v1default&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;writeview: SNMP_MIB_VIEW       <br>
+notifyview: &lt;no notifyview specified&gt;&nbsp;&nbsp;&nbsp;&nbsp;
+row status: active
 </code></div>
 </p>
 
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
   <code>
-R2(config)#<b>do show snmp engineID</b>                                    <br>
-
+R2(config)#<b>do show snmp engineID</b> <br>
+Local SNMP engineID: 800000090300CA0206BC0006   <br>
+Remote Engine ID&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;IP-addr&nbsp;&nbsp;&nbsp;&nbsp;Port       <br>
+R2#
 </code></div></p>
 
 <h2>Troubleshooting SNMP v3</h2>
