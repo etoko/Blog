@@ -261,9 +261,64 @@ adj</b></code>.
  
 </p>
 <p>
-<div><code>
-<b>access-list 100 permit ip any 192.168.1.1 0.0.0.0</b><br>
-<b>debug ip packet 100</b>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3"><code>
+<b>access-list 99 permit 10.0.12.0 /30</b><br>
+<b>debug ip packet 99</b>
+<br>
+                                                                                                                                                                                                               <br>
+R1#                                                                                                                                                                                                            <br>
+*Oct 25 20:44:57.335: IP: s=10.0.12.1 (local), d=224.0.0.5 (GigabitEthernet0/0), len 80, sending broad/multicast, proto=89                                                                                     <br>
+*Oct 25 20:44:57.343: IP: s=10.0.12.1 (local), d=224.0.0.5 (GigabitEthernet0/0), len 80, sending full packet, proto=89                                                                                         <br>
+R1#                                                                                                                                                                                                            <br>
+*Oct 25 20:44:59.591: IP: s=10.0.12.2 (GigabitEthernet0/0), d=224.0.0.5, len 80, rcvd 0, proto=89                                                                                                              <br>
+*Oct 25 20:44:59.595: IP: s=10.0.12.2 (GigabitEthernet0/0), d=224.0.0.5, len 80, input feature, proto=89, packet consumed, MCI Check(101), rtype 0, forus FALSE, sendself FALSE, mtu 0, fwdchk FALSE           <br>
+R1#                                                                                                                                                                                                            <br>
+*Oct 25 20:45:06.699: IP: s=10.0.12.1 (local), d=224.0.0.5 (GigabitEthernet0/0), len 80, sending broad/multicast, proto=89                                                                                     <br>
+*Oct 25 20:45:06.707: IP: s=10.0.12.1 (local), d=224.0.0.5 (GigabitEthernet0/0), len 80, sending full packet, proto=89                                                                                         <br>
+R1#                                                                                                                                                                                                            <br>
+*Oct 25 20:45:08.327: IP: s=10.0.12.2 (GigabitEthernet0/0), d=224.0.0.5, len 80, rcvd 0, proto=89                                                                                                              <br>
+*Oct 25 20:45:08.331: IP: s=10.0.12.2 (GigabitEthernet0/0), d=224.0.0.5, len 80, input feature, proto=89, packet consumed, MCI Check(101), rtype 0, forus FALSE, sendself FALSE, mtu 0, fwdchk FALSE           <br>
+R1#                                                                                                                                                                                                            <br>
+R1#                                                                                                                                                                                                            <br>
+*Oct 25 20:45:16.083: IP: s=10.0.12.1 (local), d=224.0.0.5 (GigabitEthernet0/0), len 80, sending broad/multicast, proto=89                                                                                     <br>
+*Oct 25 20:45:16.091: IP: s=10.0.12.1 (local), d=224.0.0.5 (GigabitEthernet0/0), len 80, sending full packet, proto=89                                                                                         <br>
+R1#                                                                                                                                                                                                            <br>
+*Oct 25 20:45:18.111: IP: s=10.0.12.2 (GigabitEthernet0/0), d=224.0.0.5, len 80, rcvd 0, proto=89                                                                                                              <br>
+*Oct 25 20:45:18.115: IP: s=10.0.12.2 (GigabitEthernet0/0), d=224.0.0.5, len 80, input feature, proto=89, packet consumed, MCI Check(101), rtype 0, forus FALSE, sendself FALSE, mtu 0, fwdchk FALSE           <br>
+R1#                                                                                                                                                                                                            <br>
+*Oct 25 20:45:25.623: IP: s=10.0.12.1 (local), d=224.0.0.5 (GigabitEthernet0/0), len 80, sending broad/multicast, proto=89                                                                                     <br>
+*Oct 25 20:45:25.631: IP: s=10.0.12.1 (local), d=224.0.0.5 (GigabitEthernet0/0), len 80, sending full packet, proto=89                                                                                         <br>
+R1#                                                                                                                                                                                                            <br>
+*Oct 25 20:45:28.115: IP: s=10.0.12.2 (GigabitEthernet0/0), d=224.0.0.5, len 80, rcvd 0, proto=89                                                                                                              <br>
+*Oct 25 20:45:28.119: IP: s=10.0.12.2 (GigabitEthernet0/0), d=224.0.0.5, len 80, input feature, proto=89, packet consumed, MCI Check(101), rtype 0, forus FALSE, sendself FALSE, mtu 0, fwdchk FALSE           <br>
+R1#                                                                                                                                                                                                            <br>
+*Oct 25 20:45:35.587: IP: s=10.0.12.1 (local), d=224.0.0.5 (GigabitEthernet0/0), len 80, sending broad/multicast, proto=89                                                                                     <br>
+*Oct 25 20:45:35.595: IP: s=10.0.12.1 (local), d=224.0.0.5 (GigabitEthernet0/0), len 80, sending full packet, proto=89                                                                                         <br>
+R1#                                                                                                                                                                                                            <br>
+*Oct 25 20:45:38.467: IP: s=10.0.12.2 (GigabitEthernet0/0), d=224.0.0.5, len 80, rcvd 0, proto=89                                                                                                              <br>
+*Oct 25 20:45:38.471: IP: s=10.0.12.2 (GigabitEthernet0/0), d=224.0.0.5, len 80, input feature, proto=89, packet consumed, MCI Check(101), rtype 0, forus FALSE, sendself FALSE, mtu 0, fwdchk FALSE           <br>
+R1#                                                                                                                                                                                                            <br>
+*Oct 25 20:45:44.623: IP: s=10.0.12.1 (local), d=224.0.0.5 (GigabitEthernet0/0), len 80, sending broad/multicast, proto=89                                                                                     <br>
+*Oct 25 20:45:44.631: IP: s=10.0.12.1 (local), d=224.0.0.5 (GigabitEthernet0/0), len 80, sending full packet, proto=89                                                                                         <br>
+R1#                                                                                                                                                                                                            <br>
+*Oct 25 20:45:47.879: IP: s=10.0.12.2 (GigabitEthernet0/0), d=224.0.0.5, len 80, rcvd 0, proto=89                                                                                                              <br>
+*Oct 25 20:45:47.883: IP: s=10.0.12.2 (GigabitEthernet0/0), d=224.0.0.5, len 80, input feature, proto=89, packet consumed, MCI Check(101), rtype 0, forus FALSE, sendself FALSE, mtu 0, fwdchk FALSE           <br>
+R1#                                                                                                                                                                                                            <br>
+*Oct 25 20:45:54.067: IP: s=10.0.12.1 (local), d=224.0.0.5 (GigabitEthernet0/0), len 80, sending broad/multicast, proto=89                                                                                     <br>
+*Oct 25 20:45:54.075: IP: s=10.0.12.1 (local), d=224.0.0.5 (GigabitEthernet0/0), len 80, sending full packet, proto=89                                                                                         <br>
+R1#                                                                                                                                                                                                            <br>
+*Oct 25 20:45:56.971: IP: s=10.0.12.2 (GigabitEthernet0/0), d=224.0.0.5, len 80, rcvd 0, proto=89                                                                                                              <br>
+*Oct 25 20:45:56.975: IP: s=10.0.12.2 (GigabitEthernet0/0), d=224.0.0.5, len 80, input feature, proto=89, packet consumed, MCI Check(101), rtype 0, forus FALSE, sendself FALSE, mtu 0, fwdchk FALSE           <br>
+R1#show debug                                                                                                                                                                                                  <br>
+*Oct 25 20:46:03.483: IP: s=10.0.12.1 (local), d=224.0.0.5 (GigabitEthernet0/0), len 80, sending broad/multicast, proto=89                                                                                     <br>
+*Oct 25 20:46:03.491: IP: s=10.0.12.1 (local), d=224.0.0.5 (GigabitEthernet0/0), len 80, sending full packet, proto=89                                                                                         <br>
+R1#<b>show debug</b>                                                                                                                                                                                           <br>
+Generic IP:                                                                                                                                                                                                    <br>
+  IP packet debugging is on (detailed) for access list 99                                                                                                                                                      <br>
+                                                                                                                                                                                                               <br>
+                                                                                                                                                                                                               <br>
+                                                                                                                                                                                                               <br>
+R1#                                                                                                                                                                                                               <br>
 </code></div>
 </p>
 <p>
@@ -282,8 +337,8 @@ in the stack.
 </p>
 <p>
 <div><code>
-<b>debug condition gigabitethernet1/0<br>
-debug condition ip 192.168.1.1<br>
+<b>debug condition interface gigabitethernet1/0<br>
+debug condition ip 10.0.13.2<br>
 debug ip ospf hello</b>
 </code></div>
 </p>
@@ -312,6 +367,36 @@ To view the debugging messages, use the command <code><b>show debug</b></code>.
 
 After disabling the debug, ensure that the debug condition is disabled as well.
 
+</p>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+R1#<b>show debug</b>                                                                         <br>      
+OSPF:                                                                                        <br>
+  OSPF hello debugging is on                                                                 <br>
+                                                                                             <br>
+                                                                                             <br>
+                                                                                             <br>
+                                                                                             <br>
+Condition 1: interface Gi0/0 (1 flags triggered)                                             <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Flags: Gi0/0                                                                         <br>
+Condition 2: ip 10.0.13.2 (0 flags triggered)                                                <br>
+                                                                                             <br>
+R1#                                                                                          <br>
+R1#                                                                                          <br>
+R1#                                                                                          <br>
+R1#                                                                                          <br>
+*Oct 25 21:00:13.142: OSPF-1 HELLO Gi0/0: Rcv hello from 10.0.24.1 area 0 10.0.12.2          <br>
+R1#                                                                                          <br>
+*Oct 25 21:00:18.014: OSPF-1 HELLO Gi0/0: Send hello to 224.0.0.5 area 0 from 10.0.12.1      <br>
+R1#                                                                                          <br>
+*Oct 25 21:00:23.202: OSPF-1 HELLO Gi0/0: Rcv hello from 10.0.24.1 area 0 10.0.12.2          <br>
+R1#                                                                                          <br>
+*Oct 25 21:00:27.638: OSPF-1 HELLO Gi0/0: Send hello to 224.0.0.5 area 0 from 10.0.12.1      <br>
+R1#                                                                                          <br>
+*Oct 25 21:00:32.854: OSPF-1 HELLO Gi0/0: Rcv hello from 10.0.24.1 area 0 10.0.12.2          <br>
+R1#                                                                                         
+</code></div>
 </p>
 
 <h1 id="SYSLOG">Syslog</h1>
@@ -385,7 +470,7 @@ where:
   <p>
      <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
   <code>
-    <b>logging discriminator  msg-body drops Configured from console by console</b>
+    <b>logging discriminator NO_CONFIGURED msg-body drops Configured from console by console</b>
   </code></div>
   </p>
   </li>
@@ -439,7 +524,79 @@ messages:
   </li>
 </ul>
 </p>
-
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+R1(config)#<b>service timestamps debug datetime localtime show-timezone msec</b>                                                 <br>
+R1(config)#                                                                                                                      <br>
+04:16:27: OSPF-1 HELLO Gi0/0: Send hello to 224.0.0.5 area 0 from 10.0.12.1                                                      <br>
+R1(config)#                                                                                                                      <br>
+*Oct 25 21:09:52.490 UTC: OSPF-1 HELLO Gi0/0: Rcv hello from 10.0.24.1 area 0 10.0.12.2                                          <br>
+R1(config)#                                                                                                                      <br>
+*Oct 25 21:09:57.214 UTC: OSPF-1 HELLO Gi0/0: Send hello to 224.0.0.5 area 0 from 10.0.12.1                                      <br>
+R1(config)#service                                                                                                               <br>
+*Oct 25 21:10:02.322 UTC: OSPF-1 HELLO Gi0/0: Rcv hello from 10.0.24.1 area 0 10.0.12.2                                          <br>
+R1(config)#service timestamps log dat                                                                                            <br>
+*Oct 25 21:10:06.814 UTC: OSPF-1 HELLO Gi0/0: Send hello to 224.0.0.5 area 0 from 10.0.12.1                                      <br>
+R1(config)#service timestamps log datetime msec                                                                                  <br>
+R1(config)#do sho                                                                                                                <br>
+*Oct 25 21:10:11.790 UTC: OSPF-1 HELLO Gi0/0: Rcv hello from 10.0.24.1 area 0 10.0.12.2                                          <br>
+R1(config)#do show log                                                                                                           <br>
+R1(config)#do show loggin                                                                                                        <br>
+*Oct 25 21:10:16.234 UTC: OSPF-1 HELLO Gi0/0: Send hello to 224.0.0.5 area 0 from 10.0.12.1                                      <br>
+                                                                                                                                 <br>
+R1#<b>show logging</b>                                                                                                           <br>
+*Oct 25 21:10:25.462 UTC: OSPF-1 HELLO Gi0/0: Send hello to 224.0.0.5 area 0 from 10.0.12.1                                      <br>
+Syslog logging: enabled (0 messages dropped, 2 messages rate-limited, 0 flushes, 0 overruns, xml disabled, filtering disabled)   <br>
+                                                                                                                                 <br>
+No Active Message Discriminator.                                                                                                 <br>
+                                                                                                                                 <br>
+                                                                                                                                 <br>
+                                                                                                                                 <br>
+No Inactive Message Discriminator.                                                                                               <br>
+                                                                                                                                 <br>
+                                                                                                                                 <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Console logging: level debugging, 2225 messages logged, xml disabled,                                                        <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; filtering disabled&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                                                <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Monitor logging: level debugging, 0 messages logged, xml disabled,                                                           <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; filtering disabled&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                                                <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Buffer logging:&nbsp;&nbsp;level debugging, 2225 messages logged, xml disabled,                                                        <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;filtering disabled&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                                                 <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Exception Logging: size (8192 bytes)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                                                 <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Count and timestamp logging messages: disabled                                                                               <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Persistent logging: disabled&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                                                 <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                                                 <br>
+No active filter modules.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                                                <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                                                 <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Trap logging: level informational, 49 message lines logged                                                                   <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Logging Source-Interface:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; VRF Name:                                                                                <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                                                 <br>
+Log Buffer (8192 bytes):                                                                                                         <br>
+F-1 HELLO Gi0/0: Send hello to 224.0.0.5 area 0 from 10.0.12.1                                                                   <br>
+*Oct 25 20:58:28.282: OSPF-1 HELLO Gi0/0: Rcv hello from 10.0.24.1 area 0 10.0.12.2                                              <br>
+*Oct 25 20:58:33.750: OSPF-1 HELLO Gi0/0: Send hello to 224.0.0.5 area 0 from 10.0.12.1                                          <br>
+*Oct 25 20:58:37.906: OSPF-1 HELLO Gi0/0: Rcv hello from 10.0.24.1 area 0 10.0.12.2                                              <br>
+*Oct 25 20:58:42.994: OSPF-1 HELLO Gi0/0: Send hello to 224.0.0.5 area 0 from 10.0.12.1                                          <br>
+*Oct 25 20:58:47.490: OSPF-1 HELLO Gi0/0: Rcv hello from 10.0.24.1 area 0 10.0.12.2                                              <br>
+*Oct 25 20:58:52.746: OSPF-1 HELLO Gi0/0: Send hello to 224.0.0.5 area 0 from 10.0.12.1                                          <br>
+*Oct 25 20:58:57.310: OSPF-1 HELLO Gi0/0: Rcv hello from 10.0.24.1 area 0 10.0.12.2                                              <br>
+*Oct 25 20:59:02.742: OSPF-1 HELLO Gi0/0: Send hello to 224.0.0.5 area 0 from 10.0.12.1                                          <br>
+*Oct 25 20:59:06.318: OSPF-1 HELLO Gi0/0: Rcv hello from 10.0.24.1 area 0 10.0.12.2                                              <br>
+*Oct 25 20:59:11.954: OSPF-1 HELLO Gi0/0: Send hello to 224.0.0.5 area 0 from 10.0.12.1                                          <br>
+*Oct 25 20:59:16.218: OSPF-1 HELLO Gi0/0: Rcv hello from 10.0.24.1 area 0 10.0.12.2                                              <br>
+*Oct 25 20:59:21.686: OSPF-1 HELLO Gi0/0: Send hello to 224.0.0.5 area 0 from 10.0.12.1                                          <br>
+*Oct 25 20:59:25.834: OSPF-1 HELLO Gi0/0: Rcv hello from 10.0.24.1 area 0 10.0.12.2                                              <br>
+*Oct 25 20:59:30.922: OSPF-1 HELLO Gi0/0: Send hello to 224.0.0.5 area 0 from 10.0.12.1                                          <br>
+*Oct 25 20:59:34.034: OSPF-1 HELLO Gi0/0: Rcv hello from 10.0.24.1 area 0 10.0.12.2                                              <br>
+*Oct 25 20:59:40.566: OSPF-1 HELLO Gi0/0: Send hello to 224.0.0.5 area 0 from 10.0.12.1                                          <br>
+*Oct 25 20:59:43.534: OSPF-1 HELLO Gi0/0: Rcv hello from 10.0.24.1 area 0 10.0.12.2                                              <br>
+*Oct 25 20:59:49.654: OSPF-1 HELLO Gi0/0: Send hello to 224.0.0.5 area 0 from 10.0.12.1                                          <br>
+*Oct 25 20:59:53.378: OSPF-1 HELLO Gi0/0: Rcv hello from 10.0.24.1 area 0 10.0.12.2                                              <br>
+*Oct 25 20:59:58.906: OSPF-1 HELLO Gi0/0: Send hello to 224.0.0.5 area 0 from 10.0.12.1                                          <br>
+*Oct 25 21:00:02.526: OSPF-1 HELLO Gi0/0: Rcv hello from 10.0.24.1 area 0 10.0.12.2                                              <br>
+*Oct 25 21:00:08.102: OSPF-1 HELLO Gi0/0: Send hello to 224.0.0.5 area 0 from 10.0.12.                                           <br>
+</code></div>
+</p>
 <h1 id="SEQUENCE">Sequence Numbers</h1>
 <p>
 Sequence numbers can be added to log messages based on the time that they were 
@@ -451,4 +608,25 @@ are not added to log messages.
 Sequence numbers can be added to log messages using the command <code><b>service 
 sequence-numbers</b></code>. When enabled, they are prepended to the log message 
 appearing at the start of a log message.
+</p>
+
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+R1(config)#<b>service sequence-numbers</b>                                                     <br>
+                                                                                               <br>
+000748: 04:18:31: OSPF-1 HELLO Gi0/0: Send hello to 224.0.0.5 area 0 from 10.0.12.1[OK]        <br>
+R1(config)#                                                                                    <br>
+000749: 04:18:36: OSPF-1 HELLO Gi0/0: Rcv hello from 10.0.24.1 area 0 10.0.12.2                <br>
+R1(config)#                                                                                    <br>
+000750: 04:18:40: OSPF-1 HELLO Gi0/0: Send hello to 224.0.0.5 area 0 from 10.0.12.1            <br>
+R1(config)#                                                                                    <br>
+000751: 04:18:45: OSPF-1 HELLO Gi0/0: Rcv hello from 10.0.24.1 area 0 10.0.12.2                <br>
+R1(config)#                                                                                    <br>
+000752: 04:18:50: OSPF-1 HELLO Gi0/0: Send hello to 224.0.0.5 area 0 from 10.0.12.1            <br>
+R1(config)#                                                                                    <br>
+000753: 04:18:54: OSPF-1 HELLO Gi0/0: Rcv hello from 10.0.24.1 area 0 10.0.12.2                <br>
+R1(config)#                                                                                    <br>
+000754: 04:19:00: OSPF-1 HELLO Gi0/0: Send hello to 224.0.0.5 area 0 from 10.0.12.1            <br>
+</code></div>
 </p>
