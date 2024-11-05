@@ -64,9 +64,14 @@ EIGRP has features unique from other distance vector protocols:
 <li>It utilizes neighbors for sharing information and continuously monitors neighbor state</li>
 <li>Rapid convergence of EIGRP networks is enabled by using pre-calculated loop-free backup paths</li>
 <li>EIGRP sends incremental and bounded updates; it does not send periodic updates. 
-Updates are only sent when there is a topology change i.e. a new network is added or 
-an existing network is withdrawn due to link or device failure, change of path metric etc. 
-These updates are only sent to routers that require them.</li>
+Updates are only sent when there is a topology change i.e.:
+  <ol>
+	  <li>A new network is added</li>
+	  <li>An existing network is withdrawn due to link or device failure</li>
+	  <li>Change of path metric</li>  
+  </ol>
+These updates are only sent to routers that require them.
+	  </li>
 <li>EIGRP uses a composite metric that, by default, consists of cumulative delay and lowest path bandwidth. EIGRP can be 
 configured to include additional parameters such as link load and reliability. </li>
 <li>EIGRP is the only routing protocol to-date to support unequal cost load balancing</li>
@@ -90,14 +95,14 @@ Once neighborships are formed, unicasts are used to synchronize the topology.
  The routing table (RIB) receives routing information from various sources. If a routing device is being informed about a route from 
  various sources such as EIGRP, OSPF, IS-IS, BGP etc it uses the concept of administrative distance to rank the routing 
  information from each source. 
- The admininstrative distance (AD) can be considered as the level of trustworthiness of routing information from a given 
+ The administrative distance (AD) can be considered as the level of trustworthiness of routing information from a given 
  source. 
  The lower the AD, the more trustworthy the routing information and the more likely that that routing 
  information will be installed in the RIB in preference over other sources with higher AD. An AD of 255 represents an untrustworthy route. 
  </p>
  <p>
  EIGRP has an administrative distance of 90 for  internal EIGRP-originated routes and 170 for routes that are
- redistributed into EIGRP from other sources such as OSPF (external routes). 
+ redistributed into EIGRP from other sources such as OSPF (external routes). EIGRP summary routes have an AD of 5. 
  The following table shows the ADs of some common routing  protocols.
  </p>
  <p>
@@ -1180,7 +1185,8 @@ Interface of the local device through which the neighbor can be reached. </td>
 <tr>
 <td style="border-bottom:solid; border-width:1px"> <b>Hold (sec):</b> </td>
 <td style="border-bottom:solid; border-width:1px"> 
-Hold timer value in seconds for the adjacency with the neighbor. This value is usually between 10 - 15. If this value decrements to zero, the neighbor is 
+Hold timer value in seconds for the adjacency with the neighbor. 
+By default, this value is usually between 10 - 15. If this value decrements to zero, the neighbor is 
 declared down and removed from the neighbor table.</td>
 </tr>
 <tr>
@@ -2069,8 +2075,8 @@ in the Query packet that use the local router as a next hop.
  </p>
  <p>
  Two additional 
- message types have been added: SIA-query and SIA-reply. SIA-query is sent at half query time if a reply is not seen. Its
- primary purpose is to verify the status of the query. SIA-reply is sent if that neighbor is still waiting for a reply to 
+ message types have been added: SIA-query and SIA-reply. SIA-query is sent at half query time if a reply packet is not received. 
+ Its  primary purpose is to verify the status of the query. SIA-reply is sent if that neighbor is still waiting for a reply to 
  its query from its neighbor with an 'active' bit set. If that neighbor is completed with its processing of the query, it 
  will send back either a reply or SIA-reply packet.
  </p>
@@ -2280,7 +2286,7 @@ in the Query packet that use the local router as a next hop.
  </p>
  
  <p>
- <b>Note:</b> It is important to note that Update, Query, Reply, SIA-reply, 
+ <b>Note:</b>Update, Query, Reply, SIA-reply, 
  SIA-query packets are sent reliably i.e. require acknowledgement packets.
  </p>
  
@@ -2783,7 +2789,7 @@ Routing Protocol is "eigrp 1"                                                <br
  
  <p>
  It is important to note that EIGRP is currently using only one path for the destination 10.7.12.0/24. EIGRP is capable of 
- using multiple paths to route traffic to a destination. Optimizing EIGRP to utilise multiple paths including unequal
+ using multiple paths to route traffic to a destination. Optimizing EIGRP to utilize multiple paths including unequal
  cost paths is covered under <a href="#TRAFFIC_ENGINEERING">Traffic Engineering</a> section.  
  </p>
  
