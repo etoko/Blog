@@ -62,15 +62,20 @@ neighbors.
 <p>
 OSPF is classified as an Interior Gateway Protocol routing within a single 
 autonomous system. As a link state routing protocol, a router running OSPF 
-compiles a database of all the links in the domain, the OSPF routers on those 
-links and the cost of the links. This database is the same on all routers in an OSPF area.
+compiles a database of:
+<ol>
+  <li>all the links in the domain</li>
+  <li>the OSPF routers on those links</li>
+  <li>and the cost of these links.</li> 
+</ol>
+This database is the same on all routers in an OSPF area.
 Each router independently determines their best path to the destinations in this 
 database. 
 </p>
 <p>
 OSPF runs Dijkstra's algorithm to calculate the shortest path to any 
 destination network in the OSPF domain. Dijkstra's algorithm is used by all 
-link state routing alogrithms to calculate the shortest path to a destination.
+link state routing protocols to calculate the shortest path to a destination.
 </p>
 
 <p>
@@ -127,7 +132,7 @@ OSPF generates a shortest path first tree (SPT) in which the local
  The routing table (RIB) receives routing information from various sources. If a routing device is being informed about a route from 
  various sources such as EIGRP, OSPF, IS-IS, BGP etc it uses the concept of administrative distance to rank the routing 
  information from each source. 
- The admininstrative distance (AD) can be considered as the level of trustworthiness of routing information from a given 
+ The administrative distance (AD) can be considered as the level of trustworthiness of routing information from a given 
  source. 
  The lower the AD, the more trustworthy the routing information and the more likely that that routing 
  information will be installed in the RIB in preference over other sources with higher AD. An AD of 255 represents an untrustworthy route. 
@@ -261,6 +266,8 @@ The following are the adjacency preconditions:
   </li>
   <li><b>Matching MTU:</b> Interface MTU must match. The MTU controls the size 
   of packets that are sent out of interfaces. The default MTU value is 1500. 
+  The MTU is utilized by OSPF's transport layer functions to ensure that OSPF packets 
+  sizes are agreed by the OSPF adjacent devices. 
 <p>
 <b>Troubleshooting tip:</b> if a neighbor adjacency formation stops at the <b>EXSTART</b>
 phase, then it is probable that the IP MTUs are mismatched. 
@@ -350,9 +357,11 @@ few packets and the neighbor may be unable to process these large packets.
 For OSPF to advertise local networks, it has to be enabled on the directly 
 connected interfaces with configured IP addresses. The area that the 
 network will be resident has to be explicitly defined. 
-A network can only reside in one area. This can be done in two ways: using the 
-OSPF <code><b>network</b></code> command or using the interface command 
-<code><b>ip ospf &lt;process-id&gt; area &lt;area-id&gt;</b></code>.
+A network can only reside in one area. This can be done in two ways: 
+<ol type="i">
+	<li>using the OSPF <code><b>network</b></code> command or</li>
+	<li>using the interface command  <code><b>ip ospf &lt;process-id&gt; area &lt;area-id&gt;</b></code>.</li>
+</ol>
 </p>
 <ol>
 <li><h3><code>network</code> command</h3>
@@ -543,18 +552,18 @@ The following output shows a <a href="https://wireshark.org" target="_blank">Wir
 <p>
 The header contains the following fields:
  <ul>
- <li><b>Version:</b> values in this field are 2 (two) for OSPv2 
+ <li><b>Version:</b> values in this field are 2 (two) for OSPFv2 
  or 3 for OSPFv3. From the packet capture, the OSPF version is 2.</li>
  <li><b>Message Type:</b> type of OSPF packet that is in the packet body. The 
  following are the possible values for the message type field:
- <ol>
-     <li> Hello packet.</li>
-     <li> Database descriptor (DBD)</li>
-     <li> Link State Request (LSR)</li>
-     <li> Link State Update (LSU)</li>
-     <li> Link State Acknowledgement (LSAck)</li>
- </ol>
- From the capture, the OSPF packet type is a hello packet (Type 1).
+ <ul>
+     <li> Hello packet - 1</li>
+     <li> Database descriptor (DBD) - 2</li>
+     <li> Link State Request (LSR) - 3</li>
+     <li> Link State Update (LSU) - 4</li>
+     <li> Link State Acknowledgement (LSAck) - 5</li>
+ </ul>
+ From the above packet capture, the OSPF packet type is a hello packet (Type 1).
  <li><b>Packet Length:</b> length of the packet. From the packet capture, the 
  packet length is 48 bytes.</li>
  <li><b>Source OSPF Router:</b> this field displays the router identifier (RID) 
@@ -565,8 +574,9 @@ The header contains the following fields:
  in area 7. The area ID was configured using the dotted decimal notation.</li>
  <li><b>Checksum:</b> used to verify the integrity of the packet.</li>
  <li><b>Authentication type:</b> contains the type of authentication used in 
- the OSPF area or interface. Configured values are usually: null, simple and MD5
- or SHA. From capture output, the authentication type is type 0 which is null 
+ the OSPF area or interface. Configured values are usually: null, simple and 
+ hashed encryption i.e., MD5 or SHA. 
+ From previous capture output, the authentication type is type 0 which is null 
  authentication i.e., no authentication at all.</li>
  <li><b>Authentication data:</b> the password used for authentication. If MD5 or 
  SHA authentication is used, then a digest of the password is contained in this 
@@ -687,7 +697,7 @@ preconditions.
   the hello interval to determine 
   when a device can be considered down and how much time is required before a device 
   is considered down. The dead interval resets each time a hello packet is received 
-  from a neighbor. If no hello packets are received, by the time the dead Interval 
+  from a neighbor. If no hello packets are received, by the time the dead interval 
   expires, then the adjacency is dropped, the SPF tree is recalculated and 
   flooding takes place.</li>
   <li><b>Designated Router and Backup Designated Router:</b> for OSPF broadcast
@@ -1200,7 +1210,7 @@ preconditions.
     <li><b>Options:</b> Relays the same information as the hello packet options
     field specifically; device capability information.</li>
     <li><b>DB Description: I,M, and MS bits:</b> Used to communicate information 
-    on the the flow of DBD messages between neighbors: 
+    on the flow of DBD messages between neighbors: 
     <ul type="i">
       <li><b>I (Init bit):</b> indicates that this is the first bit in a series.</li>
       <li><b>M (More):</b> indicates that additional DBD packets will be sent 
