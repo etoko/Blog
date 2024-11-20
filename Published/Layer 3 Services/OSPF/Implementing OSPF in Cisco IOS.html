@@ -2236,7 +2236,7 @@ network node that forms point-to-point relationships with all the other devices
 on that node. It acts as a central point forming multiple virtual point-to-point 
 links with all the OSPF peers on that node. These virtual links have a cost of 
 zero(0) so that they do not alter the cost of the physical link. 
-The SPF algorithm calculates paths based on the point-to-point links.
+The SPF algorithm calculates paths based on these virtual point-to-point links.
 </p>
 
 <p>
@@ -2290,8 +2290,12 @@ deemed invalid and purged from the LSDB. OSPF, also, uses this as a method of ro
 <p>
 Every OSPF device has a link state database (LSDB). OSPF devices inside the same area 
 have the same LSDB. 
-The LSDB stores LSAs with the link state information in the local area and 
-summary information about the link states in other areas and external networks.
+The LSDB stores LSAs with the following information:
+<ul>
+  <li>link state information of the local area </li> 
+  <li>summary information about the link states in other areas</li>
+  <li>information on external networks</li>
+</ul>
  LSDBs are populated by LSAs of different types: 
  Type 1, Type 2, Type 3, Type 4, Type 5 and Type 7 LSAs. 
  </p>
@@ -2368,7 +2372,7 @@ ID to the highest.
 <p>
 If a router has interfaces in more than one area, it will maintain separate LSDBs
 for each area. All routers in an area must have identical LSDBs. To create a 
-loop-free domain, OSPF requires a synchronised LSDB and a loop-free calculation;
+loop-free domain, OSPF requires a synchronized LSDB and a loop-free calculation;
 this calculation is implemented by SPF using Dijkstra's algorithm.
 </p>
 <p>
@@ -3271,8 +3275,8 @@ Fields included with an external LSA:
       <li><b>Type 1:</b> advertises a route with a seed metric. As the LSA is 
       propagated in the network, OSPF then adds additional path metric to it.</li>
       <li><b>Type 2:</b> advertises a route with a static cost. This cost does 
-      not change within the OSPF network. This metric type is the default Type 5 
-      LSA with most vendors. It often works fine with a single connection 
+      not change within the OSPF network. This metric type is the default for Type 5 
+      LSAs with most vendors. It often works fine with a single link  
       to the OSPF domain. If there are multiple connection points, the Type 1 external metric 
       type is preferred.</li>
     </ol>
@@ -3865,7 +3869,8 @@ Multi-area OSPF involves the deployment of a two-tier hierarchical topology
 that consists of the backbone area (area 0) and non-backbone area(s).
 
 Multi-area OSPF topology is usually deployed to cater for network scalability 
-geographically as well was increasing numbers of routers, prefixes. A combination of the
+in terms of both geographically scalability and topological scalability such as increasing 
+numbers of routers, prefixes in a site. A combination of the
 following factors may influence the decision to deploy a multi-area OSPF topology:
 <ul>
   <li>High processor utilization in routers in the OSPF area.</li>
@@ -3890,7 +3895,7 @@ OSPF imposes on a router depends on these factors</a>:
 changes to all routers in an area. Routers with many neighbors have the most work 
 to do when link state changes occur. In general, any one router should have no more than 60 neighbors.
 </li>
-   <li> <b>Number of adjacent routers in an area:</b> OSPF uses a CPU-intensive algorithm.
+   <li> <b>Number of adjacent routers in an area:</b> OSPF uses SPF; a CPU-intensive algorithm.
    The number of calculations that must be performed given <code><b>n</b></code> link state packets
    is proportional to <code><b>n log n</b></code>. As a result, the larger and more unstable the area,
    the greater the likelihood for performance problems associated with routing
@@ -3936,7 +3941,7 @@ router resources.
   
   It is used to summarize topology information from other areas. Traffic from 
   one area to another must transit area 0. Area 0 must be contiguous. The only 
-  exception to this is the use of a virtual link.
+  exception to this is in scenarios involving the application of a virtual link.
   </p>
   <p>
   Multi-area OSPF domains are governed by the following OSPF design guides:
@@ -4062,6 +4067,8 @@ The ABR does not automatically advertise a default route when a Type 5 LSA is
 blocked. The ABR of an NSSA area can be configured to advertise a default route 
 using the command:
 <code><b>area &lt;area-id&gt; nssa default-information-originate</b></code>.
+This command should only be configured after the command to enable the NSSA 
+<code><b>area &lt;area-id&gt; nssa</b></code>.
 The optional <code><b>default-information-originate</b></code> keyword triggers 
 the ABR to generate a Type 7 default route into the NSSA.
 </p>
