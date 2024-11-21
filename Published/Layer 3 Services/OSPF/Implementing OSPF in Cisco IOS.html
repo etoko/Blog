@@ -4118,7 +4118,7 @@ backbone area is split-up into two or more sections with each section separated 
 Discontiguous areas cause the ABR of the discontiguous area not to be reachable 
 via SPT. An ABR can only advertise routes between areas when one of the areas it
 is connected to is the backbone(area 0).
- Some preconditions of virtual-links include the following:</h3>
+ Some preconditions for virtual-links include the following:</h3>
 <ul>
   <li>End-points must be reachable via a normal area (not a stub area). 
   OSPF stubby areas cannot be a transit area for a virtual-link.</li> 
@@ -4462,17 +4462,16 @@ in the network. During a change in the network topology,
 the SPT is rebuilt and the SPF algorithm runs again to calculate new shortest 
 paths from the changed network topology. These shortest paths are then presented 
 to the routing table for installation. If the path presented by OSPF is the most 
-specific or has the lowest administrative distance, they are installed 
+specific or has the lowest administrative distance, it is installed 
 into the routing table. If multiple paths are discovered and there is a tie in cost, 
 then these paths are installed
 into the routing table, a concept known as Equal Cost Multiple Paths (ECMP).
 </p>
 <p>
-The SPF algorithm runs many complex 
-calculations which may be recursive. These calculations are resource intensive
-consuming more processor time and memory. In OSPF areas that experience many 
-network changes such as flapping links, a significant amount of processor time is 
-spent on SPF execution. This may affect other functions of the router.
+The SPF algorithm runs many calculations which may be recursive. These calculations are resource intensive
+consuming more processor time and memory. A significant amount of processor time 
+is spend on SPF execution in areas that experience many network changes such as flapping links.
+This may affect other functions of the router.
 If the number of SPF calculations for an area is high, then it is a sign of an unstable network.
 Care should be taken to ensure a proper design of the OSPF domain and configuration 
 of OSPF optimization features to ensure a stable network with few SPF executions.
@@ -4491,9 +4490,9 @@ availability of neighbors. LSUs are used to update neighbors of network changes.
 When a new LSA is received, it is checked against the LSDB for changes such as:
 <ul>
  <li><b>Sequence number:</b> used to differentiate same LSAs containing same network 
- information. The sequence number is usally used to differentiate LSAs containing 
+ information. The sequence number is used to differentiate LSAs containing 
  new topology information from the LSAs containing previous topology information.</li>
- <li><b>Age:</b> used to keep information updated and withdraw old information. Periodic
+ <li><b>Age:</b> facilitates in maintaining link state information updated and withdraw old information. Periodic
  flooding occurs every 30 minutes (1800 secs). LSAs whose LSA age 
  is equal to the MaxAge value of 3600 seconds are purged from the LSDB as they 
  are considered invalid.</li>
@@ -4517,7 +4516,7 @@ The method used for flooding will depend on the following factors:
   If new information is found within the contents of a database descriptor packet,
   the local device sends an LSR requesting for the missing updates. The 
   determination of whether information should be updated if a copy already 
-  exists in the LSDB is primarily based on the link state sequence number. The 
+  exists in the LSDB is primarily based on the LSA sequence number. The 
   sequence number of an LSA is updated when new information is received through 
   an LSU.
   It is this sequence number that is used for comparison by OSPF where multiple 
@@ -4553,7 +4552,7 @@ Flooding method depends on the network type:
 </p>
 <h3>Metrics</h3>
 <p>
-The decision on the path to the destination for traffic is based on the path metric. 
+The decision on the path to install in the routing table is based on the path metric. 
 Metric is the cumulative OSPF cost along the path. 
 The OSPF metric is called cost. The cost is calculated based on the bandwidth of 
 the exit interface. The cost is calculated as follows;  
@@ -4568,7 +4567,7 @@ imperative to modify the default reference bandwidth in network environments wit
 having Gigabit Ethernet or higher capacity interfaces so that OSPF can make more accurate path selection decisions. 
 </p>
 <p>
-This default reference bandwidth can be modified with the OSPF router mode command:
+The default reference bandwidth can be modified with the OSPF router mode command:
 <code><b>auto-cost reference-bandwidth &lt;1-4294967&gt;</b></code>.
 The bandwidth value is in megabits per second. It is recommended that the reference 
 bandwidth be an order of magnitude higher than the largest bandwidth link in the 
@@ -4649,7 +4648,7 @@ with extraordinary design considerations.
 
 <h3 id="VIRTUAL_LINKS">Virtual-Link Costs</h3>
 <p>
-Virtual-links inherit their cost from cost between the virtual-link endpoints.
+Virtual-links inherit their cost from the link cost between the virtual-link endpoints.
 A virtual-link must have a cost below 65535 (maximum metric) to initialize. 
 Link costs higher than 65535 could occur if reference bandwidth is higher and 
 virtual-link transits legacy links.
