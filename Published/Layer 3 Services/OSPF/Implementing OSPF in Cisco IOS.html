@@ -4753,7 +4753,7 @@ OSPF failure detection time can be decreased through:
 <h3 id="TIMERS">Hello and Dead Interval Timers</h3>
 <p>
 In today's converged high-bandwidth networks, the 40 second dead 
-interval timer to detect a failed neighbor are considered unacceptable. 
+interval timer to detect a failed neighbor are considered unacceptably long. 
 Default OSPF timer values are not often the best method to rely on for failure 
 detection.  The hello and dead-interval timers
 can be modified to lower values to increase the speed of failure detection.
@@ -5179,7 +5179,7 @@ To configure iSPF, use the command <code><b>ispf</b></code> in OSPF router mode.
   <code>
 R1(config)#<b>router ospf 1</b>                                       <br />
 R1(config-router)#<b>ispf</b>                                         <br />
-R1(config-router)#do show ip ospf                                     <br />
+R1(config-router)#<b>do show ip ospf</b>                              <br />
 &nbsp;Routing Process "ospf 1" with ID 1.1.1.1                        <br />
 &nbsp;Start time: 00:00:52.732, Time elapsed: 04:01:26.532            <br />
 &nbsp;Supports only single TOS(TOS0) routes                           <br />
@@ -5235,7 +5235,7 @@ All routers in the area must agree on the stub area flag.
 
 <h3>Summarization</h3>
 <p>
-OSPF scalability is achieved by minimising the number of routers (topology 
+OSPF scalability is achieved by minimizing the number of routers (topology 
 summarization) and number of prefixes (prefix summarization). Topology 
 summarization is achieved through implementation of OSPF areas. 
 Prefix summarization reduces the number of routes in the RIB.
@@ -5377,19 +5377,30 @@ Using the filter list, Type 3 LSAs can be filtered as they leave an area or as t
 enter an area.
 </p>
 <p>
-Filtering routes using a filter list at the ABR is a two-step process that 
-involves creation of a prefix list and referencing the prefix-list using <code>
-<b>filter-list</b></code> keyword of the <code><b>area</b></code> command.
-</p>
+Filtering routes using a filter list at the ABR is a two-step process:
+  <ol>
+	  <li>Configuration of a prefix list:
 
 <p>
 <div style="background-color: #f4f0ec">
 <code>
 R9(config)#<b>ip prefix-list PL_10.255.1.0 deny 10.255.1.0/24 le 32</b><br>
 R9(config)#<b>ip prefix-list PL_10.255.1.0 permit 0.0.0.0/0 le 32</b> <br>
+</code></div></p>
+	  </li>
+	  <li>Referencing the prefix-list using <code>
+			  <b>filter-list</b></code> keyword of the <code><b>area</b></code> command.
+
+<p>
+<div style="background-color: #f4f0ec">
+<code>
 R9(config)#<b>router ospf 9</b> <br>
 R9(config-router)#<b>area 10 filter-list prefix PL_10.255.1.0 in</b>
 </code> </div></p>
+	  </li>
+  </ol>
+</p>
+
 
 <h5 style="font-size:110%"><code>area ... range</code> command</h5>
 <p>
@@ -5438,11 +5449,8 @@ because these intermediate links cannot be accessed.
 Local OSPF route filtering involves preventing a router from installing a network 
 from the LSDB into the RIB. This involves two steps: 
 <ol>
-	<li>Identification of the route (using an ACL, prefix-list, route-map)</li>
-	<li>Applying the filtering using the <code><b>distribute-list</b></code> command</li>
-</ol>
-</p>
-
+	<li>Identification of the route (using an ACL, prefix-list, route-map)
+	
 <p>
 <div style="background-color: #f4f0ec">
 <code>
@@ -5450,9 +5458,20 @@ R7(config)#<b>ip access-list standard ACL_10.3.4.0</b> <br />
 R7(config-std-nacl)#<b>deny 10.3.4.0 0.0.0.255</b>     <br />
 R7(config-std-nacl)#<b>permit any </b>                 <br />
 R7(config-std-nacl)#<b>exit </b>                       <br />
+</code></div></p>	
+	</li>
+	<li>Applying the filtering using the <code><b>distribute-list</b></code> command:
+
+<p>
+<div style="background-color: #f4f0ec">
+<code>
 R7(config)#<b>router ospf 7 </b>                       <br />
 R7(config-router)#<b>distribute-list ACL_10.3.4.0 in</b>
 </code></div></p>
+	</li>
+</ol>
+</p>
+
 
 <p>
 The filtered route still exists in the LSDB. It is advertised to other routers in 
@@ -5473,7 +5492,7 @@ number of stages in the neighbor formation process.
 </p>
 
 
-<h4>External Filtering: Filtering at ASBR</h4>
+<h4>External Filtering</h4>
 <p>
 Filtering can be applied on the ASBR during redistribution or "special treatment" 
 of routes can be implemented such as configuration of a seed metric, metric type 
@@ -5669,8 +5688,8 @@ R8(config-if)#                                                                 <
 </div></p>
 </p>
  </li>
- <li><b>Process <code>auto-cost</code>: </b>Modification of the default reference bandwidth implicitly changes the OSPF cost. </li>
- <li><b>Process <code><b>neighbor cost</b></code>: </b>In NBMA networks, neighbors are statically configured using the OSPF router mode command 
+ <li>Modification of the default reference bandwidth implicitly changes the OSPF cost.</li>
+ <li><b>Static Assignment of Neighbor OSPF Cost:</b> In NBMA networks, neighbors are statically configured using the OSPF router mode command 
  <code><b>neighbor &lt;x.x.x.x&gt; cost &lt;cost&gt;</b></code>. A static cost can be assigned to the link to this neighbor.</li>
 </ul>
 
@@ -5869,8 +5888,11 @@ To modify characteristics of the default route;
 R1(config-router)#<b>default-information originate metric 50 metric-Type 1</b>
 </code> </div></p>
 <p>
-where 50 is the seed OSPF cost of the default route and the metric type is set to 
-external Type 1.
+where:
+<ul>
+  <li><b>50</b> is the seed OSPF cost of the default route</li>
+  <li>metric type is set to external Type 1</li>
+</ul>
 </p>
 
 <p>
@@ -5926,8 +5948,8 @@ in a number of different ways:
       <li> Traffic could be re-routed to a longer path to add additional delay.</li>
    </ul>   
    </li>
-  <li><b>Traffic to nowhere</b> to cause traffic to never reach its destination.</li>
-  <li><b>Introduce constant recalculations</b> to reduce performance of the 
+  <li><b>Traffic to nowhere:</b> to blackhole traffic such that it never reaches its destination.</li>
+  <li><b>Introduce constant SPF recalculations</b> to reduce performance of the 
   routing devices themselves through constant changing of link state information
   being advertised.</li>
 </ul>
@@ -5950,7 +5972,7 @@ threat actors from sniffing OSPF traffic and learning some information from the
 hello packets.
 </p>
 <p>
-Another additional benefit from passive interfaces is that an OSPF device does 
+Another additional benefit of passive interfaces is that an OSPF device does 
 not respond to hello packets transmitted to passive interfaces. This prevents 
 the injection of unauthorised OSPF traffic into the OSPF domain.
 </p>
