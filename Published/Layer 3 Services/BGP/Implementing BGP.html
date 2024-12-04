@@ -82,8 +82,7 @@ on TCP reliability mechanisms for transmission of messages.
 <li>Ensuring packets are reliably transmitted</li>
 </ol>
 TCP allows for multi-hop BGP sessions. This directly implies that BGP requires the 
-implementation of an interior gateway protocol (IGP) such as OSPF and IS-IS 
-first in the network.
+prior implementation of an interior gateway protocol (IGP) such as OSPF, IS-IS.
 </p>
 
 <p>
@@ -116,7 +115,7 @@ exist in the RIB without the need for redistribution.
 </p>
 
 <p>
-The following are selected use cases under which the use of BGP can be considered:
+The following are selected use cases for BGP: 
 <ul>
   <li>Scaling the enterprise: to interconnect different implementations of discrete 
   IGPs.</li>
@@ -140,9 +139,28 @@ an autonomous system could use BGP as the only routing protocol.
 </p>
 <p>
 Autonomous systems are uniquely identified by an autonomous system number (ASN).
-Every autonomous system is provided with an autonomous system number (ASN) that 
-is ultimately issued by the <a href="https://www.iana.org/assignments/as-numbers/as-numbers.xhtml">
+Every autonomous system is provided with an autonomous system number (ASN) issued by the 
+Regional Internet Registry (RIR) on behalf of the 
+ <a href="https://www.iana.org/assignments/as-numbers/as-numbers.xhtml">
 Internet Assigned Numbers Authority (iana.org)</a>.
+</p>
+
+<p>
+IANA is responsible for assigning all public ASNs to ensure that they are globally 
+unique. IANA requires the following information when requesting for a public ASN:
+<ol>
+  <li>Proof of a publically-allocated network range i.e. addresses are owned by 
+  the enterprise.</li>
+  <li>Proof that Internet connectivity is provided through multiple service provider connections.</li>
+  <li>Need for a unique routing policy from service providers.</li>
+</ol>
+In the event that an organisation can not provide this information, it should use the 
+ASN provided by its service provider. IANA delegates issuing ASNs to the regional 
+Internet registries (RIR) such as AFRINIC, APNIC, ARIN, LACNIC, RIPE NCC. The 
+appropriate RIRs then allocate blocks of ASNs to local internet registries (LIR) 
+which are usually ISPs.
+</p>
+<p>
 Originally, the ASNs issued were 2 bytes(16 bits) in the range 0 - 65535. The 
 publically issued ASNs were in the range 1 - 64495. The 2 byte ASNs were depleted 
 rapidly resulting in the 4 byte ASNs being adopted based on the recommendation 
@@ -172,21 +190,6 @@ on the Internet.
 <p>
   In BGP, ASNs act as a loop prevention mechanism and can be used for traffic 
 engineering.
-</p>
-<p>
-IANA is responsible for assigning all public ASNs to ensure that they are globally 
-unique. IANA requires the following information when requesting for a public ASN:
-<ol>
-  <li>Proof of a publically-allocated network range i.e. addresses are owned by 
-  the enterprise.</li>
-  <li>Proof that Internet connectivity is provided through multiple service provider connections.</li>
-  <li>Need for a unique routing policy from service providers.</li>
-</ol>
-In the event that an organisation can not provide this information, it should use the 
-ASN provided by its service provider. IANA delegates issuing ASNs to the regional 
-Internet registries (RIR) such as AFRINIC, APNIC, ARIN, LACNIC, RIPE NCC. The 
-appropriate RIRs then allocate blocks of ASNs to local internet registries (LIR) 
-which are usually ISPs.
 </p>
 
 <h2>Special-Purpose ASNs</h2>
@@ -372,7 +375,7 @@ BGP messages consist of the message header and message body. The message header
 All BGP packet types contain a header field. The BGP header contains the following fields: <br> <br>
 <table width="100%" cellspacing="0" cellpadding="2">
 <tr>
-<td style="border-bottom:solid; border-top:solid; border-width:1px; width:12%">
+<td style="border-bottom:solid; border-top:solid; border-width:1px; width:15%">
 <b>Marker field:</b></td>
 <td style="border-bottom:solid; border-top:solid; border-width:1px;">
 16-octets and is filled with all ones but its use is now deprecated in the BGP 
@@ -385,28 +388,28 @@ compatibility.
 <tr>
 <td  style="border-bottom:solid; border-width:1px;"><b>Length:</b></td>
 <td  style="border-bottom:solid; border-width:1px;">
-contains a value denoting the overall length of the message.</td>
+Contains a value denoting the overall length of the message.</td>
 </tr>
 <tr>
 <td style="border-bottom:solid; border-width:1px;"><b>Type:</b></td>
-<td style="border-bottom:solid; border-width:1px;">indicates what type of BGP 
+<td style="border-bottom:solid; border-width:1px;">Indicates what type of BGP 
 message is contained in the packet i.e.
 <table>
 <tr>
-<td>1</td><td>OPEN message</td>
+<td>1 - </td><td>OPEN message</td>
 </tr>
 <tr>
-<td>2</td><td>UPDATE message</td>
+<td>2 - </td><td>UPDATE message</td>
 </tr>
 
 <tr>
-<td>3</td><td>NOTIFICATION message</td>
+<td>3 - </td><td>NOTIFICATION message</td>
 </tr>
 <tr>
-<td>4</td><td>KEEPALIVE message</td>
+<td>4 - </td><td>KEEPALIVE message</td>
 </tr>
 <tr>
-<td>5</td><td>ROUTE refresh</td>
+<td>5 - </td><td>ROUTE refresh</td>
 </tr>
 
 </table>
@@ -438,11 +441,20 @@ message types depending on the amount of information to be transmitted.
 
 <h3>OPEN</h3>
 <p>
-The BGP open message is used to establish a BGP adjacency. It is used to advertise
-the local 
-ASN, timer values, BGP identifier, BGP capabilities such as: 
-multi-protocol support, route refresh capability, support for 4-octet ASNs.
-4 byte ASNs support is negotiated during capability exchange. The old BGP speakers 
+The BGP Open message is used to establish a BGP adjacency. It is used to advertise
+the following: 
+<ul>
+  <li>local ASN</li> 
+  <li>timer values</li>
+  <li>BGP identifier</li>
+  <li>BGP capabilities such as:
+	  <ul>
+		  <li>multi-protocol support</li>
+		  <li>route refresh capability</li>
+		  <lil>support for 4-byte ASNs.</li>
+	  </ul>
+</ul>
+4-byte ASNs support is negotiated during capability exchange. The old BGP speakers 
 are sent ASdot numbers encoded as ASN "23456". The real AS-Path is encoded with 
 the optional transitive attributes AS4_AGGREGATOR and AS4_PATH.
 BGP OPEN messages have a value of 1 (one) in the type field of the message header.
@@ -476,8 +488,8 @@ the peering. The minimum hold timer value needs to be either zero or at least
 three seconds. 
 </p>
 <p>
-Monitoring of the hold timer values can be disabled by configuring a holdtimer value of zero. This also disables
-the transmission of keepalive messages.
+Monitoring of the hold timer values can be disabled by configuring a hold timer value of zero.
+This, also, disables the transmission of keepalive messages.
 For Cisco devices, the default hold time is 180 seconds. When the hold time expires, 
 the BGP session is torn down and prefixes originated by the unreachable peer are 
 purged from the BGP table. An update with a route withdrawal is sent to other 
@@ -1034,8 +1046,7 @@ iBGP sessions are established within an AS.
 
 <h2>External BGP (eBGP)</h2>
 <p>
-eBGP sessions are established between autonomous systems. 
-eBGP peerings are the core of component of BGP on the Internet. 
+eBGP sessions are established between autonomous systems and form the core component of BGP on the Internet. 
 </p>
 <p>
 eBGP has the following features:
@@ -1425,7 +1436,7 @@ If the default BGP IPv4 address family is enabled, then activation of a neighbor
 <h2>BGP Session Resets</h2>
 <p>
 If a policy configuration change is made to BGP, such as a change in routing  
-policy, after a BGP device forms a peering with another BGP device the BGP 
+policy, after a BGP device forms a peering with another BGP device, the BGP 
 session may need to be reset for the changes to take effect. 
 BGP supports two methods of cleaning a session; hard reset and soft reset:
 <ul>
@@ -1441,7 +1452,8 @@ session is to be reset. The "*" refers to all BGP peers.
   <ul>
     <li><code><b>clear bgp ipv4 unicast &lt;*&gt;</b></code>:
       <ul>
-        <li>The BGP sessions with all peers are reset. The BGP session transitions 
+	      <li>The BGP sessions with all peers are reset.</li>
+	      <li>The BGP session transitions 
         from Established to Idle and the re-establishment of peering starts again.</li>
         <li>The entire BGP table is flushed.</li>
         <li>All NLRI is learned again.</li>
@@ -1899,11 +1911,16 @@ established state</td></tr>
 <tr>
 <td  style="border-bottom: solid 1px; font-weight:bold;">State/PfxRcd</td>
 <td  style="border-bottom: solid 1px;">
-Current state of the BGP peer or the number of prefixes received from the peer. 
+	<p>
+	Current state of the BGP peer or the number of prefixes received from the peer. 
 If there is a number in this column, it indicates that a BGP neighbor relationship 
-has been successfully formed. If the values are 'Idle' or 'Active', then there 
+has been successfully formed; and the number refers to the number of NLRI shared by the peer.
+	</p>
+	<p>
+If the values are 'Idle' or 'Active', reflecting the state of the neighbor relationship, then there 
 is a problem in the formation of the neighbor relationship: this may usually mean 
 that the local BGP device or remote BGP peer does not have a route to the neighbor.
+	</p>
 </td>
 </tr>
 </tbody>
@@ -1936,7 +1953,7 @@ keywords to the above command display additional information for each neighbor:
       <td style="border-bottom: 1px solid;"><code><b>show bgp ipv4 unicast 
       neighbors &lt;ip-address&gt; policy detail</b></code></td>
       <td style="border-bottom: 1px solid;">
-      Displays any policies configurations for the neighbor such as route-maps</td>
+      Displays any policy configurations for the neighbor such as route-maps</td>
     </tr>
     <tr>
       <td  style="border-bottom: 1px solid;">
@@ -3046,7 +3063,8 @@ BGP next hop. One of the primary reasons for rib-failures is the higher
 administrative distance (AD). This is particularly the case if the same prefix 
 is learned through iBGP and an IGP. iBGP has a higher default administrative 
 distance (of 200) than most IGPs.
-
+</p>
+<p>
 The list of prefixes with a rib-failure and the reason for the rib-failure can 
 be viewed using the command <code><b>show bgp 
 ipv4 unicast rib-failure</b></code>.
@@ -3063,7 +3081,7 @@ as active in the BGP table i.e., prefixes that were not installed into the RIB.
 <p>
 If the network design provides for the installation into the RIB of BGP prefixes 
 with a rib-failure; this can be accomplished by lowering the administrative 
-distance of iBGP to lower that of the IGP.
+distance of iBGP below that of the IGP.
 </p>
 
 <h2 id="PREFIX_PROCESSING">Prefix Processing</h2>
@@ -3186,12 +3204,15 @@ BGP prefix path attributes are classified as:
   attribute is permitted to transit from one autonomous system to another. 
   This is done by setting the transitive flag to "on" that results in the BGP device 
   including the path attribute in its update to eBGP peers.
+<p>
   For 
   prefixes received with path attributes that are not understood, these prefixes 
   can be installed in the BGP table. 
   However, these attributes cannot be altered. Additionally, they are included 
   in any subsequent advertisement to other peers. These attributes are maintained 
-  with the prefix update from autonomous system to autonomous system.</li>
+  with the prefix update from autonomous system to autonomous system.
+</p>
+  </li>
   <li><b>Optional non-transitive:</b> may be proprietary. This attribute can not 
   leave the autonomous system.</li>
 </ol>
@@ -3202,7 +3223,7 @@ Optional attributes do not have to be recognised by all BGP implementations.
 
 <h2>Use of Path Attributes</h2>
 <p>
- Path attributes serve a variety of purposes with some path attributes 
+ Path attributes serve a variety of purposes with some 
 serving more than one purpose:
 <ul>
   <li>Best path selection process</li>
@@ -3241,7 +3262,8 @@ modify the next hop attribute when sending the update to an iBGP peer. The next
 hop attribute should be thought of in the context of autonomous system to 
 autonomous system instead of router to router. This approach helps in troubleshooting 
 reachability issues that my arise.
-
+</p>
+<p>
 In iBGP, the next hop IP address is the address of the iBGP peer that originated 
 the prefix. The originator of a prefix has a next hop value of 0.0.0.0 in the 
 BGP table. When advertising internal prefixes, a BGP peer should override the 
@@ -3255,12 +3277,28 @@ selection process starts.
 </p>
 <p>
 The next hop path attribute controls the IGP route recursion i.e. BGP knows the 
-next-hop but does not know the egress interface. It is important to note that 
+next-hop but does not know the egress interface. Route recursion occurs when a router needs 
+to perform multiple lookups in the routing table to determine the exit interface for forwarding a packet. 
+This typically happens when the next-hop IP address specified in a route is not directly connected
+to the router. Three lookups typically take place:
+<ol>
+	<li><b>Initial Lookup:</b> The router first looks up the destination IP address in its 
+		routing table to find the next-hop IP address.</li>
+	<li><b>Second Lookup:</b> If the next-hop IP address is not directly connected, the router 
+		performs a second lookup to determine how to reach this next-hop IP address.</li>
+        <li><b>Final Lookup:</b> This process continues until the router finds an entry that is directly connected, 
+		which provides the exit interface for the packet.</li>
+ </ol>
+</p>
+<p>
+It is important to note that 
 BGP entries in the routing table do not have an exit interface specified.
 The IGP must perform recursion otherwise, 
 the route cannot be used. The result of a failed next hop recursion is a failed 
 best path selection i.e. the route is not installed in the RIB or advertised.
 The next-hop validity check is to prevent a route recursion failure.
+</p>
+<p>
 By default, outbound iBGP updates do not modify the next-hop attribute regardless 
 of iBGP peer type. This can be modified using the BGP command <code><b>neighbor 
 &lt;ip-address&gt; next-hop-self</b></code> or in a route-map using the action 
