@@ -1143,6 +1143,11 @@ that it does not change even when the interface IP addresses for the loopback an
 physical interfaces are modified.
 </p>
 <p>
+It is important to note that changing the router-id using the command <code><b>bgp 
+router-id x.x.x.x</b></code> immediately updates the router-id in an active BGP session
+without the need to refresh the active BGP session.
+</p>
+<p>
 <b>Step 3: </b> define the BGP neighbor's IP address and autonomous system number with the command: 
 <code><b>neighbor &lt;ip-address&gt; remote-as 
 &lt;asn&gt;</b></code>. 
@@ -3376,27 +3381,31 @@ are compared against the current best path. Processing involving checking of the
 path parameters continues until a best path winner is identified. The BGP best 
 path algorithm, on Cisco devices, selects the best path in the following order: 
 <ol>
-  <li>Prefer the path with the highest <b>weight</b></li>
-  <li>Prefer the path with the highest <b>local preference</b>.</li>
-  <li>Prefer the path that was originated by the local router via the 
-  <code><b>network</b></code> or <code><b>aggregate</b></code> commands or through 
-  route redistribution from an IGP such as OSPF, IS-IS, etc. Local paths sourced 
+  <li>Highest <b>Weight</b></li>
+  <li>Highest <b>Local preference</b>.</li>
+  <li>Originated by the local router via:
+	  <ul>
+		  <li><code><b>network</b></code> command</li>
+		  <li><code><b>aggregate-address</b></code> command</li>
+		  <li>route redistribution from an IGP such as OSPF, IS-IS, etc.</li>
+	  </ul>
+		  Local paths sourced 
   through the <code><b>network</b></code> or <code><b>redistribute</b></code> 
   commands are preferred over local aggregated paths sourced through the command 
   <code><b>aggregate-address</b></code>.
   
   </li>
-  <li>Prefer the path with the lower Accumulated Interior Gateway Protocol (AIGP) metric.</li>
-  <li>Prefer the path with the shortest AS_PATH.</li>
-  <li>Prefer the path with the lowest origin type where IGP is lower than external 
+  <li>Lower <b>Accumulated Interior Gateway Protocol (AIGP) metric</b>.</li>
+  <li>Shortest <b>AS_PATH</b>.</li>
+  <li>Lowest <b>Origin</b> type where IGP is lower than external 
   gateway protocol (EGP), and EGP is lower than incomplete.</li>
-  <li>Prefer the path with the lowest Multi-Exit Discriminator (MED).</li>
-  <li>Prefer the external path over the internal path.</li>
-  <li>Prefer the path with the lowest IGP metric to the BGP next hop.</li>
-  <li>Prefer the path with the oldest session for eBGP paths.</li>
-  <li>Prefer the path from the BGP peer with the lowest router ID.</li>
-  <li>Prefer the path with the lowest cluster length for iBGP paths.</li>
-  <li>Prefer the path with the lowest neighbor BGP router ID for iBGP peers.</li>
+  <li>Lowest <b>Multi-Exit Discriminator</b> (MED).</li>
+  <li>External path over the internal path.</li>
+  <li>Lowest IGP <b>metric</b> to the BGP next hop.</li>
+  <li><b>Oldest session</b> for eBGP paths.</li>
+  <li>BGP peer with the lowest <b>router ID</b>.</li>
+  <li>Lowest <b>cluster length</b> for iBGP paths.</li>
+  <li>Lowest <b>neighbor BGP router ID</b> for iBGP peers.</li>
 </ol>
 Some consider the next-hop validity as the first path selection criteria.
 </p>
@@ -3743,6 +3752,8 @@ preferred over a longer AS_PATH</b>.
 The AS_PATH is a well-known transitive and mandatory path attribute.
 It has to be included in all eBGP updates. eBGP peers discard updates if they do 
 not include the AS_PATH.
+</p>
+<p>
 The AS_PATH is not prepended by iBGP peers because it can result in traffic being black-holed.
 Traffic can be modified by prepending to the AS_PATH in a route-map with the command 
 <code><b>set as-path prepend &lt;last_as_number | pattern&gt;</b></code>.
