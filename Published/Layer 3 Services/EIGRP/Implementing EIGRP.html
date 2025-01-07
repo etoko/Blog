@@ -70,11 +70,11 @@ Updates are only sent when there is a topology change i.e.:
 	  <li>An existing network is withdrawn due to link or device failure</li>
 	  <li>Change of path metric</li>  
   </ol>
-These updates are only sent to routers that require them.
+Bounded updates are a type of update message that is sent to a specific set of EIGRP neighbors that are affected by the network change.
 	  </li>
 <li>EIGRP uses a composite metric that, by default, consists of cumulative delay and lowest path bandwidth. EIGRP can be 
 configured to include additional parameters such as link load and reliability. </li>
-<li>EIGRP is the only routing protocol to-date to support unequal cost load balancing</li>
+<li>EIGRP is currently the only routing protocol that supports unequal cost load balancing</li>
 </ul>
 </p>
 <p>
@@ -93,7 +93,7 @@ Once neighborships are formed, unicasts are used to synchronize the topology.
 <h1>EIGRP and Other Routing Information Sources</h1>
  <p>
  The routing table (RIB) receives routing information from various sources. If a routing device is being informed about a route from 
- various sources such as EIGRP, OSPF, IS-IS, BGP etc it uses the concept of administrative distance to rank the routing 
+ various sources such as EIGRP, OSPF, IS-IS, BGP etc., it uses the concept of administrative distance to rank the routing 
  information from each source. 
  The administrative distance (AD) can be considered as the level of trustworthiness of routing information from a given 
  source. 
@@ -165,7 +165,7 @@ Once neighborships are formed, unicasts are used to synchronize the topology.
 <p>
 EIGRP supports two configuration modes: named and classic. The original EIGRP configuration mode was classic-mode.
 The named-mode was introduced in IOS versions 15.2.
-It is backward compatible with classic EIGRP; a router configured using named-mode can form a neighborship with an
+It is backwards compatible with classic EIGRP; a router configured using named-mode can form a neighbor relationship or neighborship with an
 EIGRP peer whose configuration is in classic-mode.
 </p>
 
