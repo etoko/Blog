@@ -6,7 +6,7 @@
   <li><a href="#RID">Router IDs</a>
   <li><a href="#EXCHANGE">How Information is Exchanged with EIGRP</a>
     <ol type="a">
-	  <li><a href="#NEIGHBOR_ESTABLISHMENT">Neighbor Formation</a></li>
+	  <li><a href="#NEIGHBOR_ESTABLISHMENT">Neighbor Formation(Adjacency)</a></li>
 	  <li><a href="#NEIGHBOR_TABLE">Neighbor Table</a></li>
 	  <li><a href="#INTER-ROUTER_COMMUNICATION">Inter-Router Communication</a></li>
 	  <li><a href="#EIGRP_PACKETS">Packet Types</a></li>
@@ -55,8 +55,8 @@ Current versions of EIGRP only support IPv4 and IPv6.
  other vendors. This makes it possible for EIGRP to be implemented in a multi-vendor enterprise network.
  </p>
 <p>
-Distance vector protocols learn information about remote networks only from neighbors and therefore have a limited view
-of the network compared to link-state routers which learn route information from all routers in an area.
+Routers running distance vector protocols learn information about remote networks only from neighbors and therefore have a limited view
+of the network compared to routers running link-state protocols which learn route information from all routers in an area.
 </p>
 <p>
 EIGRP has features unique from other distance vector protocols:
@@ -250,7 +250,7 @@ R1(config-router)#<b>network 10.1.12.0 0.0.0.255 </b>                           
 The wildcard mask:
 <ul>
   <li>Can be as specific as 0.0.0.0 where it identifies an interface by its exact IP address.</li> 
-  <li>It can be as general as 0.0.0.3 where it identifies the network that a 
+  <li>It can be as refined as 0.0.0.3 where it identifies the network that a 
   specific interface belongs to.</li>
   <li>It can also be as general as 0.0.255.255 where the last two octets can be 
   ignored when matching the network address. With this type of wildcard mask, EIGRP can be activated on many 
@@ -315,7 +315,7 @@ EIGRP selects paths with the lowest composite metric based on the following para
 <ul>
 <p>
 <b>Bandwidth:</b> lowest bandwidth along path in kbps. The bandwidth value 
-can also be retrieved from the configured interface bandwidth using command
+can also be configured using the interface mode command
 <code><b>bandwidth &lt;value&gt;</b></code> 
 </p>
 <p>
@@ -368,16 +368,16 @@ It is recommended to use EIGRP named-mode on platforms that support it.
 <h2>Named Mode (Multi Address-family Mode)</h2>
 <p>
 With EIGRP named-mode configuration, all the EIGRP configuration is done in one location; under the 
-<code><b>router eigrp</b></code> configuration mode. Named mode supports IPv4 
+<code><b>router eigrp &lt;name&&gt; </b></code> configuration mode. Named mode supports IPv4 
 and IPv6 including Virtual Routing and Forwarding [VRF] 
 instances. EIGRP named configuration is also known as multi-address family configuration mode. 
-Unlike classic-mode, named-mode supports newer features such as wide metrics, IPv6 VRF Lite.
+Unlike classic-mode, named-mode supports newer features such as wide metrics, VRF Lite.
 </p>
 
 <p>
 EIGRP named configuration makes it possible to run multiple instances (different 
 autonomous system numbers) under the same EIGRP process. EIGRP named-mode 
-provides a hierarchical configuration in three subsections: address-family, 
+provides a hierarchical configuration under three subsections: address-family, 
 interface and topology.
 <ol>
 <li>
@@ -416,14 +416,14 @@ under the default interface apply to all interfaces on the router.
 </li>
 </ol>
 If there are conflicting configurations between the default interface and a specific interface, 
-the specific interface configuration takes priority over the default configuration.
+the specific interface configuration overrides the default interface configuration.
 </li>
 <li>
 <b>Topology: </b>This sub-mode contains configurations that affect the EIGRP topology database and how routes are presented to the 
 router&#39;s RIB. Configurations that can be done under the topology base section include: 
 <ul>
   <li>route redistribution</li>
-  <li>administrative distance</li> 
+  <li>modification of administrative distance</li> 
   <li>unequal-cost load-balancing using <code><b>variance</b></code> command</li>
   <li>maximum-paths settings for load-balancing</li>
   <li>offset-lists for traffic engineering</li>
@@ -440,7 +440,7 @@ The following interface configuration will be used in the discussion of EIGRP na
 
 <p><div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
 <code>
-R6(config-if)#<b>do show ip interface brief</b>                                       <br />                          
+R6#<b>show ip interface brief</b>                                       <br />                          
 Interface&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;IP-Address&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;OK? Method Status&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Protocol  <br />
 Ethernet0/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;unassigned&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;YES NVRAM  administratively down&nbsp;&nbsp;down      <br />
 GigabitEthernet0/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.100.0.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;YES manual up&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;up        <br />
@@ -646,9 +646,9 @@ Wide metrics are backwards compatible with classic EIGRP.
 </p>
 <h3>Wide Metric and RIB Scaling</h3>
 <p>
-Routing Information Base (RIB) only supports 32-bit metrics. After EIGRP DUAL, 
-the 64-bit EIGRP wide metric is scaled down to fit in the 32-bit RIB metric size 
-using the RIB-scale value in the formula <code><b>32-bit metric = 64-bit metric &times; (1 &divide; rib-scale)</b></code>. 
+Routing Information Base (RIB) only supports 32-bit metrics. After DUAL calculates the 
+64-bit metric, it is scaled down to fit in the 32-bit RIB 
+using the RIB-scale value according to the formula <code><b>32-bit metric = 64-bit metric &times; (1 &divide; rib-scale)</b></code>. 
 </p>
 <p>
 This default RIB-scale value can be modified using the command: 
@@ -661,7 +661,7 @@ RIB metric = Feasible Distance &times; (1 &div; 128)
 </b></code></div></p>
 
 <p>
-Modifying the rib-scale has a direct impact on the metrics of routes. When the 
+Modifying the rib-scale has a direct impact on the metrics of routes; when the 
 <code><b>metric rib-scale</b></code> command is issued, all 
 EIGRP routes in the RIB are cleared and replaced with recalculated metrics.
 </p>
@@ -672,10 +672,13 @@ EIGRP metric values are already 32-bit values. As a result, RIB-scale value is n
 <code><b>metric rib-scale &lt;value&gt;</b> </code> is excluded in the classic EIGRP mode configuration.
 </p>
 
+<h4>Modifying the RIB-Scale Value</h4>
 <p>
-The following configurations and output show the effect of modifying the rib-scale on the metric values. 
+The following configurations and command output show the effect of modifying the rib-scale on the metric values. 
 The command <code><b>show ip protocols</b></code> shows the currently configured rib-scale value. 
-In this example, it has the default value of 128.
+</p>
+<p>
+In this example, the rib-scale has the default value of 128.
 </p>
 <p><div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
 <code>
@@ -910,7 +913,7 @@ of neighborship or route information. Conversion is automated as of IOS version 
 <p>
 The router ID (RID) is a 32-bit number that uniquely identifies an EIGRP router 
 in an autonomous system. It also serves as a loop-prevention mechanism. 
-The RID is set automatically (default) or can be configured manually.
+The RID is set by the EIGRP process automatically (default) but can be configured manually.
 When the EIGRP process initializes, the EIGRP router ID is set in the following order of criteria:
 <ol>
 <li>The highest IPv4 address of any "up" loopback interface.</li> 
@@ -929,8 +932,8 @@ changed and no further action takes place as no neighborship exists to be reset.
 
 <p>
  Router IDs are used during the origination and redistribution of routes. 
- EIGRP devices only accept routes with different originator router IDs. Remote 
- routes with duplicate RIDs are discarded by 
+ EIGRP devices only accept routes with originator router IDs different from their own. 
+ Remote routes with RIDs similar to the local device RID are discarded by 
  the local router because EIGRP will assume that the route was locally originated. This discarding behaviour is 
  performed on both internal and external routes.
  </p>
@@ -1087,15 +1090,27 @@ R1# &nbsp;&nbsp;                                                                
 <p>
 
 </p>
-<h2 id="NEIGHBOR_ESTABLISHMENT">Neighbor Formation</h2>
+<h2 id="NEIGHBOR_ESTABLISHMENT">Adjacency Formation</h2>
  <p>
 EIGRP requires a neighbor relationship to form between EIGRP devices before prefix exchange 
 takes place. 
 EIGRP uses neighborships to form a trusted bond between two similarly configured devices. 
 </p
+
+<p>
+ Before becoming neighbors, devices running EIGRP have to meet certain criteria. 
+ The following parameters must match for two devices to form a neighborship:
+ <ul>
+ <li><b>Autonomous system numbers (ASNs):</b>  devices must be in the same EIGRP autonomous system. 
+ <li><b>K-values: </b> K1 and K3 are set to one (1), all others are set to zero by default. 
+ <li><b>Authentication parameters:</b> must match including, algorithm used, Key ID and password (key string).</b> 
+ <li><b>Same subnet: </b> the interfaces over which the neighbor relationship will be formed must reside in the 
+ same subnet.</li> 
+ </ul>
+ </p>
 <p>
 Router X must receive an initial Hello packet from Router Y before it can accept 
-other EIGRP packet types. When a router X receives an EIGRP hello packet from 
+other EIGRP packet types. When router X receives an EIGRP hello packet from 
 another router Y, it attempts to become the neighbor of the router Y. When router 
 X receives the first Hello packet from router Y, it places Y in a "pending state".
 X transmits a unicast "NULL" Update which has the initialization bit set and no 
@@ -1108,21 +1123,10 @@ no ACK message is received, the timer on X will run out and the neighbor formati
 process will start again.
 </p>
 <p>
-When the ACK message is received from, X changes its tracking state of Y from pending state to "Up" state.
-In the "up" state, X and Y exchange their topology table. This validates the 
+When the ACK message is received from Y, X changes its tracking state of Y from pending state to "Up" state.
+In the "Up" state, X and Y exchange their topology table. This validates the 
 bi-directional exchange of messages completing the "three-way handshake".
 </p>
-<p>
- Before becoming neighbors, devices running EIGRP have to meet certain criteria. 
- The following parameters must match for two devices to form a neighborship:
- <ul>
- <li><b>Autonomous system numbers (ASNs):</b>  devices must be in the same EIGRP autonomous system. 
- <li><b>K-values: </b> K1 and K3 are set to one (1), all others are set to zero by default. 
- <li><b>Authentication parameters:</b> must match including Key ID and password (key string).</b> 
- <li><b>Same subnet: </b> the interfaces over which the neighbor relationship will be formed must reside in the 
- same subnet.</li> 
- </ul>
- </p>
 <p>
 Once the neighborship is formed, devices then share prefix information with each other. 
 Each EIGRP process maintains a table of neighbors to ensure 
@@ -1433,9 +1437,9 @@ R7#son: new if on tid 0                                                         
  
 <p>
 EIGRP uses five different packet types to communicate i.e. Hello, Update, Request, Reply, Query.  
-EIGRP sends packets using IP protocol 88. EIGRP uses multicast packets where possible to reduce bandwidth consumed on a link
-(one packet to reach multiple devices); it uses unicast packets when necessary. 
-Communication between routers is done with multicast using the IPv4 multicast address 
+EIGRP sends packets using IP protocol 88. Multicast packets are used where possible to reduce bandwidth consumed on a link
+(one packet to reach multiple devices); Unicast packets are used when necessary. 
+Communication between routers is done with multicast using the destinatoin IPv4 multicast address 
 <code><b>224.0.0.10</b></code> and the MAC address <code><b>01:00:5e:00:00:0a</b></code>. 
 </p>              
 
@@ -1448,7 +1452,7 @@ Some EIGRP packets must be sent reliably.
 
 <p>
 For efficiency, reliability is provided only when necessary. 
-For example, on a multiaccess network that has multicast capabilities, it is not
+For example, on a multi-access network that has multicast capabilities, it is not
 necessary to send hello packets reliably to all neighbors individually. Therefore, EIGRP sends a single
 multicast hello with an indication in the packet informing the receivers that the packet need not be
 acknowledged using sequence number of zero (0). 
@@ -1463,7 +1467,7 @@ of varying speed links.
  </p>
  <h4>EIGRP Packet Header</h4>
  The EIGRP packet header can be found in each of the five EIGRP packet types. It contains the following fields:
- <p><b>Header version:</b> usually 2.</p>
+ <p><b>Header version:</b> contains the value 2 if EIGRP version 2 is operational.</p>
  <p>
  <b>OpCode: </b> The type of message in the packet. Eleven(11) types are supported; 
  seven(7) are actively used: The OpCode for EIGRP's five packet types are: 
@@ -1509,12 +1513,12 @@ of varying speed links.
  </p>
  <p>
  <b>Sequence Number: </b> To ensure the reliable transmission of certain packet types with EIGRP, 
- a sequence number is set on certain packet types. Packets with a sequence number 
- greater than zero require acknowledgement. The sequence number of the packet is 
+ a sequence number is set on certain packet types. Packets with a non-zero sequence number 
+  require acknowledgement. The sequence number of the packet is 
  contained in the acknowledgement message to acknowledge that packets have been received correctly. When a packet requires acknowledgement, the sequence 
  number is set to a non-zero value. If the value is zero, then the packet does not require acknowledgement. The acknowledgement 
  number is used along with a non-zero sequence number in a unicast packet exchange. When required, it is set to the same 
- value as the acknowledged packet's sequence number wthin an acknoweledgement Hello packet and sent back to the initial 
+ value as the acknowledged packet's sequence number wthin an acknowledgement Hello packet and sent back to the initial 
  sender. 
  </p>
  
@@ -1538,8 +1542,8 @@ of varying speed links.
  <h4>1. Hello Packet</h4>
  <p>
  Hello packets are used primarily for neighbor discovery and maintenance of the 
- neighbor relationship where they act as keepalive messages. The hello-interval 
- sets the time for hello packets to be transmitted by an interface. By default, the hello interval is 5 seconds.
+ neighbor relationship where they act as keepalive messages. The <code><b>hello-interval</b></code> command  
+ sets the time interval for the transmission of hello packets by an interface. By default, the hello interval is 5 seconds.
  The Hello packet body contains sender's K-values, hold time and TLV (Type, Length Value) of the EIGRP version and TLV
  version used. Hello packets are often sent to multicast 224.0.0.10 on IPv4 
  networks and FF02::A on IPv6 networks.
@@ -1589,7 +1593,8 @@ of varying speed links.
  they have a sequence number of zero (0). 
  They are used for acknowledgment of reliable packet types such as Update packets.
  When used in this capacity, the packet body is empty but with an acknowledgement number set to sequence 
- number of the received packets and with the unicast destination address of the sender. Additionally, acknowledgment packets 
+ number of the received packets and with the unicast destination address of the sender. Additionally, 
+ acknowledgment packets 
  are sent in unicast so they do not use the destination multicast IP address of 
  224.0.0.10 and MAC address 01:00:5e:00:00:0a.
     
@@ -1706,8 +1711,8 @@ of varying speed links.
  
  <h4>2. Update Packet</h4>
  <p>
-EIGRP Update packets are used to exchange new or updated information on different routes. 
-The EIGRP update packet includes path attributes associated with each prefix. The EIGRP path attributes can include 
+EIGRP Update packets are used to exchange new or updated route information. 
+The EIGRP update packet includes path attributes associated with each prefix. The EIGRP path attributes include 
 hop count, cumulative delay, minimum bandwidth. The attributes are updated by each hop along the way, 
 allowing each router to independently identify the shortest path.
 </p>
@@ -1844,7 +1849,7 @@ allowing each router to independently identify the shortest path.
  multiple routes may have been affected and gone active at the same time. Under such circumstances 
  multiple query packets may be sent to the same destination neighbors but with different lists of active routes if all 
  the active routes can not be fitted in a single packet. 
- Query packets require acknowledgement from each neighbor making it a reliable mechanism.
+ Query packets require acknowledgement from each neighbor.
  </p>
  <p>
  Query packets can be sent in multicast or unicast depending on link limitations between neighbors or neighbor 
@@ -2044,9 +2049,13 @@ allowing each router to independently identify the shortest path.
 
 </code></div></p> 
 <p>
-From the packet capture of the EIGRP Query packet, the delay parameter is set to 
-infinity and bandwidth to the maximum bandwidth value of 4294967295 (2<sup>32</sup>) 
-i.e. unreachable, and hop count is set to maximum at 255. These indicate that the local 
+From the packet capture of the EIGRP Query packet:
+  <ul>
+    <li>the delay parameter is set to infinity</li>
+    <li>bandwidth to the maximum bandwidth value of 4294967295 (2<sup>32</sup>) i.e. unreachable</li>
+    <li>hop count is set to maximum at 255.</li>
+    </ul>
+These indicate that the local 
 device has poisoned all paths to the prefixes 
 in the Query packet that use the local router as a next hop.
 </p>
@@ -2054,13 +2063,13 @@ in the Query packet that use the local router as a next hop.
  <p>
  The EIGRP Reply packet is always sent as a response to a query regardless of whether a neighbor has a route to the 
  destination or not. The reply packet acts as an acknowledgement for a query packet and contains the query packet's 
- sequence number in its acknowledge field. If a neighbor does not have a route to the query destination, the reply is sent with an infinite delay 
+ sequence number in its acknowledge field. If a neighbor does not have a route to the destination, the reply is sent with an infinite delay 
  metric.
  </p>
  <p>
  TLVs are common to update, query and reply packets with corresponding information based on network reachability. The query 
- process is iterative i.e. across the EIGRP domain. A reply packet is not sent back to the devices sending the query 
- packets until an answering reply packet is received, This can be problematic on large networks.
+ process is iterative i.e. across the EIGRP domain. A reply packet is not sent back to the device that sent 
+ the original query until the local peer receives a reply packet to its own query. This can be problematic on large networks.
  </p>
  <p>
  Query scope can be limited: 
@@ -2070,8 +2079,9 @@ in the Query packet that use the local router as a next hop.
  <li>route filtering</li> 
  </ul>
  Sometimes replies are lost or delayed. 
- This results in stuck-in-active (SIA) conditions. SIA is caused by failure to receive a reply from all queried devices within 
- a defined query time interval which by default is 90 seconds. This can result in a neighborship being reset. 
+ This results in stuck-in-active (SIA) conditions. SIA is caused by failure to receive a reply from all queried peers 
+ within 
+ a defined query time interval, which, by default, is 90 seconds. This can result in a neighborship being reset. 
  </p>
  <p>
  Two additional 
@@ -2084,7 +2094,7 @@ in the Query packet that use the local router as a next hop.
  Everytime an SIA-reply packet is sent for a route, the query timer is reset to half the initial value. The exchange of 
  SIA-query and SIA-reply packets can occur three different times. If the route is still being processed once a third 
  SIA-reply packet is received, the route will be considered SIA. This will cause the neighborship to be reset 
-  on Cisco devices. RFC does require this.
+  on Cisco devices. RFC 7868	 does require this.
  </p>
  <p>
  The following output shows a Wireshark packet capture of an EIGRP Reply packet.
@@ -2292,21 +2302,23 @@ in the Query packet that use the local router as a next hop.
  
  <h2 id="LOOP_PREVENTION">EIGRP Loop Prevention</h2>
  <p>
- As a distance-vector routing protocol, EIGRP uses the following techniques as 
- counter-measures for formation of loops in a network.: 
+ As a distance-vector routing protocol, EIGRP uses the following techniques  
+ to prevent the formation of routing loops in a network.: 
  <ol>
    <li>Split horizon</li>
    <li>Poison reverse</li>
    <li>Maximum hop count</li>
+   <li>Feasibility condition: explained in detail <a href="#FEASIBILITY_CONDITION">here</a></li>
  </ol>  
  </p>
  
  <h3>Split Horizon</h3>
  <p>
  Split horizon is a loop prevention technique often implemented in distance vector 
- routing protocols. It is enabled, by default, on all interfaces where EIGRP 
- has been enabled. Split horizon follows this principle; 
+ routing protocols. 
+  Split horizon follows this principle; 
  <b>"<u>Never advertise a route out of the interface through which it was learned</u>."</b> 
+ It is enabled, by default, on all interfaces where EIGRP has been enabled.
   </p>
   <p>
  In some circumstances, it may be advisable to disable split horizon such as on 
@@ -2335,11 +2347,11 @@ in the Query packet that use the local router as a next hop.
 <h1 id="TOPOLOGY_TABLE">Topology Table</h1>
 
 <p>
-EIGRP&#39;s topology table is a vital data structure in the operation of EIGRP 
-together with the EIGRP neighbor table. 
-It contains all routes as advertised by neighbors to an EIGRP router. DUAL then uses the topology 
+The topology table is a vital data structure in the operation of EIGRP 
+together with the neighbor table. 
+It contains connected routes and all routes as advertised by neighbors. DUAL then uses the topology 
 table to identify loop-free backup routes. 
-The topology table contains all the network prefixes advertised within an EIGRP autonomous system. 
+The topology table contains all the network prefixes advertised within an autonomous system. 
 
 Each entry in the table contains the following information:
 <uL> 
@@ -2354,7 +2366,7 @@ Each entry in the table contains the following information:
  <li>Feasible distance and reported distance of the route.
 </ul>
 
-The command <code><b>show ip eigrp topology </b></code> is used to display the EIGRP topology table.
+The command <code><b>show ip eigrp topology </b></code> is used to display the topology table.
 </p>
 <p>
 The feasible distance (FD) represents the total path metric from a local router to a destination. 
@@ -2476,11 +2488,13 @@ R8#                                                                             
  </p>
 
 
-<h3>EIGRP Feasibility Condition</h3>
+<h3 id="FEASIBILITY_CONDITION">EIGRP Feasibility Condition</h3>
 
 <p>
+The first received route is selected as the successor route. 
 Feasibility condition is used to select loop-free backup paths. 
- A path entry is considered not feasible if the advertised distance is equal to or greater 
+ A path entry is considered infeasible (not a candidate for backup route) if 
+ the advertised distance is equal to or greater 
  than the feasible distance of the lowest metric path.
 EIGRP uses the feasibility condition to prevent the formation of routing loops. 
 This is used in addition to split horizon. 
@@ -2489,8 +2503,7 @@ This is used in addition to split horizon.
 <p>
 The feasibility condition follows this sequence of steps during path selection:
 <ol>
-<p><b>Step 1:</b> Find the best path i.e. the path with the lowest metric; take the metric of the best path as 
-as X.</p>
+<p><b>Step 1:</b> Find the best path i.e. the path with the lowest metric; take the metric of the best path as X.</p>
 <p><b>Step 2:</b> Find all alternate backup paths to the same network and retrieve the metric reported by the neighbor; 
 any one path with a metric reported by the neighbor that is less than X is close to the destination.</p>
 <p><b>Step 3:</b> Exclude all other paths with a metric reported by the neighbor greater than or equal to X.</p>
@@ -2511,7 +2524,7 @@ interval between failure of the successor and installation of the feasible succe
 <b>Successor:</b> best path to a destination with the lowest feasible distance.<br />
 <b>Feasible Distance (FD): </b> Composite metric of the best path (successor). <br />
 <b>Reported Distance (RD): </b>Composite metric learned from the neighbor. <br />
-<b>Feasibile Successor (FS):</b> Backup paths that meet the feasibility condition.
+<b>Feasible Successor (FS):</b> Backup paths that meet the feasibility condition.
 </p>
 <p>
 Once the best path is chosen, additional paths are examined for backup routes. The FC finds loop-free 
