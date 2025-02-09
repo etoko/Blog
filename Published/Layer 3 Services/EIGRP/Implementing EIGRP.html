@@ -2897,9 +2897,9 @@ command <code><b>show ip protocols</b></code>.
 <p>
 The active timer is set to 3 minutes by default. 
 The active timer can be disabled or modified with the command 
-<code><b>timers active-time {disabled | 1-65535-minutes} </b></code> under the EIGRP process. 
+<code><b>timers active-time {disabled | 1-65535-minutes} </b></code>. 
 With classic configuration mode, the command runs directly under the EIGRP process, and with named-mode configuration, 
-the command runs under the topology base.
+the command runs under the topology base sub-mode.
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
@@ -3124,7 +3124,7 @@ The columns of the command <code><b>show ip eigrp interfaces</b></code> are expl
 <td style="border-bottom:solid; border-width:1px">Number of EIGRP neighborships formed through that interface.</td>
 </tr>
 <tr>
-<td style="border-bottom:solid; border-width:1px"><b>Xmt Queue<br />Un/Reliable: </b></td>
+<td style="border-bottom:solid; border-width:1px"><b>Xmit Queue<br />Un/Reliable: </b></td>
 <td style="border-bottom:solid; border-width:1px">
 Total number of packets waiting in transport transmission queue; reliable (requiring acknowledgement) and 
 unreliable (no acknowledgement required). A value of zero indicates that the network 
@@ -3212,8 +3212,13 @@ Gi1/0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nb
 </p>
 <p>
 <b>NOTE:</b> The <code><b>show ip eigrp interfaces</b></code> command does not 
-display passive interfaces and intefaces that are administratively shutdown. With classic-mode,
-the command <code><b>show ip protocols</b></code> does not display interfaces that are operating in EIGRP passive-mode 
+display passive interfaces and intefaces that have EIGRP enabled but are 
+administratively shutdown. 
+</p>
+<p>
+Under classic-mode configuration,
+the command <code><b>show ip protocols</b></code> does not display interfaces that are 
+operating in EIGRP passive-mode 
 that were configured using the command <code><b>passive-interface default</b></code>.
 </p>
 
@@ -3865,9 +3870,9 @@ R8#                                                                             
 EIGRP routes that are installed into the RIB can be viewed using the command <code><b> show ip route eigrp</b></code>. 
 EIGRP routes originating within the autonomous system have an administrative distance (AD) of 90 and are 
 shown in the routing table with the code '<code><b>D</b></code>'. 
-Routes that originate from outside the autonomous system are external EIGRP routes.
+Routes that originate from outside the autonomous system ( through redistribution) are external EIGRP routes.
 External EIGRP routes have an AD of 170 and are shown in the routing table with the code '<code><b>D EX</b></code>'. 
-Placing external EIGRP routes into the RIB with a higher AD acts as a loop-prevention mechanism.
+Installation of external EIGRP routes into the RIB with a higher AD acts as a loop-prevention mechanism.
 </p>
 
 <p><div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
@@ -3907,7 +3912,7 @@ R3#                                                                             
 </code>
 </div></p>
 <p>
-The metric for the selected route is the second number in square brackets. 
+The metric for the selected route is the second number in square brackets (after the administrative distance). 
 </p>
 
 <p>
@@ -3974,7 +3979,7 @@ provides additional security to the network.
 
  <h2 id="TIMERS">EIGRP Timers</h2>
  <p>
- EIGRP supports two different timers: Hello interval and Hold timer. Hello interval controls how often hello packets are sent. 
+ EIGRP supports two different timers: hello interval and hold timer. Hello interval controls how often hello packets are sent. 
  Hello packets are used:
  <ul>
   <li>To discover new neighbors</li>
@@ -4153,14 +4158,14 @@ interface using the interface-mode BFD configuration commands.
 
 <h2 id="PASSIVE_INTERFACE">Passive Interfaces</h2>
 <p>
-Passive interfaces in EIGRP allow the network configured on an interface to be advertised 
+Passive interfaces suppress the sending of hello packets. Passive interfaces allow the network configured on an interface to be advertised 
 but prevent neighbor adjacencies from forming on those interfaces because hello packets are 
 not sent. Hello packets received on passive interfaces are not processed.
 </p>
 <p>
-Configuration of passive interfaces can be good from a security perspective. As Hello packets are not sent out 
+Configuration of passive interfaces can be good from a security perspective. As hello packets are not sent out 
 passive interfaces, a packet sniffer will not be able 
-to view routing information off of these interfaces.
+to view routing information off these interfaces.
 </p>
 <p>
 To configure an EIGRP interface as passive, you use the command <code><b>passive-interface &lt;interface-id&gt;</b></code> under the EIGRP process 
@@ -4303,13 +4308,13 @@ of the query domain size. A query domain can be bounded by summarization and stu
 EIGRP query packets are generated when a route becomes active due to link-loss, 
 loss of an EIGRP neighbor, change of path metric. 
 Query packets are sent for an exact match of the lost route for example do you have a route to 1.2.3.4/24. Reply is 
-immediately sent if no match is available for example 1.2.3.4/24 does not match my 1.0.0.0/8. This is how summaries limit the 
+immediately sent if no match is available; for example 1.2.3.4/24 does not match my 1.0.0.0/8. This is how summaries limit the 
 query domain.
 </p>
  
 <p>
 EIGRP supports two ways of configuring summarization: auto-summarization and manual summarization. 
-EIGRP hierarchy is arbitrary unlike OSPF that supports a two-tier hierarchy. Summaries can be configured in 
+EIGRP hierarchy is arbitrary unlike OSPF that supports a two-tier hierarchy. Summarization can be configured in 
 any part of the network. However, it is recommended to configure summarization at network convergence points 
 such as core layer or distribution layer of a two-tier/three-tier network topology.
 </p>
@@ -4327,10 +4332,11 @@ process-level in classic EIGRP and base topology in named EIGRP.
 Manual summarization is supported at any bit boundary including 0.0.0.0/0. It 
 automatically suppresses subnet advertisements.
 It is still possible to advertise constituent subnets even after configuring 
-summarization using a leak-map. Manual summarization can be implemented; in 
-classic-mode under interface configuration mode
-using the command <code><b>ip summary-address eigrp</b></code>. In named-mode manual summarization is configured under the 
-af-interface mode: <code><b>summary-address</b></code>.
+summarization using a leak-map. Manual summarization can be implemented in: 
+<ul>
+	<li><b>classic-mode</b> under interface configuration mode using the command <code><b>ip summary-address eigrp</b></code>.</li>
+	<li><b>named-mode</b> manual summarization is configured under the af-interface mode: <code><b>summary-address</b></code>.</li>
+</ul>
 </p>
 <p>
 <b>Note:</b> In named-mode, manual summarization can not be configured under the default interface.
@@ -4661,7 +4667,7 @@ receive routes or advertise any combination of redistributed routes, connected r
 </p>
 <p>
 When configured on the spoke router, the router announces its stub router status using a new 
-TLV in the EIGRP Hello messages. The following is an EIGRP Hello Packet capture from an EIGRP stub device that advertises
+TLV <code>0x0006</code> in the EIGRP Hello messages. The following is an EIGRP Hello Packet capture from an EIGRP stub device that advertises
 connected, redistributed routes and routes permitted via a leak-map.
 </p>
 
@@ -4765,7 +4771,7 @@ additional options is saved as <code><b>eigrp stub connected summary </b></code>
 The EIGRP stub router announces itself as a stub within the EIGRP hello packet. 
 Neighboring routers detect the stub TLV field and update the EIGRP neighbor table to 
 reflect the router&#39;s stub status. 
-If a route goes active, EIGRP does not send EIGRP queries to an EIGRP stub router.
+If a route goes active, EIGRP does not send queries to a stub router.
 </p>
 <p>
 You configure a stub router by placing the command
@@ -4827,8 +4833,8 @@ R3#                                                                             
 <h4>Verification of Stub Configuration</h4>
 
 <p>
-Stub configuration can be confirmed on a local router using the command: 
-<code><b>show ip protocols</b></code>.
+Stub configuration can be confirmed on a local router using the commands  
+<code><b>show ip protocols</b></code> and <code><b>show ip eigrp neighbors detail</b></code>.
 </p>
 
 <p><div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
@@ -5436,6 +5442,8 @@ R8#                                                                             
 EIGRP allows load distribution over unequal paths. Only FS are candidates for load-balancing. Unequal cost load-balancing is 
 controlled by <code><b>variance</b></code> command. For a path to be considered for unequal cost load balancing, its feasible distance must be 
 less than the product of the  feasible distance of the successor and variance multiplier.
+ </p>
+ <p>
 Traffic share is automatically calculated over the links based on a ratio proportional to their composite metrics.
 Actual load-balancing still controlled by switching paths e.g. CEF per flow.
 </p>
@@ -5876,8 +5884,8 @@ Outbound filtering affects the advertisement of prefixes to neighbors.
 Filtering is accomplished with the command:
 </p>
 <p>
-<code><b>distribute-list {acl-number | acl-name | prefix prefix-list-name | route-map route-map-name | 
-gateway prefix-list-name} {in | out} [interface-id]</b></code>
+<code><b>distribute-list {acl-number | acl-name | prefix &lt;prefix-list-name&gt; | route-map &lt;route-map-name&gt; | 
+gateway &lt;prefix-list-name&gt;} {in | out} [interface-id]</b></code>
 </p>
 <p>
 EIGRP classic configuration places the command under the EIGRP process, while 
@@ -6277,9 +6285,11 @@ Offset lists allow for the modification of route metrics based on the direction 
 or a combination of direction and prefix. 
 An offset list is configured with the command 
 <code><b>offset-list &lt;offset-value&gt; [acl-number | acl-name] [in | out] [interface-id]</b></code>. 
-Specifying an interface restricts the conditional match for the offset list to the interface 
-that the route is received or advertised out of. If the interface argument is 
+Specifying an interface restricts the conditional match of the offset list to the specified interface. 
+If the interface argument is 
 not specified, the offset-list is applied to all interfaces.
+</p>
+<p>
 EIGRP classic configuration places the command under the EIGRP process, while named-mode configuration 
 places the command under the topology base. 
 </p>
@@ -6375,8 +6385,51 @@ R8(config-router-af-topology)#<b>offset-list ACL_10200340 in 7000000 gigabitethe
 </p>
 <h4>Verification</h4>
 <p>
-The configuration of the offset-list can be verified by the following series of commands.
+The offset-list configuration can be confirmed from the output of the <code><b>show ip protocols</b></code> command.
 </p>
+<p><div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+<code>
+R8#<b>show ip protocol</b> <br />
+*** IP Routing is NSF aware ***&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                   <br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                  <br />
+Routing Protocol is "eigrp 1"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                     <br />
+&nbsp;&nbsp;Outgoing update filter list for all interfaces is not set&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;           <br />
+&nbsp;&nbsp;Incoming update filter list for all interfaces is (route-map) RM_DENY_19216800&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;       <br />
+&nbsp;&nbsp;<span style="background-color:#d3d3d3">Incoming routes in GigabitEthernet0/0 will have 7000000 added to metric if on list ACL_10200340 </span><br />
+&nbsp;&nbsp;Default networks flagged in outgoing updates&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;          <br />
+&nbsp;&nbsp;Default networks accepted from incoming updates&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;       <br />
+&nbsp;&nbsp;EIGRP-IPv4 VR(EIGRP_NAMED) Address-Family Protocol for AS(1)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;        <br />
+&nbsp;&nbsp;&nbsp;&nbsp;Metric weight K1=1, K2=0, K3=1, K4=0, K5=0 K6=0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;            <br />
+&nbsp;&nbsp;&nbsp;&nbsp;Metric rib-scale 128&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                  <br />
+&nbsp;&nbsp;&nbsp;&nbsp;Metric version 64bit&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                  <br />
+&nbsp;&nbsp;&nbsp;&nbsp;NSF-aware route hold timer is 240&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                 <br />
+&nbsp;&nbsp;&nbsp;&nbsp;Router-ID: 10.8.14.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                  <br />
+&nbsp;&nbsp;&nbsp;&nbsp;Topology : 0 (base)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                   <br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Active Timer: 3 min&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                 <br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Distance: internal 90 external 170&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;              <br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Maximum path: 4&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                     <br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Maximum hopcount 100&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                <br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Maximum metric variance 1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                   <br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Total Prefix Count: 26&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                      <br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Total Redist Count: 0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                               <br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                  <br />
+&nbsp;&nbsp;Automatic Summarization: disabled&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                               <br />
+&nbsp;&nbsp;Maximum path: 4&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                 <br />
+&nbsp;&nbsp;Routing for Networks:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                   <br />
+&nbsp;&nbsp;&nbsp;&nbsp;10.8.0.0/16&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                   <br />
+&nbsp;&nbsp;&nbsp;&nbsp;10.100.1.16/28&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                <br />
+&nbsp;&nbsp;&nbsp;&nbsp;10.100.0.0/23&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                 <br />
+&nbsp;&nbsp;Routing Information Sources:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                    <br />
+&nbsp;&nbsp;&nbsp;&nbsp;Gateway&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Distance&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Last Update&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                 <br />
+&nbsp;&nbsp;&nbsp;&nbsp;10.100.1.7&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;90&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;00:16:47&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                <br />
+&nbsp;&nbsp;&nbsp;&nbsp;10.100.1.6&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;90&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;00:16:47&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                <br />
+&nbsp;&nbsp;&nbsp;&nbsp;10.100.1.20&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;90&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;00:16:47&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                <br />
+&nbsp;&nbsp;&nbsp;&nbsp;10.100.1.18&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;90&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;00:16:47&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                <br />
+&nbsp;&nbsp;&nbsp;&nbsp;10.100.1.17&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;90&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;00:16:47&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                <br />
+&nbsp;&nbsp;Distance: internal 90 external 170&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                               <br />
+                                                                                                  <br />
+R8#
+</code></div></p>
 <p>
 As can be observed in the following traceroute output, the change in metrics of the successor path 
 causes the feasible successor to become the successor path.
@@ -6442,52 +6495,6 @@ EIGRP-IPv4 VR(EIGRP_NAMED) Topology Entry for AS(1)/ID(10.8.14.1) for 10.200.34.
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Hop count is 3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                    <br />
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Originating router is 10.200.34.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                 <br />
 R8#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                               <br />
-</code></div></p>
-<p>
-The offset-list configuration can be confirmed from the output of the <code><b>show ip protocols</b></code> command.
-</p>
-<p><div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-<code>
-R8#<b>show ip protocol</b> <br />
-*** IP Routing is NSF aware ***&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                   <br />
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                  <br />
-Routing Protocol is "eigrp 1"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                     <br />
-&nbsp;&nbsp;Outgoing update filter list for all interfaces is not set&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;           <br />
-&nbsp;&nbsp;Incoming update filter list for all interfaces is (route-map) RM_DENY_19216800&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;       <br />
-&nbsp;&nbsp;<span style="background-color:#d3d3d3">Incoming routes in GigabitEthernet0/0 will have 7000000 added to metric if on list ACL_10200340 </span><br />
-&nbsp;&nbsp;Default networks flagged in outgoing updates&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;          <br />
-&nbsp;&nbsp;Default networks accepted from incoming updates&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;       <br />
-&nbsp;&nbsp;EIGRP-IPv4 VR(EIGRP_NAMED) Address-Family Protocol for AS(1)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;        <br />
-&nbsp;&nbsp;&nbsp;&nbsp;Metric weight K1=1, K2=0, K3=1, K4=0, K5=0 K6=0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;            <br />
-&nbsp;&nbsp;&nbsp;&nbsp;Metric rib-scale 128&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                  <br />
-&nbsp;&nbsp;&nbsp;&nbsp;Metric version 64bit&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                  <br />
-&nbsp;&nbsp;&nbsp;&nbsp;NSF-aware route hold timer is 240&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                 <br />
-&nbsp;&nbsp;&nbsp;&nbsp;Router-ID: 10.8.14.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                  <br />
-&nbsp;&nbsp;&nbsp;&nbsp;Topology : 0 (base)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                   <br />
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Active Timer: 3 min&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                 <br />
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Distance: internal 90 external 170&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;              <br />
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Maximum path: 4&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                     <br />
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Maximum hopcount 100&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                <br />
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Maximum metric variance 1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                   <br />
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Total Prefix Count: 26&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                      <br />
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Total Redist Count: 0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                               <br />
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                  <br />
-&nbsp;&nbsp;Automatic Summarization: disabled&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                               <br />
-&nbsp;&nbsp;Maximum path: 4&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                 <br />
-&nbsp;&nbsp;Routing for Networks:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                   <br />
-&nbsp;&nbsp;&nbsp;&nbsp;10.8.0.0/16&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                   <br />
-&nbsp;&nbsp;&nbsp;&nbsp;10.100.1.16/28&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                <br />
-&nbsp;&nbsp;&nbsp;&nbsp;10.100.0.0/23&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                 <br />
-&nbsp;&nbsp;Routing Information Sources:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                    <br />
-&nbsp;&nbsp;&nbsp;&nbsp;Gateway&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Distance&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Last Update&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                 <br />
-&nbsp;&nbsp;&nbsp;&nbsp;10.100.1.7&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;90&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;00:16:47&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                <br />
-&nbsp;&nbsp;&nbsp;&nbsp;10.100.1.6&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;90&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;00:16:47&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                <br />
-&nbsp;&nbsp;&nbsp;&nbsp;10.100.1.20&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;90&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;00:16:47&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                <br />
-&nbsp;&nbsp;&nbsp;&nbsp;10.100.1.18&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;90&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;00:16:47&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                <br />
-&nbsp;&nbsp;&nbsp;&nbsp;10.100.1.17&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;90&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;00:16:47&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                <br />
-&nbsp;&nbsp;Distance: internal 90 external 170&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                               <br />
-                                                                                                  <br />
-R8#
 </code></div></p>
 
 
