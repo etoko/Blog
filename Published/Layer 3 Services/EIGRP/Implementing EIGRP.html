@@ -6765,10 +6765,10 @@ Key-chain EIGRP_KEYCHAIN:                                                       
 
 <h3>Automatic Key-Rotation</h3>
 <p>
-A key chain supports multiple key numbers. A router always sends the lowest valid key if more than one key is valid to 
-be sent. The key number's validity is based on time. Additionally, when configuring multiple keys, ensure 
-that the validity periods of the keys overlap by a significant amount of time; the second key should be valid to 
-be sent and received before the expiry of the first key. This ensures that at least more than one 
+A key chain supports multiple key numbers. A router always sends the lowest valid key if more than one key is valid. 
+The key number's validity is based on time. Additionally, when configuring multiple keys, ensure 
+that the validity periods of the keys overlap by a significant amount of time; the succeeeding key should be valid to 
+be sent and received before the expiry of the currently key. This ensures that at least more than one 
 key is valid during the transition from one key to another. If one key expires and another is not valid, the neighborship 
 may be lost resulting in route loss for some prefixes.
 </p>
@@ -6976,7 +6976,9 @@ Additional commands that help in troubleshooting include:
 <li><code><b>show key chain</b></code>
 </ul>
 </p>
-
+<p>
+It is important to note that the ACK packet is transmitted without the hash digest.
+</p>
 
 <h1>EIGRP in Wide Area Networks</h1>
 <h2>IP Bandwidth Percentage</h2>
