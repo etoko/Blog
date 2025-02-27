@@ -4111,10 +4111,13 @@ area with the same command <code><b>area &lt;area-id&gt; nssa no-summary</b></co
 
 <h3 id="VIRTUAL_LINKS">OSPF Virtual Links</h3>
 <p>
-Discontiguous areas arise when a non-backbone area is not directly connected to 
-the backbone. Another scenario where discontiguous areas exist is where the 
-backbone area is split-up into two or more sections with each section separated by a non-backbone area.
-
+Discontiguous areas arise due to two main network topologies:
+	<ul>
+		<li>when a non-backbone area is not directly connected to 
+the backbone.</li>
+		<li>Another scenario where discontiguous areas exist is where the 
+backbone area is split-up into two or more sections with each section separated by a non-backbone area.</li>
+	</ul> 
 Discontiguous areas cause the ABR of the discontiguous area not to be reachable 
 via SPT. An ABR can only advertise routes between areas when one of the areas it
 is connected to is the backbone(area 0).
@@ -4163,7 +4166,7 @@ A virtual link is characterized by the following features:
   </li>
 </ul>
 The tunnel (of a virtual-link) belongs to the backbone area and therefore the 
-router terminating the virtual link becomes an ABR. The area in which the 
+router terminating the virtual link (of the discontiguous area) becomes an ABR. The area in which the 
 virtual-link endpoints are established is known as the transit area.  Each router 
 identifies the remote router by its RID. The virtual-link can span one hop or 
 multiple hops from the remote virtual-link endpoint.
@@ -4318,7 +4321,7 @@ Routing Protocol is "ospf 1"<br />
 </div></p>
 
 <p>
-To view all ABRs and ASBRs in the OSPF domain, 
+To view all ABRs and ASBRs in the OSPF domain, on any router in the domain, 
 run the command <code><b>show ip ospf border-routers</b></code> with the optional
 keyword <code><b>detail</b></code> appended for additional information.
 </p>
@@ -4443,12 +4446,14 @@ OSPF routes are classified based on how they are sourced. These OSPF route types
 include: intra-area routes, inter-area routes and external routes. 
 <ul>
   <li><b>Intra-area:</b> these are routes that are sourced within an area. 
-  In OSPF, the LSDB of single-area networks contain only intra-area routes.</li>
-  <li><b>Inter-area:</b> route sourced from one area X that appears in another 
-  area Y.</li>
+  In OSPF, the LSDB of single-area networks contain only intra-area routes. In 
+	  the LSDB, these are typically Type 1 and Type 2 LSAs.</li>
+  <li><b>Inter-area:</b> routes sourced from one area X that appears in another 
+  area Y. In the LSDB, these are Type 3 LSAs.</li>
   <li><b>External routes:</b> routes redistributed into OSPF from another 
   routing protocol or static routes. These are advertised 
-  as Type 5 LSAs and appear as external Type 1 and external Type 2 routes.
+  as Type 5 LSAs and appear as external Type 1 and external Type 2 routes. In NSSA areas, 
+	  these are represented as Type 7 LSAs.
 </ul>
 </p>
 
