@@ -5235,16 +5235,17 @@ implemented include the following:
 
 <h1 id="COMMUNITIES">BGP Communities</h1>
 <p>
-BGP communities are an optional transitive BGP attribute that can traverse from 
+BGP communities are an optional transitive BGP path attribute that can traverse from 
 autonomous system to autonomous system. 
 A BGP community is a 32-bit value that can be included with a prefix in an update
 message. 
 By default, BGP communities are not included in BGP update messages. It is a recommended 
 best practice to enable the sending of BGP communities to peers during BGP configuration.
+</p>
+<p>
 BGP communities provide the capability to tag routes for the purpose of 
 modifying BGP routing policy of upstream and downstream BGP devices. 
-It is important to note that BGP does not have route-tag matching or setting 
-support. 
+It is important to note that BGP does not have route-tag matching. 
 BGP communities can be used to add common policies
 to large groups of prefixes. 
 BGP communities are used to group prefixes together for:
@@ -5399,8 +5400,7 @@ Advertise the prefix to any BGP peer.
 <P>
 All NLRI received carrying a communities attribute containing this value MUST 
 NOT be advertised to other BGP peers.
-The No-Advertise community indicates that prefixes should not be advertised to 
-any BGP peer. The No_Advertise BGP community can be advertised from an upstream 
+The No_Advertise BGP community can be advertised from an upstream 
 BGP peer or locally with an inbound policy. The No-Advertise community is set in the 
 BGP Loc-RIB that affects outbound route advertisement. The No-Advertise community
 is set in a route-map with the command: <code><b>set community no-advertise</b></code>.
