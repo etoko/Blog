@@ -5927,7 +5927,7 @@ To implement this feature, configure a community list:
 
 <h1 id="OPTIMIZATION">BGP Optimization</h1>
 <p>
-Optimization of BGP helps improve the performance of BGP through the configuration 
+Optimization of BGP helps improve its performance through the configuration 
 of:
 <ul>
 	<li>Peer groups or peer templates</li>
@@ -6001,7 +6001,7 @@ the peer-group's individual members:
 <ol>
   <li><b>Reset of BGP neighborship:</b> This can be a soft reset or hard reset e.g. 
   <code><b>clear bgp ipv4 unicast peer-group AS65000 soft out</b></code>.</li>
-  <li><b>Route-filtering using route-maps, distribute-lists and filter-lists.</b>
+  <li><b>Route-filtering:</b> using route-maps, distribute-lists and filter-lists.
 </ol>
 Peer groups can be verified using the command <code><b>show ip bgp update-group</b></code>.
 If BGP peers share the same policy, then they are put in the same update-group. 
@@ -6010,11 +6010,11 @@ If BGP peers share the same policy, then they are put in the same update-group.
 <p>
 When troubleshooting peer group issues, you need to take note of the following:
 <ul>
-  <li>The neighbor ip address was not associated with the configured peer group.
+  <li>The neighbor IP address was not associated with the configured peer group.
   <li>The peer group is not configured correctly; what works for one neighbor might not work for the other. 
   <li>The route filter applied to the group is not appropriate for all the peers.
   <li>If there are conflicting entries between the peer group and a specific neighbor statement, 
-  the neighbor statement wins.</li>
+  the neighbor statement takes precedence.</li>
 </ul>
 </p>
 
@@ -6135,7 +6135,7 @@ be applied to a neighbor or neighbor group.
 </p>
 
 <p>
-BGP policy configuration commands that are configured only for a specific address family.
+BGP policy configuration commands are configured only for a specific address family.
 You define peer policy template configurations with the BGP configuration command 
 <code><b>template peer-policy &lt;template-name&gt;</b></code> and
 then enter any BGP address family–related configuration commands. 
@@ -6313,7 +6313,7 @@ update-group.
 
 <h2 id="SUMMARIZATION">Route Summarization</h2>
 <p>
-BGP route summarization automatically summarizes prefixes on classful boundary, 
+BGP route summarization automatically summarizes prefixes on the IPv4 address class boundaries, 
 when no mask is provided when defining networks to be advertised using the BGP 
 <code><b>network</b></code> command. BGP auto-summary is disabled by default. 
 </p>
@@ -6323,24 +6323,28 @@ when no mask is provided when defining networks to be advertised using the BGP
 The hierarchy of a BGP topology is arbitrary; learning of routes in path vector 
 protocols like BGP is similar to distance vector routing protocols i.e. you learn 
 from your neighbor. This, therefore, 
-implies that summarization can be implemented anywhere in the toplogy. The only 
+implies that summarization can be implemented anywhere in the topology. The only 
 requirement is that the subnet must exist in BGP table.
 </p>
 <p>
-Network prefix summarization is extremely important with BGP due to the large 
+Network prefix summarization is extremely important in BGP due to the large 
 number of network prefixes that BGP can hold. The Internet routing table has 
 over 1,000,000 IPv4 prefixes (as at 1/1/2023). Summarization conserves router resources and accelerates
 best path calculation by reducing the size of the BGP table on downstream routers. 
 Summarization provides the benefit of stability  by hiding route flaps from 
 downstream routers thereby reducing routing churn. Route summarization can reduce 
-the size of the BGP table for Internet routers. The aggregated prefixes on the 
-Internet reduce the routing table to 560,000 prefixes.
+the size of the BGP table for Internet routers. 
+</p>
+<p>
+It has been suggested that aggregating BGP public IP prefixes can potentially reduce the Internet routing table 
+to 560,000 prefixes.
 </p>
 <p>
 Two techniques exist for BGP route summarization: static and dynamic route summarization.
 <ul>
-<li><b>Static:</b> create a static route (point to interface null0 for loop 
-prevention) for the prefix and advertise that prefix with the network statement.</li>
+<li><b>Static:</b> create a static route for the prefix and advertise that prefix with the network statement.
+For loop prevention purposes the static route should point to interface Null0.
+</li>
 <li><b>Dynamic:</b> configure an aggregation network prefix. When valid component 
 routes are present in the Loc-RIB, the router will create an aggregate prefix.
  For routes to be aggregated, they must be in the BGP table and not only in the 
@@ -6370,7 +6374,10 @@ routes are present in the Loc-RIB, the router will create an aggregate prefix.
 <p>
 In both methods, a new network prefix with a shorter prefix length is advertised 
 into BGP. The summarizing router becomes the originator of the aggregate 
-route because it is considered a new route. Dynamic aggregation does not 
+route because it is considered a new route.
+</p>
+<p>
+Dynamic aggregation does not 
 suppress the component routes by default. The <code><b>summary-only</b></code>
 keyword is required to suppress the component prefixes. The suppressed component 
 prefixes have a status code of 's' for suppressed in the BGP table. 
@@ -7146,8 +7153,8 @@ R1(config-router-af)#<b>neighbor 9.9.9.9 prefix-list PL_10.1.0.0/17 out</b>
 R1(config-router-af)#<b>do clear bgp ipv4 unicast 9.9.9.9 out</b>
 </code></div></p>
 <p>
-The Loc-RIB table of R1 and R9 after applying filtering using the prefix-list shows that prefixes 10.1.10.0/24, 
-10.1.11.0/24, 10.1.12.0/24 confirms that these component prefixes have been filtered.
+After applying filtering using the prefix-list, the Loc-RIB table of R1 and R9 
+confirms that the component prefixes 10.1.10.0/24, 10.1.11.0/24, and 10.1.12.0/24 have been filtered.  
 The aggregated prefix 10.1.0.0/16 is permitted by the prefix list and is therefore not 
 filtered by BGP. 
 </p>
@@ -7396,9 +7403,13 @@ R1#                                                                             
 <h3>Outbound Route Filters (ORF)</h3>
 <p>
 In the traditional approach to connecting the enterprise network to another 
-autonomous system such as ISP, connectivity options include upstream provider 
-sending a full BGP table, a default route only, or default route and some filtered 
-routes. Normally, some complex view is not maintained. 
+autonomous system such as ISP, connectivity options include:
+<ul>
+  <li>Upstream provider sending a full BGP table</li>
+  <li>Default route only</li>
+  <li>Default route and some filtered routes</li>
+</ul>
+Normally, some complex view is not maintained. 
 Inbound route filtering on the downstream neighbor is inefficient because we 
 must receive the full view of the service provider's BGP table and process it via
 BGP before any filtering e.g. if we are interested in just 100 NLRI, we will 
@@ -7526,52 +7537,45 @@ AS Path ACLs:
 <table cellspacing="0" width="100%">
   <thead style="font-weight: bold;">
     <tr>
-      <td style="background: #D3D3D3; border-top: 1px solid;">Character</td>
-      <td style="background: #D3D3D3; border-top: 1px solid;">Usage</td>
+      <td width="10%" style="background: #D3D3D3; border-top: 1px solid;">Character</td>
+      <td width="40%" style="background: #D3D3D3; border-top: 1px solid;">Usage</td>
+      <td width="10%" style="background: #D3D3D3; border-top: 1px solid;">Character</td>
+      <td width="40%" style="background: #D3D3D3; border-top: 1px solid;">Usage</td>
     </tr>
   </thead>
   <tbody>
   <tr>
       <td style="border-top: 1px solid;">^</td>
       <td style="border-top: 1px solid;">Start of string</td>
-    </tr>
-    <tr>
-      <td style="border-top: 1px solid;">$</td>
-      <td style="border-top: 1px solid;">End of string</td>
-    </tr>
-    <tr>
-      <td style="border-top: 1px solid;">[]</td>
-      <td style="border-top: 1px solid;">Range of characters</td>
-    </tr>
-    <tr>
-      <td style="border-top: 1px solid;">-</td>
-      <td style="border-top: 1px solid;">Used to specify range</td>
-    </tr>
-    <tr>
-      <td style="border-top: 1px solid;">()</td>
-      <td style="border-top: 1px solid;">Logical grouping</td>
-    </tr>
-    <tr>
       <td style="border-top: 1px solid;">.</td>
       <td style="border-top: 1px solid;">Any single character</td>
     </tr>
     <tr>
+      <td style="border-top: 1px solid;">$</td>
+      <td style="border-top: 1px solid;">End of string</td>
       <td style="border-top: 1px solid;">*</td>
       <td style="border-top: 1px solid;">Zero or more instances</td>
     </tr>
     <tr>
+      <td style="border-top: 1px solid;">[]</td>
+      <td style="border-top: 1px solid;">Range of characters</td>
       <td style="border-top: 1px solid;">+</td>
       <td style="border-top: 1px solid;">One or more instances</td>
     </tr>
     <tr>
+      <td style="border-top: 1px solid;">-</td>
+      <td style="border-top: 1px solid;">Used to specify range</td>
       <td style="border-top: 1px solid;">?</td>
       <td style="border-top: 1px solid;">Zero or more instances</td>
     </tr>
     <tr>
-      <td style="border-top: 1px solid;">_</td>
-      <td style="border-top: 1px solid;">Comma, open, or close brace, open or 
+      <td style="border-top: 1px solid; border-bottom: 1px solid;">()</td>
+      <td style="border-top: 1px solid; border-bottom: 1px solid">Logical grouping</td>
+      <td style="border-top: 1px solid; border-bottom: 1px solid">_</td>
+      <td style="border-top: 1px solid; border-bottom: 1px solid;">Comma, open, or close brace, open or 
       close parenthesis, start or end of string, or space</td>
     </tr>
+    <tr>
   </tbody>
 </table>
 </p>
@@ -7830,7 +7834,7 @@ Total number of prefixes 41
 
 </code></div></p>
 
-<h3>Route-map</h3>
+<h3>Route-maps</h3>
 <p>
 Route-maps can be used to filter prefixes by referencing access control lists or 
 prefix lists. Route-maps can also be used to manipulate prefix path attributes 
@@ -8028,6 +8032,8 @@ Next hop tracking involves the IGP sharing next hop information and their viabil
 so that when there is a problem, the IGP informs BGP. Next hop tracking is enabled 
 in IOS by default. It can be enabled using the command 
 <code><b>bgp nexthop trigger enable</b></code>.
+</p>
+<p>
 A delay can be added to the next hop tracking process. The delay ensures that 
 BGP does not react to a flapping route: 
 <code><b>bgp nexthop trigger delay 5</b></code>. 
@@ -8055,8 +8061,7 @@ BGP fast external fallover can be enabled in the BGP configuration using the com
  </p>
  <p>
  BFD operates in two modes; async mode or demand mode.  In async mode, 
- hello packets flow between the two devices continuously. The echo feature makes 
- sure the CPU is not involved in the BFD process.
+ hello packets flow between the two devices continuously.
 </p>
 <p>
 Configuring BFD is a two stage process:
@@ -8108,7 +8113,10 @@ The restart time is the time that the BGP peer is expected to complete restartin
 the BGP process otherwise the peering will fail. By default, the graceful restart
 restart time is 120 seconds  
 and a stalepath time is 360 seconds (how long stalepaths are maintained until restart is 
-complete). To configure graceful restart, under the BGP configuration issue the
+complete).
+</p>
+<p>
+To configure graceful restart, under the BGP configuration issue the
  command <code><b>bgp graceful-restart</b></code>. The IOS will prompt to reset 
  peering for the configuration to take effect.
 </p>
@@ -8130,8 +8138,10 @@ not come from downstream customers.
 Routers can place prefix restrictions on the number of prefixes that they are able 
 to receive from a BGP neighbor. If the number of prefixes received exceeds the 
 configured maximum, two actions can be taken; generation of a log message
-or shutdown of the peer relationship. If not explicitly configured, the default behaviour is to 
+or shutdown of the peer relationship. The default behaviour is to 
 shutdown the peer session with the "offending" peer.
+</p>
+<p>
 The maximum prefix can be configured using the BGP address family configuration command 
 <code><b>neighbor ip-address maximum-prefix &lt;prefix-count&gt; [warning-percentage] [restart &lt;minutes&gt;] [warning-only]</b></code>.
 </p>
@@ -8142,7 +8152,7 @@ R1(config-router-af)#<b>neighbor 2.2.2.2 maximum-prefixes 45 75 warning-only</b>
 
 <p>
 The above configuration sets the maximum number of prefixes from BGP neighbor with BGP ID 2.2.2.2 at 45 with warning 
-messages issued when the number of received prefixes from the BGP peer is at 75% the maximum prefix configured. 
+messages issued when the number of received prefixes from the BGP peer is at 75% the maximum prefix configured i.e. 34 prefixes.  
 Additionally, warning messages are issued after the number of received prefixes exceeds the configured maximum.
 A warning is not generated before the prefix limit is reached. By adding a warning percentage, 
 you can have a warning message sent when the percentage is exceeded. 
@@ -8160,12 +8170,13 @@ When the threshold has been reached, additional prefixes are discarded.
 </code></div></p>
 <p>
 If the <code><b>warning-only</b></code> keyword is not added when configuring the maximum-prefix, 
-when a peer advertises more routes than the maximum prefix count:
+when a peer advertises more routes than the maximum prefix count, the following sequence of events 
+takes place:
 <ol>
   <li>The peer moves the neighbor to the idle state in the BGP finite-state machine (FSM),</li> 
   <li>Closes the BGP session, </li>
   <li>And sends out the appropriate syslog message.</li>
-  <li>The BGP session is not automatically reestablished by default.</li>
+  <li>The BGP session is not automatically re-established by default.</li>
   <li>If you want to restart the BGP session after a certain amount of time, you can use the optional 
   keyword <code><b>restart &lt;minutes&gt;</b></code>.</li>
  </ol>
@@ -8192,9 +8203,12 @@ To optimize CPU utilization by BGP, consider the following:
 </p>
 <h3>Tuning Memory</h3>
 <p>
-To view memory usage by BGP, use these commands 
-<code><b>show ip bgp summary, show ip route summary. show processes memory sorted | i PID|BGP
-</b></code>.
+To view memory usage by BGP, use these commands:
+<ul>
+  <li><code><b>show ip bgp summary</b></code></li>
+  <li><code><b>show ip route summary</b></code></li>
+  <li><code><b>show processes memory sorted | i PID|BGP</b></code></li>
+</ul>
 To tune memory consumption, consider the implementation of the following features:
 <ul>
   <li>Aggregation</li>
@@ -8273,15 +8287,18 @@ Route flapping occurs when a route is advertised and then withdrawn repeatedly
 over a short period of time. The advertised route may alternatively have 
 different BGP next hops for each advertisement. Each time a route flap occurs, a BGP Update message 
 must be sent to advertise the new route and/or withdraw previously advertised 
-routes. Processing these BGP Update messages increases the router's CPU load.
+routes. Continually processing these BGP Update messages increases the router's CPU load.
 eBGP neighbors going down/up is not considered a flap.
+</p>
+<p>
 Route flap dampening was introduced as a method to prevent the installation of 
 flapping routes into the BGP table and lower the CPU load.   
 BGP route flap dampening tries to ensure a stable BGP table from flapping routes.
 </p>
 <p>
 The routers today have greater processing capacity to handle many BGP updates. As 
-a result, BGP route flap dampening is not commonly used today.
+a result, BGP route flap dampening is not commonly used today in core Internet routers.
+However, for smaller capacity devices running BGP, route flap dampening is critical.
 </p>
 <p>
 Route dampening aims to reduce the scope of route flap propagation. Prefixes with 
@@ -8436,7 +8453,10 @@ toward the BGP peer by default. When configuring a BGP neighbor, the IP address
 of one of the neighbor's interfaces is entered in the configuration. If the IP 
 address of the BGP open message does not match with the neighbor's configured IP 
 address, the relationship will not form. If a link failure occurs on the outbound
-interface, then the peering session is dropped. To maintain the peering session
+interface, then the peering session is dropped. 
+</p>
+<p>
+To maintain the peering session
 despite the failure of the outbound links, configure an IGP on the router's 
 transit links, advertise the loopback interfaces into the IGP and then configure 
 the BGP neighbors to establish a session to the remote router's loopback address.
@@ -8445,11 +8465,14 @@ the peering session stays up and the IGP finds another path to the loopback addr
 in essence, turning a single hop iBGP session into a multi-hop iBGP session.
 </p>
 <p>
-BGP processes messages from peers that it has an existing BGP session.
+BGP processes messages from peers that it has an existing BGP session with.
 If a BGP message source does not match an entry in the neighbor table, the BGP 
 message cannot be associated to a peer and it is therefore discarded. The 
 source IP address of the BGP message still reflects the IP address of the outbound 
-interface. The source IP address of BGP messages needs to be explicitly configured
+interface. 
+</p>
+<p>
+The source IP address of BGP messages needs to be explicitly configured
 for each neighbor with the command:
 <code><b>neighbor &lt;ip-address&gt; update-source 
 &lt;interface_id&gt; </b></code>. Verification of peer's IP address can be confirmed 
@@ -8461,15 +8484,15 @@ For eBGP peering using a loopback interface, the IP address or network of the lo
 interface should exist in the routing table of the eBGP peer. In production networks, 
 usually a static route is configured. Scenarios exist where an IGP is configured 
 between eBGP peers. Here, the IP address of the loopback interface is advertised 
-into the IGP. This will result in the peer session between the two prefixes to 
-flap as the eBGP route (with AD of 20) is installed into the routing table. 
+into the IGP. This will trigger flagging of the peer session between the BGP peers; 
+the eBGP route (with AD of 20) is installed into the routing table. 
 This results in the IGP route (with its higher AD) not being installed into the 
 RIB. However, as the IGP route is not in the RIB, the eBGP route is again 
 removed because it is not in the RIB.
 </p>
 <p>
 One solution to this is to advertise the 
-IP address loopback of the loopback with the added keyword <code><b>backdoor</b></code>.
+IP address of the loopback interface with the added keyword <code><b>backdoor</b></code>.
 For example <code><b>network 192.168.0.1 mask 255.255.255.255 backdoor</b></code>.
 </p>
 
@@ -8487,23 +8510,27 @@ command is enabled by default.
 
 <h1>BGP Synchronization</h1>
 <p>
-BGP configuration in more recent IOS versions, by default, includes the command
-<code><b>no bgp synchronization</b></code>.
   BGP Synchronization is a legacy black-hole prevention technique.
- BGP synchronization was an attempt to eliminate traffic blackholes in an iBGP multihop topology where 
+ BGP synchronization was introduced as an attempt to eliminate traffic blackholes in an iBGP multihop topology where 
  intermediate routers are not running BGP. 
- </p>
- <p>
+ 
  With BGP synchronization, prefixes are advertised to iBGP peers only if they are available 
  in the IGP as well. This would ensure that any intermediate non-BGP routers would 
- be able to forward the traffic to/from prefixes that are advertised in BGP.
+ be able to forward the traffic to/from prefixes that are advertised in BGP. 
 </p>
+ <p>
+ To enable BGP synchronization, the command <code><b>bgp synchronization</b></code> is used.
+</p>
+
 <p>
 BGP synchronization is not commonly used because redistributing the large number of prefixes 
 in the BGP table may overwhelm the IGP. Additionally, BGP synchronization is not 
 used today because of the use of iBGP scalability techniques such as full mesh, 
 route reflection, and BGP confederations reduces possibilites of traffic being 
 black-holed.
+
+BGP configuration in more recent IOS versions, by default, BGP is disabled with the command
+<code><b>no bgp synchronization</b></code>.
 </p>
 
 
