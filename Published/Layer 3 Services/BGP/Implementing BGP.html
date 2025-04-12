@@ -8694,49 +8694,50 @@ for IPv6.
 The configuration of BGP session involves the following commands:
 </p>
 <p>
-<b>Step 1:</b> Ensure that IPv6 unicast routing is enabled with the configuration command: 
+<ul>
+  <li><b>Step 1:</b> Ensure that IPv6 unicast routing is enabled with the configuration command: 
 <code><b>ipv6 unicast-routing</b></code>
-</p>
-<p>
+</li>
+<li>
 <b>Step 2:</b> Initialise the BGP process with the command: 
 <code><b>router bgp &lt;as_number&gt;</b></code>
-</p>
-<p>
-<b>Step 3 (Optional if IPv4 address configured on any interface):</b> Define the 
-BGP router ID statically with the command: 
+</li>
+<li>
+<b>Step 3:</b> Define the BGP router ID statically with the command: 
 <code><b>bgp router-id &lt;id&gt;</b></code>
 If no IP address is configured, the router will dynamically choose an ID of 
 0.0.0.0 and a BGP session will not be able to establish.
-</p>
-<p>
+</li>
+<li>
 <b>Step 4:</b> Define the BGP neighbors's remote ASN with the command:
 <code><b>neighbor &lt;ip-address&gt; remote-as &lt;as_number&gt;</b></code>
-</p>
-<p>
+</li>
+<li>
 <b>Step 5 (Optional):</b> Define the BGP sessions password with MD5 hash:
 <code><b>neighbor &lt;ip-address&gt; password &lt;password&gt;</b></code>
-</p>
-<p>
+</li>
+<li>
 <b>Step 6 (Optional):</b> Modify the BGP session timers with the command:
 <code><b>neighbor &lt;ip-address&gt; timers &lt;keep-alive_time&gt; &lt;hold_time&gt;</b></code>
-</p>
-<p>
+</li>
+<li>
 <b>Step 7:</b> Initialize the address family with the command:
 <code><b>address-family &lt;afi&gt; &lt;safi&gt;</b></code>
-</p>
-<p>
+</li>
+<li>
 <b>Step 8:</b> Activate the address-family for that neighbor with the command:
 <code><b>neighbor &lt;ip-address&gt; activate</b></code>
-</p>
-<p>
+</li>
+<li>
 <b>Step 9:</b> Advertise IPv6 prefixes that are in the Loc-RIB with the command:
 <code><b>network &lt;prefix/prefix-length&gt; [route-map &lt;rmap_name&gt;]</b></code>
 It is recommended not to use the same route-map for IPv4 and IPv6 prefixes.
-</p>
-<p>
+</li>
+<li>
 BGP configuration can be made hierarchical when viewing configuration using the 
 command <code><b>bgp upgrade-cli</b></code>
-
+</li>
+</ul>
 </p>
 <p>
 The following commands are helpful for understanding the current status of the router:
@@ -8842,27 +8843,28 @@ Using VRF-lite
 follows the same syntax; it just does not require the configuration of the VPN-v4 
 address family or sessions to be established with other provider edge routers. 
 Enabling VRF support on BGP is accomplished by the following steps:
-</p>
-<p>
+<ul>
+<li>
 <b>Step 1:</b> Define the BGP route distinguisher for the VRF under the VRF 
 definition with the command:
 <code><b>rd &lt;route_distinguisher&gt;</b></code>. The RD is a path attribute 
 used in layer 3 VPN that ensures 
-uniqueness of a prefix. A VPN prefix is an RD+Prefix. There is only one ED associated to a prefix.
-</p>
-<p>
+uniqueness of a prefix. A VPN prefix is an RD+Prefix. There is only one RD associated to a prefix.
+</li>
+<li>
 <b>Step 2:</b> Initialize the BGP process with the command:
 <code><b>router bgp  &lt;as_number&gt;</b></code>.
-</p>
-<p>
+</li>
+<li>
 <b>Step 3:</b> Initialize the address family for the VRF with the command 
 <code><b>address-family &lt;afi&gt; &lt;safi&gt; vrf &lt;vrf_name&gt;</b></code>.
-</p>
-<p>
+</li>
+<li>
 <b>Step 4:</b> Define the BGP neighbor's remote autonomous system number:
 <code><b>neighbor &lt;ip-address&gt; remote-as &lt;as_number&gt;</b></code>
+</li>
+</ul>
 </p>
-
 <h2>BGP VPNv4 Diagnostic Commands</h2>
 <p>
 <table width="100%" cellspacing="0">
