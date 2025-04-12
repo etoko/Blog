@@ -45,6 +45,7 @@
           <li><a href="#DEFAULT_ROUTE">Default Route Propagation</a></li>
       </ol>
     <li><a href="#TROUBLESHOOTING">Troubleshooting BGP</a></li>  
+    <li><a href="#MPBGP">Multi-Protocol BGP</a></li>
   </ol>
   
 <h1 id="INTRODUCTION">Introduction and Overview</h1>
@@ -187,6 +188,11 @@ ASN provided by its service provider. IANA delegates issuing ASNs to the regiona
 Internet registries (RIR) such as AFRINIC, APNIC, ARIN, LACNIC, RIPE NCC. The 
 appropriate RIRs then allocate blocks of ASNs to local internet registries (LIR) 
 which are usually ISPs.
+</p>
+<p>
+The following graph shows the rapid increase in the use of ASNs on the public Internet:
+
+<img src="https://bgp.potaroo.net/bgprpts/bgp-as-count.png" />
 </p>
 
 <h2>Special-Purpose ASNs</h2>
@@ -8605,13 +8611,14 @@ Some common reasons BGP routes might be missing from either the BGP table or the
    <li><b>BGP Synchronization:</b> Prefixes may be missing because BGP 
    synchronization has been enabled. BGP synchronization may have to be disabled 
    to ensure prefixes are advertised.</li>
-   <li><b>BGP Communities:</b> Ensure that you send communities with the neighbor.</li>
+   <li><b>BGP Communities:</b> Ensure that you sending communities to the peer is enabled and the communities permit this 
+	   prefix to be shared with the neighbor.</li>
 </ul>                                                                                                                                                       </li>
 </p>
 
 
 
-<h1>Multiprotocol BGP for IPv6</h1>
+<h1 id="MPBGP">Multiprotocol BGP for IPv6</h1>
 <p>
 Originally, BGP was intended for routing IPv4 prefixes. RFC2858 added multi-protocol BGP(MP-BGP) capability by adding 
 address family identifier (AFI) extensions. 
@@ -8639,20 +8646,25 @@ or multicast routing table:
 </p>
 <p>
 <table>
+	<thead>
 <tr>
 <td>Protocol</td>
 <td>AF1</td>
 <td>SAFI</td>
 </tr>
+	</thead>
+	<tbody>
 <tr>
 <td>IPv4</td>
 <td>1</td>
 <td>1</td>
 </tr>
 <tr>
+	<td></td>
 <td>2</td>
 <td>1</td>
 </tr>
+	</tbody>
 </table>
 </p>
 <p>
