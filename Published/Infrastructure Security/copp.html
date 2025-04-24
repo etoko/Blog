@@ -1,8 +1,12 @@
-<h1>Overview of Control Plane Policing (CoPP)</h1>
+<h1>Overview</h1>
 <p>
 CoPP is a QoS feature used in security that rate-limits the traffic handled by the 
-route processor (RP).
-CoPP is a modular QoS CLI (MQC) policy to rate-limit, drop and granularly permit 
+route processor (RP) thereby protecting the control plane of devices such as routers 
+and switches from excessive traffic that could lead to CPU exhaustion, denial of service, 
+, or instability.
+</p>
+<p>
+CoPP uses Modular QoS CLI (MQC) to rate-limit, drop and granularly permit 
 traffic to or from the RP.
 
 The RP handles traffic that is categorized into three planes:
@@ -29,6 +33,30 @@ management planes. Such traffic includes:
   local router or switch is the destination of the traffic.</li>
 </ul>
 </p>
+
+<h3>Control Plane Traffic Types</h3>
+<p>
+Control plane protection categorizes control plane traffic into three types:
+<ul>
+	<li><b>Local (self generated):</b> traffic originated by the local device and destined for 
+	its own control plane e.g. routing protocol updates</li>
+	<li><b>Transit:</b> traffic that transits the router and is punted to the CP for processing e.g. ICMP 
+	unreachable messages not unknown destinations, packets with expired TTL.</li>
+	<li><b>Host:</b> traffic destined for one of the router's interfaces (physical or logical) 
+	for management purposes e.g. SSH, HTTP, SNMP</li>
+</ul>
+</p>
+
+
+<h3>Why protect the CPU</h3>
+<p>
+The CPU is a finite resouce, which when overwhelmed leads to:
+<ul>
+	<li><b>Network instability:</b> Dropping of legitimate traffic</li>
+	<li><b>Operational Outage:</b> failure to respond to management updates</li>
+	<li><b>DoS:</b> if the two aforementioned problems intensify, a DoS may be the result</li>
+</ul>
+</p>
 <p>
 Control-plane Policing (CoPP) provides rate-limiting and filtering capabilites to 
 control the number of packets that have to be processed by the RP of a router or switch. 
@@ -43,16 +71,25 @@ interface. Rate-limiting packets on this interface applies the rate-limit to all
 the physical interfaces. Quality of Service (QoS) and policing on the control 
 plane interface rate-limits packets entering any interface to protect the RP.
 </p>
+<h3>Control Plane Attack Vectors</h3>
+<p>
+The performance of the control plane can be degraded in the following ways:
+<ul>
+	<li><b>Resource Exhaustion:</b> High CPU usage due to unnecessary traffic e.g. broadcast storms.</li>
+	<li><b>Direct Attacks:</b> malicius traffic sent to the device e.g. TCP SYN flood attacks to port 22</li>
+	<li><b>Indirect Attacks:</b> excessive legitimate traffic e.g. OSPF LSA updates due to link flapping</li>
+</ul>
+</p>
 
 <h1>Configuring CoPP</h1>
 <p>
 To implement CoPP, the following sequence of steps should be followed:
 <ol>
   <li>Categorize network traffic into classes using Access Control List (ACLs).</li>
-<li>Create a Class Map (CM) to identify traffic to be policed (rate-limited).</li>
+<li>Create a Class Map (CM) to define traffic types.</li>
 <li>Create a Policy Map (PM) to define the action to take on identified traffic 
-by implementing a defined policy.</li>
-<li>Create a Service Policy which specifies where to apply the policy map</li>
+by implementing a defined policy (policing actions) e.g. drop, transmit, rate-limit.</li>
+<li>Create a Service Policy which specifies how to apply the policy map to the control plane</li>
 </ol>
 </p>
 <p>
@@ -76,6 +113,7 @@ These classes include:
 <li>File management</li> 
  <li>Interactive management</li> 
  <li>Monitoring</li> 
+ <li>STP and other layer 2 protocols</li>
  <li>Default</li> 
 </ul>
 A separate ACL should be configured for each of these traffic categories. 
@@ -307,7 +345,15 @@ with one or more policies resulting in a service policy. To configure a policy m
   <li><b>Define the rate-limit threshold and action:</b> at which traffic will 
   be rate-limited, and action to take for conformal traffic, and rate-limit 
   violation using the command <code><b>police &lt;cir | rate&gt; conform-action &lt;transmit | drop&gt; 
-exceed-action &lt;transmit | drop&gt; violate-action &lt;transmit | drop&gt;</b></code></li>
+exceed-action &lt;transmit | drop&gt; violate-action &lt;transmit | drop&gt;</b></code>
+  The <code><b>police</b></code> command allows the following policing actions:
+  <ul>
+	<li><b>Committed Information Rate (CIR):</b> the guaranteed rate of traffic allowed.</li>
+	<li><b>Committed Burst (Bc):</b> the maximum amount of traffic allowed to exceed the CIR for a short 
+		duration.</li>
+	<li><b>Excess Burst (Be):</b> An additional burst size that can be configured for two-rate policing.</li>
+  </ul>
+  </li>
 </ol>
 </p>
 <p>
@@ -777,7 +823,7 @@ R1#
 </p>
 
 
-<h1>Troubleshooting Control-Plane Policing</h1>
+<h1>Troubleshooting</h1>
 <p>
 Troubleshooting control plane policing requires troubleshooting of the various 
 components of CoPP i.e., access control lists, class maps, 
@@ -819,7 +865,7 @@ When troubleshooting ACLs for CoPP, focus on the following;
 When troubleshooting policy maps, consider;
 <ul>
 <li>Verify that the service policy is applied in the correct direction: 
-  <code><b>show policy-map control-plane</b></code>.</li>
+  <code><b>show policy-map control-plane all</b></code>.</li>
   <li>Verify that the policy-map is correctly configured;
    <code><b>show policy-map</b></code></li>
    <li>Check the correct class-map, rate or CIR, conform-action, exceed-action,correct order.</li>
@@ -848,6 +894,40 @@ When troubleshooting the application of a service policy;
   requests or ACKs. For ICMP; error or informational reply, for telnet, SSH, HTTP, 
   SNMP replies or traps. Ensure the ACL and class-map are configured appropriately for replies.</li>
   <li><b>Case:</b> Policy maps are case-sensitive; verify with 
-  <code><b>show policy-map control-plane</b></code></li>.
+  <code><b>show policy-map control-plane</b></code></li>
+  <li>Verification: <code><b> show platform hardware qos queue stats control-plane</b></code>
+</ul>
+</p>
+
+<h2>Common Issues</h2>
+<p>
+<ul>
+	<li>Too restrictive policing may result in legitimate traffic being dropped e.g. OSP updates due to flapping links.</li>
+	<li>Too permissive policing may result in CPU exhaustion when traffic increases</li>
+	<li>Missing class-default in a class map may result in unclassified traffic bypassing restrictions.</li>
+</ul>
+</p>
+<h1>Best Practices</h1>
+<p>
+The following are some recommended best practices to consider when setting up CoPP:
+<ul>
+	<li><b>Baseline</b>: monitor normal operational status before configuration of CoPP using the following:
+		<ul>
+			<li><code><b>show process cpu sorted</b></code></li>
+			<li><code><b>show control-plane stats</b></code></li>
+			<li><code><b>show interface &lt;type&gt; rate</b></code></li>
+			<li>NetFlow data</li>
+		</ul>
+	</li>
+	<li><b>Differentiate traffic types:</b> recognize different control plane traffic types (local, transit,
+		host) and their expected behaviour.</li>
+	<li>Implement granular and specific class maps: Avoid catch all policies, use extended ACLs. Also consider routing 
+		protocol peering where a class map match specific traffic to and from known neighbor IP addresses. This can 
+		protect against rogue or misconfigured devices injecting excessive routing updates.</li>
+	<li>Design adaptive policy maps: consider <code><b>set-cos</b></code> or <code><b>set-dscp</b></code> 
+		to mark traffic for further QoS treatment in the data plane.</li>
+	<li>Consider two-rate policiing where a sustained rate is maintained (cir) and a peak rate (PIR) with 
+	corresponding burst sizes offering more flexibility in handling temporary bursts of legitimate traffic. Use the 
+	command <code><b>police cir bc pir be</b></code></li>
 </ul>
 </p>
