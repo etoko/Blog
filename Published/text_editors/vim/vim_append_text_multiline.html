@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+	<title></title>
+	<meta name="generator" content="LibreOffice 24.8.5.2 (Linux)"/>
+	<meta name="created" content="2025-04-24T06:53:41.364949042"/>
+	<meta name="changed" content="2025-04-24T06:56:57.657467218"/>
+	<style type="text/css">
+		@page { size: 8.27in 11.69in; margin: 0.79in }
+		p { line-height: 115%; margin-bottom: 0.1in; background: transparent }
+		h3 { margin-top: 0.1in; margin-bottom: 0.08in; background: transparent; page-break-after: avoid }
+		h3.western { font-family: "Liberation Serif", serif; font-size: 14pt; font-weight: bold }
+		h3.cjk { font-family: "Noto Serif CJK SC"; font-size: 14pt; font-weight: bold }
+		h3.ctl { font-family: "Noto Sans Devanagari"; font-size: 14pt; font-weight: bold }
+		a:link { color: #000080; text-decoration: underline }
+		a:visited { color: #800000; text-decoration: underline }
+		strong { font-weight: bold }
+		code.western { font-family: "Liberation Mono", monospace }
+		code.cjk { font-family: "Noto Sans Mono CJK SC", monospace }
+		code.ctl { font-family: "Liberation Mono", monospace }
+	</style>
+</head>
+<body lang="en-US" link="#000080" vlink="#800000" dir="ltr"><p>To add
+text at the end of multiple lines in Vim, you can use <strong>Visual
+Block Mode </strong>or a <strong>substitution command </strong>.
+Below are two common methods to achieve this: 
+</p>
+<hr/>
+
+<h3 class="western"><strong>Method 1: Using Visual Block Mode </strong>
+</h3>
+<p>This method is ideal when you want to append text to specific
+lines. 
+</p>
+<ol>
+	<li><p><strong>Enter Visual Block Mode </strong>: 
+	</p>
+	<ul>
+		<li><p style="margin-bottom: 0in">Move your cursor to the first
+		line where you want to add text.</p></li>
+		<li><p style="margin-bottom: 0in">Press <code class="western">Ctrl-v</code>
+		to enter Visual Block Mode. 
+		</p></li>
+	</ul>
+	<li><p><strong>Select the Lines </strong>: 
+	</p>
+	<ul>
+		<li><p style="margin-bottom: 0in">Use the arrow keys (or <code class="western">j</code>/<code class="western">k</code>)
+		to select the lines where you want to append text. This will create
+		a vertical block selection. 
+		</p></li>
+	</ul>
+	<li><p><strong>Move to the End of Each Line </strong>: 
+	</p>
+	<ul>
+		<li><p style="margin-bottom: 0in">Press <code class="western">$</code>
+		to extend the selection to the end of each line. 
+		</p></li>
+	</ul>
+	<li><p><strong>Append Text </strong>: 
+	</p>
+	<ul>
+		<li><p style="margin-bottom: 0in">Press <code class="western">A</code>
+		(shift + a) to start appending text at the end of the selected
+		lines.</p></li>
+		<li><p style="margin-bottom: 0in">Type the text you want to add,
+		and it will be added to all selected lines. 
+		</p></li>
+	</ul>
+	<li><p><strong>Exit Insert Mode </strong>: 
+	</p>
+	<ul>
+		<li><p>Press <code class="western">Esc</code>, and the text will be
+		appended to all selected lines. 
+		</p></li>
+	</ul>
+</ol>
+<hr/>
+
+<h3 class="western"><strong>Method 2: Using a Substitution Command </strong>
+</h3>
+<p>This method is useful when you want to append text to all lines in
+a file or a range of lines. 
+</p>
+<ol>
+	<li><p><strong>Use the </strong><strong><code class="western">:substitute</code></strong><strong>
+	Command </strong>: 
+	</p>
+	<ul>
+		<li><p>To append text to all lines in the file, type: 
+		:%s/$/your_text/</p></li>
+	</ul>
+</ol>
+<ul>
+	<li><p>Here: 
+	</p></li>
+</ul>
+<ul>
+	<li><p style="margin-bottom: 0in"><code class="western">%</code>
+	specifies all lines in the file.</p></li>
+	<li><p style="margin-bottom: 0in"><code class="western">$</code>
+	matches the end of each line.</p></li>
+	<li><p><code class="western">your_text</code> is the text you want
+	to append. 
+	</p></li>
+</ul>
+<ul>
+	<li><p>To append text to a specific range of lines (e.g., lines 5 to
+	10), type: :5,10s/$/your_text/</p></li>
+</ul>
+<ul>
+	<li><p><strong>Confirm Changes </strong>: 
+	</p></li>
+</ul>
+<ul>
+	<li><p>Press <code class="western">Enter</code>, and the text will
+	be appended to the specified lines. 
+	</p></li>
+</ul>
+<p><br/>
+<br/>
+
+</p>
+</body>
+</html>

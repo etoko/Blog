@@ -34,6 +34,7 @@ management planes. Such traffic includes:
 </ul>
 </p>
 
+<<<<<<< HEAD
 <h3>Control Plane Traffic Types</h3>
 <p>
 Control plane protection categorizes control plane traffic into three types:
@@ -46,6 +47,8 @@ Control plane protection categorizes control plane traffic into three types:
 	for management purposes e.g. SSH, HTTP, SNMP</li>
 </ul>
 </p>
+=======
+>>>>>>> b6892fc93cf977e8ae83c685ab0f26b5383567ba
 
 
 <h3>Why protect the CPU</h3>
@@ -822,6 +825,57 @@ R1#
 </code></div>
 </p>
 
+<<<<<<< HEAD
+=======
+<h1>Advanced CoPP Techniques</h1>
+
+<h2>Control Plane Protection (CPPr)</h2>
+<p>
+Control plane protection categorizes control plane traffic into three types:
+<ul>
+	<li><b>Local (self generated):</b> traffic originated by the local device and destined for 
+	its own control plane e.g. routing protocol updates</li>
+	<li><b>Transit:</b> traffic that transits the router and is punted to the CP for processing e.g. ICMP 
+	unreachable messages not unknown destinations, packets with expired TTL.</li>
+	<li><b>Host:</b> traffic destined for one of the router's interfaces (physical or logical) 
+	for management purposes e.g. SSH, HTTP, SNMP</li>
+</ul>
+</p>
+<p>
+CPPr subdivides control plane into three queues: 
+<ul>
+	<li>Routing(OSPF, BGP, EIGRP)</li>
+	<li>Management (SSH, SNMP)</li>
+	<li>Transit (TTL-expired, ARP) </li>
+</ul>
+</p>
+<p>
+
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+    control plane <br>
+    &nbsp; &nbsp;service-policy input COPP-POLICY<br>
+    &nbsp; &nbsp;management-interface allow ssh snmp
+  </code></div>
+</p>
+
+<h2>Hierarchical CoPP (H-CoPP)</h2>
+<p>
+H-CoPP is supported on platforms such as ASR/Nexus and uses nested policies for granular control.
+
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+policy-map COPP-CHILD                                                                <br>
+&nbsp; class BGP<br>
+&nbsp;&nbsp;  police 10000 conform transmit exceed drop<br>
+<br>
+policy-map COPP-PARENT<br>
+&nbsp; class routing<br>
+&nbsp;&nbsp;&nbsp;  police cir 20m<br>
+&nbsp;&nbsp;&nbsp;  service-policy COPP-CHILD<br>
+  </code></div>
+</p>
+>>>>>>> b6892fc93cf977e8ae83c685ab0f26b5383567ba
 
 <h1>Troubleshooting</h1>
 <p>
@@ -929,5 +983,12 @@ The following are some recommended best practices to consider when setting up Co
 	<li>Consider two-rate policiing where a sustained rate is maintained (cir) and a peak rate (PIR) with 
 	corresponding burst sizes offering more flexibility in handling temporary bursts of legitimate traffic. Use the 
 	command <code><b>police cir bc pir be</b></code></li>
+<<<<<<< HEAD
+=======
+	<li>Log exceed traffic: addthe <code><b>exceed-action drop log</b></code> to monitor attacks.</li>
+	<li>Comine with control plane protection (CPP/CPPr): for granular control implement separate queues for management, 
+		routing etc.</li>
+	<li>Start with Cisco's recommended CoPP templates (Aggressive, Moderate, Lenient).</li>
+>>>>>>> b6892fc93cf977e8ae83c685ab0f26b5383567ba
 </ul>
 </p>
