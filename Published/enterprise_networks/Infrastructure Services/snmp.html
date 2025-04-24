@@ -1,0 +1,533 @@
+<h1>Introduction</h1>
+<p>
+SNMP is an open standard protocol for collecting information about 
+managed devices and modifying configuration on the managed devices. SNMP is an application layer protocol that 
+supports message exchange in a specific format between SNMP managers and agents. 
+It is used for monitoring 
+and managing devices on a network. SNMP is able to retrieve data, modify SNMP 
+object variables of managed devices on IP networks and send notifications to 
+Network Management Stations (NMS). Some devices that support SNMP include routers, 
+switches, servers, workstations, printers etc.
+</p>
+<p>
+SNMP components include; SNMP manager (NMS), SNMP agent and SNMP MIB.
+<ul>
+  <li><b>SNMP manager:</b> controls and monitors the operation of network hosts using 
+  SNMP. The manager receives unsolicited notifications from agents running on 
+  monitored devices. Additionally, the manager polls SNMP agents running on the 
+  network devices for information. The manager runs as software on a computer/server.</li>
+  <li><b>SNMP Agent:</b> is a software component that runs on the managed device. 
+  It collects and stores information on the device. The agent responds to 
+  manager requests for information. The agent can send unsolicited 
+  notifications (traps or informs) to notify the manager about conditions on the 
+  managed device.</li>
+  <li><b>MIB:</b> is a database of objects (information variables) that lists various 
+  attributes of the managed device that can be monitored. An SNMP agent contains 
+  MIB variables, whose values the SNMP manager can request for or change through the 
+  Get or Set operations. A manager can retrieve a value from an agent or store a value
+  from that agent. The agent gathers data from the SNMP MIB. The MIB uses read and
+  write community strings for controlling access. Object Identifier (OID) is an 
+  ID for the various components in the MIB of a managed device.</li>
+</ul>
+<p>
+SNMP operations involve SNMP agents running on the managed devices sending 
+monitoring data to the SNMP manager. SNMP uses the following operations to retrieve 
+and modify objects on managed/monitored devices:
+<ul>
+  <li><b>SNMP Get:</b> A Get operation is performed by the SNMP manager to retrieve SNMP object 
+  variables from the agent. There are three types of GET operations;
+  <ul>
+      <li><b>Get:</b> Retrieves exact object instance identified by OID or name.</li>
+      <li><b>GetNext:</b> Retrieves next object variable (successor) to the 
+      specified variable.</b>
+      <li><b>GetBulk:</b> Retrieves large amount of object variable data without 
+      repeated GetNext operations.</b>
+  </ul>
+  <li><b>SNMP Set:</b> An NMS carries out a SET operation to modify the value of 
+  the object variable on a managed device.</b>
+  <li><b>SNMP Notifications:</b> Traps and informs are unsolicited (asynchronous) 
+  notifications sent by an agent to an NMS.</li>
+</ul>
+</p>
+
+
+<h1>Traps, Informs, and Polls</h1>
+<p>
+Traps are unsolicited messages alerting the NMS to a condition on the managed device.
+Traps are discarded as soon as they are sent. Traps are sent once and do not 
+require acknowledgement by the manager.
+</p>
+<p>
+Informs are traps that include a request for confirmation of receipt from the SNMP 
+manager. The SNMP manager sends a confirmation using SNMP response PDU. If the 
+Agent did not receive a response for an inform, the inform can be sent again.
+Informs may be sent many times hence traps are usually preferred.
+An inform is held in memory until a response is received or times out.
+Traps are usually preferred because they consume less resources in terms of memory.
+</p>
+<p>
+Polls are probes where the SNMP manager sends an SNMP request to the agent and 
+receives an SNMP reply to this request. The SNMP GetRequest(poll) is sent using 
+UDP port 161 and the SNMP GetResponse(trap) sent using UDP port 162.
+</p>
+
+<h1>SNMP Versions</h1>
+<p>
+SNMP comes in three major versions: SNMPv1, v2c and v3. In SNMP v1, security is 
+based on community strings. SNMPv1 is not recommended to be used in today's 
+networks and many network device vendors do not support it.
+In SNMP v2c, security is also based on community 
+strings. In SNMPv3, security is based on message authentication, encryption
+algorithms.
+</p>
+
+<p>
+Security with SNMP can be refined by implementing the following:
+<ul>
+  <li>Configuration of an ACL of managers permitted to access the agent</li>
+  <li>Defining MIB view: subset of all MIB objects accessible to the community.
+  Where multiple views with the same OID are entered, the latest entry takes precedence.
+  </li>
+  <li>Read-Write or Read-only permission for MIB objects accessible to the community.</li>
+</ul>
+</p>
+<p>
+
+
+<h2>SNMPv2c</h2>
+<p>
+SNMPv2c is defined by <a href="https://www.ietf.org/rfc/rfc1441.txt" target="_blank">RFC 1441</a> 
+and RFC 1452 with improvements to SNMPv1 in areas 
+of performance, security and manager-to-device communications. It introduced 
+GetBulkRequest, an alternative to iterative GetNextRequests for retrieving large 
+amounts of management data in a single request. SNMPv2c sends the community strings in clear text.
+</p>
+<p>
+SNMPv2c includes detailed error reporting; this minimizes the number of round trips. 
+It includes expanded error codes that distinguish different types of errors. 
+SNMPv2c uses community strings for security.
+
+
+An agent can communicate with multiple managers using the appropriate version 
+for each manager.
+
+</p>
+
+<p>
+Configuring views for SNMPv2c is optional. It limits which MIB objects an SNMP 
+manager can access.
+</p>
+
+<h3>Configuration of SNMPv2c</h3>
+<p>
+
+To configure SNMPv2 on a managed device, follow these steps:
+<ol>
+
+<!--
+<li><b>Create the view record:</b>
+SNMP Views can be configured to limit the number of MIB objects that an SNMP 
+manager has access to. SNMP views can be predefined or custom configured. The 
+command to configure the SNMPv2c view is  
+<code><b>snmp-server view &lt;view-name&gt; &lt;oid-tree&gt; &lt;included | excluded&gt;
+</b></code>.
+In this configuration, the mib2 view includes all objects in the MIB-II subtree
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+R1(config)#<b>snmp-server view mib2 mib-2 included</b><br>
+R1(config)#<b>snmp-server view interfaces ifEntry included</b>
+</code></div>
+</p>
+</li>
+-->
+<li><b>Configure SNMP Community:</b> configure the read-only or 
+read-write community string using the command 
+<code><b>snmp-server community &lt;string&gt;  &lt;ro | rw &gt; 
+[&lt;ipv6 nacl&gt; | &lt;acl&gt;]</b></code>. The ACL parameter is an optional 
+access control list that is 
+recommended to be configured as it adds a layer of security to SNMPv2. 
+The community string has to match on both the manager and the agent.
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+R1(config)#<b>snmp-server community ciscolab ro</b>
+</code></div>
+</p>
+</li>
+
+
+  <li><b>Enable sending of traps;</b> SNMPv2c is able to send traps using the 
+  command <code><b>snmp-server enable traps [&lt;mib-value&gt;]</b></code>. 
+  To send all  available SNMP traps, exclude the mib-value <code><b>snmp-server enable traps</b></code>. 
+To define specific traps, add the type of traps to the above command: 
+</p>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+R1(config)#<b>snmp-server enable traps cpu threshold</b><br>
+R1(config)#<b>snmp-server enable traps vlancreate</b><br>
+R1(config)#<b>snmp-server enable traps vlandelete</b><br>
+R1(config)#<b>snmp-server enable traps memory bufferpeak</b><br>
+R1(config)#<b>snmp-server enable traps power-ethernet group 1 threshold 80</b><br>
+R1(config)#<b>snmp-server enable traps power-ethernet police</b><br>
+</code></div>
+</p>
+<p>
+Link up/down notifications are controlled by <code><b>snmp trap link-status</b></code> interface command.
+
+</p>
+</li>
+
+<li><b>Configure the SNMP manager address:</b> The SNMP manager to which the 
+notifications will be sent is configured using the command 
+<code><b>snmp-server host &lt;ip-address&gt; [traps | informs] version [1 | 2c 
+| 3 [auth | noauth | priv]] &lt;community-string&gt; udp-port &lt;port-number&gt; &lt;notification-type&gt;</b></code>. 
+By default,traps are sent. With this command, the following confurations are made:
+<ul>
+  <li>the SNMP manager address</li>
+  <li>the type of notifications sent i.e., informs or traps.</li>
+  <li>the version of SNMP</li>
+</ul>
+</li>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+R1(config)#<b>snmp-server host 192.168.5.2 traps version 2c ciscolab</b>
+</code></div></p>
+<p>
+Without the <code><b>snmp-server host</b></code> command on a managed device, no notifications are sent. 
+Each succeeding <code><b>snmp-server host</b></code> command overwrites the previous command. Entering 
+the <code><b>snmp-server host</b></code> command without keywords enables all trap types for the host. 
+</p>
+</li>
+<li><b>System information:</b>
+The first <code><b>snmp-server</b></code> command entered enables SNMP on the device. Configuring 
+SNMP system information is optional, however, the information configured can 
+be valuable when troubleshooting SNMP. System information includes; chassis-id, 
+location and contact information of the device.
+<p>
+<ol type="a">
+  <li><b>System Serial Number:</b>  <code><b>snmp-server chassis-id 0123456AB</b></code></li>
+  <li><b>System Contact:</b>  <code><b>snmp-server contact example@example.com</b></code></li>
+  <li><b>System Location:</b>  <code><b>snmp-server location Floor01_Rm02</b></code></li>
+</ol>
+</p>
+</li>
+</ol>
+</p>
+
+<h4>Security using Access Control Lists</h4>
+<p>
+An additional layer of security can be introduced by applying an Access Control List 
+(ACL).
+<ol>
+
+<li><b>Configure Access Control for an SNMP Community:</b> 
+The ACL controls the SNMP managers that are permitted to access the agent on the 
+managed device based on their IP address or the subnet they reside in.
+
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+R1(config)#<b>ip access-list standard ACL_SNMP_MANAGER</b><br>
+R1(config-std-nacl)#<b>10 permit host 192.168.5.1</b><br>
+</code></div>
+</p>
+</li>
+<li><b>Add the ACL to the configuration of the community string:</b> configure the read only or 
+read-write community string that references the ACL
+<code><b>snmp-server community &lt;string&gt; view &lt;view-name&gt; &lt;ro | rw &gt; 
+&lt;ipv6 nacl&gt; &lt;acl&gt;</b></code>. The view and the ACL are optional parameters. 
+The community string has to match on both the manager and the agent.
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+R1(config)#<b>snmp-server community ciscolab rw ACL_SNMP_MANAGER</b>
+</code></div></p>
+</li>
+</ol>
+</p>
+
+
+<h3>Index Shuffling</h3>
+<p>
+MIB indexes sometimes experience "index shuffling" where the indexes of router 
+components change after reboots or firmware upgrades. Index shuffling can be stopped using the 
+command <code><b>snmp-server ifindex persist</b></code>. This command shows up 
+in the running configuration as <code><b>snmp ifmib ifindex persist</b></code>. 
+This command ensures that the mapping between the ifDescr object values and the 
+ifIndex object values (generated from the IF_MIB) will be retained across reboots.
+</p>
+
+<h3>Verification</h3>
+<!----------------------
+<p>
+To verify the SNMP view created;
+</p>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+R1#<b>show snmp view</b>                                                                             <br>
+</code></div>
+</p>
+----->
+<h3><code>show snmp</code></h3>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+R1#<b>show snmp</b>                                        <br>                                                                                 
+</code></div>
+</p>
+<h3><code>show snmp host</code></h3>
+<h3><code>show snmp community</code></h3>
+<h3><code>show snmp chassis</code></h3>
+<h3><code>show snmp contact</code></h3>
+<h3><code>show snmp location</code></h3>
+<p>
+
+</p>
+
+<h2>Troubleshooting SNMPv2</h2>
+<p>
+When troubleshooting SNMPv2, verify the following:
+<ul>
+ <li>Traps are enabled by default (traps are unsolicited)</li>
+ <li>Specify correct traps if all are not desired.</li>
+ <li>Traps or informs is correctly configured.</li>
+ <li>Verify that the correct community string is specified</li>
+ <li>Verify that the correct NMS IP address is specified</li>
+ <li>Verify that the required SNMP version is configured</li>
+ <li>SNMP uses UDP port 161 for general messages and 162 for traps and informs. 
+ Verify that an access control list is not blocking traffic to these ports.</li> 
+ 
+</ul>
+</p>
+
+
+<h2>SNMPv3</h2>
+<p>
+The main improvement of SNMPv3 over SNMPv2c is the added security through  
+authentication and encryption.
+
+Poll messages for example GetRequest are sent still sent using UDP port 161 and traps (GetResponse)
+on UDP 162. 
+</p>
+<p>
+SNMPv3 defines three security levels:
+<ol>
+ <li><b>NoAuthNoPriv:</b> no authentication, no privacy. Uses a username for 
+ authentication and does not use encryption.</li>
+ <li><b>AuthNoPriv:</b> uses a hash for authentication (MD5 or SHA1) but does 
+ not use encryption.</li>
+ <li><b>AuthPriv:</b> uses a hash for authentication and uses encryption for 
+ privacy (DES, 3DES, AES).</li>
+</ol>
+
+When configuring SNMPv3, in order to utilize the security mechanisms that it 
+supports, groups and users must be configured.
+</p>
+
+<h3>SNMPv3 Features</h3>
+<p>
+SNMPv3 structures its configuration into three main sections:
+<ol>
+  <li><b>Views:</b> Restrict the OIDs visible to the NMS. It defines 
+  what the manager is able to access/view on the device. This restriction can include 
+  access to a particular interface. The view can be associated with 
+  a group.</li>
+  <li><b>Groups:</b> associated with a view to specify the type 
+  of access i.e., whether read or write, as well as the type of security enabled.</li>
+  <li><b>User:</b> specifies credentials required to access a view based on a group.</li>
+</ol>
+</p>
+
+<h3>Configuration</h3>
+<p>
+When configuring SNMPv3, three steps are followed;
+<ol>
+<li>Create an SNMP view to define the list of features or attributes on the managed 
+device that are to be monitored.</li>
+<li>Associate the view with the group which defines the type of access (whether 
+read-only or read-write) as well as the security type enabled for this access.</li>
+<li>Associate the group with a user. The user defines the username, password, 
+encryption and authentication to be used.</li>
+</ol>
+</p>
+<p>
+The order of configuration of SNMPv3:
+</p>
+<p>
+<ol>
+<li><b>Configuration of SNMP Views:</b>
+<p>
+SNMP Views can be configured to limit the number of MIB objects that an SNMP 
+manager has access to. SNMP views can be predefined or custom configured.
+To configure an SNMP view, use the command <code><b>snmp-server view 
+&lt;view-name&gt; &lt;oid-tree&gt; | &lt;object-name&gt; &lt;included | excluded&gt;</b></code>.<br> 
+<b>Caution:</b> If an MIB name is defined for a view, MIB names are 
+case-sensitive. Use the SNMP Object Navigator for the correct object names or OID values.
+</p>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+R2(config)#<b>snmp-server view mib2 mib-2 included</b><BR>
+R2(config)#<b>snmp-server view mib2 ifEntry included</b><BR>
+R2(config)#<b>snmp-server view int-access ifEntry included</b>
+</code></div>
+</p>
+<p>
+From the above configuration:
+<ul>
+  <li>The mib2 view includes all objects in the MIB-II subtree.</li>
+  <li>The MIB value for access to all interfaces and their features is ifIndex.</li>
+</ul>
+</p>
+</li>
+<li>
+<b>Creating SNMP Groups</b>
+<p>
+An SNMP group maps users to views using the command 
+<code><b>snmp-server group &lt;group-name&gt; [v1 | v2c | v3] [auth | noauth 
+| priv] [read &lt;read-view&gt;] [write &lt;write-view&gt;] [notify &lt;notify-view&gt;] [access &lt;acl&gt;]
+</b></code>.
+Configure the SNMP server group to enable authentication for members permitted by the configured ACL.
+</p>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+R2(config)#<b>snmp-server group group1 v3 auth read mib2</b>
+</code></div>
+</p>
+</li>
+
+
+<li>
+<b>Configuring Users</b>
+<p>
+To configure a remote user, specify the IP address of the remote SNMP manager of 
+the device where the user resides. Before you configure remote users for a particular
+agent, configure the SNMP engine ID using the command <code><b>snmp-server engineID</b></code> with 
+remote option. The remote agent’s SNMP engine ID is required when computing the 
+authentication and privacy digests from the password. EngineID (remote) should be
+configured first before sending requests and informs to it.
+</p>
+<p>
+SNMP passwords are localised using engineID of the authoritative SNMP engine. 
+For informs, the authoritative SNMP agent is the remote agent. You must configure
+the remote agent’s SNMP engine ID in the SNMP database before sending proxy 
+requests or informs to it.
+
+Changing the engine ID after configuring the SNMP user doesn’t allow the removal
+of the user. To remove the configuration, you need to first reconfigure all SNMP configurations.
+</p>
+<p>
+<ol>
+<li>Step 1: Define the remote system engineID;
+<code><b>
+snmp-server engineID &lt;local engineID | remote ip-address 
+&lt;udp-port port-number&gt; &lt;vrf name&gt; &lt;engineID-string&gt;</b></code>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+R2(config)#<b>snmp-server engineID remote 192.168.3.10 800000090300CA0305F30006</b>
+</code></div>
+</p>
+</li>
+<li>Step 2: Add a new user to a defined SNMP group;
+<code><b>snmp-server user &lt;username&gt; &lt;group-name&gt; &lt;remote ip_address&gt; [udp-port 
+&lt;port-number&gt;] [v1 | v2c | v3] encrypted&gt; [auth [md5 | sha]] &lt;auth-password&gt; 
+[priv [des56|3des|aes] &lt;shared-secret-key&gt;]
+&lt;access-acl&gt;
+</b></code>
+
+<p>
+Creating an SNMP user user1
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+R2(config)#<b>snmp-server user user1 group1 10.1.1.1 v3 auth sha complexcomplex priv aes 256 priv_password access ACL_SNMP</b> 
+</code></div></p>
+</li>
+</ol>
+</p>
+</li>
+</ol>
+
+<h4>Security</h4>
+<p>
+To use SNMP version 3 security mechanisms, groups and users with passwords must b
+e configured. No default values exist for authentication or privacy algorithms 
+when you configure <code><b>snmp-server group</b></code>.
+
+<h4>Configuration of Access Control Lists</h4>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+R2(config)#<b>ip access-list standard ACL_SNMP</b><br>
+R2(config-std-nacl)#<b>10 PERMIT 192.168.3.10 ?</b><br>
+A.B.C.D Wildcard bits<br>
+log Log matches against this entry<br>
+&lt;cr&gt;<br>
+<br>
+R2(config-std-nacl)#<b>10 PERMIT 192.168.3.10</b><br>
+R2(config-std-nacl)#exit
+</code></div></p>
+
+
+<h3>Verification</h3>
+<p>
+
+</p>
+
+<h4><code>show snmp user</code></h4>
+<p>
+SNMP users do not appear in the running-configuration. However, to view SNMP 
+users, use the command <code><b>show snmp user</b></code>.
+</p>
+
+<p>
+To verify the SNMPv3 view created;
+</p>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+R2#<b>show snmp view</b>
+</code></div>
+</p>
+
+<h4><code>show snmp host</code></h4>
+<p>
+
+</p>
+
+<h4>SNMPv3 Groups</h4>
+
+<p>
+Verification of SNMPv3 groups
+</p>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+R2(config)#<b>do show snmp group</b>                                            <br>
+
+</code></div>
+</p>
+
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+R2(config)#<b>do show snmp engineID</b>                                    <br>
+
+</code></div></p>
+
+<h3>Troubleshooting SNMPv3</h3>
+<p>
+  <ul>
+    <li>Correct security level specified?</li>
+    <li>Correct OIDs specified in the view</li>
+    <li>Is the notification configured?</li>
+    <li>Index shuffling</li>
+    <li>Correct security level specified</li>
+    <li>Correct hashing algorithm, encryption algorithm, or passwords</li>
+  </ul>
+</p>

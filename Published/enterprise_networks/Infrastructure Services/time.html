@@ -1,0 +1,34 @@
+<h1>System Time</h1>
+<p>
+UTC is the primary standard by which the world regulates clocks and time. Routers 
+have two sources of timing:
+<ol>
+  <li><b>Hardware clock:</b> powered by the battery when the device is powered off.</li>
+  <li><b>Software clock:</b> derives time from the hardware clock at boot time.</li>
+</ol>
+</p>
+<p>
+The command <code><b>show clock</b></code> displays the following output: 
+<code><b>*13:26:22.675 UTC Fri Jan 1 2010</b></code>. The leading asterisk indicates 
+that the time is not authoritative(potentially not accurate). Adding the <code><b>
+detail</b></code> keyword displays the source of the time. Show clock displays the 
+software clock. It can be modified using the command <code><b>clock set &lt;hh:mm:ss&gt; &lt;day&gt; &lt;month&gt; 
+&lt;year&gt;</b></code>. This is entered in the privileged mode. Manually configuring 
+the software clock like this makes the time source to be authoritative. This 
+can be verified using the command <code><b>show clock detail</b></code> with the 
+leading asterisk missing.
+</p>
+<p>
+The command to set the software clock does not chanage the time on the hardware 
+clock. The hardware clock can be viewed with the command <code><b>show calendar</b></code>.
+Rebooting a device whose software clock has been set/corrected results in the loss 
+of the correct time value. To update the hardware clock from the software clock, 
+use the command <code><b>clock update-calendar</b></code>. This updates the 
+hardware clock from the software clock. This correct time is maintained across
+device reboots.
+</p>
+<h2>Time-zone</h2>
+<p>
+To adjust for the correct time zone settings, in configuration mode, use the command 
+<code><b>clock timezone &lt;timezone&gt; &lt;offset&gt;</b></code>.
+</p>

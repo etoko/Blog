@@ -1,0 +1,1082 @@
+<h1>Introduction and Overview</h1>
+<p>
+ The Dynamic Host Configuration Protocol for IPv6 (DHCPv6) enables DHCPv6 
+   servers to pass configuration parameters such as IPv6 network
+   addresses to IPv6 nodes.  It offers the capability of automatic
+   allocation of reusable network addresses and additional configuration
+   flexibility.
+   
+DHCPv6 is defined by <a href="https://www.ietf.org/rfc/rfc3315.txt" target="_blank">
+RFC 3315 (Dynamic Host Configuration Protocol for IPv6 (DHCPv6)</a>.
+
+</p>
+
+<h1>DHCPv6 Operating Modes</h1>
+<p>
+IOS devices can be configured to operate as:
+<ul>
+  <li><b>Server:</b> device that provides stateless or stateful DHCPv6 services.</li>
+  <li><b>Client:</b> device that acquires IPv6 configuration from a 
+  DHCPv6 server.</li>
+  <li><b>Relay Agent:</b> router provides DHCPv6 forwarding services when 
+  the client and the server are located on different networks.</li>
+</ul>
+</p>
+<p>
+   Clients listen for DHCPv6 messages on UDP port 546.  Servers and relay
+   agents listen for DHCPv6 messages on UDP port 547.
+</p>
+
+<h2>Unique Identifiers</h2>
+<p>
+DHCPv6 servers, clients and relay agents have exactly one <b>DHCPv6 Unique Identifier (DUID)</b> that 
+uniquely identifies the device. 
+</p>
+<p>
+An <b>Identity Association (IA)</b> is a collection of addresses assigned to a client. 
+Each client has at least one IA assigned for each interface using DHCPv6. For each 
+IA, the client assigns an <b>Identity Association Identifier (IAID)</b> that 
+uniquely identifies the IA. The IAID identifies a specific interface on the 
+client. Each interface on the DHCPv6 client or server is identified using an IAID.
+</p>
+
+<h1>IPv6 Global Unicast Address Assignment</h1>
+<p>
+IPv6 global unique addresses (GUA) are assigned to host devices using one of three 
+methods:
+<ol>
+  <li>Stateless Address Autoconfiguration (SLAAC)</li>
+  <li>SLAAC with DHCPv6 (Stateless DHCPv6)</li>
+  <li>Stateful DHCPv6</li>
+</ol>
+</p>
+<p>
+The method used to receive IPv6 network configuration parameters is dictated by 
+the router advertisement (RA) messages sent by the local router. The RA messages 
+contain flags that guide the host devices on how their IPv6 prefix, prefix-length, 
+DNS servers, domain-name can be obtained.
+</p>
+
+<h2>Message Flags</h2>
+<p>
+How a client obtains an IPv6 GUA depends on the settings in the RA message. An 
+ICMPv6 RA message includes the following three flags:
+<ol>
+  <li><b>A-flag (Address autoconfiguration):</b> notifies the device to use SLAAC 
+  to create an IPv6 GUA. The host uses the RA message for network configuration 
+  parameters such as prefix, prefix-length. This is the default method used by 
+  IOS devices to assign IPv6 prefixes to their interfaces.</li>
+  <li><b>O-flag (Other configuration):</b> notifies the host that it should create 
+  its IPv6 prefix using SLAAC. Additional network configuration parameters such 
+  as DNS server addresses, domain names are available from a stateless DHCPv6 server.
+  The hosts use the RA and a DHCPv6 server to obtain complete IPv6 network 
+  configuration information. This is the implementation of stateless 
+  DHCP i.e., SLAAC and DHCPv6. The "A" flag is also set here.</li>
+  <li><b>M-flag (Managed address configuration):</b> notifies the host to use 
+  a stateful DHCPv6 server to obtain an IPv6 GUA and all other network configuration 
+  parameters. This implements stateful DHCPv6.
+</ol>
+</p>
+<p>
+Using different combinations of the A, O, and M flags, RA messages inform the 
+host about the dynamic options available.
+The following table summarizes the RA advertisement flag options for the different 
+methods of dynamic IPv6 address assignment:
+</p>
+<p>
+<table width="100%" cellspacing="0">
+  <thead style="background:#d3d3d3; font-weight: bold;">
+    <tr>
+      <td style="border-top: 1px solid; border-bottom: 1px solid;">RA Address 
+      Allocation Method</td>
+      <td style="border-top: 1px solid; border-bottom: 1px solid;" width="15%">A
+      </td>
+      <td style="border-top: 1px solid; border-bottom: 1px solid; width="15%"">O</td>
+      <td style="border-top: 1px solid; border-bottom: 1px solid; width="15%"">M</td>
+    </tr>                              
+  </thead>
+  <tbody>
+  <tr>
+      <td style="border-bottom: 1px solid;">SLAAC (default)</td>
+      <td style="border-bottom: 1px solid;">1</td>
+      <td style="border-bottom: 1px solid;">0</td>
+      <td style="border-bottom: 1px solid;">0</td>
+    </tr>
+    <tr>
+      <td style="border-bottom: 1px solid;">SLAAC with Stateless DHCPv6</td>
+      <td style="border-bottom: 1px solid;">1</td>
+      <td style="border-bottom: 1px solid;">1</td>
+      <td style="border-bottom: 1px solid;">0</td>
+    </tr>
+    <tr>
+      <td style="border-bottom: 1px solid;">Stateful DHCPv6</td>
+      <td style="border-bottom: 1px solid;">0</td>
+      <td style="border-bottom: 1px solid;">0 (ignored if set to 1)</td>
+      <td style="border-bottom: 1px solid;">1</td>
+    </tr>
+  </tbody>
+</table>
+</p>
+
+<h2>Stateful DHCPv6</h2>
+<p>
+With stateful DHCPv6, a DHCPv6 server is managing the assignment of IPv6 network 
+configuration parameters. The router RA message M-flag informs hosts to contact a 
+DHCPv6 server or DHCPv6-enabled router for all configuration
+information except the default gateway address. Hosts contact a DHCPv6 server to 
+acquire all of their IPv6 configuration parameters except the default gateway 
+which they receive through router RA messages. Although host operating systems 
+follow the suggestion of the RA, the actual decision is ultimately up to the host.
+As the DHCPv6 server is stateful, it maintains a list of IPv6 address bindings.
+</p>
+<p>
+Most environments that implement stateful DHCPv6 have an addressing need 
+  or policy where devices obtain their address only from the stateful DHCPv6 
+  server. This makes it easier to manage and track IPv6 addresses on the network.
+</p>
+<p> 
+ICMPv6 RA messages are sent periodically by an IPv6 router (default is 200
+  seconds) or when the router receives a router solicitation message from the 
+  host device.
+  When a host receives an RA message with the M-flag set, sends a DHCPv6 SOLICIT 
+message seeking additional information from a stateful DHCPv6 server.
+  </p>
+<p>
+Stateful DHCPv6 does not require SLAAC while stateless DHCPv6 does. When an RA 
+M-flag is set (to the value 1) indicating the use of stateful DHCPv6:  
+<ol type="a">
+  <li>The host sends an RS message</li>
+  <li>The router responds with an RA message.</li>
+  <li>The host sends a DHCPv6 SOLICIT message.</li>
+  <li>The DHCPv6 server responds with an ADVERTISE message.</li>
+  <li>The host responds to the ADVERTISE message with a REQUEST message. </li>
+  <li>The DHCPv6 server sends a REPLY message.</li>
+</ol>
+<b>Note:</b> Server to client DHCPv6 messages use UDP destination port 546 while 
+client to server DHCPv6 messages use destination port UDP 547.
+</p>
+
+<p>
+The RA message contains the following information:
+<ul>
+  <li>IPv6 GUA network prefix and prefix length</li>
+  <li>A flag set to 0 informing the host to contact a DHCPv6 server.</li>
+  <li>O flag set to 0 informing the host to contact a DHCPv6 server.</li>
+  <li>M flag set to 1.</li>
+</ul>
+
+</p>
+
+<h3>Stateful DHCPv6 RA Message</h3>
+<p>
+The RA message sent by a router running a stateful DHCPv6 server includes:
+<ul>
+  <li><b>Destination IPv6 address:</b> FF02::1 (All IPv6 devices multicast)</li>
+  <li><b>Source IPv6 address:</b> link-local address on interface</li>
+  <li><b>Prefix:</b> prefix e.g., 2001:db8:cafe:2::</li>
+  <li><b>Prefix-length:</b> /64</li>
+  <li><b>Managed-config-flag:</b> 1</li>
+  <li><b>Autonomous address flag:</b> 0</li>
+</ul>
+
+</p>
+
+<h3>DHCPv6 GUA Assignment Sequence</h3>
+<p>
+The DHCPv6 address assignment process is similar to that of DHCP for IPv4 with 
+that uses DORA to assign IPv4 network configuration parameters. With DHCPv6, 
+the sequence consists of four stages: SOLICIT, ADVERTISE, REQUEST, REPLY (SARR).
+When a client sends an RS message on the link, an RA message is sent in reply 
+to the all devices IPv6 multicast address FF02::1:
+<ol>
+  <li>The client sends a <b>SOLICIT</b> message on the local link requesting for network 
+  configuration parameters.</li>
+  <li><b>ADVERTISE:</b> the server responds to the SOLICIT message with an ADVERTISE 
+  message containing IPv6 configuration information.</li>
+  <li><b>REQUEST or INFORMATION REQUEST:</b> REQUEST DHCPv6 message is sent by 
+  clients using stateful DHCPv6. INFORMATION REQUEST DHCPv6 message is sent by 
+  clients using stateless DHCPv6.</li>
+  <li><b>REPLY:</b> the DHCPv6 server confirms the IPv6 network configuration 
+  parameters issued to the client.</li>
+</ol>
+</p>
+<p>
+The client can request a renewal of IPv6 network configuration parameters by 
+sending a RENEW DHCPv6 message to the server. The DHCPv6 server sends a REPLY 
+message confirming the renewal of the IPv6 address and other network configuration 
+parameters.
+</p>
+
+<h4>Rapid Commit</h4>
+<p>
+The rapid-commit option uses two DHCPv6 messages instead of four.
+The rapid-commit option sends the initial DHCPv6 SOLICIT message. However, 
+this SOLICIT message has the rapid-commit option set. This informs the server 
+that it wants to shorten the exchange from 4 messages to 2. 
+
+<code><b>rapid-commit</b></code> option can be enabled on the server using the interface 
+configuration command: 
+<code><b>ipv6 dhcp server &lt;dhcpv6-pool&gt; rapid-commit</b></code>. This is enabled 
+on the interface connecting to the clients.
+</p>
+
+<h3>Configuration of Stateful DHCPv6</h3>
+
+<h4>Server</h4>
+<p>
+The stateful DHCPv6 server option requires that the IPv6 enabled router tells the 
+host to contact a DHCPv6 server to obtain all necessary IPv6 network addressing 
+information. There are five steps to configure and verify a router as a stateful 
+DHCPv6 server:
+<ol>
+  <li><b>Enable IPv6 routing:</b> using the <code><b>ipv6 unicast-routing</b></code> 
+  command.</li>
+  <li><b>Define a DHCPv6 pool:</b> using <code><b>ipv6 dhcp pool &lt;pool-name&gt;</b></code> 
+  command.</li>
+  <li><b>Configure the DHCPv6 pool with options:</b> common options include:
+  <ul>
+    <li><code><b>address prefix 2001:db8:acad:1::/64</b></code>. This command 
+    is what causes this DHCPv6 GUA assignment to be stateful in nature.</li>
+    <li><code><b>domain-name EXAMPLE.COM</b></code></li>
+    <li>DNS server IPv6 address</li>    
+  </ul>
+  </li>
+  <li><b>Bind the interface to the pool:</b> using <code><b>ipv6 dhcp server &lt;pool-name&gt;</b></code> 
+  interface config command.
+    <ol type="a">
+      <li>
+    Manually change the M flag from 0 to 1 using the <code><b>ipv6 nd managed-config-flag</b></code>.
+    </li>
+      <li>Manually change the A flag from 1 to 0 using the <code><b>ipv6 nd prefix default no-autoconfig</b></code> 
+      interface command to inform the client to not use SLAAC to create GUA. The 
+      router will now respond to stateful DHCPv6 requests with the information contained in the pool.</li>
+    </ol>
+    <p>
+    On the interface;<br>
+    <code><b>
+    ipv6 address fe80::1 link-local<br>
+    ipv6 address 2001:db8:acad:1::1/64<br>
+    ipv6 nd managed-config-flag<br>
+    ipv6 nd prefix default no-autoconfig|ipv6 nd default no-autoconfig|ipv6 nd &lt;prefix/length&gt; no-autoconfig<br>
+    ipv6 dhcp server IPV6-STATEFUL
+    </b></code>
+    </p>
+    <p>
+    With the M-flag set, the O-flag is ignored.
+    </p>
+  </li>
+  <li><b>Verify that the hosts have received IPv6 addressing information:</b> using 
+  ipconfig /all command.</li>
+</ol>
+</p>
+
+<h4>Client</h4>
+<p>
+Most hosts have IPv6 autoconfiguration set. If the client is an IOS device, it
+needs to have <code><b>ipv6 unicast-routing</b></code> enabled and 
+an IPv6 link-local address to send and receive IPv6 messages.
+There are five steps to configure and verify a router as a stateless DHCPv6 client:
+<ol>
+  <li><b>Enable IPv6 routing:</b> using <code><b>ipv6 unicast-routing</b></code>.</li>
+  <li><b>Configure the client router to create an LLA:</b> An IPv6 link-local 
+  address is created on a router interface when a global unicast address is configured, 
+  or without a GUA using the <code><b>ipv6 enable</b></code> interface configuration 
+  command. Cisco IOS uses EUI-64 to create an interface ID.</li>
+  <li><b>Configure the client router to use DHCPv6:</b> using the <code><b>
+  ipv6 address dhcp</b></code> interface config command.</li>
+  <li><b>Verification:</b>
+  
+    <ul>
+      <li><b>Verify that the client is assigned a GUA:</b> using the <code><b>show 
+  ipv6 interface brief</b></code> command.
+  </li>
+  <li><b>Verify that the client router received other necessary DHCPv6 information:</b> 
+  using the <code><b>show ipv6 dhcp interface g0/0/1</b></code> command.</li>
+  </ul>
+</ol>
+</p>
+
+<h2>Stateless Address Assignment</h2>
+<p>
+Stateless address assignments involve assignment of prefixes and network configuration 
+information using stateless address autoconfiguration (SLAAC) and stateless DHCPv6.
+Under stateless network configuration, no device is tracking the assignment of IPv6 prefixes.
+</p>
+
+<h3>Stateless Address Autoconfiguration (SLAAC)</h3>
+<p>
+When assigning prefixes using SLAAC, a router sends RA messages providing all 
+IPv6 network configuration information i.e., network 
+prefix, prefix-length and default gateway information. The domain 
+name and DNS server list may be included if the router and host support 
+<a href="https://www.ietf.org/rfc/rfc6106.txt" target="_blank">
+RFC 6106 (IPv6 RA options for DNS configuration)</a>. Hosts use the RA information 
+exclusively for all their addressing including creating their own GUA. 
+</p>
+<p>
+This ICMPv6 RA message has the following parameters:
+<ul>
+  <li><b>Type:</b> value is 134 indicating a Router Advertisement message.</li>
+  <li><b>Cur Hop Limit:</b> value the router recommends for hosts on the link to use 
+  as their Hop Limit. A value of zero(0) indicates that hosts should determine 
+  the hop limit. The default value is 64.</li>
+  <li><b>Destination IPv6 address:</b> FF02::1(all IPv6 devices multicast address)</li>
+  <li><b>Source IPv6 address:</b> router's local interface's link-local address</li>
+  <li><b>Flags:</b> A = 1, O = 0, M = 0, default router preference: default value 
+  is medium(0 0). Other values for default router preference are: high(0 1), 
+  low(1 1), and Reserved(1 0).</li>
+  <li><b>Next header:</b> 0x3a(an ICMPv6 header, 58 in decimal).</li>
+  <li><b>Router lifetime:</b> duration, in seconds, for which the router should 
+  be used as the dfault gateway. A value of zero indicates that the router is 
+  not a default router.</li> 
+  <li><b>MTU:</b> informs the hosts the maximum MTU for the network.</li>
+  <li><b>Prefix length:</b> provides necessary information for on-link 
+  determination (when combined with the L-flag in the prefix information option).</li>
+  <li><b>Valid and Preferred lifetimes:</b> length of time public address remains 
+  in the valid state(30days by default). Preferred lifetime is the length of time 
+  a valid address(public) is preferred(7 days by default).</li>
+  <li><b>Other parameters:</b> DNS server address etc.</li>
+</ul>
+</p>
+<p>
+If the M flag  is set and the O flag is set, the O flag is ignored. For stateful 
+DHCP, the A flag should be turned off. For SLAAC, the A flag is set and the O flag 
+and M flags are disabled.
+</p>
+
+<h4>Interface ID</h4>
+<p>
+The 64-bit interface ID is generated using EUI-64(Extended Unique Identifier-64) 
+or randomly generated known as a privacy extension. If EUI-64 is used, 
+the host uses its interface MAC address to generate the address.
+</p>
+
+<h4>EUI-64</h4>
+
+<p>
+The MAC address is a 48-bit address that consists of two sections the OUI(24-bits) 
+and Device Identifier(24-bits).
+The OUI (Organization Unique Identifier) is a code unique to the manufacturer of 
+an interface card. EUI-64 generates an interface ID through two states:
+<ol>
+  <li>Inserting FF:FE between the OUI and Device Identifier sections of the MAC 
+  address creating a new address. This increases the size of the MAC address from 
+  48-bit to 64-bit.</li>
+  <li>Flipping the 7<sup>th</sup>-bit i.e., 0 &rarr; 1 or 1 &rarr; 0. This results 
+  in the second hexadecimal digit changing.</li>
+</ol>
+</p>
+
+<h4>Randomly Generated Number</h4>
+<p>
+The method used to create a randomly generated number to be used as the Interface ID depends 
+on the operating system. Windows uses a randomly generated number by default.
+</p>
+
+<h5>Privacy Extensions</h5>
+<p>
+The use of EUI-64 for generation of Interface ID values is considered by some 
+to be a security risk as the MAC address does not change. This results in the 
+Interface ID being predictable across the different IPv6 networks that the device 
+may connect to. This makes tracking this device easier.
+</p>
+<p>
+RFC 4941 proposes the use of privacy extensions for SLAAC:
+<ul>
+  <li><b>Generation of randomized Interface IDs:</b> creating an interface ID that 
+  is not traceable to a physical device.</li>
+  <li><b>Generation of temporary addresses:</b> these are addresses that have 
+  relatively short lifetimes. This address is used as a source address when 
+  originating connections.
+  </li>
+</ul>
+</p>
+<p>
+The public address uses a randomized Interface ID instead of EUI-64. Temporary 
+addresses are generated and use only a randomized Interface ID.
+</p>
+
+<h3>Configuration</h4>
+
+<h4>Servers</h4>
+<p>
+To configure SLAAC:
+<ol>
+  <li><b>Enable IPv6 routing:</b>
+  <p>
+  <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+  R1(config)#<b>ipv6 unicast-routing</b>
+  </code></div>
+  </p>
+  <li> <b>Configure a GUA on the interface:</b> By default, the A-flag 
+is set to 1. If it is disabled, enable it using the following command 
+<code><b>ipv6 address &lt;prefix&gt;/&lt;prefix-length&gt;</b></code>
+:
+   <p>
+  <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+  R1(config)#<b>interface gigabitethernet0/0</b><br>
+  R1(config-if)#<b>ipv6 address 2001:db8:cafe:1::1:1/64</b>
+  </code></div>
+  </li>
+</ol>
+</p>
+
+<h4>Clients</h4>
+<ul>
+<li><b>IOS Devices</b>
+<p>
+If an IOS device is a DHCPv6 client, then the following configuration is required
+on the interface:
+</p>
+ <p>
+  <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+  R7(config-if)#<b>ipv6 address autoconfig</b>
+  </code></div>
+  </p>
+</li>
+<li><b>Windows Hosts:</b>
+<ul>
+  <li>The temporary addresses are created using the following command:
+
+<p>
+<div><code>
+netsh interface ipv6 set privacy state=enabled store=active<br>
+netsh interface ipv6 set privacy state=enabled store=persistent
+</code></div>
+</p>
+</li>
+
+<li>
+Creation of temporary addresses can be disabled by using the <code><b>disabled</b></code> 
+keyword.
+
+<p>
+On Windows hosts, to enable the use of the randomized identifier:
+</p>
+<p>
+<div><code>
+netsh interface ipv6 set global randomizeidentifiers=enabled store=active<br>
+netsh interface ipv6 set global randomizeidentifiers=enabled store=persistent
+</code></div>
+</p>
+</li>
+<li>
+To disable the use of the random interface ID i.e., enable EUI-64:
+<p>
+<div><code>
+netsh interface ipv6 set global randomizeidentifiers=disabled store=active<br>
+netsh interface ipv6 set global randomizeidentifiers=disabled store=persistent
+</code></div>
+</p>
+</li>
+</ul>
+</li>
+</ul>
+
+
+<li><b>Linux and MacOS:</b>
+
+The use of privacy extensions with Linux and MacOS varies with OS version.
+Generally, the most common command is:
+<ul>
+  <li><b>Linux:</b> <code>sysctl net.ip6.conf.if.use_tempaddr=2</code></li>
+  <li><b>MacOS:</b> <code>sysctl net.inet6.ip6.use_tempaddr=1</code></li>
+</ul>
+</p>
+</li>
+</ul>
+
+
+<h4>SLAAC Address Lifecycle</h4>
+<p>
+SLAAC addresses transition through various states: tentative, preferred, deprecated 
+and valid.
+<ul>
+  <li><b>Tentative Address:</b>
+    <ul>
+      <li>The uniqueness of the address is in the process of being verified.</li>
+      <li>Address is not considered to be assigned to an interface</li>
+      <li>An interface discards received packets addressed to a tentative address 
+      but accepts Neighbor Discovery packets related to Duplicate Address Detection 
+      for the tentative address.</li>
+    </ul>
+    </li>
+    <li><b>Valid address:</b> 
+      <ul>
+        <li>The address is a preferred or deprecated address</li>
+        <li>Can be the source or destination address of a packet</li>
+        <li>The amount of time remains in the valid and preferred states is in the 
+        RA message.</li>
+        <li>The RA message valid lifetime, by default, is 2,592,000(30 days).</li>
+        <li>The valid address remains usable for the duration of the valid lifetime.</li>
+        <li>The valid lifetime must be greater than or equal to the preferred 
+        lifetime.</li>
+        <li>When the valid lifetime expires, the address becomes invalid.</li>
+      </ul>
+    </li>
+    <li><b>Preferred address:</b>
+      <ul>
+        <li>The interface address has been verified as unique.</li>
+        <li>Address can be considered as a state of the valid address.</li>
+        <li>The device can send and receive traffic using this address</li>
+        <li>New connections can be initiated using a preferred address as the 
+        source address.</li>
+        <li>The period of time that an address can remain in the preferred state 
+        is included in the RA message. By default, this is 604,800 seconds or 7 days.</li>
+        <li>The preferred lifetime is the length of time a valid address is preferred 
+        until it becomes deprecated.</li>
+        <li>When the preferred lifetime expires, the address becomes deprecated.</li>
+      </ul>
+    </li>
+    <li><b>Deprecated address:</b>
+      <ul>
+        <li>The address assigned to an interface is still valid, but implementation 
+        is discouraged (typically applies to temporary addresses not public addresses).</li>
+        <li>Any new connections are discouraged because an address is being assigned 
+        to this interface. This may partially explain why multiple temporary 
+        addresses may be present.</li>
+        
+      </ul>
+    </li>
+    </ul>
+</p>
+
+<h4>Verification</h4>
+
+<h5><code>show ipv6 interface &lt;inteface-id&gt;</code></h5>
+<p>
+  <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+R7#<b>show ipv6 interface g0/0</b><br>                          <br>                              
+GigabitEthernet0/0 is up, line protocol is up                   <br>                   
+&nbsp;&nbsp;IPv6 is enabled, link-local address is FE80::C807:6FF:FE8D:8  <br>                   
+&nbsp;&nbsp;No Virtual link-local address(es):                            <br>                   
+&nbsp;&nbsp;Stateless address autoconfig enabled                          <br>                   
+&nbsp;&nbsp;Global unicast address(es):                                   <br>                   
+&nbsp;&nbsp;&nbsp;&nbsp;2001:DB8:CAFE:1:C807:6FF:FE8D:8, subnet is 2001:DB8:CAFE:1::/64 [EUI/CAL/PRE] <br> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;valid lifetime 2591941 preferred lifetime 604741          <br>                  
+&nbsp;&nbsp;Joined group address(es):                                     <br>                  
+&nbsp;&nbsp;&nbsp;&nbsp;FF02::1                                                     <br>                  
+&nbsp;&nbsp;&nbsp;&nbsp;FF02::1:FF8D:8                                              <br>                  
+&nbsp;&nbsp;MTU is 1500 bytes                                             <br>                  
+&nbsp;&nbsp;ICMP error messages limited to one every 100 milliseconds     <br>                  
+&nbsp;&nbsp;ICMP redirects are enabled                                    <br>                  
+&nbsp;&nbsp;ICMP unreachables are sent                                    <br>                  
+&nbsp;&nbsp;ND DAD is enabled, number of DAD attempts: 1                  <br>                  
+&nbsp;&nbsp;ND reachable time is 30000 milliseconds (using 30000)         <br>                  
+&nbsp;&nbsp;ND NS retransmit interval is 1000 milliseconds                <br>                  
+&nbsp;&nbsp;Default router is FE80::C801:5FF:FECA:8 on GigabitEthernet0/0 <br>                  
+</code></div>
+</p>
+
+<p>
+On the router, the command <code><b>show ipv6 interface g0/0</b></code> shows 
+that:
+<ul>
+  <li>RA advertisements are sent every 200 seconds</li>
+  <li>Joined multicast groups: ff02::1, ff02::2 etc</li>
+  <li>RA advertisements live for 1800 seconds. 
+     <ul> 
+       <li>
+		  The router RA lifetime is 1800 seconds(default).</li>
+		  <li>Informs the host that the router should be used as the default gateway 
+		  for this duration.</li>
+		  <li>This is usually renewed/refreshed when the host receives the next RA.</li>
+		  <li>The link local address of the router is used as the default gateway 
+		  by the host.</li>
+		  <li>If this value is zero(0), it indicates that the router is not a default 
+		  gateway.</li>
+		  <li>This duration only applies to the router's function as a default 
+		  gateway and not to other network configuration information in the RA 
+		  message such as prefix.</li>
+	</ul>
+  </li>
+  <li><b>Advertised router preference:</b> 
+   <ul>
+    <li>Multiple routers may be present on a link. The default router 
+    preference(DRP) is used to set the preference of the 
+  default router from the list of available routers.</li>
+  <li>The default value sent to medium. Valid values include high, medium, low.</li>
+  <li>Hosts can dynamically fill their default router list using the IPv6 
+  addresses from the RA messages of the various routers on the link.</li>
+  <li>
+Client devices maintain a list of default routers. When a client receives an RA, 
+id adds the link-local source address of the packet as one of the routers it can 
+use as a default gateway. Each entry has a timer, Router Lifetime, extracted from 
+the RA. This entry gets deleted when the Router Lifetime expires. The Router Lifetime 
+value is refreshed every 200 seconds when the RA advertisements are received.
+  </li>
+  </ul>
+  </li>
+  <li><b>Hosts use stateless autoconfig for addresses:</b>
+	  <ul>
+	    <li>indicates that the RA message sent on this interface is suggesting 
+	    that hosts obtain their dynamic IPv6 using SLAAC as a result of the A flag 
+	    being set to 1 and O and M flags being set to 0.</li>
+	  </ul>
+  </li>
+ </ul>
+</p>
+
+<p>
+RA messages can be viewed in realtime using the command <code><b>debug ipv6 nd</b></code>.
+In this output, included is the:
+<ul>
+	<li><b> Link MTU:</b> as IPv6 does not support fragmentation, the hosts will 
+	use this value to fragment packets before transmission.</li>
+	<li>Valid lifetime and preferred lifetime values are given. These values 
+	are in seconds. 
+	</li>
+	<li><b>LA (L-flag(On-link) and A-flag(address autoconfiguration flag)):</b> both 
+	are set to 1.
+	<ul>
+	<li>When the L-flag is set to 1, the prefix sent in the RA is on this 
+	link or subnet.</li>
+	<li>A-flag indicates to devices that the prefix can be used to create an 
+	address with SLAAC.</li>
+	<li>Packets that are sent to addresses that are not on-link are sent to the 
+	default gateway.</li>
+	<li>The L-flag and A-flag are used by the client to determine if a destination 
+	network is on the link(on-link) or remote. On-link implies that a packet can 
+	be sent directly to the destination without being forwarded through a router.
+	<p>
+	On Windows computers, this can be 
+	verified using the command <code><b>netsh interface ipv6 show siteprefixes</b></code>.
+	</p>
+	<p>
+	The client adds this prefix to the prefix list which is a list of on-link 
+	prefixes. Any of the client's addresses that use this prefix will be considered 
+	on-link to this prefix on this subnet regardless of how the prefix was generated 
+	i.e., whether SLAAC, DHCPv6 generated or manually configured.
+	</p>
+	<p>
+	A device is considered to be on-link if:
+	<ul>
+	  <li>A neighbor discovery(ND) message is received from this device.</li>
+	  <li>An RA includes a prefix with the L-flag set to 1</li>
+	  <li>A local router sends a redirect message to the source of a packet. This 
+	  redirect message triggered when a router forwards a packet out the same interface 
+	  that the packet was received through. It notifies the source that the destination 
+	  is on-link.
+	  </li>
+	</ul>
+	</p>
+	</li>
+	</ul>
+	</li>
+	
+</ul>
+</p>
+
+<h2>SLAAC with DHCPv6 (Stateless DHCPv6)</h2>
+<p>
+RA messages provide IPv6 configuration information to hosts such as prefix, 
+prefix length but inform them to contact a stateless DHCPv6 server for additional 
+configuration information.
+Hosts use their RA information to create their own unique GUA and get additional
+information from a DHCPv6 server.
+<b>Note:</b> The DHCPv6 server only provides configuration parameters for clients 
+and does not maintain a list of IPv6 address bindings.
+</p>
+<p>
+Part of the network configuration parameters are received from the RA  
+and the rest from the DHCPv6 server.
+</p>
+
+<p>
+SLAAC enables hosts to create their own unique IPv6 GUA without the services of 
+a DHCPv6 server. SLAAC is a stateless service which means that there is no server 
+that maintains network address information to know which IPv6 addresses are being 
+used and which ones are available. SLAAC sends periodic ICMPv6 ND RA messages every 
+200 seconds providing addressing and other configuration information for hosts to 
+autoconfigure their IPv6 address based on the information in the RA. The RA 
+advertisements live for 1800 seconds.
+</p>
+<p>
+RA messages have the following flags set:
+<ul>
+  <li><b>A=1:</b> informs the client to use the IPv6 GUA prefix in the RA and 
+  dynamically create its own interface ID.</li>
+  <li><b>O=1 and M=0:</b> informs the client to use the additional information 
+  in the RA message i.e., DNS server, interface MTU, and default gateway information.</li>
+</ul>
+The default gateway address is the link-local address of the router interface.
+</p>
+<p>
+A router sends RA messages every 200ms or when it receives an RS message from a
+ host. IPv6 enabled hosts wishing to obtain IPv6 addressing information send an 
+ RS message to the IPv6 all-routers multicast message of FF02::2.
+</p>
+
+<h3>Stateless DHCPv6 RA Message</h3>
+<p>
+The RA message sent by a router acting as a stateless DHCPv6 server contains the 
+following information:
+<ul>
+  <li><b>Destination IPv6 address:</b> FF02::1 (All IPv6 devices multicast address)</li>
+  <li><b>Source IPv6 address:</b> link-local address</li>
+  <li><b>Prefix:</b> prefix</li>
+  <li><b>Prefix-length:</b> /64</li>
+  <li><b>Address autoconfig flag:</b> 1</li>
+  <li><b>Other config flag:</b> 1</li>
+</ul>
+</p>
+<p>
+Because the address autoconfig flag(A-flag) is set to 1, the device creates its 
+own Interface ID using EUI-64 or randomly generated. 
+</p>
+
+<h3>Host Process to Generate Interface ID</h3>
+<p>
+Using SLAAC, a host acquires its 64-bit IPv6 subnet information from the router RA 
+and must generate the remainder 64-bit interface identifier using either:
+<ul>
+  <l><b>Randomly generated:</b> the 64-bit interface identifier is randomly 
+  generated by the client operating system(usually used by Windows 10).</l>
+  <li><b>EUI-64:</b> the host creates an interface ID using its 48-bit MAC address and 
+  inserts the hex value of FF:FE in the middle of the address. Some operating 
+  systems default to randomly generated interface ID instead of the EUI-64 method 
+  due to privacy concerns. This is because the Ethernet MAC address of the host is 
+  used by EUI-64 to create the interface ID.
+  </li>
+</ul>
+Windows, Linux, and Mac OS allow for the user to modify the generation of the interface 
+ID to be either randomly generated or to use EUI-64.
+</p>
+
+<h3>Duplicate Address Detection(DAD)</h3>
+<p>
+A SLAAC host may use the following DAD process to ensure that the IPv6 GUA is unique.
+<ul>
+  <li>The host sends an ICMPv6 neighbor solicitation(NS) message with a specially 
+  constructed solicited-node multicast address containing the last 24-bits of 
+  IPv6 address of the host.</li>
+  <li>If no other devices respond with a Neighbor Advertisement(NA) message, then 
+  the address is virtually guaranteed to be unique and can be used by the host.</li>
+  <li>If an NA is received by the host, then the address is not unique, and the
+  the host must generate a new interface ID to use.
+</ul>
+
+<b>Note:</b> DAD is not really required because a 64-bit interface ID provides 
+infinite possibilites of an address. IETF recommends the use of DAD. Due to this,
+most host operating systems perform DAD on all IPv6 unicast addresses, regardless of 
+how the address is configured.
+</p>
+
+<p> 
+Interface should join the all IPv6 multicast group: FF02::1. Verify with 
+<code><b>show ipv6 interface g0/1 | section Joined</b></code>. 
+</p>
+<p>
+The RA received by hosts contains the following message:
+<ul>
+  <li>The IPv6 GUA network prefix and prefix length</li>
+  <li>A flag set to 1 informing the host to use SLAAC</li>
+  <li>O flag set to 1 informing the host to seek that additional configuration 
+  information from a DHCPv6 server.</li>
+  <li>M flag set to the default value of 0.</li>
+</ul>
+PC sends a DHCPv6 SOLICIT message seeking additional information from a stateless 
+DHCPv6 server.
+</p>
+
+
+<h3>Configuration</h3>
+<h4>Server</h4>
+<p>
+Stateless DHCPv6 server option requires that the router advertise the IPv6 network 
+addressing information in RA messages.
+
+Stateless DHCPv6 is enabled using the <code><b>ipv6 nd other-config-flag</b></code> 
+interface configuration command setting the O flag to 1. 
+</p>
+<p>
+This configuration can be verified using the command <code><b>show ipv6 interface 
+xxx</b></code>. The output confirms the RA will tell hosts to use stateless 
+autoconfigure (A flag = 1) and contact DHCPv6 server to obtain another configuration 
+information (O flag = 1).
+To disable the O flag, use the command <code><b>no ipv6 nd other-config-flag</b></code>.
+</p>
+
+<p>
+There are five steps to configure and verify a router as a stateless DHCPv6 server:
+<ol>
+  <li><b>Enable IPv6 routing:</b> using <code><b>ipv6 unicast-routing</b></code>.
+  </li>
+  <li><b>Define a DHCPv6 pool name:</b> using the <code><b>ipv6 dhcp pool &lt;pool-name&gt;</b></code> 
+  global config command.
+  <p>
+  <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+  R1(config)#<b>ipv6 dhcp pool POOL_2001:DB8:CAFE:2</b>
+  </code></div>
+  </p>
+  </li>
+  
+  <li><b>Configure the DHCPv6 pool with options:</b> common options include DNS 
+  servers, domain name:
+  <p>
+  <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+R1(config-dhcpv6)#<b>dns-server 2001:db8:cafe:a:1::1</b><br>
+R1(config-dhcpv6)#<b>domain-name emmanueltoko.blogspot.com</b>
+</code></div>
+  </p>
+  </li>
+  <li><b>Bind the interface to the pool:</b> using the <code><b>ipv6 dhcp server 
+    &lt;pool-name&gt;</b></code> interface config command.
+    <p>
+     <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+    R1(config)#<b>interface g2/0</b><br>
+    R1(config-if)#<b>ipv6 address 2001:db8:cafe:2::1/64</b><br>
+    R1(config-if)#<b>ipv6 dhcp server POOL_2001:DB8:CAFE:2</b>
+  </code></div>
+    </p>
+    
+    <p>
+    Manually change the O flag from 0 to 1 using the <code><b>ipv6 nd other-config-flag</b></code> 
+    interface command. RA messages sent to this interface indicate that 
+    </p>
+     <p>
+     <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+    R1(config-if)#<b>ipv6 nd other-config-flag</b>
+   </code></div>
+   </p>
+    </li>
+</ol>
+</p>
+
+<h4>Client</h4>
+<p>
+A router can also be a DHCPv6 client and receiev IPv6 network configuration parameters 
+from a DHCPv6 server:
+<ol>
+  <li><b>Enable IPv6 routing:</b> using <code><b>ipv6 unicast-routing</b></code>.</li>
+  
+  <li><b>Configure the client router to create a link-local address:</b> an IPv6 
+  link-local address is created on a router interface when a global unicast address 
+  is configured, or without a GUA using the IPv6 enable interface configuration 
+  command. Cisco IOS uses EUI-64 to create the interface ID.
+  
+  </li>
+  
+  <li><b>Configure the client router to use SLAAC:</b> using <code><b>ipv6 address
+  autoconfig</b></code> command.
+  <p>
+     <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+  R5(config)#<b>interface g0/0</b><br>
+  R5(config-if)#<b>ipv6 address autoconfig</b>
+  </code></div>
+  </p>
+  </li>
+  
+  <li><b>Verify that the client is assigned a GUA:</b> using 
+  <code><b>show ipv6 interface &lt;interface-id&gt;</b></code> command.
+   <p>
+     <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+  R5#<b>show ipv6 interface g0/0</b><br>
+GigabitEthernet0/0 is up, line protocol is up                  <br>
+&nbsp;&nbsp;IPv6 is enabled, link-local address is FE80::C805:6FF:FE6F:8 <br>
+&nbsp;&nbsp;No Virtual link-local address(es):                           <br>
+&nbsp;&nbsp;Stateless address autoconfig enabled                         <br>
+&nbsp;&nbsp;Global unicast address(es):                                  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;2001:DB8:CAFE:2:C805:6FF:FE6F:8, subnet is 2001:DB8:CAFE:2::/64 [EUI/CAL/PRE]<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;valid lifetime 2591984 preferred lifetime 604784          <br>
+&nbsp;&nbsp;Joined group address(es):                                     <br>
+&nbsp;&nbsp;&nbsp;&nbsp;FF02::1                                                     <br>
+&nbsp;&nbsp;&nbsp;&nbsp;FF02::1:FF6F:8                                              <br>
+&nbsp;&nbsp;MTU is 1500 bytes                                             <br>
+&nbsp;&nbsp;ICMP error messages limited to one every 100 milliseconds     <br>
+&nbsp;&nbsp;ICMP redirects are enabled                                    <br>
+&nbsp;&nbsp;ICMP unreachables are sent                                    <br>
+&nbsp;&nbsp;ND DAD is enabled, number of DAD attempts: 1                  <br>
+&nbsp;&nbsp;ND reachable time is 30000 milliseconds (using 30000)         <br>
+&nbsp;&nbsp;ND NS retransmit interval is 1000 milliseconds                <br>
+&nbsp;&nbsp;Default router is FE80::C801:5FF:FECA:38 on GigabitEthernet0/0<br>
+  </code></div>
+  </p>
+  </li>
+  
+  <li><b>Verify that the client router received other necessary DHCPv6 information:</b> 
+  The show <code><b>ipv6 dhcp interface g0/0</b></code> confirms DHCP option information,
+  such as DNS server and domain name have been received by the client.
+  <p>
+     <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+  R5#<b>show ipv6 dhcp interface g0/0</b><br>                     
+GigabitEthernet0/0 is in client mode             <br>    
+&nbsp;&nbsp;Prefix State is IDLE (1)                       <br>    
+&nbsp;&nbsp;Information refresh timer expires in 23:44:04  <br>    
+&nbsp;&nbsp;Address State is IDLE                          <br>    
+&nbsp;&nbsp;List of known servers:                         <br>    
+&nbsp;&nbsp;&nbsp;&nbsp;Reachable via address: FE80::C801:5FF:FECA:38<br>    
+&nbsp;&nbsp;&nbsp;&nbsp;DUID: 00030001CA0105CA0006                   <br>    
+&nbsp;&nbsp;&nbsp;&nbsp;Preference: 0                                <br>    
+&nbsp;&nbsp;&nbsp;&nbsp;Configuration parameters:                    <br>    
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;DNS server: 2001:DB8:CAFE:A:1::1           <br>    
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Domain name: emmanueltoko.blogspot.com     <br>    
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Information refresh time: 0                <br>    
+&nbsp;&nbsp;Prefix Rapid-Commit: disabled                  <br>    
+&nbsp;&nbsp;Address Rapid-Commit: disabled                 <br>    
+  </code></div>
+  </p>
+  </li>
+</ol>
+</p>
+
+<h1>Address Allocation</h1>
+<p>
+There are two modes of address allocation: 
+<ul>
+  <li><b>Two-message exchange:</b> The DHCPv6 client requests for an address and other 
+  network configuration parameters from the server. The server allocates an 
+  address and other network configuration parameters to the client. This mode 
+  applies to a network with only one DHCPv6 server. </li>
+  <li><b>Four-message exchange:</b> When there are multiple 
+  IPv6 DHCPv6 servers, all of them can allocate addresses and other configuration 
+  parameters to requesting clients. The client may waste address space. In this 
+  case the four-message exchange is used to allocate addresses. 
+    <ol>
+      <li>The DHCP client requests for an address and other network configuration
+      parameters.</li>
+      <li>The server notifies the client of the IPv6 address other network 
+      configuration parameters that can be allocated.</li>
+      <li>If the client receives multiple messages from multiple servers, it selects 
+      messages from the server with the highest priority and sends multicast messages 
+      to all the servers.</li>
+      <li>The server responds with a message that contains the allocated IPv6 
+      address and network configuration parameters.
+    </ol>
+  </li>
+</ul>
+</p>
+
+<h1>DHCPv6 Relay Agent</h1>
+<p>
+If the DHCPv6 server is located on a different network from the client, then 
+the IPv6 router can be configured as a DHCPv6 relay agent. 
+The relay agent creates a unicast RELAY-FORWARD message containing the original 
+DHCPv6 message from the client and forwards the message to a server.
+
+The configuration of a 
+DHCPv6 relay agent is similar to the configuration of an IPv4 router as a DHCPv4 relay
+and uses the interface mode command <code><b>ipv6 dhcp relay destination &lt;ipv6-address&gt; &lt;egress-interface&gt;</b></code>.
+This command is configured on the interface facing the DHCPv6 clients and specifies 
+the DHCPv6 server address and egress interface to reach the server. The egress interface
+is only required when the next-hop address is an LLA. 
+</p>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+ <code>
+R3(config)#<b>int g0/0</b><br>
+R3(config-if)#<b>ipv6 dhcp relay destination FE80::C802:6FF:FE37:1C GigabitEthernet1/0</b>
+</code></div></p>
+<p>
+The relay address can be unicast or multicast. With a multicast address, multiple 
+DHCPv6 servers can respond to the request. If a link-local unicast address is configured, 
+then the egress interface must be specified.
+</p>
+
+<h2>Verification</h2>
+<p>
+Verify that the DHCPv6 relay agent is operational with the <code><b>show ipv6 dhcp interface</b></code> 
+and <code><b>show ipv6 dhcp binding</b></code>.
+</p>
+
+<h1>Prefix Delegation</h1>
+<p>
+IPv6 Prefix Delegation(PD) mechanism allows a downstream device to request for 
+an address prefix from an upstream device and allows the upstream device to 
+allocate the appropriate prefix to the downstream device.
+
+The downstream device automatically divides the obtained address prefix into 
+subnet segments with 64-bit prefixes and sends RA messages carrying the subnet 
+segments on the link that IPv6 hosts directly connect to. This allows IPv6 hosts 
+to automatically configure IPv6 addresses implementing hierarchical address 
+deployment.
+</p>
+
+
+<h1>Security</h1>
+<p>
+DHCPv6 snooping.
+An intermediate device such as a switch maintains a DHCPv6 snooping binding table 
+that records information between a DHCPv6 client and server. It intercepts DHCPv6 
+messages between the server and the client. This table contains user information 
+such as MAC address, IPv6 address lease, VLAN ID, and interface information. 
+Based on this table, the device analyzes and processes messages as well as filters 
+out attack messages providing security services for DHCPv6 
+
+</p>
+
+<h1>Verification</h1>
+<p>
+
+</p>
+
+<h2><code>show ipv6 dhcp</code></h2>
+<p>
+View the device's DHCPv6 unique identifier(DUID).
+</p>
+
+
+<h2><code>show ipv6 dhcp pool</code></h2>
+<p>
+Command verifies the name of the DHCPv6 pool and its parameters. The command also 
+identifies the number of active clients.
+</p>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+ <code>
+DHCP#<b>show ipv6 dhcp pool</b><br>
+DHCPv6 pool: DHCPV6_2001:DB8:3::/64<br>
+&nbsp;&nbsp;Address allocation prefix: 2001:DB8:3::/64 valid 172800 preferred 86400 (1 in use, 0 conflicts)<br>
+&nbsp;&nbsp;DNS server: 2001:DB8:3::1<br>
+&nbsp;&nbsp;Domain name: emmanueltoko.blogspot.com<br>
+&nbsp;&nbsp;Active clients: 1
+</code></div></p>
+
+<h2><code>show ipv6 dhcp binding</code></h2>
+<p>
+To display the IPv6 link-local address of the client and the global unicast address 
+assigned by the server. This information is maintained by a stateful DHCPv6 server.
+A stateless DHCPv6 server would not maintain this information.
+</p>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+ <code>
+DHCP#<b>show ipv6 dhcp binding</b><br>                                 
+Client: FE80::C804:6FF:FE72:8                               <br>
+&nbsp;&nbsp;DUID: 00030001CA0406720006                                <br>
+&nbsp;&nbsp;Username : unassigned                                     <br>
+&nbsp;&nbsp;IA NA: IA ID 0x00040001, T1 43200, T2 69120               <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Address: 2001:DB8:3:0:99D4:6B3E:472E:EACD               <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;preferred lifetime 86400, valid lifetime 172800 <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;expires at Aug 08 2023 03:40 PM (171398 seconds)<br>
+DHCP#  
+</code></div>
+</p>
+
+
+<h2><code>show ipv6 dhcp interface &lt;interface-ID&gt;</code></h2>
+<p>
+View settings such as state of rapid-commit.
+</p>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+ <code>
+DHCP#<b>show ipv6 dhcp interface</b><br>
+GigabitEthernet1/0 is in server mode  <br>
+&nbsp;&nbsp;Using pool: DHCPV6_2001:DB8:3::/64  <br>
+&nbsp;&nbsp;Preference value: 0                 <br>
+&nbsp;&nbsp;Hint from client: ignored           <br>
+&nbsp;&nbsp;Rapid-Commit: disabled              <br>
+DHCP#
+</code></div></p>

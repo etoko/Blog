@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="330mm"
+   height="52mm"
+   viewBox="0 0 330 52"
+   version="1.1"
+   id="svg5"
+   inkscape:version="1.3 (0e150ed6c4, 2023-07-21)"
+   sodipodi:docname="IP Packet with MPLS Label.svg"
+   inkscape:export-filename="IP_Packet_MPLS_Label.png"
+   inkscape:export-xdpi="67.23"
+   inkscape:export-ydpi="67.23"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview7"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="mm"
+     showgrid="false"
+     showguides="true"
+     inkscape:zoom="1.2316035"
+     inkscape:cx="653.61942"
+     inkscape:cy="140.0613"
+     inkscape:window-width="1920"
+     inkscape:window-height="1027"
+     inkscape:window-x="-8"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer4">
+    <inkscape:grid
+       type="xygrid"
+       id="grid236"
+       originx="0"
+       originy="0"
+       spacingy="1"
+       spacingx="1"
+       units="mm"
+       visible="false" />
+    <sodipodi:guide
+       position="99.147398,31.528271"
+       orientation="0,-1"
+       id="guide7466"
+       inkscape:locked="false" />
+    <sodipodi:guide
+       position="75.665121,-10.218002"
+       orientation="0,-1"
+       id="guide7468"
+       inkscape:locked="false" />
+    <sodipodi:guide
+       position="184.04485,34.940226"
+       orientation="0,-1"
+       id="guide9801"
+       inkscape:locked="false" />
+    <sodipodi:guide
+       position="122.27197,19.373813"
+       orientation="0,-1"
+       id="guide13827"
+       inkscape:locked="false" />
+    <sodipodi:guide
+       position="90.053562,-31.099619"
+       orientation="1,0"
+       id="guide15391"
+       inkscape:locked="false" />
+    <sodipodi:guide
+       position="170.3716,-37.879714"
+       orientation="1,0"
+       id="guide15393"
+       inkscape:locked="false" />
+  </sodipodi:namedview>
+  <defs
+     id="defs2" />
+  <g
+     inkscape:groupmode="layer"
+     id="layer3"
+     inkscape:label="MPLS Label"
+     transform="matrix(1.0003681,0,0,0.69219601,-0.06068292,6.1757221)">
+    <rect
+       style="fill:none;fill-opacity:1;fill-rule:evenodd;stroke:#131f49;stroke-width:0.67945;stroke-opacity:1"
+       id="rect234"
+       width="309.80981"
+       height="42.01263"
+       x="9.9293299"
+       y="10.310913" />
+  </g>
+  <g
+     inkscape:label="Label Sections"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="matrix(1,0,0,0.68175365,0,6.515053)">
+    <rect
+       style="fill:#ddddff;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:0.251174"
+       id="rect7464"
+       width="80.034798"
+       height="41.501244"
+       x="10.052437"
+       y="10.503229" />
+    <rect
+       style="fill:#fffddd;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:0.251174"
+       id="rect7464-8"
+       width="80.034798"
+       height="41.501244"
+       x="170.26462"
+       y="10.824542" />
+    <rect
+       style="fill:#b3f898;fill-opacity:1;fill-rule:evenodd;stroke-width:0.42864"
+       id="rect7470"
+       width="79.625473"
+       height="41.54557"
+       x="90.564621"
+       y="10.381329" />
+  </g>
+  <g
+     inkscape:groupmode="layer"
+     id="layer4"
+     inkscape:label="Label Names"
+     transform="translate(0.20070323,-7.8274262)">
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:7.05556px;line-height:1.25;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583"
+       x="19.583361"
+       y="40.259232"
+       id="text13813"><tspan
+         sodipodi:role="line"
+         id="tspan13811"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:7.05556px;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;stroke-width:0.264583"
+         x="19.583361"
+         y="40.259232">Layer 2 header</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:7.05556px;line-height:1.25;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583"
+       x="180.94476"
+       y="40.384037"
+       id="text13813-4"><tspan
+         sodipodi:role="line"
+         id="tspan13811-6"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:7.05556px;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;stroke-width:0.264583"
+         x="180.94476"
+         y="40.384037">Layer 3 header</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:7.05556px;line-height:1.25;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583"
+       x="115.73368"
+       y="40.413845"
+       id="text13817"><tspan
+         sodipodi:role="line"
+         id="tspan13815"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:7.05556px;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;stroke-width:0.264583"
+         x="115.73368"
+         y="40.413845">MPLS Label</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:7.05556px;line-height:1.25;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583"
+       x="271.55145"
+       y="40.48679"
+       id="text13825"><tspan
+         sodipodi:role="line"
+         id="tspan13823"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:7.05556px;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;stroke-width:0.264583"
+         x="271.55145"
+         y="40.48679">Payload</tspan></text>
+  </g>
+</svg>

@@ -1,0 +1,1142 @@
+<h1>Authentication Authorization and Accounting</h1>
+<p>
+Authentication refers to the verification of the users accessing a device; it 
+seeks answers to the question "Who are you?". Authorization defines what resources 
+the user is allowed to access and which operations the user is allowed to perform.
+Accounting logs all user actions on the system.
+</p>
+<p>
+AAA is usually used for device access and network access. Device access provides 
+administrative access to network devices for administrative purposes.
+</p>
+<p>
+Application of AAA in network access can be used to segregate users between 
+employee access and guest access. Additionally, employee access can be further 
+refined such that some employees can access some departmental resources and others 
+should be unable to access network  resources in other departments.
+</p>
+
+<p>
+Authentication of a user can be performed using a username and password 
+combination. Certificates (PKI) can also be used to authenticate users. The 
+user may be a network device.
+</p>
+
+<p>
+Authorization defines what resources the user has access to. It can also be 
+defined as what the user actions the user is allowed to perform on a device.
+</p>
+
+<h2>AAA Components</h2>
+<p>
+AAA consists of three components: supplicant, authenticator and authentication server.
+<ol>
+  <li><b>Supplicant:</b> device requesting access; this may be a laptop, printer,  
+  smartphone. The supplicant is either requesting for network access or device 
+  access.</li>
+  <li><b>Authenticator:</b> this is the device being accessed; it is the device 
+  that is enforcing authentication (NAD). With device access, this device can be 
+  any network-connected device such as router, switch, wireless LAN controller. 
+  If the access request is for network access, the device is usually a wireless 
+  LAN controller or switch for wireless and wired network access respectively.
+  </li>
+  <li><b>Authentication server:</b> validates the identity of the client and 
+  notifies the authenticator if the client is authorized to access the network 
+  or device. This authentication uses username/password combination or certificates (PKI) 
+  to authenticate users. RADIUS is an example of an authentication services. 
+  <p>
+  Cisco systems offers Identity Services Engine (ISE) and Access Control System (ACS) 
+  to provide AAA services for a network.
+  </p>
+  </li>
+</ol>
+</p>
+
+<h2>Protocols</h2>
+<p>
+AAA can be used to authenticate users for device administration or network access:
+<ol>
+  <li><b>Device administration:</b> device access is possible through console, SSH, Telnet and  
+  HTTP(S). The network device then uses RADIUS or TACACS+ to authenticate the 
+  user's network access with the authentication server.</li>
+  <li><b>Network access:</b> users can be authenticated using 
+  protocols such as EAPoL, HTTP(S), SSL, IKEv1 and IKEv2. RADIUS, TACACS+ are 
+  used between NAD and authentication server.</li>
+</ol>
+</p>
+
+<h1>Privileges</h1>
+<p>
+Privileges are the list of commands that a user is authorized to execute. Cisco 
+defines different privilege levels with level 0, 1 and 15 defined by default. 
+Privilege 
+levels 2-14 are open for customization. The following table displays the different 
+levels of privileges in Cisco IOS:
+</p>
+<p>
+<table cellspacing="0" width="100%">
+<thead style="background:#d3d3d3; font-weight: bold;">
+<tr>
+  <td style="border-bottom:1px solid; border-top:1px solid;" width="15%">Privilege Level</td>
+  <td style="border-bottom:1px solid; border-top:1px solid;" width="15%">Origin</td>
+  <td style="border-bottom:1px solid; border-top:1px solid;">Accessibility</td>
+</tr>
+</thead>
+<tbody>
+ <tr>
+  <td  style="border-bottom:1px solid;" width="15%">0</td>
+  <td  style="border-bottom:1px solid;">Built-in</td>
+  <td  style="border-bottom:1px solid;">No access. Few commands are available.</td>
+ </tr>
+  <tr>
+  <td style="border-bottom:1px solid;">1</td>
+  <td style="border-bottom:1px solid;">Built-in</td>
+  <td style="border-bottom:1px solid;">User mode, very limited access. It is the default exec user level and 
+  provides some show commands.</td>
+ </tr> 
+ <tr>
+  <td style="border-bottom:1px solid;">15</td>
+  <td style="border-bottom:1px solid;">Built-in</td>
+  <td style="border-bottom:1px solid;">Privilege exec / enable mode, verification and full access.</td>
+ </tr> 
+ <tr>
+  <td style="border-bottom:1px solid;">2 - 14</td>
+  <td style="border-bottom:1px solid;">User-defined</td>
+  <td style="border-bottom:1px solid;">Granular control over commands users are authorised to use</td>
+ </tr> 
+</tbody>
+</table>
+</p>
+<h2>Custom Privileges</h2>
+<p> 
+These custom privilege levels are defined in the range 2 – 14. Users can then be 
+assigned these privileges based on the level of configuration depth that you would 
+like them to make on the devices.
+The default privilege for remote access (SSH, Telnet) is 1(one) while console is 15. If a privilege 
+level is not assigned to a line or user, then the default privilege is used.
+</p>
+<p>
+When configuring allowable commands to privilege levels, higher privilege levels 
+inherit commands allowed in lower privilege levels. For example assigning a 
+privilege level of 7 to a user grants the user privileges to run commands that have been 
+defined in privilege levels 0 – 6 in addition to level 7.
+</p>
+
+<p>
+The following example configuration sets the commands that the custom privilege 
+level 2 is permitted to run. Here, the user is permitted to access the configuration 
+mode and shutdown or enable interfaces only. Privilege level 2 is then assigned 
+to a user account on the local database.
+</p>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+R1(config)#<b>privilege exec level 2 configure terminal</b><br>
+R1(config)#<b>privilege configure level 2 interface</b><br>
+R1(config)#<b>privilege interface level 2 shutdown</b><br>
+R1(config)#<b>privilege interface level 2 no shutdown</b><br>
+R1(config)#<b>privilege exec level 2 show privilege</b><br>
+R1(config)#<b>username bob privilege 2 secret alice</b>
+</code></div>
+</p>
+<p>
+When the privilege level is defined on the router as in the case above, by default, 
+the router will use the local database for commands.
+</p>
+<p>
+The use of role-based access control(RBAC) provides granular control over commands 
+and privileges from a centralized point. 
+</p>
+
+
+<h3>Line Privilege</h3>
+<p>
+Privilege level can be configured for a line rather than a user (see Local Database section).
+This can be accomplished using the line command <code><b>privilege level &lt;level&gt;</b></code>.
+Here, all users who login into the device through the configured line will be 
+granted the same privilege level.
+</p>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+  R1(config)#<b>line vty 0 4</b><br>
+  R1(config-line)#<b>privilege level 10</b>
+  </code></div>
+</p>
+<p>
+If a user has a privilege configured in the local database and the user logs 
+into the device through a VTY line that has a configured privilege, the user's local database 
+configured-privilege supersedes the configured line privilege.
+</p>
+
+<h2>Verification</h2>
+<p>
+To verify privileges of the login session, use the command <code><b>show privilege</b></code>.
+</p>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+R2#<b>192.168.1.1</b>           <br>
+Trying 192.168.1.1 ... Open     <br>
+                                <br>
+User Access Verification        <br>
+                                <br>
+Username: <b>bob</b>                   <br>
+Password:                       <br>
+R1#<b>show privilege</b>               <br>
+Current privilege level is 2    <br>
+  </code></div>
+</p>
+<p>
+From the output above, the VTY line was configured with a privilege level of 10. 
+However, the user bob's session privilege is 2(two) which is the privilege 
+level configured in the local database. 
+</p>
+
+<h1>Local Database</h1>
+<p>
+The local database is a list of user accounts configured on the local device. 
+The local database contains records of the username, password and configured 
+privilege levels for users. 
+The local database supports authentication and authorization features. However, 
+it does not support accounting functionality. Authorization is 
+supported through the configuration of privilege levels.
+This database can be used to authenticate many types 
+of sessions such as login sessions.
+</p>
+<p>
+A local user database is created using the global config command 
+<code><b>username &lt;username&gt; privilege &lt;level&gt; secret &lt;password&gt;</b></code>.
+Use of the keyword <code><b>secret</b></code> is preferred to <code><b>password</b></code>
+because it encrypts the secret key in the configuration file. If <code><b>password</b></code> 
+is used, then the secret key has to be encrypted in the configuration file using 
+the command <code><b>service password encryption</b></code>.
+</p>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+R1(config)#<b>username bob privilege 1 secret alice      </b>     <br>
+R1(config)#<b>username alice privilege 1 secret bob      </b>     <br>
+R1(config)#<b>username rasta privilege 1 password reggae </b>     <br>
+R1(config)#<b>do show run | in username </b>                      <br>
+username bob privilege 2 secret 5 $1$WHSh$PYERWv2eq6ud0txH8G4id.  <br>
+username alice privilege 3 secret 5 $1$HxyA$IHet6l6lilvR7A2z7bYme.<br>
+username rasta password 0 reggae                                  <br>
+</code>
+</div>
+</p>
+
+<h2>Local Database for Authentication</h2>
+<p>
+If the local database is to be used for authenticating remote users through VTY 
+lines or local console connections, then the following commands can be used.
+</p>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+R1(config)#<b>ip domain-name emmanueltoko.blogspot.com</b>                 <br>                                                                                                                                                                                                                       
+R1(config)#<b>crypto key generate rsa modulus 2048</b>                     <br>                                                                         
+The name for the keys will be: R1.emmanueltoko.blogspot.com         <br>                                                                         
+                                                                    <br>                                                                         
+% The key modulus size is 2048 bits                                 <br>                                                                         
+% Generating 2048 bit RSA keys, keys will be non-exportable...      <br>                                                                         
+[OK] (elapsed time was 33 seconds)                                  <br>                                                                         
+                                                                    <br>                                                                         
+R1(config)#                                                         <br>                                                                         
+*Feb 22 13:29:06.599: %SSH-5-ENABLED: SSH 1.99 has been enabled     <br>                                                                                                                                                                                                                 
+R1(config)#<b>ip ssh version 2</b>                                         <br>                                                                         
+R1(config)#<b>do show ip ssh</b>                                           <br>                                                                         
+SSH Enabled - version 2.0                                           <br>                                                                         
+Authentication timeout: 120 secs; Authentication retries: 3         <br>                                                                         
+Minimum expected Diffie Hellman key size : 1024 bits                <br>                                                                         
+IOS Keys in SECSH format(ssh-rsa, base64 encoded):                  <br>                                                                         
+ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC2ErQIRNGA/SVNcDfgoGZs2KTF3nNPXPC19zUVakD9 <br>                                                             
+NGKyb88AhWu1kVJeOSBarZzivfezJY5E2QLzFw6FjZ6Tla41NOTduziwzHht2dvO3kDTCli61wW9bF5Q <br>                                                             
+ekjXc8HOwOXd2f0kslx8Il9QxELY1Sq01tPk/Q4Pgza3NOqC+oLHVLkJt5JBDn84AybjYn56OgXk1ETb <br>                                                             
+Mjj2VKy7M7WdNlhful17LHX/mkVVZSavpMfMhpjaz/Z+yHbgGsNu5r5wNS29+rMpjB4OCAbpATy/Ee1V <br>                                                             
+GsEEiQU8XChJk9kwM8ADxFJZKz5bHHlmbyiI9LS/jN3SaEtZbU2pKpQwMaKN      <br>  
+R1(config)#<b>line vty 0 4</b><br>
+R1(config-line)#<b>login local</b><br>
+R1(config-line)#<b>transport input ssh telnet</b>
+</code></div>
+</p>
+<p>
+The above command enables authentication using the local database on vty lines 
+0 to 4 (5 simultaneous remote logins). In this snippet, SSH has been enabled as 
+the primary remote access method with telnet as backup if SSH fails.
+</p>
+<p>
+<b>Note:</b> It is recommended disable remote access using telnet as it sends 
+the authentication credentials and commands to the remote device in clear text.
+</p>
+
+<h1>Device Security With AAA</h1>
+<p>
+AAA refers to authentication, authorization and accounting. It is a refined 
+approach to authenticating users, authorizing their activities and logging (accounting) 
+for all their activities and commands issued on a network device. AAA supports 
+the use of the local database, RADIUS and TACACS+ for authenticating and authorization, 
+and only RADIUS and TACACS+ for accounting.
+</p>
+
+<p>
+AAA features are not available until enabled globally using the global config 
+mode command <code><b>aaa new-model</b></code>.
+</p>
+
+<h2>Local Database</h2>
+<p>
+When implementing AAA using the local database, the router authenticates the 
+username and password using the local database and the user is authorized to 
+access the network device based on the information in the local database. Local 
+authentication is used on small networks and is not scalable.
+</p>
+<h3>Authentication with Local Database</h3>
+<p>
+<ol>
+  <li>Turn on AAA services;
+  <p>
+  <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+R1(config)#<b>aaa new-model</b>
+</code></div>
+</p>
+</li>
+<li>Create a local user:
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+R1(config)#<b>username user secret pass</b>
+</code></div>
+</p>
+</li>
+<li>Set the enable password:
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+R1(config)#<b>enable secret pass</b>
+</code></div>
+</p>
+</li>
+<li>
+Configure login authentication to use the enable password as the default method:
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+R1(config)#<b>aaa authentication login default enable</b>
+</code></div>
+</p>
+<p>
+OR
+</p>
+<p>
+Create a login authentication method named local_auth and set it to 
+authenticate users against the local database:
+</p>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+R1(config)#<b>aaa authentication login local_auth local</b>
+</code></div>
+</p>
+<li>Apply AAA authentication to the VTY lines;
+<p>
+If using the default method:
+</p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+R1(config)#<b>line vty 0 15</b><br>
+R1(config-line)#<b>login authentication default</b>
+</code></div>
+</p>
+<p>
+If using a configured authentication method:
+</p>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+R1(config)#<b>line vty 0 15</b><br>
+R1(config-line)#<b>login authentication local_auth</b>
+</code></div>
+</p>
+<li>SSH to above router: It uses the local database to authenticate;
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+R1#<b>ssh -l user7 192.168.1.1</b>
+</code></div>
+</p>
+</ol>
+</p>
+
+<h3>Authorization using Local Database</h3>
+<p>
+If authorization is enabled for a line, and <code><b>enable secret</b></code> is 
+configured, the enable secret is superseded by the aaa authorization. To enable 
+authorization,
+</p>
+<p>
+<ol>
+  <li>Create a user:
+  <p>
+  <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+  	R1(config)#<b>username user secret pass</b>
+  	</code></div>
+  </p>
+  
+  Login to the above router from the remote host: What is the privilege level?
+  </li>
+  <li>Create an exec-authorization method: Create method list local-author. 
+Configure authorization to be performed against the local router’s database
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+  	R1(config)#<b>aaa authorization exec local-author local</b>
+  </code></div>
+</p>
+</li>
+<li>Apply ‘local-author’ as an authorisation method for the vty lines
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+R1(config)#<b>line vty 0 4</b><br>
+R1(config-line)#<b>authorisation exec local-author</b>
+</code></div>
+</p>
+</li>
+<li>Telnet to router and authenticate.</li>
+</ol>
+</p>
+
+<p>
+The main drawbacks of local user authentication are:
+<ul>
+  <li>User credentials are stored locally i.e., on the device</li>
+  <li>Solution is not scalable if the network grows to hundreds of devices</li>
+  <li>More administrative overhead</li>
+  <li>No centralized control over authentication services</li>
+</ul>
+</p>
+<p>
+It is therefore recommended to deploy the services of external server-based 
+authentication such as ISE, ACS, or any other platform that supports RADIUS or 
+TACACS+ for network access control. These have the following strengths
+</p>
+
+<h2 id="RADIUS">RADIUS</h2>
+<p>
+RADIUS (Remote Authentication Dial-In User Service) is a standards-based protocol 
+for implementing AAA (RFC 2865). It combines authentication and authorization into a 
+single resource. It offers robust accounting features. The default ports for RADIUS 
+servers are 1645 for authentication and 1646 for accounting. The new RFC sets the 
+RADIUS ports on UDP to 1812 for authentication and 1813 for accounting. 
+RADIUS uses both TCP and UDP as the transport protocol.
+With RADIUS, only the password is encrypted. 
+RADIUS combines authentication and authorization features. It offers robust 
+accounting features.
+</p>
+<p>
+The RADIUS server may be located in the same subnet or remote network. All that 
+is required is for the local device to have IP connectivity to the RADIUS server.
+</p>
+
+<h3>Authentication using RADIUS</h3>
+<p>
+When configuring authentication of user credentials against a RADIUS server, the 
+local device sends the authentication credentials entered by the user to the specificed 
+IP address of the RADIUS server connecting to the port number 1812 or 1645.
+</p>
+<p>
+When configuring RADIUS authentication, ensure that a backup authentication method 
+is configured to avoid being unable to access the device due to misconfiguration 
+of the RADIUS authentication. Usually, this backup authentication method is the 
+local database. When authenticating a user login session against a RADIUS server, 
+by default, IOS will attempt to connect to the RADIUS server up to five times to make an 
+access request. If the connection attempt fails all these five times, then 
+the backup authentication method is used. 
+A RADIUS server will not respond to an access request if the requester is not 
+configured as a client. This happens regardless of whether IP connectivity 
+between the client and the server exists.
+</p>
+<p>
+RADIUS uses MD5 to generate a digest of the user's password by default.
+</p>
+<p>
+If the RADIUS server does respond with an access denied message to an authentication 
+request, then the IOS will deny access and not use the configured backup 
+authentication method.
+</p>
+
+<h3>Configuration</h3>
+<p>
+<ol>
+<li> Enable AAA with aaa new-model command;
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+R1(config)#<b>aaa new-model</b>
+</code></div>
+</p>
+</li>
+<li>
+Define the source of authentication: Use local database as last resort;
+The default RADIUS authentication port is 1645 and accounting port 1646.
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+R1(config)#<b>radius-server host 192.168.1.2 auth-port 1812 acc-port 1813</b><br>
+R1(config)#<b>radius-server host 192.168.1.2  key password</b>
+</code></div>
+</p>
+<p>
+OR
+</p>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+R1(config)#<b>radius server RADIUS_SERVER01</b><br>                                                                                                                                                                                                               
+R1(config-radius-server)#<b>address ipv4 192.168.1.2 auth-port 1812 acct-port 1813</b><br>                                                                                                                                                                                                                                                                                         
+R1(config-radius-server)#<b>key complexpassword</b><br>                                                                                                                                                                                                                                                                                                                                                            
+R1(config)#<b>radius server RADIUS_SERVER02</b><br>
+R1(config-radius-server)#<b>address ipv4 192.168.1.5 auth-port 1812 acct-port 1813</b><br>
+R1(config-radius-server)#<b>key complexkey</b>          
+</code></div>
+</p>
+<p>
+Additional interaction with the RADIUS servers can be configured using the following 
+options:
+<ul>
+  <li><b><code><b>timeout &lt;1-1000&gt;</b></code>:</b> the time to wait(in seconds) for the server to respond when 
+  requesting for an authentication attempt. If access to the first server times 
+  out, an attempt to connect to the second server is initiated.</li>
+  <li><code><b>retransmit &lt;0-100&gt;:</b></code> number of retries to active server after every failure. 
+  The default number of retransmit attempts is five times.</li>
+</ul>
+</p>
+<p>
+When configuring a server, it is automatically added to a group <code><b>radius</b></code>. If 
+a server group is explicitly configured (step below), then the server will be 
+added to this group. This can be verified using the command <code><b>show radius 
+server-group all</b></code>:
+</p>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+R1#<b>show radius server-group all</b><br>                  
+<span style="background:#d3d3d3;">Server group radius</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>          
+&nbsp;&nbsp;&nbsp;&nbsp;Sharecount = 1&nbsp;&nbsp;sg_unconfigured = FALSE                                                <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Type = standard&nbsp;&nbsp;Memlocks = 1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                      <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Server(192.168.1.2:1812,1813) Transactions:                                                      <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Authen: 0&nbsp;&nbsp; Author: 0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Acct: 0                      <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Server_auto_test_enabled: FALSE&nbsp;&nbsp;&nbsp;&nbsp;                                          <br>
+&nbsp;&nbsp;&nbsp;&nbsp; Keywrap enabled: FALSE&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  <br>        
+&nbsp;&nbsp;&nbsp;&nbsp;Server(192.168.1.5:1812,1813) Transactions:                                                      <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Authen: 0&nbsp;&nbsp; Author: 0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Acct: 0                      <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Server_auto_test_enabled: FALSE&nbsp;&nbsp;&nbsp;&nbsp;                                          <br>
+&nbsp;&nbsp;&nbsp;&nbsp; Keywrap enabled: FALSE&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  <br>        
+                                                 
+R1#
+</code></div>
+</p>
+
+</li>
+<li>
+<ol type="a">
+<li>Define a group name that will contain the list of servers:
+<code><b>aaa group server radius &lt;group-name&gt;</b></code>.
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+  R1(config)#<b>aaa group server radius RADIUS_SERVERS</b>                                                                                                                                                                           
+</code></div>
+</p>
+</li>
+<li>
+Define each server in the group <code><b>server &lt;ip-address&gt;</b></code>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+R1(config-sg-radius)#<b>server name RADIUS_SERVER01</b><br>                                                                                                                                                                                                  
+R1(config-sg-radius)#<b>server name RADIUS_SERVER02</b>
+</code></div>
+</p>
+<p>
+Alternatively, IP address or server name (requires DNS server to be configured) 
+of the RADIUS servers can be defined in place of the server names using the 
+command <code><b>server &lt;ip-address|hostname&gt;</b></code>.
+The timeout and retransmit settings can also be configured for each server in this group.
+</p>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+R1(config-sg-radius)#<b>do show radius server-group all</b> <br>
+Server group radius&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;            <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Sharecount = 1&nbsp;&nbsp;sg_unconfigured = FALSE          <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Type = standard&nbsp;&nbsp;Memlocks = 1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;            <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Server(192.168.1.2:1812,1813) Transactions:      <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Authen: 0&nbsp;&nbsp; Author: 0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Acct: 0&nbsp;&nbsp;            <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Server_auto_test_enabled: FALSE&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;            <br>
+&nbsp;&nbsp;&nbsp;&nbsp; Keywrap enabled: FALSE&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;            <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Server(192.168.1.5:1812,1813) Transactions:      <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Authen: 0&nbsp;&nbsp; Author: 0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Acct: 0&nbsp;&nbsp;            <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Server_auto_test_enabled: FALSE&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;            <br>
+&nbsp;&nbsp;&nbsp;&nbsp; Keywrap enabled: FALSE&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;            <br>
+Server group RADIUS_SERVERS&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;            <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Sharecount = 1&nbsp;&nbsp;sg_unconfigured = FALSE          <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Type = standard&nbsp;&nbsp;Memlocks = 1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;            <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Server(192.168.1.2:1812,1813) Transactions:      <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Authen: 0&nbsp;&nbsp; Author: 0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Acct: 0&nbsp;&nbsp;            <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Server_auto_test_enabled: FALSE&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;            <br>
+&nbsp;&nbsp;&nbsp;&nbsp; Keywrap enabled: FALSE&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;            <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Server(192.168.1.5:1812,1813) Transactions:      <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Authen: 0&nbsp;&nbsp; Author: 0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Acct: 0&nbsp;&nbsp;            <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Server_auto_test_enabled: FALSE&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;            <br>
+&nbsp;&nbsp;&nbsp;&nbsp; Keywrap enabled: FALSE&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;            <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;           <br>
+R1(config-sg-radius)#
+</code></div>
+</p>
+<p>
+If configuring a server as private, using <code><b>server-private</b></code> instead
+of <code><b>server</b></code>, it 
+does not get added to the group radius but is only available in the group can 
+it is defined in.
+</p>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+R1(config)#<b>aaa group server radius RADIUS_SERVERS</b><br>  
+R1(config-sg-radius)#<b>server-private 192.168.1.7 auth-port 1645 acct-port 1646 key cisco</b>
+</code></div>
+</p>
+</li>
+ </ol>
+<li>
+Configure the purpose of the authentication and method of authentication: 
+<ol type="a">
+  <li><b>Purpose of authentication:</b> authentication can be enabled for a list 
+  of services such as the following:
+  <ul>
+    <li><b>login:</b> login to the device.</li>
+    <li><b>enable:</b> executing the <code><b>enable</b></code> command to move into 
+    privileged mode. The authentication prompt for enable appears regardless of 
+    connection type i.e., console, SSH, telnet.</li>
+    <li><b>dot1x:</b> authentication by cable network access.</li>
+  </ul>
+  </li>
+  <li>
+  <b>Authentication list:</b> You can list authentication 
+methods by giving the method a descriptive name or using the unnamed ‘default’ method; 
+<code><b>aaa authentication login &lt;default | list-name method1, method2, method3&gt;</b></code>.
+  <ol type="i">
+  <li>default list: the default authentication list uses the keyword <code><b>default</b></code> to define the 
+  list;
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+R1(config)#<b>aaa authentication login default</b>
+</code></div>
+</p>
+<p>
+It is recommended to use the named list over the default list. The default list 
+keyword gets attached to console, vty lines automatically; it is common to all 
+the lines. This increases the 
+possibilities of getting locked out due to misconfiguration. With the named lists, 
+the different lines such as console, vty will require explicit configuration.
+</p>
+</li>
+<li>
+Using a named list: here, the named list AAA_AUTHENTICATION is used:
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+R1(config)#<b>aaa authentication login AAA_AUTHENTICATION </b> 
+</code></div>
+</p>
+</li>
+</ol>
+<li><b>Define the authentication method(s):</b> 
+<p>
+More than one method can be configured. The methods refer to the following;
+
+<ul>
+ <li><b>tacacs+:</b> each tacacs+ server is tried in configuration order</li>
+ <li><b>radius:</b> each radius server is tried in configuration order</li>
+ <li><b>local:</b> the local user database containing the username commands configured on the switch</li>
+ <li><b>local-case:</b> use the local database with case sensitivity.</li>
+ <li><b>enable:</b> use of the enable password for authentication.</li>
+ <li><b>line:</b> line passwords authenticate any connected user. No usernames can be used.</li>
+</ul>    
+</p>
+<p>
+The following configuration uses the enable authentication as a backup for RADIUS 
+authentication. 
+</p>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+R1(config)#<b>aaa authentication login AAA_AUTHENTICATION group radius local enable</b> 
+</code></div>
+</p>
+<p>
+The keyword <code><b>group</b></code> has the options RADIUS or TACACS and the authentication 
+request will be forwarded to the configured RADIUS groups first, the next 'local' will be 
+used if the RADIUS servers are unavailable/unreachable. Lastly, the enable password will be used 
+for authentication.
+Note: Add the local, line and/or enable methods at the end of the list as a last resort authentication method.
+</p>
+<p>
+If the authentication using RADIUS fails, the next authentication method is not used. 
+RADIUS authentication failure happens when a user account is not available in the 
+RADIUS server or when a user's password is not correct. The second authentication 
+method is only used if the RADIUS server is not reachable.
+</p>
+<p>
+However, if the local or local-case authentication method is configured as first 
+authentication method and RADIUS as second, if an authentication request fails for 
+the local method, then RADIUS authentication is attempted next. This fact can 
+be used to ensure that some users are authenticated using the local database and 
+others use RADIUS only.
+</p>
+</li>
+</ol>
+</li>
+<li>
+Apply a method list to a line (Console, VTY):
+
+To enable AAA authentication on VTY lines 0 to 4 (5 simultaneous connections).
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+R1(config)#<b>line vty 0 4</b><br>
+R1(config-line)#<b>login authentication AAA_AUTHENTICATION</b>
+</code></div>
+</p>
+</li>
+</ol>
+</p>
+<p>
+Instead the default unnamed method list can be used if method list was not defined in Step 4.
+</p>
+
+</ol>
+</li>
+
+<h3>Verification</h3>
+<p>
+RADIUS authentication can be verified using the command <code><b>debug radius authentication</b></code>.
+The following output shows an attempt to login remotely using telnet. The RADIUS 
+servers in the server group are unreachable, so the backup authentication method, 
+<code><b>local-case</b></code> is used and is successful:
+</p>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+!!On R1<br>
+<br>
+R1#<b>debug radius authentication</b><br>
+<br>
+<br>
+!--------------------------                                                                                                 <br>
+<br>
+
+!!On R2                                                                                                                     <br>
+<br>
+R2#<b>192.168.1.1</b>                                                                                                              <br>
+Trying 192.168.1.1 ... Open                                                                                                 <br>
+                                                                                                                            <br>
+User Access Verification                                                                                                    <br>
+                                                                                                                            <br>
+Username: bob                                                                                                               <br>
+Password:                                                                                                                   <br>
+                                                                                                                            <br>
+R1#                                                                                                                         <br>
+                                                                                                                            <br>
+!!! Debug messages on R1                                                                                                    <br>
+!---------------                                                                                                            <br>
+*Apr 17 22:47:31.367: RADIUS/ENCODE(00000024): ask "Username: "                                                             <br>
+*Apr 17 22:47:31.367: RADIUS/ENCODE(00000024): send packet; GET_USER                                                        <br>
+R1(config)#                                                                                                                 <br>
+*Apr 17 22:47:37.479: RADIUS/ENCODE(00000024): ask "Password: "                                                             <br>
+*Apr 17 22:47:37.483: RADIUS/ENCODE(00000024): send packet; GET_PASSWORD                                                    <br>
+R1(config)#                                                                                                                 <br>
+*Apr 17 22:47:41.855: RADIUS/ENCODE(00000024):Orig. component type = Exec                                                   <br>
+*Apr 17 22:47:41.859: RADIUS:  AAA Unsupported Attr: interface         [221] 4   1797168952                                 <br>
+*Apr 17 22:47:41.859: RADIUS/ENCODE(00000024): dropping service type, "radius-server attribute 6 on-for-login-auth" is off  <br>
+*Apr 17 22:47:41.859: RADIUS(00000024): Config NAS IP: 0.0.0.0                                                              <br>
+*Apr 17 22:47:41.859: RADIUS(00000024): Config NAS IPv6: ::                                                                 <br>
+*Apr 17 22:47:41.863: RADIUS/ENCODE(00000024): acct_session_id: 19                                                          <br>
+*Apr 17 22:47:41.863: RADIUS(00000024): sending                                                                             <br>
+*Apr 17 22:47:41.867: RADIUS/ENCODE: Best Local IP-Address 192.168.1.1 for Radius-Server 192.168.1.2                        <br>
+*Apr 17 22:47:41.867: RADIUS(00000024): Send Access-Request to 192.168.1.2:1812 id 1645/2, len 67                           <br>
+*Apr 17 22:47:41.867: RADIUS:  authenticator 83 1D 62 A3 6C FD D2 D4 - A2 59 29 65 B0 96 39 3D                              <br>
+*Apr 17 22:47:41.867: RADIUS:  User-Name           [1]   5   "bob"                                                          <br>
+*Apr 17 22:47:41.867: RADIUS:  User-Password       [2]   18  *                                                              <br>
+*Apr 17 22:47:41.867: RADIUS:  NAS                                                                                          <br>
+R1(config)#-Port            [5]   6   2                                                                                     <br>
+*Apr 17 22:47:41.867: RADIUS:  NAS-Port-Id         [87]  6   "tty2"                                                         <br>
+*Apr 17 22:47:41.867: RADIUS:  NAS-Port-Type       [61]  6   Virtual                   [5]                                  <br>
+*Apr 17 22:47:41.867: RADIUS:  NAS-IP-Address      [4]   6   192.168.1.1                                                    <br>
+*Apr 17 22:47:41.867: RADIUS(00000024): Sending a IPv4 Radius Packet                                                        <br>
+*Apr 17 22:47:41.867: RADIUS(00000024): Started 5 sec timeout                                                               <br>
+R1(config)#                                                                                                                 <br>
+*Apr 17 22:47:46.875: RADIUS(00000024): Request timed out!                                                                  <br>
+*Apr 17 22:47:46.875: RADIUS: Retransmit to (192.168.1.2:1812,1813) for id 1645/2                                           <br>
+*Apr 17 22:47:46.879: RADIUS(00000024): Started 5 sec timeout                                                               <br>
+R1(config)#                                                                                                                 <br>
+*Apr 17 22:47:51.923: RADIUS(00000024): Request timed out!                                                                  <br>
+*Apr 17 22:47:51.923: RADIUS: Retransmit to (192.168.1.2:1812,1813) for id 1645/2                                           <br>
+*Apr 17 22:47:51.927: RADIUS(00000024): Started 5 sec timeout                                                               <br>
+R1(config)#                                                                                                                 <br>
+*Apr 17 22:47:56.959: RADIUS(00000024): Request timed out!                                                                  <br>
+*Apr 17 22:47:56.959: RADIUS: Retransmit to (192.168.1.2:1812,1813) for id 1645/2                                           <br>
+*Apr 17 22:47:56.963: RADIUS(00000024): Started 5 sec timeout                                                               <br>
+R1(config)#                                                                                                                 <br>
+*Apr 17 22:48:01.979: RADIUS(00000024): Request timed out!                                                                  <br>
+*Apr 17 22:48:01.979: RADIUS: Fail-over to (192.168.1.5:1812,1813) for id 1645/2                                            <br>
+*Apr 17 22:48:01.983: RADIUS(00000024): Started 5 sec timeout                                                               <br>
+R1(config)#                                                                                                                 <br>
+*Apr 17 22:48:07.019: RADIUS(00000024): Request timed out!                                                                  <br>
+*Apr 17 22:48:07.019: RADIUS: Retransmit to (192.168.1.5:1812,1813) for id 1645/2                                           <br>
+*Apr 17 22:48:07.019: RADIUS(00000024): Started 5 sec timeout                                                               <br>
+R1(config)#                                                                                                                 <br>
+*Apr 17 22:48:12.047: RADIUS(00000024): Request timed out!                                                                  <br>
+*Apr 17 22:48:12.047: RADIUS: Retransmit to (192.168.1.5:1812,1813) for id 1645/2                                           <br>
+*Apr 17 22:48:12.051: RADIUS(00000024): Started 5 sec timeout                                                               <br>
+R1(config)#                                                                                                                 <br>
+*Apr 17 22:48:17.083: RADIUS(00000024): Request timed out!                                                                  <br>
+*Apr 17 22:48:17.083: RADIUS: Retransmit to (192.168.1.5:1812,1813) for id 1645/2                                           <br>
+*Apr 17 22:48:17.087: RADIUS(00000024): Started 5 sec timeout                                                               <br>
+R1(config)#                                                                                                                 <br>
+*Apr 17 22:48:22.111: RADIUS(00000024): Request timed out!                                                                  <br>
+*Apr 17 22:48:22.111: RADIUS: Fail-over to (192.168.1.7:1645,1646) for id 1645/2                                            <br>
+*Apr 17 22:48:22.115: RADIUS(00000024): Started 5 sec timeout                                                               <br>
+R1(config)#                                                                                                                 <br>
+*Apr 17 22:48:27.135: RADIUS(00000024): Request timed out!                                                                  <br>
+*Apr 17 22:48:27.135: RADIUS: Retransmit to (192.168.1.7:1645,1646) for id 1645/2                                           <br>
+*Apr 17 22:48:27.139: RADIUS(00000024): Started 5 sec timeout                                                               <br>
+R1(config)#                                                                                                                 <br>
+*Apr 17 22:48:32.175: RADIUS(00000024): Request timed out!                                                                  <br>
+*Apr 17 22:48:32.179: RADIUS: Retransmit to (192.168.1.7:1645,1646) for id 1645/2                                           <br>
+*Apr 17 22:48:32.183: RADIUS(00000024): Started 5 sec timeout                                                               <br>
+R1(config)#                                                                                                                 <br>
+*Apr 17 22:48:37.215: RADIUS(00000024): Request timed out!                                                                  <br>
+*Apr 17 22:48:37.215: RADIUS: Retransmit to (192.168.1.7:1645,1646) for id 1645/2                                           <br>
+*Apr 17 22:48:37.219: RADIUS(00000024): Started 5 sec timeout                                                               <br>
+R1(config)#                                                                                                                 <br>
+*Apr 17 22:48:42.243: RADIUS(00000024): Request timed out!                                                                  <br>
+*Apr 17 22:48:42.243: RADIUS: No response from (192.168.1.7:1645,1646) for id 1645/2                                        <br>
+*Apr 17 22:48:42.247: RADIUS/DECODE: No response from radius-server; parse response; FAIL                                   <br>
+*Apr 17 22:48:42.247: RADIUS/DECODE: Case error(no response/ bad packet/ op decode);parse response; FAIL                    <br>
+R1(config)#                                                                                                                
+</code></div>
+</p>
+
+
+<h3>Authorization</h3>
+<p>
+AAA authorization determines what commands an authenticated user is permitted to 
+issue to the network device. Authenticated users are by default put at EXEC level.
+Command authorization involves configuring the commands that an authenticated user 
+is permitted to use. Here, an authorization request is sent to the RADIUS server 
+each time that the user types a command. Authorization can be configured to 
+set the login session to a configured privilege. If privileges have not been 
+configured, then the default privilege is set (one for remote session and fifteen 
+for a console session).
+</p>
+<p>
+ Configuring a privilege at the line level is not recommended as all users will 
+ have the same privilege. It is recommended to set the privilege for each user.
+</p>
+<p>
+<ol>
+<li>
+Configure authorisation by defining any RADIUS or TACACS+ servers. 
+Follow steps 1 -3 of RADIUS and/or TACACS+ configurations above.
+</li>
+<li>
+Define a method list of authorisation that will be tried in sequence using;
+<code><b>aaa authorisation &lt;commands | config-commands | configuration | exec 
+| network| reverse-access&gt; &lt;default | list-name&gt; method1, method2, method3 …. methodn
+</b></code>.
+<p>
+Specify the function or service needing authorisation with one of the following keywords;
+<ul>
+    <li><b>commands:</b> the server must return permission to use any command at any privilege level</li>
+    <li><b>config-commands:</b> the server must return permission to use any configuration command.</li>
+    <li><b>configuration:</b> The server must return permission to enter configuration mode.</li>
+    <li><b>exec:</b> server must return permission for the user to run an EXEC session. 
+    The server can also return the privilege level for the user so that the user 
+    immediately can be put into privileged EXEC (enabled) mode without typing ‘enable’.</li>
+    <li><b>network:</b> the server must return permission to use network-related services.</li>
+    <li><b>reverse-access:</b> the server must return permission for the user to access a reverse telnet session.</li>
+  </ul>
+</p>
+<p>
+You can identify the method with a descriptive name (list-name) or use the single 
+unnamed list (default). Each authorisation method will be listed in the order it will be tried;
+<ul>
+  <li><b>group &lt;group-name&gt;:</b> requests are sent to servers in a group.</li>
+  <li><b>group &lt;radius|tacacs+:</b> requests are sent to all servers of this type.</li>
+  <li><b>if-authenticated:</b> requests are granted if the user is already authenticated.</li>
+  <li><b>none:</b> no external authorisation is used; every user is authorised successfully.</li>
+ </ul>  
+</p>
+<p>
+Only TACACS+ servers can authorise users with permission to use specific commands. 
+RADIUS servers offer more of an all or nothing approach.
+</p>
+</li>
+<li>
+Apply an authorisation method list to a specific line;
+<code><b>authorization &lt;commands level | exec | reverse-access&gt; &lt;default | list-name&gt;</b></code>.
+
+If this command is not entered, the default group is used for all lines.
+
+To configure a switch / router to use AAA authorisation for all lines using 
+configured TACACS+ group, with the local user database as backup authorisation.
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+R1(config)#<b>aaa authorisation exec aaa-exec group tacacs+ local</b>
+</code></div>
+</p>
+<p>
+Another example:
+</p>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+R1(config)#<b>aaa authorisation exec VTY group radius local</b>
+</code></div>
+</p>
+<p>
+Here authorization is attempted using configured RADIUS servers; if this fails, 
+then the local database is used as backup.
+</p>
+</li>
+<li>
+Apply the authorization to the line:
+<ol type="a">
+  <li>For remote sessions(vty):
+  <p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+R1(config)#<b>line vty 0 98</b><br>
+R1(config-line)#<b>authorization exec VTY</b>
+</code></div>
+</p>
+  </li>
+  <li>For console sessions:
+  <p>
+  Authorization is not enabled on console by default. It should be explicitly 
+  enabled first.
+  </p>
+  <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+R1(config)#<b>aaa authorization console</b><br>
+</code></div>
+  <p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+R1(config)#<b>line console 0</b><br>
+R1(config-line)#<b>authorization exec CON</b><br>
+</code></div>
+</p>
+</li>
+  </li>
+</ol>
+</li>
+</ol>
+
+<h3><code>autocommand logout</code></h3>
+<p>
+Given a user, bob, if we want to ensure that this account is authenticated for 
+some purposes but not for login, one option available is not to use the aaa 
+authentication for login. Another option is to use <code><b>username bob autocommand logout</b></code>.
+Under authorization, <code><b>aaa authorization exec default local group MYRADIUS</b></code>.
+</p>
+<h1>Accounting</h1>
+<p>
+AAA accounting logs all actions including configurations and show commands issued
+on the network device. To configure accounting, the following sequence of commands 
+needs to be configured;
+</p>
+<p>
+Enable AAA and configure RADIUS and TACACS+ server groups as described in 
+steps 1 -3 of RADIUS and TACACS+ authentication procedures.
+
+Define a method list giving a sequence of accounting methods;
+
+<code><b>
+aaa accounting [system | exec | commands &lt;level&gt;] [default | &lt;list-name&gt;] [start | stop | stop-only | wait-start | none] [method1 method2 method3 ..methodn]
+</b></code>. 
+<p>
+The function triggering the accounting can be one of the following;
+<ul>
+ <li><b>system:</b> major events such as reloading are recorded.</li>
+ <li><b>exec:</b> user authentication into an EXEC session is recorded along 
+ with the user’s address, time, duration.</li>
+ <li><b>commands level:</b> information about any command running at a specific privilege 
+    level is recorded, along with the user who issued the command.</li>
+ </ul>
+</p>
+<p>
+You can specify that certain types of accounting records to be sent to the accounting server using;
+<ul>
+ <li><b>start-stop:</b> events are recorded when they start and stop-only</li>
+ <li><b>stop-only:</b> event are recorded only when they stop.</li>
+ <li><b>none:</b> no events are recorded.</li>
+</ul>
+</p>
+<p>
+Apply an accounting method list to a specific line;
+<code><b>accounting &lt;commands level | connection | exec&gt; &lt;default | list-name&gt;</b></code>.
+If the above command is not used, default group will be used for all lines. 
+User EXEC sessions will be recorded as they start and stop along with user information. 
+Any commands that are entered while a user is in privilege 15 (enable mode) will also b recorded.
+</p>
+<p>
+Example:
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+R1(config)#<b>aaa accounting exec default start-stop group myauthserver</b><br>
+R1(config)#<b>aaa accounting commands 15 default start-stop group myauthserver</b>
+</code></div>
+</p>
+
+
+<h2>TACACS+</h2>
+<p>
+Developed by Cisco systems, it is mainly used for device administration using 
+ACS servers. It uses TCP port 49 for both the client and server. TACACS+ does 
+not support EAPoL.
+</p>
+<p>
+In networks 
+supporting TACACS+ and RADIUS, it is common for TACACS+ to be used for device 
+administration and RADIUS for network access.
+</p>
+
+
+<h3>Authentication using TACACS+</h3>
+<p>
+TACACS+ (Terminal Access Controller Access Control System) is Cisco-proprietary 
+and uses port 49 on TCP (but also UDP). It provides separate services for 
+authentication, authorisation and accounting. TACACS+ offers basic accounting features. 
+Unlike RADIUS where only the password is encrypted, with TACACS+, the entire packet is encrypted.
+</p>
+
+<h4>Configuration</h4>
+<ol>
+<li>
+Enable AAA:
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+R1(config)#<b>aaa new-model</b>
+</code></div>
+</p>
+</li>
+<li>
+Configure TACACS+ server settings on the client:
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+R1(config)#<b>tacacs server TACACS+_SERVER01         </b><br>                                                                                                                                                                                                      
+R1(config-tacacs-server)#<b>address ipv4 192.168.1.2 </b><br>                                                                                                                                                                                                                                                                                        
+R1(config-tacacs-server)#<b>key complexpassword      </b><br>                                                                                                                                                                                                                                                                                                                                                      
+R1(config)#<b>tacacs server TACACS+_SERVER02         </b><br>
+R1(config-tacacs-server)#<b>address ipv4 192.168.1.5 </b><br>
+R1(config-tacacs-server)#<b>key complexkey           </b><br>
+</code></div>
+</p>
+<p>
+The TACACS+ port does not need to be explicitly configured as the default port 
+of 49 is used. However, it can be explicitly configured if the TACACS+ server is
+listening on a port that is not the default TCP port 49.
+</p>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+R1(config-tacacs-server)#<b>port 65000</b>
+</code></div>
+</p>
+<p>
+Some prefer to configure TACACS+ server settings using the command 
+<code><b>tacacs-server host &lt;server-ip-address&gt;</b></code>. 
+</p>
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+  R1(config)#<b>tacacs-server host 192.168.1.2</b><br>
+  R1(config)#<b>tacacs-server key complexpassword</b>
+  </code></div>
+  </p>
+</li>
+<li>
+Configure TACACS+ server groups;
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+R1(config)#<b>aaa group server tacacs+ TACACS+_SERVER_GROUP</b><br>                                                                                                                                                                           
+R1(config-sg-tacacs)#<b>server name TACACS+_SERVER01</b><br>                                                                                                                                                                                                  
+R1(config-sg-tacacs)#<b>server name TACACS+_SERVER02</b><br>
+</code></div>
+</p>
+</li>
+<li>
+Create a login authentication method named ‘AAA_AUTHENTICATION’ and 
+configure it to authenticate against a TACACS+ server. The local user database 
+should be the backup authentication method.
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+R1(config)#<b>aaa authentication login AAA_AUTHENTICATION group tacacs+ local</b>
+</code></div>
+</p>
+</li>
+<li>
+Apply ‘AAA_AUTHENTICATION’ method to vty lines
+<p>
+<div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
+  <code>
+R1(config)#<b>line vty 0 4</b><br>
+R1(config-line)#<b>login authentication AAA_AUTHENTICATION</b>
+</code></div>
+</p>
+</li>
+<li>
+Telnet above router. What credentials were used and why?
+</li>
+</ol>
+
+<h1>Cisco Authentication Servers</h1>
+<p>
+Cisco offers access control system (ACS) and Identity Services Engine(ISE) servers 
+as physical hardware or virtual images to implement access authentication. 
+ACS and ISE support RADIUS and TACACS+:
+<ul>
+  <li><b>Access Control System (ACS):</b>
+    <ul>
+      <li>Used for both device access and network access</li>
+      <li>Supports both RADIUS and TACACS+ with TACACS+ particularly used for 
+      device access.</li>
+    </ul>
+  </li>
+  <li><b>Identity Services Engine (ISE):</b>
+    <ul>
+      <li>Mainly used for network access.</li>
+      <li>Mainly uses RADIUS. However, starting ISE 2.0, TACACS+ support has been 
+      added.</li>
+      <li>Supports RADIUS with Change of authorization (CoA).</li>
+      <li>Supports additional features such as profiling such as granting 
+      access to specific devices only, security posture 
+      assessment of the end-user device (device must meet certain minimum requirements), 
+      web portal services such as for guest user access.</li>
+    </ul>
+  </li>
+</ul>
+</p>
