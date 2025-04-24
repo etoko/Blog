@@ -34,7 +34,7 @@ management planes. Such traffic includes:
 </ul>
 </p>
 
-<<<<<<< HEAD
+
 <h3>Control Plane Traffic Types</h3>
 <p>
 Control plane protection categorizes control plane traffic into three types:
@@ -47,8 +47,7 @@ Control plane protection categorizes control plane traffic into three types:
 	for management purposes e.g. SSH, HTTP, SNMP</li>
 </ul>
 </p>
-=======
->>>>>>> b6892fc93cf977e8ae83c685ab0f26b5383567ba
+
 
 
 <h3>Why protect the CPU</h3>
@@ -825,8 +824,8 @@ R1#
 </code></div>
 </p>
 
-<<<<<<< HEAD
-=======
+
+
 <h1>Advanced CoPP Techniques</h1>
 
 <h2>Control Plane Protection (CPPr)</h2>
@@ -875,7 +874,7 @@ policy-map COPP-PARENT<br>
 &nbsp;&nbsp;&nbsp;  service-policy COPP-CHILD<br>
   </code></div>
 </p>
->>>>>>> b6892fc93cf977e8ae83c685ab0f26b5383567ba
+
 
 <h1>Troubleshooting</h1>
 <p>
@@ -983,12 +982,12 @@ The following are some recommended best practices to consider when setting up Co
 	<li>Consider two-rate policiing where a sustained rate is maintained (cir) and a peak rate (PIR) with 
 	corresponding burst sizes offering more flexibility in handling temporary bursts of legitimate traffic. Use the 
 	command <code><b>police cir bc pir be</b></code></li>
-<<<<<<< HEAD
-=======
+
+
 	<li>Log exceed traffic: addthe <code><b>exceed-action drop log</b></code> to monitor attacks.</li>
 	<li>Comine with control plane protection (CPP/CPPr): for granular control implement separate queues for management, 
 		routing etc.</li>
 	<li>Start with Cisco's recommended CoPP templates (Aggressive, Moderate, Lenient).</li>
->>>>>>> b6892fc93cf977e8ae83c685ab0f26b5383567ba
+
 </ul>
 </p>
