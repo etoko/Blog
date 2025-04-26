@@ -15,7 +15,7 @@
 
 <p>
 An Access Control List (ACL) is a sequential list of rules containing permit 
-or/and deny statements, that are used to match packets. When applied to interfaces, 
+or deny statements, that are used to match packets. When applied to interfaces, 
 ACLs are used to perform a network control service. Each rule in the ACL is known 
 as an Access Control Entry (ACE); sometimes referred to as ACL statements. 
  
@@ -56,15 +56,15 @@ The most common application of ACLs, in enterprise networks, is in packet filter
 By default, routers do not filter traffic; they examine the destination IP address 
 of an IPv4/IPv6 packet and refer to the routing table to determine the egress 
 interface. When an ACL is applied to a router interface:
-<ul>
+<ol>
   <li>It evaluates all transiting packets</li>
   <li>Determines if a packet is permitted or denied based on the ACEs.</li>
-</ul>
+</ol>
 
 A router processing an ACL checks the header 
-of each packet to determine whether it matches the criteria specified in each ACE 
+of each packet to determine whether it matches the criteria specified in any ACE 
 of an ACL. If a match is found, the packet is forwarded or dropped as specified 
-in the ACE (permit or deny):
+in the ACE (permit or deny) and further processing of the ACL ends:
 
 <ul>
   <li>A permit action allows the packet through.</li>
@@ -125,7 +125,7 @@ R2(config-std-nacl)#<b>5 deny 192.168.3.0 0.0.0.255</b><br>
 <h1>Wildcard Bits</h1>
 <p>
 ACLs use wildcard bits and not subnet masks to match  binary 0s and 1s of 
-the IP address. Wildcard bits allow for more 
+the IP address. Unlike subnet masks, wildcard masks use 0 = ignore, 1 = match. Wildcard bits allow for more 
 specific matching of traffic compared to subnet masks. The bits that are set to 
 zero in a wildcard bit must match. For example;
 172.16.1.1 0.15.255.255 matches addresses in the range 172.16.1.1 172.31.255.255.
@@ -153,7 +153,7 @@ i.e., 255.255.255.255 (/24).
 <h3>Example 1</h3>
 <p>
  If an 
- IP address 192.168.1.0 has a subnet mask of 255.255.255.0, then the wilcard 
+ IP address 192.168.1.0 has a subnet mask of 255.255.255.0, then the wildcard 
  bits can be determined as follows:
 <div class="separator" style="clear: both;"><a href="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjF1Js_U6K2uu4fBaM4MZz2-PPkdJnNgTGpW_uplOQVMuAZ_XXzhoC2RCbSxgG_v-azsVVDPynkrYVj3giu2n4Uq52yVpJ1oS8rSvL0zI56oCBQ3nt1cUHfuXcwk0Pyo_mEvUOO-42IlQ1tW35ONR8ruYEv4QtieAs155YkXpXqux7DEVEQRdUn3ouesIA/s278/wildcard_bit.png" style="display: block; padding: 1em 0; text-align: center; "><img alt="" border="0" width="320" data-original-height="196" data-original-width="278" src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjF1Js_U6K2uu4fBaM4MZz2-PPkdJnNgTGpW_uplOQVMuAZ_XXzhoC2RCbSxgG_v-azsVVDPynkrYVj3giu2n4Uq52yVpJ1oS8rSvL0zI56oCBQ3nt1cUHfuXcwk0Pyo_mEvUOO-42IlQ1tW35ONR8ruYEv4QtieAs155YkXpXqux7DEVEQRdUn3ouesIA/s320/wildcard_bit.png"/></a></div>
 </div>
@@ -222,15 +222,19 @@ An example can be <code><b>access-list 1 permit 0.0.0.0 255.255.255.255</b></cod
 </p>
 
 
-<h1>ACL Placement</h1>
+<h1>ACL Best Practices</h1>
 <p>
-The recommendation for placement of ACLs is for one ACL, per interface 
- per direction (ingress or egress), per protocol (IPv4 or IPv6).
-The best location for the placement of ACLs is as close to the source of the 
+The following are best practices to consider when configuring ACLs:
+<ul>
+	<li><b>Placement:</b>
+    <ul>
+    <li>The recommendation for placement of ACLs is for one ACL, per interface 
+	    per direction (ingress or egress), per protocol (IPv4 or IPv6).</li>
+ 
+    <li>The best location for the placement of ACLs is as close to the source of the 
 traffic as possible. This helps with saving network bandwidth by blocking traffic 
 before it consumes network bandwidth. However, this may depend on the network 
-design and type of ACL:
- <ul>
+design and type of ACL:</li>
    <li><b>Extended ACLs</b> are usually placed near the source; undesirable 
  traffic is denied close to the source. This minimizes the waste of available network 
  bandwidth with traffic that will be subsequently dropped.</li>
@@ -239,17 +243,19 @@ design and type of ACL:
  destination addresses. This reduces the 
  possibility of inadvertently blocking traffic that should be permitted.
  </li>
- </ul>
-</p>
-
-<p>
+<li>
 Additional factors that may determine the placement of ACLs include:
 <ul>
   <li>The available network bandwidth</li>
   <li>Ease of configuration</li>
   <li>Scope of administrative control over the network</li>
 </ul>
+</li>
+ </ul>
+ <li><b>Optimize ACL order:</b> most frequent matches should be placed at the top of the ACL</li>
+</ul>
 </p>
+
 
 <p>
 When applying an ACL to filter traffic, the following keywords are used:
@@ -1021,8 +1027,9 @@ R1(config-ext-nacl)#<b>deny tcp any any fragments</b>
 <h1 id="ACL_REF">Reflexive ACLs (IP Session Filtering)</h1>
 
 <p>
-Reflexive ACLs enable a router to implement security features that firewalls 
-implement where a network is labelled an inside network and another network 
+Reflexive ACLs enable a router to implement stateful filtering that firewalls 
+implement where return traffic for established sessions is dynamically allowed. 
+A network is labelled an inside network and another network 
 labelled as an outside (and considered unsafe). Connections initiated by hosts in the inside 
 network to hosts in the outside network are permitted. Also permitted is return 
 traffic. Traffic initiated by hosts in the outside network is denied. 
@@ -1783,6 +1790,16 @@ When sending ACL syslogs to logging buffer, one can filter one these identifiers
 </ol>
 </p>
 
+<h1 id="TROUBLE">Verification and Troubleshooting</h1>
+<p>
+Some key commands include:
+<ul>
+	<li><code><b>show access-lists</b></code>: displays configured ACLs</li>
+	<li><code><b>show ip interface</b></code>: displays any ACLs configured on a port.</li>
+	<li><code><b>debug ip packet &lt;acl_num&gt;:</b></code> debugs packets matching an ACL</li>
+</ul>
+</p>
+
 <h1 id="IPv6">IPv6 ACLs</h1>
 <p>
 By default, IPv6 access-lists add permit statements that are necessary for IPv6 
@@ -1790,7 +1807,7 @@ to function.
 IPv6 ACls are only named extended ACLs. They offer similar features to IPv4 extended ACLs.
 
  
-IPv6 ACLs use the prefix length instead of wilcard masks to match.
+IPv6 ACLs use the prefix length instead of wildcard masks to match.
 The host keyword can also be used with IPv6 ACLs.
 </p>
 <p>
