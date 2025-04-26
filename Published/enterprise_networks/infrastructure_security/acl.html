@@ -226,7 +226,9 @@ An example can be <code><b>access-list 1 permit 0.0.0.0 255.255.255.255</b></cod
 <p>
 The following are best practices to consider when configuring ACLs:
 <ul>
-	<li><b>Placement:</b>
+    <li><b>Optimize ACL order:</b> most frequent matches should be placed at the top of the ACL minimize 
+    ACL processing time.</li>
+    <li><b>Placement:</b>
     <ul>
     <li>The recommendation for placement of ACLs is for one ACL, per interface 
 	    per direction (ingress or egress), per protocol (IPv4 or IPv6).</li>
@@ -235,6 +237,7 @@ The following are best practices to consider when configuring ACLs:
 traffic as possible. This helps with saving network bandwidth by blocking traffic 
 before it consumes network bandwidth. However, this may depend on the network 
 design and type of ACL:</li>
+    <ul>
    <li><b>Extended ACLs</b> are usually placed near the source; undesirable 
  traffic is denied close to the source. This minimizes the waste of available network 
  bandwidth with traffic that will be subsequently dropped.</li>
@@ -243,6 +246,7 @@ design and type of ACL:</li>
  destination addresses. This reduces the 
  possibility of inadvertently blocking traffic that should be permitted.
  </li>
+    </ul>
 <li>
 Additional factors that may determine the placement of ACLs include:
 <ul>
@@ -252,7 +256,6 @@ Additional factors that may determine the placement of ACLs include:
 </ul>
 </li>
  </ul>
- <li><b>Optimize ACL order:</b> most frequent matches should be placed at the top of the ACL</li>
 </ul>
 </p>
 
@@ -275,7 +278,7 @@ The ACL naming recommendations include the following:
   <li>Name cannot contain spaces or punctuation marks.</li>
   <li>ACL name cannot begin with a number</li>
   <li>ACL name must be unique; ACLs of different types cannot have the same name</li>
-  <li>ACL name can have a mixture alphanumeric characters</li>
+  <li>ACL name can have alphanumeric characters</li>
   <li>Recommended that the ACL name be written in capital letters</li>
   <li>ACL names are locally significant. Multiple routers on the network can be 
   configured to have the same name</li>
@@ -304,7 +307,7 @@ time-based ACLs, reflexive ACLs, and Dynamic ACLs.
 </p>
 
 
-<h1>Standard Access Control Lists</h1>
+<h2>Standard Access Control Lists</h2>
 <p>
 A standard ACL filters traffic based on source IP address of the packet. 
 Standard ACLs can be named or numbered. If an ACL number is used to define the  
@@ -315,7 +318,7 @@ ACL, standard ACLs have two numbered ranges; 1-99 and 1300-1999 (expanded).
 
 </p>
 
-<h2>Named Standard ACLs</h2>
+<h3>Named Standard ACLs</h3>
 <p>
 Named standard ACLs can be uniquely identified by the name. The name of the ACL 
 is guided by the ACL naming recommendations <a href="#ACL_NAMES">previously discussed</a>.
@@ -337,10 +340,8 @@ To configure a named standard ACL:
   </p>
   </li>
   
-  <li><b>Specify the permit or deny statements:</b> using the command <code><b>
-  [permit | deny] {&lt;ip-address&gt; &lt;wildcard-mask&gt; | any}</b></code>. If specifying 
-  a specific host IP address, use the <code><b>host</b></code> keyword instead of 
-  adding the wildcard bit <code><b>0.0.0.0</b></code> using the command
+  <li><b>Define the ACE: </b> specify the permit or deny statement using the command <code><b>
+  [permit | deny] {&lt;ip-address&gt; &lt;wildcard-mask&gt; | any}</b></code>. 
   <code><b>
   [permit | deny] host &lt;ip-address&gt;</b></code>
   <p>
@@ -351,7 +352,7 @@ To configure a named standard ACL:
   </code></div>
   </p>
   </li>
-  <li><b>Apply the ACL to the interface</b> using the interface mode command  
+  <li><b>Apply the ACL:</b> for traffic filtering, the ACL is applied to an interface using the interface mode command  
     <code><b>ip access-group &lt;ACL-NAME&gt; [in | out]</b></code>.
     <p>
     <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
@@ -458,7 +459,7 @@ To modify a standard numbered ACL:
   the ACL mode command <code><b>no &lt;acl-number&gt;</b></code>. 
   </li>
   <li>
-  Enter the new ACE
+  Enter the new ACE specifying its sequence number to replace the recently deleted ACE with the same sequence number.
   </li>
 </ol>
 </p>
@@ -570,13 +571,8 @@ GigabitEthernet0/0 is up, line protocol is up                      <br>
 
 <h1 id="ACL_EXT">Extended Access Control Lists</h1>
 <p>
-Compared to standard ACLs, extended ACLs provide granular control over 
-traffic filtering. 
-Extended ACLs can be numbered or named. Numbered extended ACLs are configured with 
-an ACL ID in the range from 100 - 199 and 2000 - 2699.
-</p>
-<p>
-Extended ACLs filter traffic based on the following parameters:
+Extended ACLs provide granular control over packet matching than standard ACLs. 
+Extended ACLs match packets based on the following parameters:
 <ul>
   <li>Protocol type i.e., IP, ICMP, EIGRP, OSPF, TCP, UDP etc.</li>
   <li>Source IP address</li>
@@ -586,7 +582,11 @@ Extended ACLs filter traffic based on the following parameters:
 </ul>
 </p>
 <p>
-Extended ACLs support many layer 3 and layer 4 protocols. The protocols are 
+Extended ACLs can be numbered or named. Numbered extended ACLs are configured with 
+an ACL number in the range from 100 - 199 and 2000 - 2699.
+</p>
+<p>
+Extended ACLs support many layer 3 and layer 4 protocol names. The protocols are 
 defined using the protocol name or number. Some supported protocol names include:
 eigrp, esp, ip, ospf, tcp, udp, icmp, gre. The  supported protocol numbers are 
 in the range 0 - 255. TCP has a protocol number of 6, UDP 17, OSPF 89.
@@ -597,15 +597,31 @@ sequence number of the ACE. When modifying an existing ACE, it should first be
 deleted using the command <code><b>no &lt;sequence-number&gt;</b></code>. Then 
 the new ACE can be entered with the same sequence number as the deleted one. Adding 
 a new ACE without indicating the sequence number adds it to the bottom of the ACL 
-and generates the highest sequence number for the ACE.
+by generating the highest sequence number for the ACE.
 </p>
+
+
+
+<h2>Configuration</h2>
 <p>
-The command to configure an extended ACL is: <code><b>
-ip access-list extended &lt;100 – 199 | 2000 - 2699 | acl-name&gt; &lt;permit or deny&gt; 
-&lt;protocol&gt; [host] &lt;source-network&gt; &lt;wildcard-bits&gt; [&lt;operator&gt; port-number] 
-&lt;destination-network&gt; &lt;wildcard-bits&gt; [&lt;operator&gt; port-number]
-</b></code>
-</p>
+To configure an extended ACL:
+    <ol type="a">
+      <li><b>Classic numbered extended ACL:</b> 
+  using the command:
+  <ol type="i">
+	  <li>  <code><b>access-list 
+				  &lt;100-199 | 2000-2699&gt;</b></code></li>
+	  <li><code><b>[permit | deny] &lt;protocol&gt; &lt;source-ip&gt; &lt;wildcard&gt; [ &lt;operator&gt; source-port] 
+				  &lt;destination-ip&gt; &lt;wildcard&gt; [ &lt;operator&gt; destination-port]</b></code></li>
+  </ol>
+  </li> 
+  <li><b>Modern extended ACL:</b>
+	  <ol type="i">
+      <li><code><b>ip access-list extended &lt;name | 100-199 | 2000-2699&gt;</b></code></li>
+      <li><code><b>[permit | deny] &lt;protocol&gt; &lt;source-ip&gt; &lt;wildcard&gt; [&lt;operator&gt; source-port] 
+			      &lt;destination-ip&gt; &lt;wildcard&gt; [&lt;operator&gt; destination-port]</b></code></li>
+	  </ol>
+
 <p>
 The operator can be any of the following:
 <ul>
@@ -615,48 +631,22 @@ The operator can be any of the following:
   <li><b>lt:</b> match ports less than</li>
 </ul>
 </p>
-<p>
-A remark can be added to an ACL to describe the purpose of the ACL.
-</p>
-
-
-
-<h2>Configuration</h2>
-<p>
-To configure an extended ACL:
-<ol>
-  <li><b>Define the extended ACL:</b> 
-    <ol>
-      <li><b>Classic numbered extended ACL:</b> 
-  using the command <code><b>access-list 
-  &lt;100-199 | 2000-2699&gt; [permit | deny] &lt;protocol&gt; &lt;source-ip&gt; [source-port] 
-  &lt;destination-ip&gt; [destination-port]</b></code>.
-  </li> 
-  <li><b>Modern extended ACL:</b>
-    <code><b>ip access-list extended  
-  &lt;name | 100-199 | 2000-2699&gt; [permit | deny] &lt;protocol&gt; &lt;source-ip&gt; [source-port] 
-  &lt;destination-ip&gt; [destination-port]</b></code>.
-  </li>
-  </ol>
-  <p>
   <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
   	<code>
 R2(config)#<b>ip access-list extended ACL_DENY_172.31.33.3</b>
-</code></div>
-</p>
-  </p>
-  </li>
-  <li>Specify the condition, protocol, destination and source addresses:  
-  permit or match
-  <p>
-  <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
-  	<code>
   R2(config-ext-nacl)#<b>deny ip 192.168.12.0 0.0.0.3 host 172.31.33.3</b><br>
   R2(config-ext-nacl)#<b>permit tcp 192.168.12.0 0.0.0.3 host 172.31.33.3 eq www</b><br>
   R2(config-ext-nacl)#<b>permit ip any any</b>
   </code></div>
   </p>
+  </li>
+  </ol>
+  </p>
+
+<p>
+A optional remark can be added to an ACL to describe the purpose of the ACL.
+</p>
   </li>
 </ol>
 </p>
