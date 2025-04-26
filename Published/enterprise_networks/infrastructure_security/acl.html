@@ -125,7 +125,7 @@ R2(config-std-nacl)#<b>5 deny 192.168.3.0 0.0.0.255</b><br>
 <h1>Wildcard Bits</h1>
 <p>
 ACLs use wildcard bits and not subnet masks to match  binary 0s and 1s of 
-the IP address. Unlike subnet masks, wildcard masks use 0 = ignore, 1 = match. Wildcard bits allow for more 
+the IP address. Unlike subnet masks, wildcard masks use 0 = match, 1 = ignore. Wildcard bits allow for more 
 specific matching of traffic compared to subnet masks. The bits that are set to 
 zero in a wildcard bit must match. For example;
 172.16.1.1 0.15.255.255 matches addresses in the range 172.16.1.1 172.31.255.255.
