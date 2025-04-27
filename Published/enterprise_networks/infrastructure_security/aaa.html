@@ -1,5 +1,8 @@
-<h1>Authentication Authorization and Accounting</h1>
+<h1>Introduction</h1>
 <p>
+AAA refers to authentication, authorization and accounting. It is a refined 
+approach to authenticating users, authorizing their activities and logging (accounting) 
+for all their activities and commands issued on a network device.
 Authentication refers to the verification of the users accessing a device; it 
 seeks answers to the question "Who are you?". Authorization defines what resources 
 the user is allowed to access and which operations the user is allowed to perform.
@@ -17,14 +20,8 @@ should be unable to access network  resources in other departments.
 </p>
 
 <p>
-Authentication of a user can be performed using a username and password 
-combination. Certificates (PKI) can also be used to authenticate users. The 
-user may be a network device.
-</p>
-
-<p>
-Authorization defines what resources the user has access to. It can also be 
-defined as what the user actions the user is allowed to perform on a device.
+One of the methods of authentication of users is username and password 
+combination. Certificates (using PKI) can also be used to authenticate users.
 </p>
 
 <h2>AAA Components</h2>
@@ -44,13 +41,14 @@ AAA consists of three components: supplicant, authenticator and authentication s
   notifies the authenticator if the client is authorized to access the network 
   or device. This authentication uses username/password combination or certificates (PKI) 
   to authenticate users. RADIUS is an example of an authentication services. 
+  </li>
+</ol>
+</p>
+
   <p>
   Cisco systems offers Identity Services Engine (ISE) and Access Control System (ACS) 
   to provide AAA services for a network.
   </p>
-  </li>
-</ol>
-</p>
 
 <h2>Protocols</h2>
 <p>
@@ -86,13 +84,13 @@ levels of privileges in Cisco IOS:
  <tr>
   <td  style="border-bottom:1px solid;" width="15%">0</td>
   <td  style="border-bottom:1px solid;">Built-in</td>
-  <td  style="border-bottom:1px solid;">No access. Few commands are available.</td>
+  <td  style="border-bottom:1px solid;">No access to privileged mode. Few commands are available.</td>
  </tr>
   <tr>
   <td style="border-bottom:1px solid;">1</td>
   <td style="border-bottom:1px solid;">Built-in</td>
   <td style="border-bottom:1px solid;">User mode, very limited access. It is the default exec user level and 
-  provides some show commands.</td>
+	  provides some <code><b>show</b></code> commands.</td>
  </tr> 
  <tr>
   <td style="border-bottom:1px solid;">15</td>
@@ -151,7 +149,7 @@ and privileges from a centralized point.
 
 <h3>Line Privilege</h3>
 <p>
-Privilege level can be configured for a line rather than a user (see Local Database section).
+Privilege level can be configured for a line rather than a user (see <a = href="#LOCAL_DB">Local Database section</a>).
 This can be accomplished using the line command <code><b>privilege level &lt;level&gt;</b></code>.
 Here, all users who login into the device through the configured line will be 
 granted the same privilege level.
@@ -193,7 +191,7 @@ However, the user bob's session privilege is 2(two) which is the privilege
 level configured in the local database. 
 </p>
 
-<h1>Local Database</h1>
+<h1 id="LOCAL_DB">Local Database</h1>
 <p>
 The local database is a list of user accounts configured on the local device. 
 The local database contains records of the username, password and configured 
@@ -266,20 +264,15 @@ The above command enables authentication using the local database on vty lines
 the primary remote access method with telnet as backup if SSH fails.
 </p>
 <p>
-<b>Note:</b> It is recommended disable remote access using telnet as it sends 
+<b>Note:</b> It is recommended disable remote access using Telnet as it sends 
 the authentication credentials and commands to the remote device in clear text.
 </p>
 
 <h1>Device Security With AAA</h1>
 <p>
-AAA refers to authentication, authorization and accounting. It is a refined 
-approach to authenticating users, authorizing their activities and logging (accounting) 
-for all their activities and commands issued on a network device. AAA supports 
+Device security can be enhanced when the AAA feature is enabled. AAA supports 
 the use of the local database, RADIUS and TACACS+ for authenticating and authorization, 
 and only RADIUS and TACACS+ for accounting.
-</p>
-
-<p>
 AAA features are not available until enabled globally using the global config 
 mode command <code><b>aaa new-model</b></code>.
 </p>
