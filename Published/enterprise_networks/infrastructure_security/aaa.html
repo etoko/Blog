@@ -312,18 +312,19 @@ R1(config)#<b>enable secret pass</b>
 </p>
 </li>
 <li>
-Configure login authentication to use the enable password as the default method:
+Enable login to use AAA authentication: use one of two available methods default or named
+    <ul>
+	    <li><b>default method:</b>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
   <code>
 R1(config)#<b>aaa authentication login default enable</b>
 </code></div>
 </p>
+	    </li>
+	    <li><b>Named method:</b> create a method whose name will be referenced on the VTY lines
 <p>
-OR
-</p>
-<p>
-Create a login authentication method named local_auth and set it to 
+A login authentication method named local_auth is configured to 
 authenticate users against the local database:
 </p>
 <p>
@@ -332,26 +333,29 @@ authenticate users against the local database:
 R1(config)#<b>aaa authentication login local_auth local</b>
 </code></div>
 </p>
+	    </li>
+    </ul>
 <li>Apply AAA authentication to the VTY lines;
-<p>
+	<ul>
+<li> 
 If using the default method:
-</p>
+
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
   <code>
 R1(config)#<b>line vty 0 15</b><br>
 R1(config-line)#<b>login authentication default</b>
 </code></div>
-</p>
-<p>
+</li>
+<li>
 If using a configured authentication method:
-</p>
-<p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
   <code>
 R1(config)#<b>line vty 0 15</b><br>
 R1(config-line)#<b>login authentication local_auth</b>
 </code></div>
-</p>
+</li>
+</ul>
+</li>
 <li>SSH to above router: It uses the local database to authenticate;
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
@@ -414,7 +418,7 @@ The main drawbacks of local user authentication are:
 <p>
 It is therefore recommended to deploy the services of external server-based 
 authentication such as ISE, ACS, or any other platform that supports RADIUS or 
-TACACS+ for network access control. These have the following strengths
+TACACS+ for network access control.
 </p>
 
 <h2 id="RADIUS">RADIUS</h2>
@@ -426,8 +430,6 @@ servers are 1645 for authentication and 1646 for accounting. The new RFC sets th
 RADIUS ports on UDP to 1812 for authentication and 1813 for accounting. 
 RADIUS uses both TCP and UDP as the transport protocol.
 With RADIUS, only the password is encrypted. 
-RADIUS combines authentication and authorization features. It offers robust 
-accounting features.
 </p>
 <p>
 The RADIUS server may be located in the same subnet or remote network. All that 
@@ -442,9 +444,13 @@ IP address of the RADIUS server connecting to the port number 1812 or 1645.
 </p>
 <p>
 When configuring RADIUS authentication, ensure that a backup authentication method 
-is configured to avoid being unable to access the device due to misconfiguration 
-of the RADIUS authentication. Usually, this backup authentication method is the 
-local database. When authenticating a user login session against a RADIUS server, 
+is enabled. This avoids a potential issue where one is unable to access the network 
+device due to misconfiguration authentication on the device, the RADIUS server or the 
+RADIUS server being inaccessible. This backup authentication method may be a second RADIUS server, or the 
+local database. 
+</p>
+<p>
+When authenticating a user login session against a RADIUS server, 
 by default, IOS will attempt to connect to the RADIUS server up to five times to make an 
 access request. If the connection attempt fails all these five times, then 
 the backup authentication method is used. 
@@ -473,8 +479,8 @@ R1(config)#<b>aaa new-model</b>
 </p>
 </li>
 <li>
-Define the source of authentication: Use local database as last resort;
-The default RADIUS authentication port is 1645 and accounting port 1646.
+Define the RADIUS server: The default RADIUS authentication port is 1645 and accounting port 1646. Two 
+configuration methods exist:
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
   <code>
@@ -508,7 +514,7 @@ options:
 </ul>
 </p>
 <p>
-When configuring a server, it is automatically added to a group <code><b>radius</b></code>. If 
+When configuring settings for a RADIUS server, it is automatically added to a group <code><b>radius</b></code>. If 
 a server group is explicitly configured (step below), then the server will be 
 added to this group. This can be verified using the command <code><b>show radius 
 server-group all</b></code>:
@@ -534,7 +540,7 @@ R1#
 </p>
 
 </li>
-<li>
+<li> (Optional) Create a RADIUS server group where the appropriate RADIUS servers will be added:
 <ol type="a">
 <li>Define a group name that will contain the list of servers:
 <code><b>aaa group server radius &lt;group-name&gt;</b></code>.
@@ -555,9 +561,8 @@ R1(config-sg-radius)#<b>server name RADIUS_SERVER02</b>
 </code></div>
 </p>
 <p>
-Alternatively, IP address or server name (requires DNS server to be configured) 
-of the RADIUS servers can be defined in place of the server names using the 
-command <code><b>server &lt;ip-address|hostname&gt;</b></code>.
+The server IP address or name can be used to register the server in the group. If a name is used, a name lookup 
+using DNS will have to be carried out: <code><b>server &lt;ip-address|hostname&gt;</b></code>.
 The timeout and retransmit settings can also be configured for each server in this group.
 </p>
 <p>
@@ -606,7 +611,7 @@ R1(config-sg-radius)#<b>server-private 192.168.1.7 auth-port 1645 acct-port 1646
 </li>
  </ol>
 <li>
-Configure the purpose of the authentication and method of authentication: 
+Define the purpose of the authentication and method of authentication: 
 <ol type="a">
   <li><b>Purpose of authentication:</b> authentication can be enabled for a list 
   of services such as the following:
@@ -623,8 +628,7 @@ Configure the purpose of the authentication and method of authentication:
 methods by giving the method a descriptive name or using the unnamed ‘default’ method; 
 <code><b>aaa authentication login &lt;default | list-name method1, method2, method3&gt;</b></code>.
   <ol type="i">
-  <li>default list: the default authentication list uses the keyword <code><b>default</b></code> to define the 
-  list;
+  <li>default method: the default authentication method uses the keyword <code><b>default</b></code>;
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
   <code>
@@ -640,7 +644,7 @@ the different lines such as console, vty will require explicit configuration.
 </p>
 </li>
 <li>
-Using a named list: here, the named list AAA_AUTHENTICATION is used:
+Using a named method: here, the named list AAA_AUTHENTICATION is used:
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
   <code>
@@ -651,7 +655,7 @@ R1(config)#<b>aaa authentication login AAA_AUTHENTICATION </b>
 </ol>
 <li><b>Define the authentication method(s):</b> 
 <p>
-More than one method can be configured. The methods refer to the following;
+More than one method can be configured; they include the following;
 
 <ul>
  <li><b>tacacs+:</b> each tacacs+ server is tried in configuration order</li>
@@ -673,7 +677,7 @@ R1(config)#<b>aaa authentication login AAA_AUTHENTICATION group radius local ena
 </code></div>
 </p>
 <p>
-The keyword <code><b>group</b></code> has the options RADIUS or TACACS and the authentication 
+The keyword <code><b>group</b></code> has the options RADIUS or TACACS. The authentication 
 request will be forwarded to the configured RADIUS groups first, the next 'local' will be 
 used if the RADIUS servers are unavailable/unreachable. Lastly, the enable password will be used 
 for authentication.
@@ -683,7 +687,7 @@ Note: Add the local, line and/or enable methods at the end of the list as a last
 If the authentication using RADIUS fails, the next authentication method is not used. 
 RADIUS authentication failure happens when a user account is not available in the 
 RADIUS server or when a user's password is not correct. The second authentication 
-method is only used if the RADIUS server is not reachable.
+method is only used if the RADIUS server is not reachable or the authentication wait time times-out.
 </p>
 <p>
 However, if the local or local-case authentication method is configured as first 
@@ -950,7 +954,8 @@ some purposes but not for login, one option available is not to use the aaa
 authentication for login. Another option is to use <code><b>username bob autocommand logout</b></code>.
 Under authorization, <code><b>aaa authorization exec default local group MYRADIUS</b></code>.
 </p>
-<h1>Accounting</h1>
+
+<h3>Accounting</h3>
 <p>
 AAA accounting logs all actions including configurations and show commands issued
 on the network device. To configure accounting, the following sequence of commands 
