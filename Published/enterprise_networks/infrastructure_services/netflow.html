@@ -3,8 +3,7 @@
 NetFlow is a Cisco application that collects statistics on packets flowing through 
 a router. By analyzing the data provided by NetFlow, a 
 network administrator can determine the characteristics of network traffic such 
-as source, destination of traffic, class of service to get a hint on troubleshooting 
-network problems such as the causes of congestion. 
+as source, destination of traffic, class of service to get a hint on potential causes of congestion. 
 NetFlow provides insights into the state of network traffic and this information 
 can be utilized in network and security monitoring, network planning, traffic 
 analysis, application monitoring, capacity planning, and IP accounting.
@@ -599,10 +598,6 @@ one-minute fragments, we can avoid the high peaks by normalizing the data.
 The default is 20.
         </td>
       </tr>
-      <tr>
-        <td style="border-bottom: 1px solid black;"><code><b>ip flow-export template options timeout-rate &lt;minutes&gt;</b></code></td>
-        <td style="border-bottom: 1px solid black;"> Specifies time elapsed before templates are resent. The default is 30 minutes </td>
-      </tr>
 	  <tr>
 		<td style="border-bottom: 1px solid black;"><code><b>ip flow-capture fragment-offset  </b></code>  </td>
 		<td style="border-bottom: 1px solid black;">Capture the fragment offset information </td>
@@ -926,8 +921,8 @@ different categories of traffic.
 </p>
 <h2>IPFIX</h2>
 <p>
-IPFIX (IP Flow Information eXport) is the standards-based method for exporting 
-the flow information to a collector that was published by IETF. It is intended 
+IPFIX (IP Flow Information eXport) is the standards-based method published by IET, Ffor exporting 
+the flow information. It is intended 
 to serve as a universal protocol for exporting flow information. IPFIX has extensive 
 flexibility in its configurations.
 Cisco configuration commands will consider export format in IPFIX as NetFlow version 10.
@@ -937,8 +932,8 @@ Cisco configuration commands will consider export format in IPFIX as NetFlow ver
 <p>
 To configure flexible NetFlow:
 <ol>
-  <li><b>Create a flow record:</b> a flow record explicitly specifies what exactly 
-  we are sampling. This creates the template to match on. This template can be 
+  <li><b>Create a flow record:</b> a flow record explicitly specifies what exactly parameters 
+  of the flow that will be recorded. This creates the template that will be used for the flow. This template can be 
   modified using the <code><b>match</b></code> and <code><b>collect</b></code> 
   commands.
   <ol type="a">
@@ -1205,7 +1200,18 @@ A flow sampler can be added to the configuration as follows:
 
 <h3><code>show flow record</code></h3>
 <p>
-To view configured flow records.
+To view configured flow records, the following commands can be used:
+<ul>
+	<li><code><b>show flow record</b></code></li>
+	<li><code><b>show flow record Netflow ipv4 original-output</b></code></li>
+	<li><code><b>show flow record Netflow ipv4 prefix</b></code></li>
+	<li><code><b>show flow exporter</b></code></li>
+	<li><code><b>show flow exporter templates</b></code></li>
+	<li><code><b>show flow exporter statistics</b></code></li>
+	<li><code><b>show flow monitor</b></code></li>
+	<li><code><b>show flow monitor &lt;monitor-name&gt; cache </b></code></li>
+	<li><code><b>show flow monitor &lt;monitor-name&gt; statistics</b></code></li>
+</ul>
 </p>
 
 <p>
@@ -1240,7 +1246,7 @@ flow record FLOW-RECORD-G00:<br>
 </code></div>
 </p>
 
-<h3><code>show flow record NetFlow ipv4 original-input</code></h3>
+<h3><code>show flow record NetFlow ipv4 original-output</code></h3>
 <p>
 Lists the builtin flow records templates in the IOS.
 </p>
