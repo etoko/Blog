@@ -191,7 +191,7 @@ ICMP-Echo request packet to a target device and receiving the ICMP-Echo reply.
 The response time calculated from the <code><b>icmp-echo</b></code> operation 
 provides a general picture of the response time. However, its results may not 
 necessarily be accurate because some systems may not prioritize the processing of 
-ICMP packets, resulting in apparent higher delay values. The use of the UDP-echo operation is a preferred  
+ICMP packets, resulting in apparent higher delay values. The use of the <code><b>udp-echo</b></code> operation is a preferred  
 method to measure network connectivity and response time.
 </p>
 <p>
@@ -235,8 +235,7 @@ R1(config-ip-sla-echo)#<b>frequency 10</b>
 <li><b>Timeout:</b> Define a timeout value using ICMP echo mode command <code><b>timeout 
 &lt;0-604800000&gt;</b></code> where the value is in milliseconds. This optional step 
 defines the maximum amount of time an IP SLA operation waits for a response to its 
-request packet. It is the timeout waiting period for the probe response. The 
-timeout value cannot be greater than the frequency value.
+request packet. The timeout value cannot be greater than the frequency value.
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
   <code>
@@ -479,8 +478,8 @@ IP SLA ICMP Path Jitter provides hop-by-hop jitter, packet loss and delay
 measurement statistics in network. ICMP path jitter can be used to supplement 
 standard UDP jitter operations. For example, high jitter values from a UDP jitter
 operation could be used to trigger an ICMP path jitter operation that could be 
-used to troubleshoot the network path and determine if traffic is bottlenecking 
-in a particular segment along the path. ICMP Path Jitter default values are:
+used to troubleshoot the network path and determine if a particular segment of the path is 
+a bottleneck to traffic. ICMP Path Jitter default values are:
 <ul>
 <li>Number of echo probes: 10</li>
 <li>Interval (time between echo probes in milliseconds): 20</li> 
@@ -880,7 +879,7 @@ R1#
 <h2>UDP Jitter</h2>
 <p>
 The UDP Jitter operation is used to measure the jitter experienced by traffic 
-between the source device and the target.
+between the source device and the destination.
 UDP Jitter operation diagnoses network suitability for real-time traffic applications 
 such as VoIP, video over IP or real-time conferencing. These parameters can be 
 monitored to assess whether they are within acceptable thresholds.
@@ -889,7 +888,7 @@ monitored to assess whether they are within acceptable thresholds.
 If multiple 
 packets are sent consecutively from a source to a
 destination, for example, 10 ms apart, and if the network is behaving ideally, the destination should receive
-the packets 10 ms apart. But if there are delays in the network (like queuing, arriving through alternate routes,
+the packets 10 ms apart. But if there are delays in the network (like queueing, arriving through alternate routes,
 and so on), the arrival delay between packets might be greater than or less than 10 ms. Using this example, a
 positive jitter value indicates that packets arrived greater than 10 ms apart. If packets arrive 12 ms apart, then
 positive jitter is 2 ms; if packets arrive 8 ms apart, negative jitter is 2 ms. For delay-sensitive networks like
@@ -1014,8 +1013,8 @@ However, it includes detailed information such as:
   opinion score (MOS)</li>
 </ul>
 
-The following output shows RTT values for udp-jitter and icmp-jitter operations
-for purposes of comparison:
+The following output shows RTT values for <code><b>udp-jitter</b></code> and <code><b>icmp-jitter</b></code> 
+operations for purposes of comparison:
 </p>
 <p>
 <div style="background-color:#f4f0ec; border-style:solid;border-width:1px;border-color:#D3D3D3">
