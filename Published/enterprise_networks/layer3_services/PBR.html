@@ -190,13 +190,10 @@ R1(config-route-map)#<b>match ip address ACL_172.31.0.0/24</b><br>
    </ul> 
     
 </p>
-<p>
-Matching against a prefix-list is commonly in BGP.	
-</p>
 
- <h3>Defining an Action to Take on Identified Traffic</h3>
+ <h3>Define an Action</h3>
 <p>
- After the matching, the action to be taken to the matched traffic is configured 
+The action to be taken to the matched traffic is implemented 
 using the route-map <code><b>set</b></code> command.
 The conditions that can be modified by the <code><b>set</b></code> command is 
 highly dependent on the platform and the IOS version; for PBR the action is 
@@ -247,7 +244,7 @@ following modifications to the header of IP packets;
   using the route-map command <code><b>set ip precedence</b></code>. The IP 
   header precedence setting determines how packets are treated by routers during 
   times of high traffic. When packets containing these headers arrive at another 
-  router, the packets are ordered for transmission according to the precedence 
+  router, the packets are queued for transmission according to the precedence 
   set if queuing feature is enabled. Precedence bits are not honoured if queueing 
   is not enabled; in which case packet queueing will be based on FIFO. 
   The precedence value can be changed by using a name or number. Possible values 
@@ -382,6 +379,16 @@ show track. In the output, look out for section tracked by:
 <h1>Verification of PBR</h1>
 <p>
 PBR can be verified by the following list of commands:
+<ul>
+	<li><code><b>ping </b></code></li>
+	<li><code><b>traceroute </b></code></li>
+	<li><code><b>show ip policy</b></code></li>
+	<li><code><b>show cef interface &lt;interface-name&gt;</b></code></li>
+	<li><code><b>debug ip policy</b></code></li>
+	<li><code><b>show route-map</b></code></li>
+	<li><code><b>show ip interface &lt;interface-name&gt;</b></code></li>
+	<li><code><b>debug ip routing</b></code></li>
+</ul>
 </p>
 
 
