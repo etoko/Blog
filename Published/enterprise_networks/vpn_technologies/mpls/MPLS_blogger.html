@@ -25,7 +25,7 @@ this is usually implemented through MPLS Layer 2 or Layer 3 VPNs.
 <p>
 MPLS was developed to replace legacy remote-site-connectivity technologies  
 such as ATM circuits, frame relay circuits, dedicated serial lines. 
- MPLS supports many layer 3 protocols such as IP (multicasts,unicasts) and IPv6.
+ MPLS supports many layer 3 protocols such as IP (multicasts, unicasts) and IPv6.
 </p>
 <p>
 Originally Cisco-proprietary, MPLS was referred to as tag switching. Cisco later 
@@ -312,26 +312,35 @@ a specific label originated from.
 
 <h2>Forwarding Equivalence Class</h2>
 <p>
-MPLS labels are bound to forwarding equivalency class (FEC). 
 A FEC is a group of IP packets that have similar characteristics and therefore 
-are treated the same way i.e.;
+are treated the same way for forwarding purposes i.e.;
 <ul>
-  <li>QoS (queueing)</li>
+  <li>destination IP address/prefix: common basis for defining a FEC</li>
+  <li>QoS parameters</li>
   <li>same path (next hop)</li>
-  <li>egress interface</li>
+  <li>VPN membership</li>
+  <li>Source IP address/prefix</li>
+  <li>TCP/UDP ports</li>
   </ul>
 </p>  
+<p>
+The purpose of the FEC is to simplify the forwarding process. Instead of examining the entire  IP packet header, 
+LSR simply use the label associated with the FEC to determine how to forward the packet. MPLS groups packets with 
+similar forwarding requirements into FECs and assigns a label to each FEC.
+All packets 
+in a particular FEC are forwarded along the same path.
+</p>
 <p>  
-  A FEC might correspond to a 
-destination IP subnet but it also might correspond to any traffic class that the 
+  A FEC might group packets according to the destination IP subnet but it also might correspond to any traffic class that the 
 Edge-LSR considers significant. For example, all traffic with a certain value 
 of IP precedence might constitute a FEC.
+MPLS labels are bound to forwarding equivalency class (FEC). 
 </p>
 <p>
-In MPLS, FEC is determined only once, at the ingress LSR rather than at every 
-LSR in the LSP.
-A FEC can be mapped to multiple incoming labels to balance
-loads, but a label represents only a single FEC on an LSR.
+In MPLS, FEC is determined only once, at the ingress LSR rather than at every LSR in the LSP. The ingress LSR 
+assigns an MPLS label to the packet; this label represents the the FEC. Each FEC is associated with an LSP. All 
+packets associated with the particular FEC are forwarded along the same LSP. The FEC typically corresponds to an LSP.
+However, the reverse is not always true. A single LSP can carry packets belonging to different FECs.
 </p>
 
 
